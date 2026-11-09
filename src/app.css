@@ -1,0 +1,43 @@
+:root {
+  color-scheme: dark;
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-body: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --type-caption: 0.8125rem;
+  --type-small: 0.9375rem;
+  --type-body: 1rem;
+  --type-lead: 1.125rem;
+  --control-min: 44px;
+  font-family: var(--font-body);
+  font-size: 100%;
+  line-height: 1.5;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--colour-canvas);
+  color: var(--colour-text);
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--colour-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

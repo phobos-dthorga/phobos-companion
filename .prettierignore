@@ -1,0 +1,10 @@
+node_modules
+dist
+artifacts
+test-results
+external
+src-tauri/target
+src-tauri/gen
+src-tauri/icons
+package-lock.json
+*.md

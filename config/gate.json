@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "description": "This repository's checks: python scripts/check-all.py runs them all.",
+  "stages": [
+    {
+      "name": "Web",
+      "steps": [
+        {
+          "name": "web format",
+          "lane": "web",
+          "requires": "node",
+          "run": [
+            "node",
+            "node_modules/prettier/bin/prettier.cjs",
+            "--check",
+            "."
+          ]
+        },
+        {
+          "name": "web types",
+          "lane": "web",
+          "requires": "node",
+          "run": [
+            "node",
+            "node_modules/svelte-check/bin/svelte-check",
+            "--tsconfig",
+            "./tsconfig.json",
+            "--fail-on-warnings"
+          ]
+        },
+        {
+          "name": "web tests",
+          "lane": "web",
+          "requires": "node",
+          "run": ["node", "node_modules/vitest/vitest.mjs", "run"]
+        },
+        {
+          "name": "web build",
+          "lane": "web",
+          "requires": "node",
+          "run": ["node", "node_modules/vite/bin/vite.js", "build"]
+        }
+      ]
+    },
+    {
+      "name": "Rust",
+      "steps": [
+        {
+          "name": "rust format",
+          "lane": "cargo",
+          "parser": "cargo",
+          "requires": "cargo",
+          "cwd": "src-tauri",
+          "env": { "CARGO_TARGET_DIR": "{cargo_target}" },
+          "run": ["cargo", "fmt", "--all", "--", "--check"]
+        },
+        {
+          "name": "rust lints",
+          "lane": "cargo",
+          "parser": "cargo",
+          "requires": "cargo",
+          "cwd": "src-tauri",
+          "env": { "CARGO_TARGET_DIR": "{cargo_target}" },
+          "run": [
+            "cargo",
+            "clippy",
+            "--locked",
+            "--all-targets",
+            "--",
+            "-D",
+            "warnings"
+          ]
+        },
+        {
+          "name": "rust tests",
+          "lane": "cargo",
+          "parser": "cargo",
+          "requires": "cargo",
+          "cwd": "src-tauri",
+          "env": { "CARGO_TARGET_DIR": "{cargo_target}" },
+          "run": ["cargo", "test", "--locked"]
+        }
+      ]
+    },
+    {
+      "name": "Window",
+      "steps": [
+        {
+          "name": "window audit",
+          "lane": "window",
+          "requires": "node",
+          "run": ["node", "node_modules/@playwright/test/cli.js", "test"]
+        },
+        {
+          "name": "desktop program",
+          "lane": "window",
+          "requires": "node",
+          "env": { "CARGO_TARGET_DIR": "{cargo_target}" },
+          "run": [
+            "node",
+            "node_modules/@tauri-apps/cli/tauri.js",
+            "build",
+            "--no-bundle"
+          ]
+        }
+      ]
+    }
+  ]
+}

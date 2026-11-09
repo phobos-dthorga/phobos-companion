@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "org.phobosdthorga.companion.house-dthorga",
+  "name": "House D'thorga",
+  "colours": {
+    "canvas": "#0E0B10",
+    "surface": "#17121B",
+    "surface_raised": "#211A27",
+    "surface_soft": "#2A2231",
+    "text": "#F4EEE8",
+    "text_muted": "#C9BEC8",
+    "line": "#5A4D63",
+    "accent": "#F2A93B",
+    "observed": "#4FD1C5",
+    "risk": "#FF8A7A",
+    "success": "#8BD17C",
+    "comparison": "#B79CFF"
+  }
+}

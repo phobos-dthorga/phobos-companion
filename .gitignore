@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.vite/
+/artifacts/
+/test-results/
+/.local/
+*.log
+.env
+.env.*
+Thumbs.db
+
+# Saves and derived data never belong here.
+*.rws
+*.sqlite
+*.sqlite3
+
+# Rust and desktop-shell build output.
+src-tauri/target/
+src-tauri/gen/schemas/
+__pycache__/

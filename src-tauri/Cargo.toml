@@ -1,0 +1,27 @@
+[package]
+name = "phobos-companion"
+version = "0.1.0"
+description = "D'thorga Companion: one desktop program for every game you mod"
+authors = ["Phobos A. D'thorga"]
+edition = "2024"
+rust-version = "1.97"
+license = "MIT"
+repository = "https://github.com/phobos-dthorga/phobos-companion"
+
+[lib]
+name = "phobos_companion_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "~2.7.4", features = [] }
+
+[dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.145"
+# Tauri's command line refuses a crate and window package on different minor versions, so both stay on 2.12.
+tauri = { version = "~2.12.5", features = [] }
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+strip = "symbols"

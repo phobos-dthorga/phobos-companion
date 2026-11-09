@@ -80,14 +80,15 @@ type Answer = { result?: unknown; failure?: unknown };
 /** Stands in for the desktop host, through the same hooks Tauri provides. */
 export async function mockHost(
   page: Page,
-  answers: { home: Answer; kit: Answer },
+  answers: Record<string, Answer>,
 ): Promise<void> {
   await page.addInitScript((given) => {
     const scope = window as unknown as Record<string, unknown>;
     scope.isTauri = true;
     scope.__TAURI_INTERNALS__ = {
-      invoke: async (command: string) => {
-        const answer = command === "home_status" ? given.home : given.kit;
+      invoke: async (command: string, args?: { top?: number }) => {
+        const more = command === "run_report" && (args?.top ?? 0) > 100;
+        const answer = given[more ? "run_report_more" : command];
         if (answer.failure) throw answer.failure;
         return answer.result;
       },

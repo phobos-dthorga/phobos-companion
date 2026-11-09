@@ -4,6 +4,22 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-09
+
+The tools' reports in the window, chosen by the question they answer, with nothing to type (owner, 9 November 2026). Not yet tested on screen.
+
+### Added
+
+- A Reports page, listing for the chosen game the reports that only read and need nothing typed, 19 of them for RimWorld, each named as a question.
+- Reports show their words, lists, tables and text in the window, and a report that fails says what happened and offers another go.
+- Click a table heading to sort it: numbers as numbers, words A to Z, and click again to reverse.
+- Show more brings in the rows a long table left out.
+- Copy as command puts the report's command on the clipboard, to paste into a console or a session.
+
+### Changed
+
+- Uses phobos-modkit 1.1.0.
+
 ## [0.2.0] - 2026-11-09
 
 Where each game was left, so changing games doesn't lose the thread (owner, 9 November 2026). Not yet tested on screen.

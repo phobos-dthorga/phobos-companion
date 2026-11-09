@@ -7,30 +7,36 @@ fn envelope(body: &str) -> Vec<u8> {
 #[test]
 fn counts_the_commands_in_a_manifest() {
     let text = envelope(r#"{"envelope":1,"tool":"manifest","kit_version":"1.0.0","data":{"commands":[{},{}]}}"#);
-    assert_eq!(parse_manifest(&text), Ok(KitStatus { kit_version: "1.0.0".to_owned(), tools: 2 }));
+    assert_eq!(
+        parse_envelope(&text, "manifest").and_then(|v| status_of(&v)),
+        Ok(KitStatus { kit_version: "1.0.0".to_owned(), tools: 2 })
+    );
 }
 
 #[test]
 fn refuses_text_that_is_not_json() {
-    assert_eq!(parse_manifest(b"usage: nothing").unwrap_err().code, FailureCode::Unreadable);
+    assert_eq!(parse_envelope(b"usage: nothing", "manifest").unwrap_err().code, FailureCode::Unreadable);
 }
 
 #[test]
 fn refuses_an_envelope_it_does_not_know() {
     let text = envelope(r#"{"envelope":2,"tool":"manifest","kit_version":"9.0.0","data":{"commands":[]}}"#);
-    assert_eq!(parse_manifest(&text).unwrap_err().code, FailureCode::Unreadable);
+    assert_eq!(parse_envelope(&text, "manifest").unwrap_err().code, FailureCode::Unreadable);
 }
 
 #[test]
 fn refuses_another_tools_answer() {
     let text = envelope(r#"{"envelope":1,"tool":"gate","kit_version":"1.0.0","data":{"commands":[]}}"#);
-    assert_eq!(parse_manifest(&text).unwrap_err().code, FailureCode::Unreadable);
+    assert_eq!(parse_envelope(&text, "manifest").unwrap_err().code, FailureCode::Unreadable);
 }
 
 #[test]
 fn refuses_an_answer_with_no_commands() {
     let text = envelope(r#"{"envelope":1,"tool":"manifest","kit_version":"1.0.0","data":{}}"#);
-    assert_eq!(parse_manifest(&text).unwrap_err().code, FailureCode::Unreadable);
+    assert_eq!(
+        parse_envelope(&text, "manifest").and_then(|v| status_of(&v)).unwrap_err().code,
+        FailureCode::Unreadable
+    );
 }
 
 #[test]

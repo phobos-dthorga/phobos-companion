@@ -123,10 +123,34 @@ watcher, which is what leaked daemons on the owner's PC in November 2026. A test
 
 **Left out of the mock-up:** Reports in the command bar, and Copy as command, until the report viewer gives them something to do.
 
+## The report viewer, first stage (built 9 Nov 2026)
+
+**The Reports page lists, for the chosen game, every report the kit marks `reads`, gives a plain question and needs nothing typed:
+19 for RimWorld.** The questions live with the tools, in each adapter's manifest, so the program still names no game. A game appears
+here when its list `id` matches the manifest's `game`.
+
+**The host decides.** The window asks to run a report by name. The host reads the manifest again, refuses anything it wouldn't offer,
+and builds the arguments itself, so nothing typed or sent from the window reaches a command line.
+
+**Tables:** numbers sort as numbers, through the `values` the kit adds beside each table (1.1.0). A column that isn't all numbers in
+one unit sorts as words. Columns take the width their words need and the table scrolls sideways, after a real pawn list showed words
+broken mid-letter. **Show more** asks the tool for five times as many rows, up to 5,000.
+
+| Behaviour | What it lets them do | What it stops them doing | How it changes the way they work |
+| --- | --- | --- | --- |
+| Reports by question | Ask 19 questions of their game with a click | Run anything that writes, goes online or needs typing | No more long quoted commands for these |
+| Sorting and Show more | Reorder a table and see all of it | Nothing | "Raise --top" and scanning for the biggest number are gone |
+| Copy as command | Hand a session exactly what they're looking at | Nothing | Sessions and the program stay in step |
+
+**The real path was checked with a report from the owner's own game**, through Rust and through the page, in a throwaway check that left
+nothing behind. Clicking through the packaged window is the owner's.
+
 ## What comes next
 
-**Step 5, the report viewer.** Forms built from the manifest; every report drawn from the envelope's report. Needs typed table
-cells in the kit so numbers sort.
+**Step 5, the rest of the report viewer.** Forms built from the manifest for the 19 reports that need an input, then the kit's
+progress stream and the 7 that read online. Three tools get extra paths from phobos-rimworld's wrapper scripts (`query-code`,
+`query-defs patched`, `mod-settings`) and need those paths in the game list first. The reports' opening lines are written for agents
+("Index of PG4.rws, built now from a frozen copy...") and want moving out of the way of the answer.
 
 **Step 6, saves and logs.** Rust watches the folders, with file events as hints, a full check every 15 seconds and a 1.5 second
 wait until a file stops changing (Observatory's `recorder_service.rs`). Needs the kit's progress stream.

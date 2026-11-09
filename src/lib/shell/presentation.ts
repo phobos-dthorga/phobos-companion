@@ -23,6 +23,10 @@ const FAILURES: Record<FailureCode, FailureWords> = {
     happened: "failure-list-unreadable",
     next: "failure-list-unreadable-next",
   },
+  refused: {
+    happened: "failure-refused",
+    next: "failure-refused-next",
+  },
 };
 
 /** The message keys for a failure: what happened and what to do. An unknown code reads as an unreadable answer. */

@@ -5,7 +5,8 @@ export type FailureCode =
   | "kit_missing"
   | "tool_failed"
   | "unreadable"
-  | "list_unreadable";
+  | "list_unreadable"
+  | "refused";
 
 export type Failure = { code: FailureCode; detail: string };
 

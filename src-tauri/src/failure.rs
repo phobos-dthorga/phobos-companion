@@ -10,6 +10,7 @@ pub enum FailureCode {
     ToolFailed,
     Unreadable,
     ListUnreadable,
+    Refused,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

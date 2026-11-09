@@ -1,6 +1,6 @@
 [package]
 name = "phobos-companion"
-version = "0.2.0"
+version = "0.3.0"
 description = "D'thorga Companion: one desktop program for every game you mod"
 authors = ["Phobos A. D'thorga"]
 edition = "2024"

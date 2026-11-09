@@ -51,8 +51,8 @@ for (const [name, viewport] of [
     test.describe("with games", () => {
       test.beforeEach(async ({ page }) => {
         await mockHost(page, {
-          home: { result: sampleHome() },
-          kit: healthyKit,
+          home_status: { result: sampleHome() },
+          kit_status: healthyKit,
         });
         await page.goto("/");
         await expect(page.getByRole("heading", { level: 1 })).toContainText(
@@ -130,8 +130,8 @@ for (const [name, viewport] of [
 
     test("no list yet says what to do", async ({ page }) => {
       await mockHost(page, {
-        home: { result: { list_found: false, games: [] } },
-        kit: healthyKit,
+        home_status: { result: { list_found: false, games: [] } },
+        kit_status: healthyKit,
       });
       await page.goto("/");
       await expect(page.getByRole("heading", { level: 1 })).toContainText(
@@ -145,10 +145,10 @@ for (const [name, viewport] of [
       page,
     }) => {
       await mockHost(page, {
-        home: {
+        home_status: {
           failure: { code: "list_unreadable", detail: "games.json: line 3" },
         },
-        kit: {
+        kit_status: {
           failure: { code: "python_missing", detail: "not found" },
         },
       });

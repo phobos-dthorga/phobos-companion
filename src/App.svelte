@@ -6,6 +6,7 @@
   import { formatTime, formatUnixDate } from "./lib/home/presentation";
   import type { HomeReading } from "./lib/home/types";
   import { t } from "./lib/i18n/runtime";
+  import ReportsPage from "./lib/reports/ReportsPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
   import { readKit } from "./lib/shell/desktopClient";
@@ -15,6 +16,7 @@
   let home = $state<HomeReading>({ state: "reading" });
   let looking = $state(true);
   let chosenId = $state<string | null>(null);
+  let page = $state<"home" | "reports">("home");
   let now = $state(new Date());
 
   const games = $derived(home.state === "ready" ? home.home.games : []);
@@ -44,8 +46,21 @@
         <div class="name">{t("brand-name")}</div>
       </div>
     </div>
-    <nav aria-label={t("pages-label")}>
-      <span class="page" aria-current="page">{t("page-home")}</span>
+    <nav class="pages" aria-label={t("pages-label")}>
+      <button
+        type="button"
+        class="page"
+        class:current={page === "home"}
+        aria-current={page === "home" ? "page" : undefined}
+        onclick={() => (page = "home")}>{t("page-home")}</button
+      >
+      <button
+        type="button"
+        class="page"
+        class:current={page === "reports"}
+        aria-current={page === "reports" ? "page" : undefined}
+        onclick={() => (page = "reports")}>{t("page-reports")}</button
+      >
     </nav>
   </header>
 
@@ -90,7 +105,11 @@
     </nav>
 
     <main class="canvas">
-      {#if selected}
+      {#if selected && page === "reports"}
+        {#key selected.id}
+          <ReportsPage game={selected} />
+        {/key}
+      {:else if selected}
         <WherePage game={selected} {now} />
       {:else if home.state === "reading"}
         <div class="eyebrow accent">{t("home-kicker")}</div>
@@ -191,15 +210,27 @@
     line-height: 1.15;
   }
 
+  .pages {
+    display: flex;
+    gap: 8px;
+  }
+
   .page {
-    display: inline-flex;
-    align-items: center;
     min-height: var(--control-min);
     padding-inline: 18px;
-    font-weight: 600;
-    background: var(--colour-surface-soft);
-    border: 1px solid var(--colour-accent);
+    font: inherit;
+    color: var(--colour-text-muted);
+    background: transparent;
+    border: 1px solid var(--colour-line);
     border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .page.current {
+    font-weight: 600;
+    color: var(--colour-text);
+    background: var(--colour-surface-soft);
+    border: 2px solid var(--colour-accent);
   }
 
   .observation-bar {

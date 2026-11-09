@@ -18,8 +18,10 @@ and method follow Republic Observatory and OnAir WyrmGrid, without their code or
 
 ## What the program may do
 
-- **It runs what the kit's manifest marks `reads` or `reads-online`.** Anything else needs a design record and a confirmation
-  step. **`owner-only` is never run**, and the program never holds credentials.
+- **The host decides what may run, from the kit's manifest** (`src-tauri/src/reports.rs`), and checks again when asked to run it: the
+  window can only request. Today that is reports marked `reads` with a `question` and nothing required. `reads-online` and typed inputs
+  come next; anything else needs a design record and a confirmation step. **`owner-only` is never run**, and the program never holds
+  credentials.
 - **Read-only towards games, saves and repositories** in the first version.
 - **The core never names a game.** A game reaches it only through the manifest's `game` field and the owner's own list,
   `.local/games.json`, which holds personal paths and is never committed.

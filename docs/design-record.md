@@ -1,7 +1,7 @@
 # D'thorga Companion: design record (9 Nov 2026)
 
-**Steps 1 to 3 of this record are built: the window, its theme and its checks. Nothing has been opened and judged on
-screen by the owner yet.** The research behind it, with sources, is phobos-rimworld's
+**Steps 1 to 4 of this record are built: the window, its theme, its checks and the "where was I?" home page. The owner approved
+the mock-up on 9 Nov 2026 ("I like the purple vibe"); the built page has not been judged on screen yet.** The research behind it, with sources, is phobos-rimworld's
 [research record](https://github.com/phobos-dthorga/phobos-rimworld/blob/main/docs/development/tools-desktop-research.md). The
 home page mock-up the owner is judging is private to the owner; this record describes what it shows.
 
@@ -29,7 +29,7 @@ colours below; the first version only reads.
 | Behaviour | What it lets them do | What it stops them doing | How it changes the way they work |
 | --- | --- | --- | --- |
 | The window (built) | See that the program and the tools are working, or be told plainly what is wrong and what to do | Nothing | Nothing yet: it is the frame everything else goes in |
-| "Where was I?" home page (step 4) | Come back to a game after months and see when they last worked on it and what they did | Nothing; it only reads | Changing games stops costing the thread |
+| "Where was I?" home page (built) | Come back to a game after months and see when they last worked on it, what they did, what was left uncommitted, what isn't released and what's still open | Nothing; it only reads | Changing games stops costing the thread |
 | Report viewer (step 5) | Read any tool's report, chosen from a list, with no typing | Run anything the manifest marks as writing, running or owner-only | Long quoted commands are no longer needed |
 | Newest save and log (step 6) | See them appear by themselves as they play | Nothing | The page stays current without asking |
 | Planet globe (step 7) | See world-map pollution and every settlement at a glance, stepping through saves with buttons | Nothing | "Why is that place polluted?" becomes a glance |
@@ -97,10 +97,33 @@ The owner's Dragonself is the palette, in `themes/house-dthorga.json`:
 A test holds every colour to Observatory's contrast rules: 4.5:1 for text, 1.5:1 for dividers. **Colour never carries a
 meaning alone.**
 
-## What comes next
+## "Where was I?" (built 9 Nov 2026)
 
-**Step 4, "Where was I?"** Each game is a list of repositories, kept on the owner's PC because it holds paths. For each game:
-when it was last worked on, the last few commits, unreleased changelog entries, and open work where a repository records it.
+**Each game is a list of repositories** in `.local/games.json`, never committed because it holds paths. `config/games.example.json`
+shows the shape; `PHOBOS_COMPANION_GAMES` names another file. Nothing about any game is built in: the list is the only place a game
+is named.
+
+| On the page | Where it comes from |
+| --- | --- |
+| Games, most recently worked on first | The newest commit across the game's repositories |
+| The opening sentence and the last thing done | That newest commit |
+| Left unfinished | `git status`: files changed but not committed, only when there are some |
+| The latest work | The newest eight commits, across the game's repositories |
+| Not released yet | Each changelog, the repository's own and one per mod in `mods/`: entries under Unreleased, and the newest version marked Draft |
+| Open work | `docs/development/outstanding-work.md`, where a repository has one: tables with Item and Status columns, counting statuses that begin open, in progress, waits, waiting, blocked, proposed or done except |
+| Couldn't be read | Any repository that is missing or has no history; the rest of the page still shows |
+
+**Git is read without changing anything:** `--no-optional-locks` takes no index lock, and `core.fsmonitor=false` starts no background
+watcher, which is what leaked daemons on the owner's PC in November 2026. A test proves a read leaves the index unchanged.
+
+**Why a JSON file and not SQLite** (agent choice, owner to revise): the list is short, is written by hand or by an agent, and in
+`.local/` it is backed up with the repository. SQLite still arrives with the first thing that needs it, such as pins and history.
+
+**Dates:** teal for a date read from a repository, purple for "how long ago", which is worked out from it, as the legend says.
+
+**Left out of the mock-up:** Reports in the command bar, and Copy as command, until the report viewer gives them something to do.
+
+## What comes next
 
 **Step 5, the report viewer.** Forms built from the manifest; every report drawn from the envelope's report. Needs typed table
 cells in the kit so numbers sort.

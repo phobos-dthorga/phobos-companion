@@ -16,11 +16,19 @@ describe("failure words", () => {
 });
 
 describe("versions", () => {
+  const web = JSON.parse(readFileSync("package.json", "utf-8")).version;
+
   it("is the same in package.json and Cargo.toml", () => {
-    const web = JSON.parse(readFileSync("package.json", "utf-8")).version;
     const rust = /^version = "([^"]+)"/m.exec(
       readFileSync("src-tauri/Cargo.toml", "utf-8"),
     )?.[1];
     expect(rust).toBe(web);
+  });
+
+  it("is the same in package.json and tauri.conf.json", () => {
+    const config = JSON.parse(
+      readFileSync("src-tauri/tauri.conf.json", "utf-8"),
+    );
+    expect(config.version).toBe(web);
   });
 });

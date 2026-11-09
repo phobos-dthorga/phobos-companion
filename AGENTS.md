@@ -21,7 +21,10 @@ and method follow Republic Observatory and OnAir WyrmGrid, without their code or
 - **It runs what the kit's manifest marks `reads` or `reads-online`.** Anything else needs a design record and a confirmation
   step. **`owner-only` is never run**, and the program never holds credentials.
 - **Read-only towards games, saves and repositories** in the first version.
-- **The core never names a game.** A game reaches it only through the manifest's `game` field and the owner's own list.
+- **The core never names a game.** A game reaches it only through the manifest's `game` field and the owner's own list,
+  `.local/games.json`, which holds personal paths and is never committed.
+- **Git is read with `--no-optional-locks` and `core.fsmonitor=false`**, through `src-tauri/src/git.rs`: reading takes no lock and
+  starts no background watcher. A test that makes a repository sets `core.fsmonitor false` in it and removes it with read-only handling.
 - **Tools run as processes through the pinned kit.** Fix a tool in phobos-modkit, then move the pin; never edit the submodule.
 
 ## How it is built

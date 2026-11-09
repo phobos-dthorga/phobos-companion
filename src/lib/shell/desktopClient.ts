@@ -1,5 +1,5 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
-import type { KitFailure, KitReading, KitStatus } from "./types";
+import type { Failure, KitReading, KitStatus } from "./types";
 
 /** Asks the host how the tools are. The only place the window talks to the host about them. */
 export async function readKit(): Promise<KitReading> {
@@ -7,6 +7,6 @@ export async function readKit(): Promise<KitReading> {
   try {
     return { state: "ready", status: await invoke<KitStatus>("kit_status") };
   } catch (failure) {
-    return { state: "failed", failure: failure as KitFailure };
+    return { state: "failed", failure: failure as Failure };
   }
 }

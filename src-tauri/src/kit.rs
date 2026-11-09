@@ -1,5 +1,7 @@
 //! The one way to the tools: run the pinned phobos-modkit as a process and read its JSON envelope.
 
+use crate::failure::{Failure, FailureCode};
+use crate::process::hide_console;
 use serde::Serialize;
 use serde_json::Value;
 use std::env;
@@ -20,28 +22,6 @@ pub struct KitStatus {
     pub tools: usize,
 }
 
-/// Why the tools could not be read. The window turns the code into words.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum KitFailureCode {
-    PythonMissing,
-    KitMissing,
-    ToolFailed,
-    Unreadable,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct KitFailure {
-    pub code: KitFailureCode,
-    pub detail: String,
-}
-
-impl KitFailure {
-    pub fn new(code: KitFailureCode, detail: impl Into<String>) -> Self {
-        Self { code, detail: detail.into() }
-    }
-}
-
 /// The kit's Python folder. A packaged program will carry its own copy; for now it is the submodule it was built from.
 fn kit_folder() -> PathBuf {
     env::var_os(KIT_FOLDER_VARIABLE).map(PathBuf::from).unwrap_or_else(|| {
@@ -54,41 +34,27 @@ fn python() -> String {
 }
 
 /// Reads the kit's manifest and says how many tools it holds.
-pub fn read_status() -> Result<KitStatus, KitFailure> {
+pub fn read_status() -> Result<KitStatus, Failure> {
     let folder = kit_folder();
     if !folder.join(PACKAGE).is_dir() {
-        return Err(KitFailure::new(KitFailureCode::KitMissing, folder.display().to_string()));
+        return Err(Failure::new(FailureCode::KitMissing, folder.display().to_string()));
     }
     let mut command = Command::new(python());
     command.args(["-m", PACKAGE, "manifest", "--json"]).current_dir(&folder).env("PYTHONDONTWRITEBYTECODE", "1");
     hide_console(&mut command);
     let output = command.output().map_err(|problem| {
-        let code = if problem.kind() == ErrorKind::NotFound {
-            KitFailureCode::PythonMissing
-        } else {
-            KitFailureCode::ToolFailed
-        };
-        KitFailure::new(code, problem.to_string())
+        let code =
+            if problem.kind() == ErrorKind::NotFound { FailureCode::PythonMissing } else { FailureCode::ToolFailed };
+        Failure::new(code, problem.to_string())
     })?;
     if !output.status.success() {
-        return Err(KitFailure::new(KitFailureCode::ToolFailed, String::from_utf8_lossy(&output.stderr).into_owned()));
+        return Err(Failure::new(FailureCode::ToolFailed, String::from_utf8_lossy(&output.stderr).into_owned()));
     }
     parse_manifest(&output.stdout)
 }
 
-/// A windowed program would otherwise flash a console for every tool it runs.
-#[cfg(windows)]
-fn hide_console(command: &mut Command) {
-    use std::os::windows::process::CommandExt;
-    const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-    command.creation_flags(CREATE_NO_WINDOW);
-}
-
-#[cfg(not(windows))]
-fn hide_console(_command: &mut Command) {}
-
-fn parse_manifest(stdout: &[u8]) -> Result<KitStatus, KitFailure> {
-    let unreadable = |detail: &str| KitFailure::new(KitFailureCode::Unreadable, detail);
+fn parse_manifest(stdout: &[u8]) -> Result<KitStatus, Failure> {
+    let unreadable = |detail: &str| Failure::new(FailureCode::Unreadable, detail);
     let value: Value = serde_json::from_slice(stdout).map_err(|problem| unreadable(&problem.to_string()))?;
     if value["envelope"].as_u64() != Some(ENVELOPE_FORMAT) {
         return Err(unreadable("the envelope's format is not one this program knows"));

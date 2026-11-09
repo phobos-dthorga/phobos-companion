@@ -18,31 +18,27 @@ const code = sources("src")
   .map((path) => readFileSync(path, "utf-8"))
   .join("\n");
 const keys = Object.keys(catalogue.messages);
-const used = [...code.matchAll(/\bt\("([a-z0-9-]+)"/g)].map(
-  (match) => match[1],
-);
-const named = [...code.matchAll(/"(failure-[a-z-]+)"/g)].map(
-  (match) => match[1],
-);
+const asked = [
+  ...code.matchAll(/\bt\(\s*"([a-z0-9-]+)"/g),
+  ...code.matchAll(/\bkey: "([a-z0-9-]+)"/g),
+  ...code.matchAll(/"((?:failure|repo-problem)-[a-z-]+)"/g),
+].map((match) => match[1]);
 
 describe("the message catalogue", () => {
   it("has every key the code asks for", () => {
-    expect(used.filter((key) => !keys.includes(key))).toEqual([]);
+    expect(asked.filter((key) => !keys.includes(key))).toEqual([]);
   });
 
-  it("has no key the code never asks for", () => {
-    const failureKeys = (key: string) => key.startsWith("failure-");
-    expect(
-      keys.filter((key) => !failureKeys(key) && !used.includes(key)),
-    ).toEqual([]);
-  });
-
-  it("names only failure messages that exist", () => {
-    expect(named.filter((key) => !keys.includes(key))).toEqual([]);
+  it("has no key the code never mentions", () => {
+    expect(keys.filter((key) => !code.includes(`"${key}"`))).toEqual([]);
   });
 
   it("counts in words a person would say", () => {
     expect(t("tools-found", { count: 1 })).toBe("One tool found.");
     expect(t("tools-found", { count: 15 })).toBe("15 tools found.");
+    expect(t("unfinished-files", { count: 1 })).toBe(
+      "One file changed but not committed",
+    );
+    expect(t("pending-earlier", { count: 3 })).toBe("and 3 earlier drafts");
   });
 });

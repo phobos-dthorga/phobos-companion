@@ -30,6 +30,37 @@ p {
   margin: 0;
 }
 
+.eyebrow {
+  font-size: var(--type-caption);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.accent {
+  color: var(--colour-accent);
+}
+
+.muted {
+  color: var(--colour-text-muted);
+}
+
+.action {
+  min-height: var(--control-min);
+  padding-inline: 18px;
+  font: inherit;
+  color: var(--colour-text);
+  background: var(--colour-surface-soft);
+  border: 1px solid var(--colour-accent);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.action:disabled {
+  cursor: progress;
+  border-color: var(--colour-line);
+}
+
 :focus-visible {
   outline: 3px solid var(--colour-accent);
   outline-offset: 2px;

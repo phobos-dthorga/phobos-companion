@@ -1,8 +1,8 @@
-import type { KitFailureCode } from "./types";
+import type { FailureCode } from "./types";
 
 type FailureWords = { happened: string; next: string };
 
-const FAILURES: Record<KitFailureCode, FailureWords> = {
+const FAILURES: Record<FailureCode, FailureWords> = {
   python_missing: {
     happened: "failure-python-missing",
     next: "failure-python-missing-next",
@@ -19,9 +19,13 @@ const FAILURES: Record<KitFailureCode, FailureWords> = {
     happened: "failure-unreadable",
     next: "failure-unreadable-next",
   },
+  list_unreadable: {
+    happened: "failure-list-unreadable",
+    next: "failure-list-unreadable-next",
+  },
 };
 
 /** The message keys for a failure: what happened and what to do. An unknown code reads as an unreadable answer. */
 export function failureWords(code: string): FailureWords {
-  return FAILURES[code as KitFailureCode] ?? FAILURES.unreadable;
+  return FAILURES[code as FailureCode] ?? FAILURES.unreadable;
 }

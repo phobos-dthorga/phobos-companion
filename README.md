@@ -5,8 +5,10 @@ what you did, and what your saves and logs say, without typing a command.
 
 ## Read this first (gotchas)
 
-- **Right now it is an empty window**: the frame, the House D'thorga theme, and a check that the tools can be reached. Your games
-  arrive in the next step.
+- **You need a list of your games first**: `.local/games.json` in this folder, naming each game and its repositories.
+  `config/games.example.json` shows how. Without one, the program says so and shows nothing else.
+- **Saves, logs and the tools' reports aren't on screen yet.** Today it shows where you left each game: dates, commits, unfinished
+  files, unreleased versions and open work.
 - **Not yet tested on screen.** It builds and passes its checks; nobody has judged the window yet.
 - **It only reads.** It does not change a game, a save or a repository.
 - **It needs Python on the PATH**, or `PHOBOS_COMPANION_PYTHON` naming one.

@@ -1,16 +1,35 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import GamesNavigator from "./lib/home/GamesNavigator.svelte";
+  import WherePage from "./lib/home/WherePage.svelte";
+  import { readHome } from "./lib/home/desktopClient";
+  import { formatTime, formatUnixDate } from "./lib/home/presentation";
+  import type { HomeReading } from "./lib/home/types";
   import { t } from "./lib/i18n/runtime";
   import Crest from "./lib/shell/Crest.svelte";
+  import FailurePanel from "./lib/shell/FailurePanel.svelte";
   import { readKit } from "./lib/shell/desktopClient";
-  import { failureWords } from "./lib/shell/presentation";
   import type { KitReading } from "./lib/shell/types";
 
   let kit = $state<KitReading>({ state: "reading" });
+  let home = $state<HomeReading>({ state: "reading" });
+  let looking = $state(true);
+  let chosenId = $state<string | null>(null);
+  let now = $state(new Date());
 
+  const games = $derived(home.state === "ready" ? home.home.games : []);
+  const selected = $derived(
+    games.find((game) => game.id === chosenId) ?? games[0] ?? null,
+  );
+
+  /** Keeps what is on screen until the new reading arrives, so looking again doesn't blank the page. */
   async function refresh() {
-    kit = { state: "reading" };
-    kit = await readKit();
+    looking = true;
+    const [nextKit, nextHome] = await Promise.all([readKit(), readHome()]);
+    kit = nextKit;
+    home = nextHome;
+    now = new Date();
+    looking = false;
   }
 
   onMount(refresh);
@@ -33,24 +52,76 @@
   <section class="observation-bar" aria-label={t("observation-label")}>
     <span>
       <span class="muted">{t("observation-looking-at")}</span>
-      <strong>{t("observation-nothing")}</strong>
+      <strong>{selected ? selected.name : t("observation-nothing")}</strong>
     </span>
-    <span class="muted">{t("observation-reading-only")}</span>
+    {#if selected?.last_worked != null}
+      <span>
+        <span class="muted">{t("observation-last-worked")}</span>
+        <strong class="read">{formatUnixDate(selected.last_worked)}</strong>
+      </span>
+    {/if}
+    <span class="look-again">
+      {#if !looking && home.state === "ready"}
+        <span class="muted" role="status"
+          >{t("observation-read-at", { time: formatTime(now) })}</span
+        >
+      {/if}
+      <button type="button" class="action" disabled={looking} onclick={refresh}>
+        {looking ? t("action-looking") : t("action-look-again")}
+      </button>
+    </span>
   </section>
 
   <div class="workspace">
     <nav class="navigator" aria-label={t("games-label")}>
-      <h2 class="eyebrow">{t("games-label")}</h2>
-      <p class="muted">{t("games-empty")}</p>
+      <h2 class="eyebrow muted">{t("games-label")}</h2>
+      {#if games.length > 0}
+        <GamesNavigator
+          {games}
+          selectedId={selected?.id ?? null}
+          {now}
+          onselect={(id) => (chosenId = id)}
+        />
+      {:else if home.state === "reading"}
+        <p class="muted">{t("games-reading")}</p>
+      {:else}
+        <p class="muted">{t("games-empty")}</p>
+      {/if}
     </nav>
 
     <main class="canvas">
-      <div class="eyebrow accent">{t("home-kicker")}</div>
-      <h1>{t("home-title")}</h1>
-      <p class="lead">{t("home-body")}</p>
+      {#if selected}
+        <WherePage game={selected} {now} />
+      {:else if home.state === "reading"}
+        <div class="eyebrow accent">{t("home-kicker")}</div>
+        <h1>{t("home-reading")}</h1>
+      {:else if home.state === "browser"}
+        <div class="eyebrow accent">{t("home-kicker")}</div>
+        <h1>{t("home-browser-title")}</h1>
+        <p class="lead">{t("home-browser-body")}</p>
+      {:else if home.state === "failed"}
+        <div class="eyebrow accent">{t("home-kicker")}</div>
+        <h1>{t("home-failed-title")}</h1>
+        <FailurePanel failure={home.failure} onretry={refresh} />
+      {:else}
+        <div class="eyebrow accent">{t("home-kicker")}</div>
+        <h1>{t("home-no-list-title")}</h1>
+        <p class="lead">{t("home-no-list-body")}</p>
+      {/if}
     </main>
 
     <aside class="inspector" aria-label={t("details-label")}>
+      <h2>{t("source-title")}</h2>
+      <p>{t("source-body")}</p>
+
+      <h2>{t("legend-title")}</h2>
+      <ul class="legend">
+        <li><span class="swatch observed"></span>{t("legend-observed")}</li>
+        <li><span class="swatch worked"></span>{t("legend-worked")}</li>
+        <li><span class="swatch attention"></span>{t("legend-attention")}</li>
+        <li><span class="swatch wrong"></span>{t("legend-wrong")}</li>
+      </ul>
+
       <h2>{t("tools-title")}</h2>
       <div aria-live="polite">
         {#if kit.state === "reading"}
@@ -64,17 +135,7 @@
           </p>
           <p class="muted">{t("tools-source")}</p>
         {:else}
-          {@const words = failureWords(kit.failure.code)}
-          <p class="problem">{t(words.happened)}</p>
-          <p>{t("failure-safe")}</p>
-          <p>{t(words.next)}</p>
-          <button type="button" onclick={refresh}
-            >{t("action-try-again")}</button
-          >
-          <details>
-            <summary>{t("failure-details")}</summary>
-            <pre>{kit.failure.code}: {kit.failure.detail}</pre>
-          </details>
+          <FailurePanel failure={kit.failure} onretry={refresh} />
         {/if}
       </div>
     </aside>
@@ -115,16 +176,11 @@
     gap: 14px;
   }
 
-  .house,
-  .eyebrow {
+  .house {
     font-size: var(--type-caption);
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-  }
-
-  .house,
-  .accent {
     color: var(--colour-accent);
   }
 
@@ -147,19 +203,26 @@
   }
 
   .observation-bar {
-    justify-content: space-between;
     padding-block: 10px;
     font-size: var(--type-small);
     background: var(--colour-canvas);
     border-bottom: 1px solid var(--colour-line);
   }
 
+  .look-again {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin-inline-start: auto;
+  }
+
   strong {
     font-weight: 600;
   }
 
-  .muted {
-    color: var(--colour-text-muted);
+  .read {
+    color: var(--colour-observed);
   }
 
   .workspace {
@@ -185,13 +248,13 @@
   }
 
   .navigator .eyebrow {
-    margin-bottom: 8px;
-    color: var(--colour-text-muted);
+    margin-bottom: 10px;
   }
 
   .canvas {
     padding: 32px;
     background: var(--colour-surface);
+    min-width: 0;
   }
 
   h1 {
@@ -204,17 +267,23 @@
 
   .lead {
     max-width: 64ch;
+    margin-bottom: 16px;
     font-size: var(--type-lead);
   }
 
   .inspector h2 {
-    margin-bottom: 8px;
+    margin-block: 20px 8px;
     font-family: var(--font-display);
     font-size: 1.25rem;
     font-weight: 600;
   }
 
-  .inspector p {
+  .inspector h2:first-child {
+    margin-top: 0;
+  }
+
+  .inspector p,
+  .legend {
     font-size: var(--type-small);
   }
 
@@ -222,46 +291,48 @@
     margin-top: 6px;
   }
 
+  .legend {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .swatch {
+    flex: none;
+    width: 14px;
+    height: 14px;
+  }
+
+  .observed {
+    background: var(--colour-observed);
+  }
+
+  .worked {
+    border: 2px solid var(--colour-comparison);
+  }
+
+  .attention {
+    background: var(--colour-accent);
+    transform: rotate(45deg) scale(0.8);
+  }
+
+  .wrong {
+    height: 4px;
+    background: var(--colour-risk);
+  }
+
   .found {
     color: var(--colour-observed);
     font-weight: 600;
-  }
-
-  .problem {
-    color: var(--colour-risk);
-    font-weight: 600;
-  }
-
-  button {
-    min-height: var(--control-min);
-    margin-top: 12px;
-    padding-inline: 18px;
-    font: inherit;
-    color: var(--colour-text);
-    background: var(--colour-surface-soft);
-    border: 1px solid var(--colour-accent);
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  details {
-    margin-top: 12px;
-    font-size: var(--type-small);
-  }
-
-  summary {
-    min-height: var(--control-min);
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-  }
-
-  pre {
-    margin: 0;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    font-size: var(--type-caption);
-    color: var(--colour-text-muted);
   }
 
   .status-bar {

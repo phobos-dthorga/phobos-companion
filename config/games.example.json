@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "root": "/path/to/your/repositories",
+  "games": [
+    {
+      "id": "first-game",
+      "name": "First Game",
+      "repositories": ["first-game-mods"]
+    },
+    {
+      "id": "second-game",
+      "name": "Second Game",
+      "repositories": ["second-game-library", "second-game-content"]
+    }
+  ]
+}

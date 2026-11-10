@@ -1,7 +1,8 @@
 # D'thorga Companion: design record (9 Nov 2026)
 
-**Steps 1 to 4 of this record are built: the window, its theme, its checks and the "where was I?" home page. The owner approved
-the mock-up on 9 Nov 2026 ("I like the purple vibe"); the built page has not been judged on screen yet.** The research behind it, with sources, is phobos-rimworld's
+**Steps 1 to 4 of this record are built: the window, its theme, its checks and the "where was I?" home page; so are the report
+viewer's first stage, charts and the colony mood report (10 Nov 2026). The owner approved the mock-up on 9 Nov 2026 ("I like the
+purple vibe"); nothing built has been judged on screen yet.** The research behind it, with sources, is phobos-rimworld's
 [research record](https://github.com/phobos-dthorga/phobos-rimworld/blob/main/docs/development/tools-desktop-research.md). The
 home page mock-up the owner is judging is private to the owner; this record describes what it shows.
 
@@ -126,7 +127,7 @@ watcher, which is what leaked daemons on the owner's PC in November 2026. A test
 ## The report viewer, first stage (built 9 Nov 2026)
 
 **The Reports page lists, for the chosen game, every report the kit marks `reads`, gives a plain question and needs nothing typed:
-19 for RimWorld.** The questions live with the tools, in each adapter's manifest, so the program still names no game. A game appears
+19 for RimWorld when built, 20 with the mood report.** The questions live with the tools, in each adapter's manifest, so the program still names no game. A game appears
 here when its list `id` matches the manifest's `game`.
 
 **The host decides.** The window asks to run a report by name. The host reads the manifest again, refuses anything it wouldn't offer,
@@ -144,6 +145,76 @@ broken mid-letter. **Show more** asks the tool for five times as many rows, up t
 
 **The real path was checked with a report from the owner's own game**, through Rust and through the page, in a throwaway check that left
 nothing behind. Clicking through the packaged window is the owner's.
+
+## Charts (built 10 Nov 2026)
+
+**Owner's request (10 Nov 2026): "pretty graphs and the like", learning from our other repositories.** Republic Observatory and
+OnAir WyrmGrid both draw with Apache ECharts 6.1.0 behind one component fed a small declarative spec (Observatory's ADR-0003,
+WyrmGrid's ADR-0004). Companion does the same, so the three programs share one way of drawing.
+
+**The tools decide what to draw; the window decides how.** A chart is a block in a kit report (phobos-modkit 1.5.0,
+`docs/manifest.md`): bars or a line, series and reference lines, each with a role (`risk`, `success` and so on) and never a colour.
+`chartOptions.ts` turns it into ECharts options as plain data, tested without a browser; `CompanionChart.svelte` is the only
+component that draws, and `echartsCore.ts` the only module that imports ECharts.
+
+**What we changed from the sibling programs** (agent choices, owner to revise):
+
+| Theirs | Ours | Why |
+| --- | --- | --- |
+| Tooltips on hover only (WyrmGrid has no other path) | Each bar's value written at its end, and **Show the numbers** for a sortable table | Nothing may need hover or a steady hand |
+| Legend and line labels drawn by ECharts | A key in the page's own text under the chart, dashed swatches for lines | ECharts measured our font wrongly and the labels overlapped; page text is read aloud too |
+| Axis text at 10 px | 13 px | The window's floor is 12 px |
+| WyrmGrid ignores reduced motion | Motion stops when Windows asks for less | Observatory's rule, adopted |
+| Canvas, loaded with the page | SVG, loaded only when a report has a chart; a failed load shows the numbers instead | Crisp at any display scale; a report without charts costs nothing |
+
+**Does ECharts earn its place?** (the five tests in AGENTS.md, after WyrmGrid's ADR-0004): a real need now (four charts in the mood
+report); less upkeep than our own, since two sibling programs already maintain the same code; one place to replace it from
+(`echartsCore.ts`); tests on the option builder and in the browser; and when it fails the table shows. It costs one file of 562 kB
+(192 kB compressed), read from this PC only when needed.
+
+| Behaviour | What it lets them do | What it stops them doing | How it changes the way they work |
+| --- | --- | --- | --- |
+| Charts | See the shape of an answer at a glance: who is lowest, what costs most | Nothing | Long tables stop being the first thing to read |
+| Show the numbers | Read and sort every figure behind a chart | Nothing | A chart never hides a number |
+
+## Colony mood (built 10 Nov 2026)
+
+**Owner's request (10 Nov 2026), from a play session showing "Extreme break risk x29":** "That might be actually worthwhile
+integrating into our Companion, to see where you are lacking mood-wise." They handle mood mostly "with extreme amounts of drugs and
+their addictions". The proposal came as a handoff from a phobos-rimworld session ([handoff-2026-11-10-mood-report.md](handoff-2026-11-10-mood-report.md));
+this section is what was built from it.
+
+**Gotcha: a save holds only half of a colonist's mood.** The game saves remembered events (a death, a meal off the floor, a party)
+and works out situational thoughts (bedrooms, pain, cold, beliefs, a drug's high) while it runs. So the report counts remembered
+events exactly, by the game's own rules, and gives the rest as one figure: mood minus the remembered events.
+
+**Built: the save route, in phobos-modkit** (`rimworld-save mood`, 1.5.0). It needs no mod running and reads any save.
+
+| Section | What it shows |
+| --- | --- |
+| Opening lines | How many are below each break threshold; what remembered events cost in all and the costliest; what everything else costs |
+| Who is closest to breaking | A chart of every pawn's mood coloured by risk, against the thresholds; a table with each pawn's own threshold (traits move it), remembered events, everything else and lowest need |
+| What hurts the most, what helps the most | Remembered events by what they cost or add everyone together, with charts |
+| Needs running low | Each need's average, lowest first, with a chart and a line at 30% (our choice) |
+| Addictions and drug needs | Each addiction, how many have it, how many are low and how many are empty |
+| What this report cannot see | Said plainly in every report |
+
+**Found while building, and fixed:** the game leaves a need's level out of the save when it is 0. Read as unknown, five colonists at
+0% mood showed as fine; they were the worst off.
+
+| Behaviour | What it lets them do | What it stops them doing | How it changes the way they play |
+| --- | --- | --- | --- |
+| Colony mood | See in one place which few problems cost the colony the most mood, instead of opening forty Needs tabs | Nothing: it only reads | Fixing the top two or three causes before reaching for drugs (the owner's own words prompted it) |
+
+**Not built, waiting for the owner:**
+
+- **The snapshot route**: D'thorga Framework writing every colonist's whole thought list, situational ones included, at each save.
+  It is the only way to name bedrooms, cold and beliefs exactly. It is a new behaviour in phobos-rimworld and needs its own design
+  record there first.
+- **Suggested fixes**, such as "a stove and a cook would lift each by about 4". The report names causes only (agent default), because
+  advice needs authored rules for every thought and must say it is advice.
+- **Colonists, slaves and prisoners** are all included, each labelled (agent default); the tool's `--who` narrows it, and the window
+  will offer that once reports take inputs.
 
 ## What comes next
 
@@ -186,3 +257,6 @@ borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
 | Do the colours and the crest feel like House D'thorga? | Keep them until the owner says otherwise |
 | Should older mods' pages link to Companion once it is public? | Not until it can be handed to someone else |
 | In what order do other games get their saves and logs read? | Whichever game the owner is on when step 6 is done |
+| Colony mood: add the snapshot route, so bedrooms, cold and beliefs are named exactly? | Yes, as the next mood step; a design record in phobos-rimworld first |
+| Colony mood: suggest fixes, or only name the causes? | Name causes only until the owner wants advice, then label it as advice |
+| Colony mood: colonists only, or slaves and prisoners too? | All three, labelled, with a choice once reports take inputs |

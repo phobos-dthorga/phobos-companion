@@ -8,8 +8,10 @@ what you did, and what your saves and logs say, without typing a command.
 - **You need a list of your games first**: `.local/games.json` in this folder, naming each game and its repositories.
   `config/games.example.json` shows how. Without one, the program says so and shows nothing else.
 - **A game's `id` in that list must match the tools' name for it** (`rimworld`) for its reports to appear.
-- **It shows where you left each game, and the reports that need nothing typed.** Reports that need an input, read online or change
-  anything aren't offered yet.
+- **It shows where you left each game, and the reports that need nothing typed**, with charts where a report has them, such as
+  RimWorld's colony mood report. Reports that need an input, read online or change anything aren't offered yet.
+- **A RimWorld save holds only half of a colonist's mood.** The mood report counts the remembered events exactly and gives the
+  rest (rooms, pain, beliefs) as one figure; see the [design record](docs/design-record.md#colony-mood-built-10-nov-2026).
 - **Not yet tested on screen.** It builds and passes its checks; nobody has judged the window yet.
 - **It only reads.** It does not change a game, a save or a repository.
 - **It needs Python on the PATH**, or `PHOBOS_COMPANION_PYTHON` naming one.

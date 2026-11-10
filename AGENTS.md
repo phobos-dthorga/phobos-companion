@@ -38,6 +38,10 @@ and method follow Republic Observatory and OnAir WyrmGrid, without their code or
 - **Controls are at least 44 px**, nothing needs a drag or appears only on hover, everything is reachable from the keyboard, and
   the type floor is 12 px.
 - **Failures say what happened, what stayed safe and what to do**, then the technical detail folded away.
+- **Charts come from the tools, drawn by one component.** The kit sends a chart block with roles, never colours;
+  `src/lib/charts/CompanionChart.svelte` is the only component that draws, and `echartsCore.ts` the only module that imports
+  ECharts, on demand. Every chart has a description read in place of the picture, its key in the page's own text, its values
+  where a pointer isn't needed, and **Show the numbers** for the table. Motion stops for reduced motion; chart text is 13 px.
 - **Quantities are preset buttons or the game's own kind of control**, not sliders.
 - **Dark first.**
 - **A new library has to earn it**: a real need now, less upkeep than a small local version, one place it can be replaced from,

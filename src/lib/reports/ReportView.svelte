@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChartBlock from "../charts/ChartBlock.svelte";
   import { t } from "../i18n/runtime";
   import TableBlock from "./TableBlock.svelte";
   import { headingTag } from "./presentation";
@@ -18,6 +19,8 @@
     </ul>
   {:else if block.type === "table"}
     <TableBlock table={block} />
+  {:else if block.type === "chart"}
+    <ChartBlock chart={block} />
   {:else}
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <pre

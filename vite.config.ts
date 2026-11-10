@@ -12,6 +12,10 @@ export default defineConfig({
     ],
   },
   clearScreen: false,
+  build: {
+    // ECharts is one file of about 560 kB (190 kB compressed), loaded only when a report has a chart, from this PC.
+    chunkSizeWarningLimit: 600,
+  },
   server: {
     host: "127.0.0.1",
     port: 1420,

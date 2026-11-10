@@ -257,6 +257,86 @@ for (const [name, viewport] of [
       await audit(page);
     });
 
+    test("a chart is drawn, named, and its numbers are a click away", async ({
+      page,
+    }) => {
+      const names = ["Ash", "Birch", "Cedar", "Damson", "Elder", "Fir"];
+      const levels = [0, 4.5, 12.5, 27, 48, 81];
+      const band = (level: number) =>
+        level < 5 ? 0 : level < 20 ? 1 : level < 35 ? 2 : 3;
+      const report = sampleReport(3);
+      report.sections = [
+        {
+          heading: "Who is closest to breaking",
+          level: 2,
+          blocks: [
+            {
+              type: "chart",
+              kind: "bar",
+              title: "Mood against breaking point",
+              description: "Each pawn's mood, coloured by risk.",
+              unit: "%",
+              value_label: "Mood",
+              stacked: true,
+              categories: names,
+              series: (
+                [
+                  ["Extreme break risk", "risk"],
+                  ["Major break risk", "accent"],
+                  ["Minor break risk", "comparison"],
+                  ["Fine", "success"],
+                ] as const
+              ).map(([label, role], index) => ({
+                label,
+                role,
+                values: levels.map((l) => (band(l) === index ? l : null)),
+              })),
+              lines: [
+                { label: "Minor break", value: 35, role: "comparison" },
+                { label: "Major break", value: 20, role: "accent" },
+                { label: "Extreme break", value: 5, role: "risk" },
+              ],
+            } as never,
+          ],
+        },
+      ];
+      await mockHost(page, {
+        home_status: { result: sampleHome() },
+        kit_status: healthyKit,
+        report_catalogue: catalogue,
+        run_report: { result: { report, command_line: "x" } },
+      });
+      await openReports(page);
+      await page.getByRole("button", { name: "What's in my save?" }).click();
+      const picture = page.getByRole("img", {
+        name: /Chart: Mood against breaking point/,
+      });
+      await expect(picture).toBeVisible();
+      await expect(picture.locator("svg")).toHaveCount(1);
+      await expect(picture.locator("svg")).toContainText("48%");
+      const key = page.getByRole("list", {
+        name: "What the colours and lines mean",
+      });
+      await expect(key).toContainText("Extreme break risk");
+      await expect(key).toContainText("Dashed line: Minor break at 35%");
+      const toggle = page.getByRole("button", { name: "Show the numbers" });
+      await expect(toggle).toHaveAttribute("aria-expanded", "false");
+      await page.screenshot({
+        path: `artifacts/chart-${name}.png`,
+        fullPage: true,
+      });
+      await toggle.click();
+      await expect(
+        page.getByRole("button", { name: "Hide the numbers" }),
+      ).toHaveAttribute("aria-expanded", "true");
+      await expect(page.locator("tbody tr")).toHaveCount(names.length);
+      await expect(page.locator("tbody tr").first()).toContainText(
+        "Extreme break risk",
+      );
+      await noSidewaysScroll(page);
+      await audit(page);
+    });
+
     test("a game with no reports says so", async ({ page }) => {
       await mockHost(page, {
         home_status: { result: sampleHome() },

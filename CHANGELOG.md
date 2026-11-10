@@ -4,6 +4,20 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-10
+
+Charts, and a colony mood report: the owner asked to see where their colony is lacking mood-wise, and for pretty graphs (10 November 2026). Not yet tested on screen.
+
+### Added
+
+- Charts in reports: bars with each value written at its end, dashed lines for thresholds, and a key in plain text under the chart. Show the numbers opens the same figures as a table you can sort, so nothing needs hovering.
+- A new RimWorld report, Where is my colony's mood suffering?: who is closest to breaking, the remembered events that cost and cheer the colony most, needs running low, and addictions and drug needs.
+- Charts stop moving when Windows is set to reduce motion. When a chart can't be drawn, its numbers show instead.
+
+### Changed
+
+- Uses phobos-modkit 1.5.1. Its reports can now carry charts, and it finds the patched-Defs file D'thorga Framework writes by itself.
+
 ## [0.3.0] - 2026-11-09
 
 The tools' reports in the window, chosen by the question they answer, with nothing to type (owner, 9 November 2026). Not yet tested on screen.

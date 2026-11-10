@@ -12,7 +12,26 @@ export type TableBlockData = {
   total: number;
 };
 export type CodeBlock = { type: "code"; language: string; lines: string[] };
-export type Block = TextBlock | BulletsBlock | TableBlockData | CodeBlock;
+
+/** What a series or line means; the window colours it from the theme. The kit never sends a colour. */
+export type ChartRole =
+  "accent" | "observed" | "comparison" | "risk" | "success" | "neutral";
+
+export type ChartBlockData = {
+  type: "chart";
+  kind: "bar" | "line";
+  title: string;
+  description: string;
+  unit: string;
+  value_label: string;
+  stacked: boolean;
+  categories: string[];
+  series: { label: string; role: ChartRole; values: (number | null)[] }[];
+  lines: { label: string; value: number; role: ChartRole }[];
+};
+
+export type Block =
+  TextBlock | BulletsBlock | TableBlockData | CodeBlock | ChartBlockData;
 
 export type Section = { heading: string; level: number; blocks: Block[] };
 

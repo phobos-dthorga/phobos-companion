@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-10
+
+The owner said yes to naming every thought, to suggested fixes and to colonists, slaves and prisoners together (10 November 2026). Not yet tested on screen.
+
+### Added
+
+- The colony mood report starts with Where to start: the costliest causes you can do something about, each with a suggestion marked as advice.
+- With D'thorga Framework 0.64.0's colony mood file, the report names every thought as the game counted it at that save, bedrooms, cold and beliefs included, and each colonist's own break thresholds.
+
+### Changed
+
+- Uses phobos-modkit 1.6.0.
+
 ## [0.4.0] - 2026-11-10
 
 Charts, and a colony mood report: the owner asked to see where their colony is lacking mood-wise, and for pretty graphs (10 November 2026). Not yet tested on screen.

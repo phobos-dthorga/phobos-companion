@@ -206,15 +206,19 @@ events exactly, by the game's own rules, and gives the rest as one figure: mood 
 | --- | --- | --- | --- |
 | Colony mood | See in one place which few problems cost the colony the most mood, instead of opening forty Needs tabs | Nothing: it only reads | Fixing the top two or three causes before reaching for drugs (the owner's own words prompted it) |
 
-**Not built, waiting for the owner:**
+**The owner's answers (10 Nov 2026), all yes, built the same day:**
 
-- **The snapshot route**: D'thorga Framework writing every colonist's whole thought list, situational ones included, at each save.
-  It is the only way to name bedrooms, cold and beliefs exactly. It is a new behaviour in phobos-rimworld and needs its own design
-  record there first.
-- **Suggested fixes**, such as "a stove and a cook would lift each by about 4". The report names causes only (agent default), because
-  advice needs authored rules for every thought and must say it is advice.
-- **Colonists, slaves and prisoners** are all included, each labelled (agent default); the tool's `--who` narrows it, and the window
-  will offer that once reports take inputs.
+- **The snapshot route.** D'thorga Framework 0.64.0 writes the colony mood file at each save (phobos-rimworld's
+  [design record](https://github.com/phobos-dthorga/phobos-rimworld/blob/main/docs/development/mood-snapshot.md)); phobos-modkit
+  1.6.0 reads it when its tick count and world seed match the save, so every thought is named as the game counted it, bedrooms,
+  cold and beliefs included, with each pawn's own thresholds. Without a matching file the report works from the save as before and
+  says so. Not yet tested in game.
+- **Suggested fixes, labelled as advice.** "Where to start" comes first: the costliest causes the player can act on, each with a
+  suggestion; low needs and one pawn's thoughts carry advice too. The suggestions are written by us (agent-authored, held for the
+  owner's review) in the kit's `mood-advice.json`, keyed by Def name, and every one says it is advice. A cause only time removes,
+  such as a death, stays out of "Where to start".
+- **Colonists, slaves and prisoners** together, each labelled; the tool's `--who` narrows it, and the window will offer that once
+  reports take inputs.
 
 ## What comes next
 
@@ -243,7 +247,8 @@ that folder.
 
 ## Who chose what
 
-**Owner (9 Nov 2026):** the seven decisions above.
+**Owner (9 Nov 2026):** the seven decisions above. **Owner (10 Nov 2026):** charts; the colony mood report, its snapshot route,
+advice labelled as such, and colonists, slaves and prisoners together.
 
 **Agent, with the owner's go-ahead on the order of work:** the stack, the boundary to the tools, the five-band layout as
 borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
@@ -257,6 +262,4 @@ borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
 | Do the colours and the crest feel like House D'thorga? | Keep them until the owner says otherwise |
 | Should older mods' pages link to Companion once it is public? | Not until it can be handed to someone else |
 | In what order do other games get their saves and logs read? | Whichever game the owner is on when step 6 is done |
-| Colony mood: add the snapshot route, so bedrooms, cold and beliefs are named exactly? | Yes, as the next mood step; a design record in phobos-rimworld first |
-| Colony mood: suggest fixes, or only name the causes? | Name causes only until the owner wants advice, then label it as advice |
-| Colony mood: colonists only, or slaves and prisoners too? | All three, labelled, with a choice once reports take inputs |
+| Does the mood advice read right for your colony? It is agent-authored | Keep it until the owner edits or asks for changes |

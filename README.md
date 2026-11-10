@@ -10,6 +10,9 @@ what you did, and what your saves and logs say, without typing a command.
 - **A game's `id` in that list must match the tools' name for it** (`rimworld`) for its reports to appear.
 - **It shows where you left each game, and the reports that need nothing typed**, with charts where a report has them, such as
   RimWorld's colony mood report. Reports that need an input, read online or change anything aren't offered yet.
+- **The Atlas page draws your newest save's world** as a globe: biomes, climate, terrain, pollution, places, roads and rivers.
+  The first time, reading the save takes a minute; after that, a few seconds. On a PC that cannot draw it, the page says so
+  and lists the same facts in tables.
 - **A RimWorld save holds only half of a colonist's mood.** The mood report counts the remembered events exactly and gives the
   rest (rooms, pain, beliefs) as one figure; see the [design record](docs/design-record.md#colony-mood-built-10-nov-2026).
 - **Not yet tested on screen.** It builds and passes its checks; nobody has judged the window yet.

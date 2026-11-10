@@ -13,6 +13,8 @@ fn manifest() -> Value {
         {"name": "game-save", "game": "g", "reports": [
             read_report("summary", Some("What's in my save?")),
             read_report("schema", None),
+            {"name": "atlas", "effect": "reads", "question": "What does it look like?", "surface": "globe",
+             "options": []},
             {"name": "find", "effect": "reads", "question": "Find it?", "options": [
                 {"name": "term", "kind": "text", "required": true},
             ]},
@@ -38,8 +40,15 @@ fn code(result: Result<&[Value], Failure>) -> FailureCode {
 fn offers_only_reading_reports_with_a_question_and_nothing_to_type() {
     let found = entries(&manifest(), "g");
     let names: Vec<_> = found.iter().map(|e| (e.command.as_str(), e.report.as_deref())).collect();
-    assert_eq!(names, [("game-save", Some("summary")), ("game-log", None)]);
+    assert_eq!(names, [("game-save", Some("summary")), ("game-save", Some("atlas")), ("game-log", None)]);
     assert_eq!(found[0].question, "What's in my save?");
+}
+
+#[test]
+fn says_which_report_wants_a_page_of_its_own() {
+    let found = entries(&manifest(), "g");
+    let surfaces: Vec<_> = found.iter().map(|e| e.surface.as_deref()).collect();
+    assert_eq!(surfaces, [None, Some("globe"), None]);
 }
 
 #[test]

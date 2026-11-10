@@ -1,4 +1,5 @@
 <script lang="ts">
+  import GlobeBlock from "../atlas/GlobeBlock.svelte";
   import ChartBlock from "../charts/ChartBlock.svelte";
   import { t } from "../i18n/runtime";
   import TableBlock from "./TableBlock.svelte";
@@ -21,6 +22,8 @@
     <TableBlock table={block} />
   {:else if block.type === "chart"}
     <ChartBlock chart={block} />
+  {:else if block.type === "globe"}
+    <GlobeBlock globe={block} />
   {:else}
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <pre

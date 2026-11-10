@@ -1,7 +1,7 @@
 # D'thorga Companion: design record (9 Nov 2026)
 
 **Steps 1 to 4 of this record are built: the window, its theme, its checks and the "where was I?" home page; so are the report
-viewer's first stage, charts and the colony mood report (10 Nov 2026). The owner approved the mock-up on 9 Nov 2026 ("I like the
+viewer's first stage, charts, the colony mood report and the atlas (10 Nov 2026). The owner approved the mock-up on 9 Nov 2026 ("I like the
 purple vibe"); nothing built has been judged on screen yet.** The research behind it, with sources, is phobos-rimworld's
 [research record](https://github.com/phobos-dthorga/phobos-rimworld/blob/main/docs/development/tools-desktop-research.md). The
 home page mock-up the owner is judging is private to the owner; this record describes what it shows.
@@ -33,7 +33,7 @@ colours below; the first version only reads.
 | "Where was I?" home page (built) | Come back to a game after months and see when they last worked on it, what they did, what was left uncommitted, what isn't released and what's still open | Nothing; it only reads | Changing games stops costing the thread |
 | Report viewer (step 5) | Read any tool's report, chosen from a list, with no typing | Run anything the manifest marks as writing, running or owner-only | Long quoted commands are no longer needed |
 | Newest save and log (step 6) | See them appear by themselves as they play | Nothing | The page stays current without asking |
-| Planet globe (step 7) | See world-map pollution and every settlement at a glance, stepping through saves with buttons | Nothing | "Why is that place polluted?" becomes a glance |
+| Atlas (step 7, built 10 Nov 2026) | See the whole world as the game draws it, in six views with pollution over any of them, find any place and read any tile | Nothing; it only reads | "Why is that place polluted?" and "where should we settle?" become a glance |
 
 ## How it is built
 
@@ -220,6 +220,31 @@ events exactly, by the game's own rules, and gives the rest as one figure: mood 
 - **Colonists, slaves and prisoners** together, each labelled; the tool's `--who` narrows it, and the window will offer that once
   reports take inputs.
 
+## The atlas (built 10 Nov 2026)
+
+**The owner chose a hex globe drawn with three.js over MapLibre (10 Nov 2026)**, once the owner's world turned out to have
+590,492 tiles: MapLibre could only have drawn the land as a flat picture, soft up close and missing at the poles. WyrmGrid
+uses three.js too, for its weather. **The owner asked for every layer in the first version**: biomes, settlements and tile
+details; pollution; climate and terrain views; roads and rivers.
+
+**The planet sits as the game's does.** The game builds its world from the same icosahedron our kit rebuilds and never rotates
+it (read from the 1.7 code, 10 Nov 2026), so the in-game reading step 7 was waiting for is not needed; on the owner's world ice
+sheet averages 75.5 degrees from the equator and rainforest 4.4. Reading the game's code for this also found that the kit kept
+each tile's neighbours in its own order, not the game's, so roads and rivers would have been put on the wrong neighbours.
+phobos-modkit 1.7.0 fixes it: the owner's 17,900 river pieces now join into 233 river systems.
+
+| Part | How |
+| --- | --- |
+| Data | `rimworld-save atlas` (kit 1.7.0): one globe block of tile positions, each tile's neighbours in order, one value per tile per layer, places, lines, tags and region labels; about 45 MB of JSON and 1.1 s for the owner's world once the save is indexed |
+| Drawing | Every tile a flat-coloured fan of triangles; one texture holds every tile's colour, another the overlay, so a new view rewrites a texture, never the geometry. It draws only when something changes. 423 ms from data to picture in a software renderer |
+| Picking | The point under the pointer on the sphere, then a walk from a nearby tile to whichever neighbour is nearer until none is; on tiles made this way that always ends at the nearest |
+| Colours | Biomes and hills bring the kit's own colours (agent-authored, `atlas-palette.json`). Temperature and elevation are two hues meeting at a light grey at 0 °C and sea level; rainfall and swampiness one hue, light to dark; pollution the game's four bands. Water shows as having no value where a layer leaves it out. The same ramps serve light and dark: the globe is a filled object, not marks on the page |
+| Labels | Your own colonies always; every place once a tile spans 5 pixels; region names at the size the game gives them. More important first, none on top of another |
+| Moving | Buttons for north, south, east, west, closer, further, the whole planet and the tile in the middle; the arrow keys, + and - and Enter do the same. Drag and the wheel are shortcuts. Flights are instant when motion is reduced |
+
+**Agent choices, owner to revise:** the ramps and their stops; line colours (river blue, road tan); the purple glow from the theme's
+comparison colour; amber for the picked tile; the label thresholds.
+
 ## What comes next
 
 **Step 5, the rest of the report viewer.** Forms built from the manifest for the 19 reports that need an input, then the kit's
@@ -230,9 +255,8 @@ progress stream and the 7 that read online. Three tools get extra paths from pho
 **Step 6, saves and logs.** Rust watches the folders, with file events as hints, a full check every 15 seconds and a 1.5 second
 wait until a file stops changing (Observatory's `recorder_service.rs`). Needs the kit's progress stream.
 
-**Step 7, the planet.** MapLibre GL JS in globe projection with an empty style and our own tiles, as WyrmGrid's Atlas draws
-its map, starting with a drawing test on the owner's save. A flat map is the fallback. **Waits for one in-game reading** to
-confirm our rebuilt planet sits the same way up as the game's.
+**Next on the atlas:** stepping through saves with buttons, to watch pollution spread; links from other reports' places and
+tiles to the atlas (the owner's cross-links idea, 10 Nov 2026).
 
 **SQLite arrives with the first thing to keep**: two files under the user's local application data, never a synced folder.
 One holds what can be rebuilt, the other the owner's own pins and history, with an export because Synology does not back up
@@ -248,7 +272,7 @@ that folder.
 ## Who chose what
 
 **Owner (9 Nov 2026):** the seven decisions above. **Owner (10 Nov 2026):** charts; the colony mood report, its snapshot route,
-advice labelled as such, and colonists, slaves and prisoners together.
+advice labelled as such, and colonists, slaves and prisoners together; the atlas now, as a three.js hex globe, with every layer.
 
 **Agent, with the owner's go-ahead on the order of work:** the stack, the boundary to the tools, the five-band layout as
 borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
@@ -263,3 +287,4 @@ borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
 | Should older mods' pages link to Companion once it is public? | Not until it can be handed to someone else |
 | In what order do other games get their saves and logs read? | Whichever game the owner is on when step 6 is done |
 | Does the mood advice read right for your colony? It is agent-authored | Keep it until the owner edits or asks for changes |
+| Do the atlas's biome colours and ramps read right? They are agent-authored | Keep them until the owner asks for changes |

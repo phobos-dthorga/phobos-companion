@@ -1,3 +1,4 @@
+import type { GlobeBlockData } from "../atlas/types";
 import type { Failure } from "../shell/types";
 
 export type Cell = string | number | boolean | null;
@@ -31,7 +32,12 @@ export type ChartBlockData = {
 };
 
 export type Block =
-  TextBlock | BulletsBlock | TableBlockData | CodeBlock | ChartBlockData;
+  | TextBlock
+  | BulletsBlock
+  | TableBlockData
+  | CodeBlock
+  | ChartBlockData
+  | GlobeBlockData;
 
 export type Section = { heading: string; level: number; blocks: Block[] };
 
@@ -47,6 +53,8 @@ export type ReportEntry = {
   command: string;
   report: string | null;
   question: string;
+  /** What the report mostly is when it has a page of its own, such as "globe". */
+  surface: string | null;
 };
 
 export type ReportResult = { report: Report; command_line: string };

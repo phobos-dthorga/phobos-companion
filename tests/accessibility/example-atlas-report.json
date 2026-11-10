@@ -1,0 +1,497 @@
+{
+  "format": 1,
+  "title": "Atlas: the world map",
+  "lines": [
+    "Index of Example.rws, built now from a frozen copy in 0.0 s (325 elements; 1 game, 3 faction, 1 map, 10 thing, 4 pawn, 3 need, 5 memory, 3 hediff, 2 trait, 1 skill, 8 map_grid, 16 planet_grid, 2 world_feature, 4 faction_relation, 3 world_object, 14 world_object_value, 2 component, 6 component_value).",
+    "World seed example seed: 272 surface tiles (3 subdivisions). Tile positions are rebuilt from a model of the planet that follows the game's own construction; the save holds none.",
+    "The installed mods' Defs were not read, so only the game's own biomes, roads and rivers are named."
+  ],
+  "blocks": [
+    {
+      "type": "globe",
+      "title": "The world map",
+      "description": "Every tile of the planet's surface: its biome, climate, terrain and pollution, with settlements, roads and rivers.",
+      "tiles": 272,
+      "positions": {
+        "dtype": "f32",
+        "count": 816,
+        "data": "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"
+      },
+      "ring_start": {
+        "dtype": "i32",
+        "count": 273,
+        "data": "AAAAAAUAAAAKAAAADwAAABQAAAAZAAAAHgAAACMAAAAoAAAALQAAADIAAAA3AAAAPAAAAEIAAABIAAAATgAAAFQAAABaAAAAYAAAAGYAAABsAAAAcgAAAHgAAAB+AAAAhAAAAIoAAACQAAAAlgAAAJwAAACiAAAAqAAAAK4AAAC0AAAAugAAAMAAAADGAAAAzAAAANIAAADYAAAA3gAAAOQAAADqAAAA8AAAAPYAAAD8AAAAAgEAAAgBAAAOAQAAFAEAABoBAAAgAQAAJgEAACwBAAAyAQAAOAEAAD4BAABEAQAASgEAAFABAABWAQAAXAEAAGIBAABoAQAAbgEAAHQBAAB6AQAAgAEAAIYBAACMAQAAkgEAAJgBAACeAQAApAEAAKoBAACwAQAAtgEAALwBAADCAQAAyAEAAM4BAADUAQAA2gEAAOABAADmAQAA7AEAAPIBAAD4AQAA/gEAAAQCAAAKAgAAEAIAABYCAAAcAgAAIgIAACgCAAAuAgAANAIAADoCAABAAgAARgIAAEwCAABSAgAAWAIAAF4CAABkAgAAagIAAHACAAB2AgAAfAIAAIICAACIAgAAjgIAAJQCAACaAgAAoAIAAKYCAACsAgAAsgIAALgCAAC+AgAAxAIAAMoCAADQAgAA1gIAANwCAADiAgAA6AIAAO4CAAD0AgAA+gIAAAADAAAGAwAADAMAABIDAAAYAwAAHgMAACQDAAAqAwAAMAMAADYDAAA8AwAAQgMAAEgDAABOAwAAVAMAAFoDAABgAwAAZgMAAGwDAAByAwAAeAMAAH4DAACEAwAAigMAAJADAACWAwAAnAMAAKIDAACoAwAArgMAALQDAAC6AwAAwAMAAMYDAADMAwAA0gMAANgDAADeAwAA5AMAAOoDAADwAwAA9gMAAPwDAAACBAAACAQAAA4EAAAUBAAAGgQAACAEAAAmBAAALAQAADIEAAA4BAAAPgQAAEQEAABKBAAAUAQAAFYEAABcBAAAYgQAAGgEAABuBAAAdAQAAHoEAACABAAAhgQAAIwEAACSBAAAmAQAAJ4EAACkBAAAqgQAALAEAAC2BAAAvAQAAMIEAADIBAAAzgQAANQEAADaBAAA4AQAAOYEAADsBAAA8gQAAPgEAAD+BAAABAUAAAoFAAAQBQAAFgUAABwFAAAiBQAAKAUAAC4FAAA0BQAAOgUAAEAFAABGBQAATAUAAFIFAABYBQAAXgUAAGQFAABqBQAAcAUAAHYFAAB8BQAAggUAAIgFAACOBQAAlAUAAJoFAACgBQAApgUAAKwFAACyBQAAuAUAAL4FAADEBQAAygUAANAFAADWBQAA3AUAAOIFAADoBQAA7gUAAPQFAAD6BQAAAAYAAAYGAAAMBgAAEgYAABgGAAAeBgAAJAYAACoGAAAwBgAANgYAADwGAABCBgAASAYAAE4GAABUBgAA"
+      },
+      "ring": {
+        "dtype": "i32",
+        "count": 1620,
+        "data": "YAAAAFwAAABdAAAAXgAAAF8AAABiAAAAYQAAAGMAAABlAAAAZAAAAGkAAABmAAAAagAAAGgAAABnAAAAbwAAAGsAAABsAAAAbQAAAG4AAABzAAAAcAAAAHQAAAByAAAAcQAAAHYAAAB1AAAAeAAAAHkAAAB3AAAAfQAAAHoAAAB+AAAAfAAAAHsAAACAAAAAfwAAAIIAAACDAAAAgQAAAIcAAACEAAAAiAAAAIYAAACFAAAAjQAAAIkAAACMAAAAigAAAIsAAACPAAAAjgAAAJEAAACSAAAAkAAAAJUAAACTAAAAlAAAAJYAAACXAAAAmQAAAJgAAACdAAAAnAAAAJsAAACaAAAAnwAAAJ4AAACiAAAAowAAAKEAAACgAAAApQAAAKQAAACmAAAApwAAAKkAAACoAAAAqwAAAKoAAACsAAAArQAAAK8AAACuAAAAtAAAALAAAACxAAAAsgAAALMAAAC1AAAAtwAAALYAAAC4AAAAuQAAALsAAAC6AAAAvQAAALwAAAC/AAAAvgAAAMAAAADBAAAAwwAAAMIAAADHAAAAxgAAAMQAAADFAAAAyQAAAMgAAADNAAAAzAAAAMoAAADLAAAA0AAAAM4AAADPAAAA0wAAANIAAADRAAAA1QAAANQAAADZAAAA2AAAANcAAADWAAAA2wAAANoAAADdAAAA3AAAAN4AAADfAAAA4gAAAOAAAADhAAAA5QAAAOQAAADjAAAA5wAAAOYAAADoAAAA6QAAAOsAAADqAAAA8AAAAOwAAADtAAAA7gAAAO8AAADxAAAA9QAAAPIAAADzAAAA9gAAAPcAAAD0AAAA/QAAAPgAAAD5AAAA+gAAAPsAAAD8AAAAAQEAAP4AAAD/AAAAAgEAAAMBAAAAAQAACQEAAAQBAAAFAQAABgEAAAcBAAAIAQAADQEAAAoBAAALAQAADgEAAA8BAAAMAQAAXQAAAFwAAACxAAAAsAAAAJ0AAACYAAAAXgAAAF0AAACYAAAAmQAAAKIAAACeAAAAXwAAAF4AAACeAAAAnwAAAKYAAACkAAAAYAAAAF8AAACkAAAApQAAAKwAAACqAAAAsQAAAFwAAABgAAAAqgAAAKsAAACyAAAAYwAAAGEAAACnAAAApgAAAJ8AAACgAAAApwAAAGEAAABiAAAAzwAAAM4AAACpAAAAZQAAAGMAAACgAAAA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"
+      },
+      "layers": [
+        {
+          "key": "biome",
+          "label": "Biome",
+          "description": "Each tile's biome, as the game's world map shows it.",
+          "kind": "categories",
+          "values": {
+            "dtype": "u16",
+            "count": 272,
+            "data": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAwABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAA=="
+          },
+          "categories": [
+            {
+              "label": "Ocean",
+              "colour": "#1f4466",
+              "description": "Ocean"
+            },
+            {
+              "label": "Temperate forest",
+              "colour": "#4e7a39",
+              "description": "TemperateForest"
+            },
+            {
+              "label": "Ice sheet",
+              "colour": "#eef2f4",
+              "description": "IceSheet"
+            },
+            {
+              "label": "Unknown biome (21284)",
+              "colour": "#808080",
+              "description": "No loaded BiomeDef has this short hash."
+            }
+          ],
+          "unit": "",
+          "scale": 1.0,
+          "offset": 0.0,
+          "precision": 0,
+          "ramp": "sequential",
+          "missing": null,
+          "missing_label": "",
+          "overlay": false,
+          "bands": []
+        },
+        {
+          "key": "elevation",
+          "label": "Elevation",
+          "description": "Height above sea level; seas and lakes show their depth.",
+          "kind": "measure",
+          "values": {
+            "dtype": "u16",
+            "count": 272,
+            "data": "DB4WHiAeKh40Hj4eSB5SHlweZh5wHnoehB6OHpgeoh6sHrYewB7KHtQe3h7oHvIe/B4GHxAfGh8kHy4fOB9CH0wfVh9gH2ofdB9+H4gfkh+cH6YfsB+6H8Qfzh/YH+If7B/2HwAgCiAUIB4gKCAyIDwgRiBQIFogZCBuIHgggiCMIJYgoCCqILQgviDIINIg3CDmIPAg+iAEIQ4hGCEiISwhNiFAIUohVCFeIWghciF8IYYhkCGaIaQhriG4IcIhzCHWIeAh6iH0If4hCCISIhwiJiIwIjoiRCJOIlgiYiJsInYigCKKIpQiniKoIrIivCLGItAi2iLkIu4i+CICIwwjFiMgIyojNCM+I0gjUiNcI2YjcCN6I4QjjiOYI6IjrCO2I8AjyiPUI94j6CPyI/wjBiQQJBokJCQuJDgkQiRMJFYkYCRqJHQkfiSIJJIknCSmJLAkuiTEJM4k2CTiJOwk9iQAJQolFCUeJSglMiU8JUYlUCVaJWQlbiV4JYIljCWWJaAlqiW0Jb4lyCXSJdwl5iXwJfolBCYOJhgmIiYsJjYmQCZKJlQmXiZoJnImfCaGJpAmmiakJq4muCbCJswm1ibgJuom9Cb+JggnEiccJyYnMCc6J0QnTidYJ2InbCd2J4AniieUJ54nqCeyJ7wnxifQJ9on5CfuJ/gnAigMKBYoICgqKDQoPihIKFIoXChmKHAoeiiEKI4omCiiKA=="
+          },
+          "categories": [],
+          "unit": "m",
+          "scale": 1.0,
+          "offset": -8192,
+          "precision": 0,
+          "ramp": "elevation",
+          "missing": null,
+          "missing_label": "",
+          "overlay": false,
+          "bands": []
+        },
+        {
+          "key": "temperature",
+          "label": "Temperature",
+          "description": "The tile's average temperature over a year.",
+          "kind": "measure",
+          "values": {
+            "dtype": "u16",
+            "count": 272,
+            "data": "gAx/DH4MfQx8DHsMegx5DHgMdwx2DHUMdAxzDHIMcQxwDG8MbgxtDGwMawxqDGkMaAxnDGYMZQxkDGMMYgxhDGAMXwxeDF0MXAxbDFoMWQxYDFcMVgxVDFQMUwxSDFEMUAxPDE4MTQxMDEsMSgxJDEgMRwxGDEUMRAxDDEIMQQxADD8MPgw9DDwMOww6DDkMOAw3DDYMNQw0DDMMMgwxDDAMLwwuDC0MLAwrDCoMKQwoDCcMJgwlDCQMIwwiDCEMIAwfDB4MHQwcDBsMGgwZDBgMFwwWDBUMFAwTDBIMEQwQDA8MDgwNDAwMCwwKDAkMCAwHDAYMBQwEDAMMAgwBDAAM/wv+C/0L/Av7C/oL+Qv4C/cL9gv1C/QL8wvyC/EL8AvvC+4L7QvsC+sL6gvpC+gL5wvmC+UL5AvjC+IL4QvgC98L3gvdC9wL2wvaC9kL2AvXC9YL1QvUC9ML0gvRC9ALzwvOC80LzAvLC8oLyQvIC8cLxgvFC8QLwwvCC8ELwAu/C74LvQu8C7sLugu5C7gLtwu2C7ULtAuzC7ILsQuwC68LrgutC6wLqwuqC6kLqAunC6YLpQukC6MLoguhC6ALnwueC50LnAubC5oLmQuYC5cLlguVC5QLkwuSC5ELkAuPC44LjQuMC4sLiguJC4gLhwuGC4ULhAuDC4ILgQuAC38Lfgt9C3wLewt6C3kLeAt3C3YLdQt0C3MLcgtxCw=="
+          },
+          "categories": [],
+          "unit": "°C",
+          "scale": 0.1,
+          "offset": -300.0,
+          "precision": 1,
+          "ramp": "temperature",
+          "missing": null,
+          "missing_label": "",
+          "overlay": false,
+          "bands": []
+        },
+        {
+          "key": "rainfall",
+          "label": "Rainfall",
+          "description": "Rain and snow in a year, in millimetres.",
+          "kind": "measure",
+          "values": {
+            "dtype": "u16",
+            "count": 272,
+            "data": "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////0AfkB/gEDAggCDQISAhcCHAIhAiYCKwIwAjUCOgI/AkQCSQJOAlMCWAJdAmICZwJsAnECdgJ7AoAChQKKAo8ClAKZAp4CowKoAq0CsgK3ArwCwQLGAssC0ALVAtoC3wLkAukC7gLzAvgC/QICAwcDDAMRAxYDGwMgAyUDKgMvAzQDOQM+A0MDSANNA1IDVwNcA2EDZgNrA3ADdQN6A38DhAOJA44DkwOYA50DogOnA6wDsQO2A7sDwAPFA8oDzwPUA9kD3gPjA+gD7QPyA/cD/AMBBAYECwQQBBUEGgQfBCQEKQQuBDMEOAQ9BEIERwRMBFEEVgRbBGAEZQRqBG8EdAR5BH4EgwSIBI0EkgSXBJwEoQSmBKsEsAS1BLoEvwTEBMkEzgTTBNgE3QTiBOcE7ATxBPYE+wQABQUFCgUPBRQFGQUeBSMFKAUtBTIFNwU8BUEFRgVLBQ=="
+          },
+          "categories": [],
+          "unit": "mm",
+          "scale": 1.0,
+          "offset": 0.0,
+          "precision": 0,
+          "ramp": "rainfall",
+          "missing": 65535,
+          "missing_label": "water",
+          "overlay": false,
+          "bands": []
+        },
+        {
+          "key": "hilliness",
+          "label": "Hills",
+          "description": "How hilly the land is, from flat to impassable mountains.",
+          "kind": "categories",
+          "values": {
+            "dtype": "u8",
+            "count": 272,
+            "data": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAECAwQFAAE="
+          },
+          "categories": [
+            {
+              "label": "Undefined",
+              "colour": "#808080",
+              "description": ""
+            },
+            {
+              "label": "Flat",
+              "colour": "#a4b47e",
+              "description": ""
+            },
+            {
+              "label": "Small hills",
+              "colour": "#b99f6c",
+              "description": ""
+            },
+            {
+              "label": "Large hills",
+              "colour": "#8e6f4c",
+              "description": ""
+            },
+            {
+              "label": "Mountainous",
+              "colour": "#66513f",
+              "description": ""
+            },
+            {
+              "label": "Impassable",
+              "colour": "#35302c",
+              "description": ""
+            }
+          ],
+          "unit": "",
+          "scale": 1.0,
+          "offset": 0.0,
+          "precision": 0,
+          "ramp": "sequential",
+          "missing": 0,
+          "missing_label": "water",
+          "overlay": false,
+          "bands": []
+        },
+        {
+          "key": "swampiness",
+          "label": "Swampiness",
+          "description": "How much of the land is marsh and bog.",
+          "kind": "measure",
+          "values": {
+            "dtype": "u8",
+            "count": 272,
+            "data": "/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////ycoKCgpKSoqKisrLCwsLS0tLi4vLy8wMDExMTIyMzMzNDQ1NTU2Njc3Nzg4ODk5Ojo6Ozs8PDw9PT4+Pj8/QEBAQUFBQkJDQ0NEREVFRUZGR0dHSEhJSUlKSktLS0xMTE1NTk5OT09QUFBRUVJSUlNTVFRUVVVVVlZXV1dYWFlZWVpaW1tbXFxdXV1eXl9fX2BgYGFhYmJiY2NkZAAAAQECAgIDAwQEBAUFBQY="
+          },
+          "categories": [],
+          "unit": "%",
+          "scale": 1.0,
+          "offset": 0.0,
+          "precision": 0,
+          "ramp": "sequential",
+          "missing": 255,
+          "missing_label": "water",
+          "overlay": false,
+          "bands": []
+        },
+        {
+          "key": "pollution",
+          "label": "Pollution",
+          "description": "Pollution on the world map, in the game's bands.",
+          "kind": "measure",
+          "values": {
+            "dtype": "u16",
+            "count": 272,
+            "data": "AAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmhkAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+          },
+          "categories": [],
+          "unit": "%",
+          "scale": 0.0015259021896696422,
+          "offset": 0.0,
+          "precision": 1,
+          "ramp": "pollution",
+          "missing": null,
+          "missing_label": "",
+          "overlay": true,
+          "bands": [
+            {
+              "label": "Light",
+              "low": 0.0,
+              "high": 25.0
+            },
+            {
+              "label": "Moderate",
+              "low": 25.0,
+              "high": 50.0
+            },
+            {
+              "label": "Heavy",
+              "low": 50.0,
+              "high": 75.0
+            },
+            {
+              "label": "Extreme",
+              "low": 75.0,
+              "high": 100.0
+            }
+          ]
+        },
+        {
+          "key": "region",
+          "label": "Region",
+          "description": "The named island, ocean, range or other region a tile lies in.",
+          "kind": "names",
+          "values": {
+            "dtype": "u16",
+            "count": 272,
+            "data": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEA/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////w=="
+          },
+          "categories": [
+            {
+              "label": "Example Ocean",
+              "colour": "",
+              "description": "Ocean"
+            },
+            {
+              "label": "Example Isle",
+              "colour": "",
+              "description": "Island"
+            }
+          ],
+          "unit": "",
+          "scale": 1.0,
+          "offset": 0.0,
+          "precision": 0,
+          "ramp": "sequential",
+          "missing": 65535,
+          "missing_label": "",
+          "overlay": false,
+          "bands": []
+        }
+      ],
+      "places": [
+        {
+          "tile": 120,
+          "label": "Example Home",
+          "kind": "Settlement",
+          "group": "Your colonies and camps",
+          "role": "accent",
+          "detail": "Example Colony",
+          "priority": 30
+        },
+        {
+          "tile": 130,
+          "label": "Raider Camp",
+          "kind": "Settlement",
+          "group": "Hostile",
+          "role": "risk",
+          "detail": "Example Raiders",
+          "priority": 10
+        },
+        {
+          "tile": 140,
+          "label": "Example site",
+          "kind": "Example site",
+          "group": "Hostile",
+          "role": "risk",
+          "detail": "Example Raiders",
+          "priority": 10
+        }
+      ],
+      "lines": [
+        {
+          "key": "rivers",
+          "label": "Rivers",
+          "description": "Rivers and creeks.",
+          "style": "river",
+          "pairs": {
+            "dtype": "i32",
+            "count": 2,
+            "data": "ggAAAKgAAAA="
+          },
+          "widths": {
+            "dtype": "u8",
+            "count": 1,
+            "data": "Ag=="
+          },
+          "names": ["River"],
+          "kinds": {
+            "dtype": "u16",
+            "count": 1,
+            "data": "AAA="
+          }
+        },
+        {
+          "key": "roads",
+          "label": "Roads",
+          "description": "Roads and paths between settlements.",
+          "style": "road",
+          "pairs": {
+            "dtype": "i32",
+            "count": 2,
+            "data": "eAAAAJoAAAA="
+          },
+          "widths": {
+            "dtype": "u8",
+            "count": 1,
+            "data": "Ag=="
+          },
+          "names": ["Dirt road"],
+          "kinds": {
+            "dtype": "u16",
+            "count": 1,
+            "data": "AAA="
+          }
+        }
+      ],
+      "tags": [],
+      "labels": [
+        {
+          "label": "Example Ocean",
+          "kind": "Ocean",
+          "position": [0.0, 0.6, -0.8],
+          "size": 20.0
+        },
+        {
+          "label": "Example Isle",
+          "kind": "Island",
+          "position": [0.8, 0.0, 0.6],
+          "size": 4.0
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "heading": "Biomes",
+      "level": 2,
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Biome",
+            "Tiles",
+            "Share",
+            "Mean temperature",
+            "Mean rainfall"
+          ],
+          "rows": [
+            ["Ocean", "100", "36.8%", "15.1 °C", "248 mm"],
+            ["Temperate forest", "99", "36.4%", "5.1 °C", "747 mm"],
+            ["Ice sheet", "72", "26.5%", "-3.6 °C", "1,178 mm"],
+            ["Unknown biome (21284)", "1", "0.4%", "5.0 °C", "750 mm"]
+          ],
+          "values": [
+            [null, 100.0, 36.8, null, null],
+            [null, 99.0, 36.4, null, null],
+            [null, 72.0, 26.5, null, null],
+            [null, 1.0, 0.4, null, null]
+          ],
+          "total": 4
+        }
+      ]
+    },
+    {
+      "heading": "Places",
+      "level": 2,
+      "blocks": [
+        {
+          "type": "table",
+          "headers": ["Place", "Kind", "Faction", "Standing", "Tile", "Where"],
+          "rows": [
+            [
+              "Example Home",
+              "Settlement",
+              "Example Colony",
+              "Your colonies and camps",
+              120,
+              "34.16°N 167.28°W"
+            ],
+            [
+              "Example site",
+              "Example site",
+              "Example Raiders",
+              "Hostile",
+              140,
+              "10.37°N 125.16°E"
+            ],
+            [
+              "Raider Camp",
+              "Settlement",
+              "Example Raiders",
+              "Hostile",
+              130,
+              "42.28°N 0.00°E"
+            ]
+          ],
+          "values": [
+            [null, null, null, null, 120, null],
+            [null, null, null, null, 140, null],
+            [null, null, null, null, 130, null]
+          ],
+          "total": 3
+        }
+      ]
+    },
+    {
+      "heading": "Named regions",
+      "level": 2,
+      "blocks": [
+        {
+          "type": "table",
+          "headers": ["Region", "Kind", "Tiles"],
+          "rows": [
+            ["Example Ocean", "Ocean", "100"],
+            ["Example Isle", "Island", "20"]
+          ],
+          "values": [
+            [null, null, 100.0],
+            [null, null, 20.0]
+          ],
+          "total": 2
+        }
+      ]
+    },
+    {
+      "heading": "Roads and rivers",
+      "level": 2,
+      "blocks": [
+        {
+          "type": "table",
+          "headers": ["What", "Kind", "Pieces"],
+          "rows": [
+            ["River", "River", "1"],
+            ["Road", "Dirt road", "1"]
+          ],
+          "values": [
+            [null, null, 1.0],
+            [null, null, 1.0]
+          ],
+          "total": 2
+        }
+      ]
+    },
+    {
+      "heading": "What the atlas could not show",
+      "level": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "1 biome short hashes match no loaded BiomeDef: the save may come from another mod list, or the Defs were not read."
+        }
+      ]
+    }
+  ]
+}

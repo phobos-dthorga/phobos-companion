@@ -42,6 +42,10 @@ and method follow Republic Observatory and OnAir WyrmGrid, without their code or
   `src/lib/charts/CompanionChart.svelte` is the only component that draws, and `echartsCore.ts` the only module that imports
   ECharts, on demand. Every chart has a description read in place of the picture, its key in the page's own text, its values
   where a pointer isn't needed, and **Show the numbers** for the table. Motion stops for reduced motion; chart text is 13 px.
+- **The globe comes from the tools, drawn by one module.** The kit sends a globe block (phobos-modkit `docs/manifest.md`);
+  `src/lib/atlas/globeScene.ts` is the only module that imports three.js, on demand, and `planet.ts` holds the arithmetic,
+  tested without a screen. Every move has a button and a key; dragging and the wheel are shortcuts. Colours for a measure
+  come from `colours.ts`'s ramps, chosen by the dataviz rules; a category layer brings the kit's own colours.
 - **Quantities are preset buttons or the game's own kind of control**, not sliders.
 - **Dark first.**
 - **A new library has to earn it**: a real need now, less upkeep than a small local version, one place it can be replaced from,

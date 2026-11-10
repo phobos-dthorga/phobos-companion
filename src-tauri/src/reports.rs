@@ -18,6 +18,8 @@ pub struct ReportEntry {
     pub command: String,
     pub report: Option<String>,
     pub question: String,
+    /// What the report mostly is when the window should give it a page of its own, such as `globe`.
+    pub surface: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -67,6 +69,7 @@ fn entries(manifest: &Value, game: &str) -> Vec<ReportEntry> {
                 command: command["name"].as_str().unwrap_or_default().to_owned(),
                 report: report["name"].as_str().map(str::to_owned),
                 question: report["question"].as_str().unwrap_or_default().to_owned(),
+                surface: report["surface"].as_str().map(str::to_owned),
             })
         })
         .collect()

@@ -4,6 +4,27 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-10
+
+The atlas: the owner asked for it, chose a hex globe over a flat map, and asked for every layer in the first version (10 November 2026). Not yet tested on screen.
+
+### Added
+
+- An Atlas page: your newest save's whole world as a globe you can turn and zoom, drawn hex by hex as the game draws its world map, sharp at any distance and at the poles.
+- Six views (biome, elevation, temperature, rainfall, hills, swampiness), with pollution over any of them in the game's four bands, and rivers, roads, places, region names and tile edges each shown or hidden with one button.
+- Click a tile, or turn the globe so it sits in the middle and press Enter, to see what is there: where it is in the game's own latitude and longitude, its biome, climate, terrain, pollution, region, landscape features, roads and rivers, and any settlement or site on it.
+- Every place in a list, grouped as your own, allies, neutral and hostile, with a search box; each one flies the globe to it. A button goes straight to your colony.
+- Everything works from buttons and the keyboard: arrows turn the globe, + and - zoom. Dragging and the scroll wheel are shortcuts, never the only way. Motion stops when Windows is set to reduce it.
+- When this PC cannot draw the globe, the page says so and the atlas's tables still list everything.
+
+### Changed
+
+- Uses phobos-modkit 1.7.0, which also fixes how roads and rivers are read from a save.
+
+### Dependencies
+
+- three.js 0.186.1 (MIT) draws the globe. It loads only when the atlas opens.
+
 ## [0.5.0] - 2026-11-10
 
 The owner said yes to naming every thought, to suggested fixes and to colonists, slaves and prisoners together (10 November 2026). Not yet tested on screen.

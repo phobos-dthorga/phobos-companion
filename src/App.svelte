@@ -6,6 +6,7 @@
   import { formatTime, formatUnixDate } from "./lib/home/presentation";
   import type { HomeReading } from "./lib/home/types";
   import { t } from "./lib/i18n/runtime";
+  import AtlasPage from "./lib/atlas/AtlasPage.svelte";
   import ReportsPage from "./lib/reports/ReportsPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
@@ -16,7 +17,7 @@
   let home = $state<HomeReading>({ state: "reading" });
   let looking = $state(true);
   let chosenId = $state<string | null>(null);
-  let page = $state<"home" | "reports">("home");
+  let page = $state<"home" | "reports" | "atlas">("home");
   let now = $state(new Date());
 
   const games = $derived(home.state === "ready" ? home.home.games : []);
@@ -60,6 +61,13 @@
         class:current={page === "reports"}
         aria-current={page === "reports" ? "page" : undefined}
         onclick={() => (page = "reports")}>{t("page-reports")}</button
+      >
+      <button
+        type="button"
+        class="page"
+        class:current={page === "atlas"}
+        aria-current={page === "atlas" ? "page" : undefined}
+        onclick={() => (page = "atlas")}>{t("page-atlas")}</button
       >
     </nav>
   </header>
@@ -108,6 +116,10 @@
       {#if selected && page === "reports"}
         {#key selected.id}
           <ReportsPage game={selected} />
+        {/key}
+      {:else if selected && page === "atlas"}
+        {#key selected.id}
+          <AtlasPage game={selected} />
         {/key}
       {:else if selected}
         <WherePage game={selected} {now} />

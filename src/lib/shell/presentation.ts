@@ -27,6 +27,10 @@ const FAILURES: Record<FailureCode, FailureWords> = {
     happened: "failure-refused",
     next: "failure-refused-next",
   },
+  write_failed: {
+    happened: "failure-write-failed",
+    next: "failure-write-failed-next",
+  },
 };
 
 /** The message keys for a failure: what happened and what to do. An unknown code reads as an unreadable answer. */

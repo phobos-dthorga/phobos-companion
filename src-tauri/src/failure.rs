@@ -11,6 +11,7 @@ pub enum FailureCode {
     Unreadable,
     ListUnreadable,
     Refused,
+    WriteFailed,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

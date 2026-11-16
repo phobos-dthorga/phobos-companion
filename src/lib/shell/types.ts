@@ -6,7 +6,8 @@ export type FailureCode =
   | "tool_failed"
   | "unreadable"
   | "list_unreadable"
-  | "refused";
+  | "refused"
+  | "write_failed";
 
 export type Failure = { code: FailureCode; detail: string };
 

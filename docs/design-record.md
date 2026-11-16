@@ -33,6 +33,7 @@ colours below; the first version only reads.
 | "Where was I?" home page (built) | Come back to a game after months and see when they last worked on it, what they did, what was left uncommitted, what isn't released and what's still open | Nothing; it only reads | Changing games stops costing the thread |
 | Report viewer (step 5) | Read any tool's report, chosen from a list, with no typing | Run anything the manifest marks as writing, running or owner-only | Long quoted commands are no longer needed |
 | Newest save and log (step 6) | See them appear by themselves as they play | Nothing | The page stays current without asking |
+| Tests page (built 17 Nov 2026) | See which in-game tests the game has seen working, and pass or fail each with one press, in the moment | Mistake a note for a pass: only their own verdict passes a row | Passes seen in play reach the test list instead of being forgotten |
 | Atlas (step 7, built 10 Nov 2026) | See the whole world as the game draws it, in six views with pollution over any of them, find any place and read any tile | Nothing; it only reads | "Why is that place polluted?" and "where should we settle?" become a glance |
 
 ## How it is built
@@ -245,6 +246,24 @@ phobos-modkit 1.7.0 fixes it: the owner's 17,900 river pieces now join into 233 
 **Agent choices, owner to revise:** the ramps and their stops; line colours (river blue, road tan); the purple glow from the theme's
 comparison colour; amber for the picked tile; the label thresholds.
 
+## The Tests page (built 17 Nov 2026)
+
+**The owner asked for it (17 Nov 2026):** passes they saw in play rarely reached the test list, and the checklist should live
+here rather than in the game ("Companion only", over an in-game window or both). **The owner's rules:** a note from the game is
+evidence, never a pass ("seen working, awaiting your word"), and the owner has the final say on every row.
+
+| Part | How |
+| --- | --- |
+| Reading | `test-pass report --all --json` (phobos-modkit 1.9.0) for every repository of the game with `config/test-evidence.json`: the rows, the game's seen-in-play notes and the verdicts so far |
+| Shelves | Seen working first (a note, no verdict), then waiting, your verdicts not yet in the list, and done; preset buttons with counts |
+| Verdicts | Passed, Failed (with an optional note) and Take it back; one JSON line appended to `test-verdicts/<repository>.jsonl` in this program's local data folder, checked by the host first (a row number, a known verdict, a note under 300 characters, a repository with a test list) |
+| Into the test list | Not by this program: `python scripts/test-pass.py apply --apply` in the repository, run by an agent session or the owner, writes verdicts in |
+
+**The one write.** The first version only read. Recording a verdict is the first thing this program writes, and only in its own
+data folder: never a game, a save or a repository. Pressing Passed or Failed is the confirmation; Take it back undoes it. Agent
+choice, for the owner to revise: no extra "are you sure?" step, since it costs a precise second press and changes nothing outside
+this program.
+
 ## What comes next
 
 **Step 5, the rest of the report viewer.** Forms built from the manifest for the 19 reports that need an input, then the kit's
@@ -276,6 +295,8 @@ advice labelled as such, and colonists, slaves and prisoners together; the atlas
 
 **Agent, with the owner's go-ahead on the order of work:** the stack, the boundary to the tools, the five-band layout as
 borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
+
+**Owner (17 Nov 2026):** the Tests page here rather than in the game; a note never passes a row.
 
 **Agent defaults, owner to revise:** the palette and what each colour means; system fonts; the empty window's wording.
 

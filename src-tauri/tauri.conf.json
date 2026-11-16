@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "D'thorga Companion",
+  "productName": "D’thorga Companion",
   "mainBinaryName": "phobos-companion",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "identifier": "org.phobosdthorga.companion",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -27,7 +27,16 @@
     }
   },
   "bundle": {
-    "active": false,
-    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.ico"]
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "Phobos A. D’thorga",
+    "shortDescription": "One desktop program for every game you mod",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.ico"],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico"
+      }
+    }
   }
 }

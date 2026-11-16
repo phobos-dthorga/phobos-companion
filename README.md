@@ -18,7 +18,24 @@ what you did, and what your saves and logs say, without typing a command.
 - **Not yet tested on screen.** It builds and passes its checks; nobody has judged the window yet.
 - **It only reads.** It does not change a game, a save or a repository.
 - **It needs Python on the PATH**, or `PHOBOS_COMPANION_PYTHON` naming one.
+- **Open it from the Start menu once installed** (see [Install it](#install-it-windows)).
 - **It can't be handed to anyone else yet**: it finds its tools by the folder it was built from, or `PHOBOS_COMPANION_KIT`.
+
+## Install it (Windows)
+
+**Build the setup program, run it once, then open the Companion from the Start menu** (type "companion") or the desktop.
+
+```powershell
+npm ci
+npm run installer
+```
+
+The setup program lands in `%LOCALAPPDATA%\phobos-modkit\target\release\bundle\nsis\`, named
+`D’thorga Companion_<version>_x64-setup.exe`. It installs for your Windows account only and needs no administrator. To update,
+build and run a newer one over the top; to remove it, use Windows' **Installed apps**.
+
+- **Keep this folder where it is.** The installed program reads its tools and your games list from the folder it was built in.
+- In Windows the name is spelled with a curly apostrophe (D’thorga), because the installer cannot hold a straight one.
 
 ## Try it
 

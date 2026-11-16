@@ -34,6 +34,7 @@ colours below; the first version only reads.
 | Report viewer (step 5) | Read any tool's report, chosen from a list, with no typing | Run anything the manifest marks as writing, running or owner-only | Long quoted commands are no longer needed |
 | Newest save and log (step 6) | See them appear by themselves as they play | Nothing | The page stays current without asking |
 | Tests page (built 17 Nov 2026) | See which in-game tests the game has seen working, and pass or fail each with one press, in the moment | Mistake a note for a pass: only their own verdict passes a row | Passes seen in play reach the test list instead of being forgotten |
+| Installer (built 17 Nov 2026) | Open the program from the Start menu or the desktop, like any other | Nothing | No more hunting for the exe in a build folder |
 | Atlas (step 7, built 10 Nov 2026) | See the whole world as the game draws it, in six views with pollution over any of them, find any place and read any tile | Nothing; it only reads | "Why is that place polluted?" and "where should we settle?" become a glance |
 
 ## How it is built
@@ -264,6 +265,21 @@ data folder: never a game, a save or a repository. Pressing Passed or Failed is 
 choice, for the owner to revise: no extra "are you sure?" step, since it costs a precise second press and changes nothing outside
 this program.
 
+## The installer (built 17 Nov 2026)
+
+The owner had trouble finding the program each time and asked for an NSIS setup (17 Nov 2026). Tauri builds one itself
+(`bundle.targets: ["nsis"]`); `npm run installer` runs it with build output outside the repository, as every build here does.
+
+| Choice | What it is | Who chose |
+| --- | --- | --- |
+| NSIS | Tauri's own Windows installer: Start menu and desktop shortcuts, an uninstaller, updates over the top | Owner |
+| For the current user | Installs under the user's local application data, no administrator prompt | Agent |
+| Curly apostrophe in `productName` | Tauri's NSIS script quotes the shortcut name with straight apostrophes, so "D'thorga" broke it (`IsShortcutTarget`, 17 Nov 2026). The window title keeps the straight one | Agent |
+| Not in the gate | The gate still builds with `--no-bundle`; the installer is built on request | Agent |
+
+The installed program still finds the kit and `.local/games.json` by the folder it was built from (see Limits), so it is for the
+PC that built it. The data folder is named by the identifier, which is unchanged, so test verdicts carry over.
+
 ## What comes next
 
 **Step 5, the rest of the report viewer.** Forms built from the manifest for the 19 reports that need an input, then the kit's
@@ -296,7 +312,7 @@ advice labelled as such, and colonists, slaves and prisoners together; the atlas
 **Agent, with the owner's go-ahead on the order of work:** the stack, the boundary to the tools, the five-band layout as
 borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
 
-**Owner (17 Nov 2026):** the Tests page here rather than in the game; a note never passes a row.
+**Owner (17 Nov 2026):** the Tests page here rather than in the game; a note never passes a row; an NSIS installer.
 
 **Agent defaults, owner to revise:** the palette and what each colour means; system fonts; the empty window's wording.
 

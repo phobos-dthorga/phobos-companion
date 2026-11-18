@@ -65,6 +65,8 @@ reads them.
   `src-tauri/src/connections_page.rs`, which checks the repository is one of the game's, a thing's id has the tools' shape, a commit
   is a commit and a search is one line, before the kit sees any of them. Pictures are drawn by `src/lib/connections/`, with the
   geometry in `layout.ts`, tested without a screen.
+- **The owner's keyboard shortcuts are kept in `shortcuts.json` in this program's own folder** (`src-tauri/src/shortcuts.rs`),
+  written only from the Settings page's shortcuts dialog, whole and checked.
 - **Otherwise read-only towards games, saves and repositories.** The only other things the program writes are the owner's test verdicts and, since
   0.9.0, their word on notes no row names ("make a row" or "no row needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks),
   each appended to its own data folder (`test-verdicts/<repository>.jsonl` and `test-key-decisions/<repository>.jsonl`,
@@ -111,6 +113,10 @@ reads them.
   moving when it cannot, always with words, and its latest line of output beneath. A new tool that can take more than a moment
   speaks progress lines (phobos-modkit `docs/manifest.md`, Progress) before its page is built.
 - **Quantities are preset buttons or the game's own kind of control**, not sliders.
+- **A page's common moves have keyboard shortcuts** (owner, 19 Nov 2026): one key each, never two held together, listed once in
+  `src/lib/shortcuts/actions.ts` with its default, and offered by the view while it is on screen (`register` in
+  `src/lib/shortcuts/registry.ts`). They never act in a text box or a part that takes keys itself, and every one can be changed or
+  turned off in Settings. A new page adds its moves there in the same change.
 - **Dark first.**
 - **A new library has to earn it**: a real need now, less upkeep than a small local version, one place it can be replaced from,
   tests that fit, and safe behaviour when it fails. Record it in `THIRD_PARTY_NOTICES.md`.

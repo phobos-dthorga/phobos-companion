@@ -1,5 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import ShortcutsDialog from "./lib/shortcuts/ShortcutsDialog.svelte";
+  import { register, dispatch } from "./lib/shortcuts/registry";
+  import { loadShortcuts, shortcuts } from "./lib/shortcuts/state.svelte";
   import GamesNavigator from "./lib/home/GamesNavigator.svelte";
   import WherePage from "./lib/home/WherePage.svelte";
   import { readHome } from "./lib/home/desktopClient";
@@ -51,7 +54,63 @@
     looking = false;
   }
 
-  onMount(refresh);
+  let helpOpen = $state(false);
+
+  type Page = typeof page;
+  const PAGES: [string, Page][] = [
+    ["page.home", "home"],
+    ["page.reports", "reports"],
+    ["page.atlas", "atlas"],
+    ["page.tests", "tests"],
+    ["page.mods", "mods"],
+    ["page.changes", "changes"],
+    ["page.timeline", "timeline"],
+    ["page.codemap", "codemap"],
+    ["page.settings", "settings"],
+  ];
+
+  /** Moves to the game before or after the one shown, in the list's order. */
+  function stepGame(step: 1 | -1) {
+    if (games.length === 0) return;
+    const index = Math.max(
+      0,
+      games.findIndex((game) => game.id === selected?.id),
+    );
+    chosenId = games[(index + step + games.length) % games.length].id;
+  }
+
+  onMount(() => {
+    void refresh();
+    void loadShortcuts();
+    const unregister = register({
+      scope: "everywhere",
+      inDialog: false,
+      run: {
+        ...Object.fromEntries(
+          PAGES.map(([id, next]) => [id, () => (page = next)]),
+        ),
+        "game.previous": () => stepGame(-1),
+        "game.next": () => stepGame(1),
+        "look-again": () => void refresh(),
+        search: () =>
+          document
+            .querySelector<HTMLElement>("[data-shortcut-search]")
+            ?.focus(),
+        help: () => (helpOpen = true),
+      },
+    });
+    const listen = (event: KeyboardEvent) =>
+      dispatch(
+        event,
+        shortcuts.saved,
+        document.querySelector("dialog[open]") !== null,
+      );
+    window.addEventListener("keydown", listen);
+    return () => {
+      unregister();
+      window.removeEventListener("keydown", listen);
+    };
+  });
 </script>
 
 <div class="shell">
@@ -263,6 +322,10 @@
       </div>
     </aside>
   </div>
+
+  {#if helpOpen}
+    <ShortcutsDialog editable={false} onclose={() => (helpOpen = false)} />
+  {/if}
 
   <footer class="status-bar">
     <span>{t("status-reading-only")}</span>

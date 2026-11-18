@@ -5,6 +5,7 @@
   import ProgressBar from "../shell/ProgressBar.svelte";
   import RichText from "../shell/RichText.svelte";
   import WindowDialog from "../shell/WindowDialog.svelte";
+  import { register } from "../shortcuts/registry";
   import CommitConnections from "../connections/CommitConnections.svelte";
   import { plainText } from "../shell/inline";
   import { heard, started } from "../shell/progress";
@@ -89,8 +90,32 @@
     });
   }
 
+  /** Opens the file before or after the one shown, in the list's order. */
+  function stepFile(step: 1 | -1) {
+    if (!code) return;
+    const files = byKind(code.files).flatMap((group) => group.files);
+    if (files.length === 0) return;
+    const index = Math.max(
+      0,
+      files.findIndex((f) => f.path === chosen),
+    );
+    mode = mode === "connections" ? "changes" : mode;
+    open(files[(index + step + files.length) % files.length]);
+  }
+
   onMount(() => {
     void load();
+    return register({
+      scope: "code",
+      inDialog: true,
+      run: {
+        "code.changes": () => (mode = "changes"),
+        "code.new": () => (mode = "new"),
+        "code.connections": () => (mode = "connections"),
+        "code.next-file": () => stepFile(1),
+        "code.previous-file": () => stepFile(-1),
+      },
+    });
   });
 </script>
 

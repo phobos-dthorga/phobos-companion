@@ -5,6 +5,8 @@
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
   import { askConnections } from "./desktopClient";
+  import { onMount } from "svelte";
+  import { register } from "../shortcuts/registry";
   import {
     curve,
     flowPicture,
@@ -187,9 +189,30 @@
   $effect(() => {
     void load(centreId);
   });
+
+  let frame: HTMLDivElement;
+
+  onMount(() =>
+    register({
+      scope: "connections",
+      inDialog: frame.closest("dialog") !== null,
+      run: {
+        "connections.around": () => choose("radial"),
+        "connections.flow": () => choose("flow"),
+        "connections.list": () => choose("list"),
+        "connections.zoom-in": () => (scale = zoomed(scale, 1)),
+        "connections.zoom-out": () => (scale = zoomed(scale, -1)),
+        "connections.fit": () => {
+          scale = 1;
+          pan = { x: 0, y: 0 };
+        },
+        "connections.back": back,
+      },
+    }),
+  );
 </script>
 
-<div class="connections">
+<div class="connections" bind:this={frame}>
   <div class="controls">
     <div
       class="toggles"

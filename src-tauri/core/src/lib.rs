@@ -12,6 +12,7 @@ pub mod failure;
 pub mod games;
 pub mod git;
 pub mod kit;
+pub mod prefs;
 pub mod process;
 
 use std::path::PathBuf;

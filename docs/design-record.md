@@ -448,6 +448,24 @@ and a press to put anything in the middle.
 **Agent choices, owner to revise:** which connections show at first (all but "holds", which lists a type's every member), 14 members
 fanned per hub, two steps each way in the flow, and .NET's own library left out of the connections.
 
+## Keyboard shortcuts (built 19 Nov 2026, 0.18.0)
+
+**The owner asked for "some common-sense keyboard shortcuts as a default setting, and the ability for the end-user to configure
+those further to their needs within the Settings Dialog somewhere, perhaps as its own modal deeper within".**
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Move between pages, games, views and pictures with one key, and choose those keys |
+| What does it stop them doing? | Reaching for the mouse for every move; and, since nothing acts in a text box and each key can be turned off, a stray key doing something unasked |
+| How does it change the way they work? | The common moves are a key away, and the full list is one more (?) |
+
+| Part | How |
+| --- | --- |
+| The keys (agent's defaults, owner to change) | One key each, never two held at once, so no move needs a chord. Numbers for pages in the bar's order, brackets for games, letters for views, + - 0 for zoom |
+| When a key acts | `registry.ts`: a view offers its moves while it is on screen; a press goes to the newest view offering it; never in a text box or in a part that takes keys itself (the globe), never when something else handled the press, and outside a dialog only while no dialog is open |
+| Changing them | The Settings page's "Change keyboard shortcuts" dialog (owner's idea: a modal deeper within Settings). A key another action has is refused in words; Tab, Enter, Space and Escape are kept |
+| Keeping them | `shortcuts.json` in the program's own folder, holding only what differs from the defaults, so new defaults still arrive; the host checks its shape before writing |
+
 ## What comes next
 
 **Shared code, on the owner's word.** The [shared code audit](shared-code-audit.md) (19 Nov 2026) found code written 3 to 17
@@ -494,6 +512,9 @@ borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
 own folder, with a central settings page to change it; installs recorded from now on, not recovered from backups; the first-class
 citizens written up as a design to edit. **Agent choices:** the marks and their order of strength, ten days at a time, quiet days
 left out of the overview, and paths only on the Settings page for now.
+
+**Owner (19 Nov 2026):** keyboard shortcuts with defaults, changed in a dialog deeper within Settings. **Agent choices:** the
+default keys, one key each.
 
 **Owner (19 Nov 2026):** how code connects, with both layouts, exact C# from built code, C#, XML Defs, Lua and Python, in the code
 viewer and on a Code map page.

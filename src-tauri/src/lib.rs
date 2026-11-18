@@ -12,6 +12,7 @@ mod open_work;
 mod pending;
 mod reports;
 mod settings_page;
+mod shortcuts;
 mod tests_page;
 
 use companion_core::failure::{Failure, FailureCode};
@@ -239,6 +240,20 @@ async fn connections(
     .await
 }
 
+/// The owner's keyboard shortcuts as saved; None before they change any.
+#[tauri::command]
+async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || shortcuts::read(&data)).await
+}
+
+/// Saves the owner's keyboard shortcuts in this program's own folder, once their shape is checked.
+#[tauri::command]
+async fn save_shortcuts(app: tauri::AppHandle, shortcuts: serde_json::Value) -> Result<serde_json::Value, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || shortcuts::save(&data, &shortcuts)).await
+}
+
 /// Starts the program.
 pub fn run() {
     tauri::Builder::default()
@@ -260,7 +275,9 @@ pub fn run() {
             as_it_stood,
             settings_list,
             set_setting,
-            connections
+            connections,
+            read_shortcuts,
+            save_shortcuts
         ])
         .run(tauri::generate_context!())
         .expect("the desktop window could not start");

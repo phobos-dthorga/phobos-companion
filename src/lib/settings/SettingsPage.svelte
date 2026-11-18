@@ -8,6 +8,7 @@
   import type { Failure } from "../shell/types";
   import { readSettings, saveSetting } from "./desktopClient";
   import { byGame, otherRepositories, sendable } from "./presentation";
+  import ShortcutsDialog from "../shortcuts/ShortcutsDialog.svelte";
   import type { Setting, SettingsReading } from "./types";
 
   /**
@@ -23,6 +24,7 @@
   let saving = $state(false);
   let told = $state<{ ok: boolean; words: string } | null>(null);
   let failure = $state<Failure | null>(null);
+  let editingShortcuts = $state(false);
 
   const groups = $derived(
     reading.state === "ready" ? byGame(reading.list.settings) : [],
@@ -94,6 +96,17 @@
 <div class="eyebrow accent">{t("settings-kicker")}</div>
 <h1>{t("settings-title")}</h1>
 <p class="lead">{t("settings-lead")}</p>
+
+<section class="keyboard" aria-labelledby="settings-keyboard-title">
+  <h2 id="settings-keyboard-title">{t("settings-keyboard-title")}</h2>
+  <p class="small">{t("settings-keyboard-body")}</p>
+  <button type="button" class="action" onclick={() => (editingShortcuts = true)}
+    >{t("settings-keyboard-open")}</button
+  >
+</section>
+{#if editingShortcuts}
+  <ShortcutsDialog editable={true} onclose={() => (editingShortcuts = false)} />
+{/if}
 
 <div aria-live="polite">
   {#if told}
@@ -318,5 +331,17 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 6px;
+  }
+
+  .keyboard {
+    margin-block: 6px 18px;
+    padding: 12px 16px;
+    background: var(--colour-surface-raised);
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
+  }
+
+  .keyboard p {
+    margin: 0 0 8px;
   }
 </style>

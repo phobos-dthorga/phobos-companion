@@ -27,6 +27,8 @@ what you did, and what your saves and logs say, without typing a command.
   with what calls it, what it calls, what it belongs to, builds on, overrides, patches and uses; press anything to put it in the
   middle. **C# is exact from what was last built, so build first**; Lua, and C# with nothing built, are read by name and drawn
   dashed.
+- **Keyboard shortcuts, one key each**: 1 to 9 for the pages, [ and ] for the games, ? for the full list. They never act while
+  you type in a box. **Change any of them, or turn them off, under Settings, Change keyboard shortcuts.**
 - **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central
   settings file**, for every repository and game; a repository's own settings still win where they set something.
 - **Anything that takes a while shows a progress bar** with what it is doing, and a count where the work can be counted.

@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-11-19
+
+The owner asked for it (19 November 2026): "some common-sense keyboard shortcuts as a default setting, and the ability for the end-user to configure those further to their needs within the Settings Dialog somewhere, perhaps as its own modal deeper within". Not yet tested on screen.
+
+### Added
+
+- **Keyboard shortcuts, one key each, none needing two keys held together.** Everywhere: 1 to 9 for the pages in the bar's order, [ and ] for the game before and after, R to look again, / to jump to the page's search box, ? for the list of every shortcut. In the code viewer: C what changed, N the code as it now stands, H how it connects, J and K the next and previous file. In a connections picture: A around it, F flow of calls, L as a list, + and - to zoom, 0 to fit, Backspace to go back.
+- **They never act while you type in a box**, or while the Atlas's globe has the keys, and the page shortcuts wait while a dialog is open.
+- **Change keyboard shortcuts**, on the Settings page: a dialog listing every shortcut by where it works. Press Change, then the new key; turn one off; put one back to its default; put them all back; or turn shortcuts off altogether. A key another action has is refused, saying which action has it; Tab, Enter, Space and Escape are kept for moving around and pressing buttons. Every change is kept at once in shortcuts.json in the Companion's own folder.
+
+### Compatibility and limits
+
+- Only what you change is saved; every other key follows the defaults, so a later version's new shortcuts reach you without undoing yours.
 ## [0.17.0] - 2026-11-19
 
 The owner asked for it (19 November 2026): "flow-charts and the such which show relationships between functions, classes, etc. of the code I'm viewing, wherever it might be. Such as when I'm viewing a code-slice that I was sent towards from a CHANGELOG", in the style of their Relationships and Factions screens. Owner's choices: both a radial and a flow layout, exact C# from built code, C#, XML Defs, Lua and Python, in the code viewer and on a page of its own. Not yet tested on screen.

@@ -141,6 +141,7 @@
         <div class="search-row">
           <input
             id="codemap-search"
+            data-shortcut-search
             type="search"
             bind:value={search}
             spellcheck="false"

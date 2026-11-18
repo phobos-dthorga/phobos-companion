@@ -23,6 +23,10 @@ what you did, and what your saves and logs say, without typing a command.
   and every fact day by day beneath. **Read it as it stood** opens any changelog exactly as it was then, marking what has been
   reworded or taken out since. Installs, go-backs, backups, builds and encodings are recorded from 19 Nov 2026 on, in the history
   log in the Companion's own folder.
+- **How code connects**: in the code viewer (How it connects) and on the Code map page, any method, class, Def or function drawn
+  with what calls it, what it calls, what it belongs to, builds on, overrides, patches and uses; press anything to put it in the
+  middle. **C# is exact from what was last built, so build first**; Lua, and C# with nothing built, are read by name and drawn
+  dashed.
 - **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central
   settings file**, for every repository and game; a repository's own settings still win where they set something.
 - **Anything that takes a while shows a progress bar** with what it is doing, and a count where the work can be counted.

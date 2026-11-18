@@ -194,6 +194,95 @@ async function open(page: Page, code: unknown = sampleCode()) {
     kit_status: healthyKit,
     changes_list: sampleChanges,
     entry_code: code as never,
+    "connections:changed": {
+      result: {
+        ok: true,
+        refusal: null,
+        data: {
+          commit: {
+            hash: "4d332ddf0123456789",
+            subject: "Sample Mod 1.3.0: boats",
+          },
+          files: [{ file: "src/Sample/Boat.cs", lines: 8, placed: 8 }],
+          things: [
+            {
+              id: "cs:Sample.Boat.Float",
+              name: "Boat.Float",
+              kind: "method",
+              language: "csharp",
+              file: "src/Sample/Boat.cs",
+              line: 4,
+              end: 9,
+              owner: null,
+              external: false,
+              assembly: null,
+              linesChanged: 6,
+              inGraph: true,
+            },
+            {
+              id: "cs:Sample.Boat.Sink",
+              name: "Boat.Sink",
+              kind: "method",
+              language: "csharp",
+              file: "src/Sample/Boat.cs",
+              line: 12,
+              end: 14,
+              owner: null,
+              external: false,
+              assembly: null,
+              linesChanged: 2,
+              inGraph: false,
+            },
+          ],
+        },
+      },
+    },
+    "connections:around": {
+      result: {
+        ok: true,
+        refusal: null,
+        data: {
+          centre: {
+            id: "cs:Sample.Boat.Float",
+            name: "Boat.Float",
+            kind: "method",
+            language: "csharp",
+            file: "src/Sample/Boat.cs",
+            line: 4,
+            end: 9,
+            owner: null,
+            external: false,
+            assembly: null,
+            connections: 1,
+          },
+          groups: [
+            {
+              relation: "called-by",
+              kind: "calls",
+              outward: false,
+              count: 1,
+              exact: true,
+              nodes: [
+                {
+                  id: "cs:Sample.Harbour.Launch",
+                  name: "Harbour.Launch",
+                  kind: "method",
+                  language: "csharp",
+                  file: "src/Sample/Harbour.cs",
+                  line: 3,
+                  end: 8,
+                  owner: null,
+                  external: false,
+                  assembly: null,
+                  exact: true,
+                  connections: 2,
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Changes", exact: true }).click();
@@ -274,6 +363,30 @@ for (const [name, viewport] of [
         CONTROL_MIN_PX,
       );
       expect(small).toBe(0);
+    });
+
+    test("shows how the code a commit changed connects", async ({ page }) => {
+      await open(page);
+      await page
+        .getByRole("button", {
+          name: "Show the code behind: Sample boats float.",
+        })
+        .click();
+      const viewer = page.getByRole("dialog");
+      await viewer.getByRole("button", { name: "How it connects" }).click();
+      await expect(
+        viewer.getByRole("button", { name: /Boat\.Float\s*6 lines/ }),
+      ).toHaveAttribute("aria-pressed", "true");
+      await expect(viewer).toContainText(
+        "One thing it changed is no longer in the code.",
+      );
+      const picture = viewer.getByRole("group", {
+        name: "How Boat.Float connects, drawn around it",
+      });
+      await expect(
+        picture.getByRole("button", { name: /^Harbour\.Launch, method/ }),
+      ).toBeVisible();
+      await audit(page);
     });
 
     test("can show only the code as it now stands, and closes", async ({

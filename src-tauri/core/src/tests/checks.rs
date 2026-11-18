@@ -72,3 +72,23 @@ fn a_setting_is_a_plain_key_and_one_line_value() {
 fn text_folds_onto_one_line() {
     assert_eq!(one_line("  **Boats float.**\n On water. "), "**Boats float.** On water.");
 }
+
+#[test]
+fn a_node_is_a_language_prefixed_id_on_one_line() {
+    assert!(node_id("cs:Phobos.Framework.TopUp.Seen.Note"));
+    assert!(node_id("def:ThingDef/Lamp"));
+    assert!(node_id("lua:file:lua/lamps.lua"));
+    assert!(node_id("py:tools.keeper.Keeper.run"));
+    assert!(!node_id("--all"));
+    assert!(!node_id("rs:main"));
+    assert!(!node_id("cs:A\nB"));
+    assert!(!node_id(&format!("cs:{}", "x".repeat(MAX_NODE))));
+}
+
+#[test]
+fn a_search_is_one_line_of_a_sane_length() {
+    assert!(search_pattern("*Tick*"));
+    assert!(!search_pattern("   "));
+    assert!(!search_pattern("a\nb"));
+    assert!(!search_pattern(&"x".repeat(MAX_PATTERN + 1)));
+}

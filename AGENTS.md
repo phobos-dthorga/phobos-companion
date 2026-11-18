@@ -61,6 +61,10 @@ reads them.
 - **The Settings page writes one file, the central settings file**, through the kit's `settings set`
   (`src-tauri/src/settings_page.rs`): only when the owner presses Save or Use the default, only while the manifest still calls it
   `writes`, and only a setting the tools list, as one line. It never writes a repository's own settings.
+- **The code viewer's How it connects and the Code map page only read**: the kit's `connections`, through
+  `src-tauri/src/connections_page.rs`, which checks the repository is one of the game's, a thing's id has the tools' shape, a commit
+  is a commit and a search is one line, before the kit sees any of them. Pictures are drawn by `src/lib/connections/`, with the
+  geometry in `layout.ts`, tested without a screen.
 - **Otherwise read-only towards games, saves and repositories.** The only other things the program writes are the owner's test verdicts and, since
   0.9.0, their word on notes no row names ("make a row" or "no row needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks),
   each appended to its own data folder (`test-verdicts/<repository>.jsonl` and `test-key-decisions/<repository>.jsonl`,

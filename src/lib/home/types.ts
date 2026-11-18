@@ -25,6 +25,8 @@ export type PendingRelease = {
 export type GameHome = {
   id: string;
   name: string;
+  /** The repositories on the owner's list for this game, by name. */
+  repositories: string[];
   last_worked: number | null;
   latest: WorkItem[];
   unfinished: Unfinished[];

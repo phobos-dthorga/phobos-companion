@@ -4,6 +4,21 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-11-19
+
+The owner asked for it (19 November 2026): "flow-charts and the such which show relationships between functions, classes, etc. of the code I'm viewing, wherever it might be. Such as when I'm viewing a code-slice that I was sent towards from a CHANGELOG", in the style of their Relationships and Factions screens. Owner's choices: both a radial and a flow layout, exact C# from built code, C#, XML Defs, Lua and Python, in the code viewer and on a page of its own. Not yet tested on screen.
+
+### Added
+
+- **How it connects**, a third view in the code viewer: the things a commit changed (methods, classes, Defs, functions), most-changed first, and how the chosen one connects to the rest. Reached from any changelog entry on the Changes or Mods page, and from any fact on the Timeline.
+- **The connections view**: the thing in the middle, a hub for each kind of connection around it (calls, called by, belongs to, holds, builds on, overrides, patches, patched by, uses, used by, imports) with its count, and its members beyond, as on the Relationships screen. Press anything to put it in the middle; Back returns. Switch to a **flow of calls** (what calls it on the left, what it calls on the right, two steps each way) or **a list**. Filters for each kind with counts, and outside code (the game's, other mods') shown or hidden. Zoom buttons, with drag and scroll as shortcuts. Dashed lines are connections read by name; dashed circles are outside the repository; things the commit changed are ringed.
+- **A Code map page for every game**: what was read and how exactly, a search for any class, method, Def or function, and the connections view from whichever is chosen.
+- Each game now tells the window its repositories, for pages that let you choose one.
+
+### Compatibility and limits
+
+- The pinned phobos-modkit moves from 1.32.0 to 1.33.0, which adds the connections tool. C# is read exactly from what each repository last built, so build first for the newest picture; where nothing is built, it is read from the source by name. Lua is always by name.
+- Checked on more than one game: phobos-rimworld (C# exact from 30 assemblies, XML Defs, Python), phobos-ostranauts (C# exact from 32 assemblies), a Project Zomboid repository (Lua) and phobos-modkit (Python). The first read of a large repository takes about 7 seconds; later ones under a second.
 ## [0.16.0] - 2026-11-19
 
 The owner asked for one shared library for code more than one part of the Companion uses (19 November 2026), after an audit (docs/shared-code-audit.md) found the same code written 3 to 17 times, and in two places already drifting apart. Owner's choices: a library crate for the host rather than a DLL, and all four steps of the audit. Nothing should look or behave differently, except where the copies had drifted. Not yet tested on screen.

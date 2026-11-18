@@ -13,6 +13,7 @@
   import ChangesPage from "./lib/code/ChangesPage.svelte";
   import TimelinePage from "./lib/timeline/TimelinePage.svelte";
   import SettingsPage from "./lib/settings/SettingsPage.svelte";
+  import CodeMapPage from "./lib/connections/CodeMapPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
   import { readKit } from "./lib/shell/desktopClient";
@@ -30,6 +31,7 @@
     | "mods"
     | "changes"
     | "timeline"
+    | "codemap"
     | "settings"
   >("home");
   let now = $state(new Date());
@@ -114,6 +116,13 @@
       <button
         type="button"
         class="page"
+        class:current={page === "codemap"}
+        aria-current={page === "codemap" ? "page" : undefined}
+        onclick={() => (page = "codemap")}>{t("page-codemap")}</button
+      >
+      <button
+        type="button"
+        class="page"
         class:current={page === "settings"}
         aria-current={page === "settings" ? "page" : undefined}
         onclick={() => (page = "settings")}>{t("page-settings")}</button
@@ -180,6 +189,10 @@
         {#key selected.id}
           <TimelinePage game={selected} />
         {/key}
+      {:else if selected && page === "codemap"}
+        {#key selected.id}
+          <CodeMapPage game={selected} />
+        {/key}
       {:else if selected && page === "mods"}
         {#key selected.id}
           <ModsPage game={selected} />
@@ -219,7 +232,9 @@
               ? t("source-body-timeline")
               : page === "settings"
                 ? t("source-body-settings")
-                : t("source-body")}
+                : page === "codemap"
+                  ? t("source-body-codemap")
+                  : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

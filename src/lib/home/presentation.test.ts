@@ -16,6 +16,7 @@ function game(lastWorked: number | null): GameHome {
   return {
     id: "g",
     name: "Game",
+    repositories: [],
     last_worked: lastWorked,
     latest: [],
     unfinished: [],

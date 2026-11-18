@@ -12,6 +12,7 @@ export function sampleHome() {
       {
         id: "first",
         name: "First Sample",
+        repositories: ["first-mods", "first-tools"],
         last_worked: now,
         latest: [
           {
@@ -48,6 +49,7 @@ export function sampleHome() {
       {
         id: "second",
         name: "Second Sample",
+        repositories: ["second-mods"],
         last_worked: now - 40 * DAY,
         latest: [
           {
@@ -64,6 +66,7 @@ export function sampleHome() {
       {
         id: "third",
         name: "Third Sample",
+        repositories: [],
         last_worked: null,
         latest: [],
         unfinished: [],
@@ -105,7 +108,11 @@ export async function mockHost(
         },
       ) => {
         const more = command === "run_report" && (args?.top ?? 0) > 100;
-        const answer = given[more ? "run_report_more" : command];
+        // One command asked several kinds of question (connections) may have an answer for each kind: "command:kind".
+        const kind = (args as { kind?: string } | undefined)?.kind;
+        const answer =
+          (kind ? given[`${command}:${kind}`] : undefined) ??
+          given[more ? "run_report_more" : command];
         for (const message of answer.progress ?? []) {
           args?.onProgress?.onmessage?.(message);
           await pause(answer.pauseMs ?? 0);

@@ -5,6 +5,7 @@
   import ProgressBar from "../shell/ProgressBar.svelte";
   import RichText from "../shell/RichText.svelte";
   import WindowDialog from "../shell/WindowDialog.svelte";
+  import CommitConnections from "../connections/CommitConnections.svelte";
   import { plainText } from "../shell/inline";
   import { heard, started } from "../shell/progress";
   import { readEntryCode } from "./desktopClient";
@@ -173,114 +174,138 @@
           aria-pressed={mode === "new"}
           onclick={() => (mode = "new")}>{t("code-mode-new")}</button
         >
+        <button
+          type="button"
+          class="toggle"
+          aria-pressed={mode === "connections"}
+          onclick={() => (mode = "connections")}
+          >{t("code-mode-connections")}</button
+        >
       </div>
 
-      <div class="body">
-        <nav class="files" aria-label={t("code-files-label")}>
-          {#each byKind(code.files) as group (group.kind)}
-            <h3>{t(KIND_WORDS[group.kind])}</h3>
-            <ul>
-              {#each group.files as candidate (candidate.path)}
-                {@const where = pathParts(candidate.path)}
-                <li>
-                  <button
-                    type="button"
-                    class="file"
-                    aria-pressed={chosen === candidate.path}
-                    onclick={() => open(candidate)}
-                  >
-                    <span class="file-line">
-                      <span class="file-name">{where.name}</span>
-                      <span class="section-tag"
-                        >{t(CHANGE_WORDS[candidate.change])}</span
-                      >
-                    </span>
-                    <span class="file-facts">
-                      <span class="file-folder muted">{where.folder}</span>
-                      {#if !candidate.binary}
-                        <span class="plus"
-                          >{t("code-added-count", {
-                            count: candidate.additions,
-                          })}</span
-                        >
-                        <span class="minus"
-                          >{t("code-removed-count", {
-                            count: candidate.deletions,
-                          })}</span
-                        >
-                      {/if}
-                    </span>
-                  </button>
-                </li>
-              {/each}
-            </ul>
-          {/each}
-        </nav>
-
-        {#if file}
-          <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-          <section
-            class="pane"
-            tabindex="0"
-            aria-label={t("code-pane-label", { path: file.path })}
-          >
-            <h3 class="path">{file.path}</h3>
-            {#if file.oldPath && file.oldPath !== file.path}
-              <p class="muted note">
-                {t("code-renamed-from", { path: file.oldPath })}
-              </p>
-            {/if}
-            {#if file.binary}
-              <p class="note">{t("code-binary")}</p>
-            {:else if file.hunks.length === 0}
-              <p class="note">{t("code-no-lines")}</p>
-            {/if}
-            {#each file.hunks as hunk, hunkIndex (hunkIndex)}
-              {@const first = hunk.lines[0]}
-              <p class="hunk-head">
-                {t("code-hunk", {
-                  line: first?.new ?? first?.old ?? 1,
-                })}
-                {#if hunk.header}
-                  <span class="hunk-where">{hunk.header}</span>
-                {/if}
-              </p>
-              <div class="lines">
-                {#each hunk.lines as line, lineIndex (lineIndex)}
-                  {#if mode === "changes" || line.kind !== "-"}
-                    <div
-                      class="line"
-                      class:added={line.kind === "+"}
-                      class:removed={line.kind === "-"}
+      {#if mode === "connections"}
+        <div class="connections-pane">
+          <CommitConnections
+            {game}
+            repository={request.repository}
+            commit={code.commit?.hash ?? null}
+          />
+        </div>
+      {:else}
+        <div class="body">
+          <nav class="files" aria-label={t("code-files-label")}>
+            {#each byKind(code.files) as group (group.kind)}
+              <h3>{t(KIND_WORDS[group.kind])}</h3>
+              <ul>
+                {#each group.files as candidate (candidate.path)}
+                  {@const where = pathParts(candidate.path)}
+                  <li>
+                    <button
+                      type="button"
+                      class="file"
+                      aria-pressed={chosen === candidate.path}
+                      onclick={() => open(candidate)}
                     >
-                      {#if mode === "changes"}
-                        <span class="number">{line.old ?? ""}</span>
-                      {/if}
-                      <span class="number">{line.new ?? ""}</span>
-                      <span class="mark">{LINE_MARKS[line.kind]}</span>
-                      <!-- eslint-disable-next-line svelte/no-at-html-tags -- escaped by the highlighter, or by hunkHtml -->
-                      <code
-                        >{@html painted[file.path]?.[hunkIndex]?.[lineIndex] ??
-                          ""}</code
-                      >
-                    </div>
-                  {/if}
+                      <span class="file-line">
+                        <span class="file-name">{where.name}</span>
+                        <span class="section-tag"
+                          >{t(CHANGE_WORDS[candidate.change])}</span
+                        >
+                      </span>
+                      <span class="file-facts">
+                        <span class="file-folder muted">{where.folder}</span>
+                        {#if !candidate.binary}
+                          <span class="plus"
+                            >{t("code-added-count", {
+                              count: candidate.additions,
+                            })}</span
+                          >
+                          <span class="minus"
+                            >{t("code-removed-count", {
+                              count: candidate.deletions,
+                            })}</span
+                          >
+                        {/if}
+                      </span>
+                    </button>
+                  </li>
                 {/each}
-              </div>
+              </ul>
             {/each}
-            {#if file.truncated}
-              <p class="note">
-                {t("code-truncated", { lines: FILE_LINE_LIMIT })}
-              </p>
-            {/if}
-          </section>
-        {/if}
-      </div>
+          </nav>
+
+          {#if file}
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <section
+              class="pane"
+              tabindex="0"
+              aria-label={t("code-pane-label", { path: file.path })}
+            >
+              <h3 class="path">{file.path}</h3>
+              {#if file.oldPath && file.oldPath !== file.path}
+                <p class="muted note">
+                  {t("code-renamed-from", { path: file.oldPath })}
+                </p>
+              {/if}
+              {#if file.binary}
+                <p class="note">{t("code-binary")}</p>
+              {:else if file.hunks.length === 0}
+                <p class="note">{t("code-no-lines")}</p>
+              {/if}
+              {#each file.hunks as hunk, hunkIndex (hunkIndex)}
+                {@const first = hunk.lines[0]}
+                <p class="hunk-head">
+                  {t("code-hunk", {
+                    line: first?.new ?? first?.old ?? 1,
+                  })}
+                  {#if hunk.header}
+                    <span class="hunk-where">{hunk.header}</span>
+                  {/if}
+                </p>
+                <div class="lines">
+                  {#each hunk.lines as line, lineIndex (lineIndex)}
+                    {#if mode === "changes" || line.kind !== "-"}
+                      <div
+                        class="line"
+                        class:added={line.kind === "+"}
+                        class:removed={line.kind === "-"}
+                      >
+                        {#if mode === "changes"}
+                          <span class="number">{line.old ?? ""}</span>
+                        {/if}
+                        <span class="number">{line.new ?? ""}</span>
+                        <span class="mark">{LINE_MARKS[line.kind]}</span>
+                        <!-- eslint-disable-next-line svelte/no-at-html-tags -- escaped by the highlighter, or by hunkHtml -->
+                        <code
+                          >{@html painted[file.path]?.[hunkIndex]?.[
+                            lineIndex
+                          ] ?? ""}</code
+                        >
+                      </div>
+                    {/if}
+                  {/each}
+                </div>
+              {/each}
+              {#if file.truncated}
+                <p class="note">
+                  {t("code-truncated", { lines: FILE_LINE_LIMIT })}
+                </p>
+              {/if}
+            </section>
+          {/if}
+        </div>
+      {/if}
     {/if}
   {/if}
 </WindowDialog>
 
 <style>
+  .connections-pane {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
   .entry-rest {
     max-width: 110ch;
     margin: 0;

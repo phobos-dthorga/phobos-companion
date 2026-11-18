@@ -4,6 +4,7 @@
 //! request checks, failures. This file holds the Tauri commands, each one line of delegation on a worker thread.
 
 mod changes_page;
+mod connections_page;
 mod history_page;
 mod home;
 mod installs_page;
@@ -221,6 +222,23 @@ async fn set_setting(
     blocking(move || settings_page::set(&key, value.as_deref(), Some(&hearing(on_progress)))).await
 }
 
+/// One question about how a repository's code connects: summary, find, around, flow or changed. The host checks it first.
+#[tauri::command]
+async fn connections(
+    game: String,
+    repository: String,
+    kind: String,
+    value: Option<String>,
+    depth: Option<u8>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<connections_page::Answer, Failure> {
+    blocking(move || {
+        let question = connections_page::question(&kind, value, depth)?;
+        connections_page::ask(&game, &repository, &question, Some(&hearing(on_progress)))
+    })
+    .await
+}
+
 /// Starts the program.
 pub fn run() {
     tauri::Builder::default()
@@ -241,7 +259,8 @@ pub fn run() {
             timeline,
             as_it_stood,
             settings_list,
-            set_setting
+            set_setting,
+            connections
         ])
         .run(tauri::generate_context!())
         .expect("the desktop window could not start");

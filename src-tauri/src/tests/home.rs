@@ -66,6 +66,7 @@ fn games_sort_by_most_recent_and_undated_last() {
     let entry = |name: &str, last_worked| GameHome {
         id: name.to_owned(),
         name: name.to_owned(),
+        repositories: Vec::new(),
         last_worked,
         latest: Vec::new(),
         unfinished: Vec::new(),

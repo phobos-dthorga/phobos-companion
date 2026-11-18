@@ -62,3 +62,18 @@ pub fn one_line(text: &str) -> String {
 #[cfg(test)]
 #[path = "tests/checks.rs"]
 mod tests;
+
+pub const MAX_NODE: usize = 400;
+pub const MAX_PATTERN: usize = 120;
+
+/// A thing's id in the tools' connections: a language prefix (cs, def, lua, py), a colon, and one line of text.
+pub fn node_id(id: &str) -> bool {
+    let known = ["cs:", "def:", "lua:", "py:"].iter().any(|prefix| id.starts_with(prefix));
+    known && id.len() <= MAX_NODE && !id.contains(['\n', '\r', '\0'])
+}
+
+/// A name or pattern to search for: one line, of a sane length, not empty.
+pub fn search_pattern(text: &str) -> bool {
+    let text = text.trim();
+    !text.is_empty() && text.chars().count() <= MAX_PATTERN && !text.contains(['\n', '\r', '\0'])
+}

@@ -2,7 +2,7 @@ export { formatDay } from "../shell/dates";
 import type { DiffLine, FileChange, FileKind, Hunk } from "./types";
 
 /** How the viewer shows a file: everything that changed, or only the code as it now stands. */
-export type ViewMode = "changes" | "new";
+export type ViewMode = "changes" | "new" | "connections";
 
 /** The kinds of file, in the order they are listed, each with its heading as a message key. */
 export const KIND_WORDS: Record<FileKind, string> = {

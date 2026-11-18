@@ -425,6 +425,29 @@ where everything or at least, most, of these sorts of things are managed".
 first-class citizen (an identity that outlives its label, an address, a history of facts, the same shape in every game), and the
 timeline is built on the first five: Change, Version, Product, Install and Event. Nothing there is a rule until the owner says so.
 
+## How code connects (built 19 Nov 2026, 0.17.0)
+
+**The owner asked for "flow-charts and the such which show relationships between functions, classes, etc. of the code I'm viewing,
+wherever it might be. Such as when I'm viewing a code-slice that I was sent towards from a CHANGELOG"**, pointing at the style of
+their Relationships and Factions screens: one thing in the middle, its connections grouped around it by kind, filters with counts,
+and a press to put anything in the middle.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See how any piece of code fits in (what calls it, what it calls, what it belongs to, builds on, overrides, patches and uses) and walk from one piece to the next, from a changelog entry or a search |
+| What does it stop them doing? | Reading a change as if it stood alone: what a changed method affects, and what affects it, is on screen |
+| How does it change the way they work? | A changelog entry leads to its code and from there to the code around it, in any game, without an editor or a terminal |
+
+| Part | How |
+| --- | --- |
+| The facts (owner's choice: exact C#) | phobos-modkit 1.33.0's `connections`: C# exact from the built assemblies through the kit's assembly reader (calls, fields, inheritance, overrides, Harmony patches), placed in the source by its scanner; XML Defs, Lua and Python by their own rules; every connection marked exact or by name |
+| The layouts (owner's choice: both) | Around it (hubs by kind, up to 14 members fanned beyond each, the rest on a "more" node that opens the list), a flow of calls (columns from callers to callees, two steps each way), and a list for the keyboard and for long groups |
+| Where (owner's choice: both) | The code viewer's third view, starting from the things the commit changed, and the Code map page, starting from a search |
+| Drawing | SVG, from `layout.ts` (tested without a screen). Each kind of connection has a theme colour and always its words and count; dashed lines are by name, dashed circles outside the repository, rings mark what the commit changed. Every node is a button with its words; zoom has buttons; drag and scroll are shortcuts |
+
+**Agent choices, owner to revise:** which connections show at first (all but "holds", which lists a type's every member), 14 members
+fanned per hub, two steps each way in the flow, and .NET's own library left out of the connections.
+
 ## What comes next
 
 **Shared code, on the owner's word.** The [shared code audit](shared-code-audit.md) (19 Nov 2026) found code written 3 to 17
@@ -471,6 +494,9 @@ borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
 own folder, with a central settings page to change it; installs recorded from now on, not recovered from backups; the first-class
 citizens written up as a design to edit. **Agent choices:** the marks and their order of strength, ten days at a time, quiet days
 left out of the overview, and paths only on the Settings page for now.
+
+**Owner (19 Nov 2026):** how code connects, with both layouts, exact C# from built code, C#, XML Defs, Lua and Python, in the code
+viewer and on a Code map page.
 
 **Agent defaults, owner to revise:** the palette and what each colour means; system fonts; the empty window's wording.
 

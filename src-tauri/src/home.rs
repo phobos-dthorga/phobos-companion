@@ -38,6 +38,8 @@ pub struct Problem {
 pub struct GameHome {
     pub id: String,
     pub name: String,
+    /// The repositories on the owner's list for this game, by name, for pages that let the owner choose one.
+    pub repositories: Vec<String>,
     pub last_worked: Option<i64>,
     pub latest: Vec<WorkItem>,
     pub unfinished: Vec<Unfinished>,
@@ -120,6 +122,7 @@ fn assemble(game: &Game, readings: Vec<RepositoryReading>) -> GameHome {
     let mut home = GameHome {
         id: game.id.clone(),
         name: game.name.clone(),
+        repositories: game.repositories.iter().map(|r| r.name.clone()).collect(),
         last_worked: None,
         latest: Vec::new(),
         unfinished: Vec::new(),

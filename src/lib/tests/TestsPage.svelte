@@ -3,6 +3,8 @@
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
+  import ProgressBar from "../shell/ProgressBar.svelte";
+  import { started } from "../shell/progress";
   import {
     readTestLists,
     recordKeyDecision,
@@ -111,7 +113,7 @@
 <p class="status" role="status" aria-live="polite">{said}</p>
 
 {#if reading.state === "reading"}
-  <p class="muted" role="status">{t("tests-reading")}</p>
+  <ProgressBar progress={started()} fallback={t("tests-reading")} />
 {:else if reading.state === "browser"}
   <p class="muted">{t("tests-browser")}</p>
 {:else if reading.state === "failed"}

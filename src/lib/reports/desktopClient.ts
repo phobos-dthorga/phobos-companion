@@ -1,4 +1,6 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
+import { progressChannel } from "../shell/desktopClient";
+import type { OnProgress } from "../shell/progress";
 import type { Failure } from "../shell/types";
 import type {
   CatalogueReading,
@@ -23,6 +25,7 @@ export async function runReport(
   game: string,
   entry: ReportEntry,
   top: number,
+  onProgress?: OnProgress,
 ): Promise<RunReading> {
   try {
     const result = await invoke<ReportResult>("run_report", {
@@ -30,6 +33,7 @@ export async function runReport(
       command: entry.command,
       report: entry.report,
       top,
+      onProgress: progressChannel(onProgress),
     });
     return { state: "ready", result };
   } catch (failure) {

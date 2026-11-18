@@ -7,6 +7,18 @@ and method follow Republic Observatory and OnAir WyrmGrid, without their code or
 ## Working with the owner
 
 - Author: Phobos A. D'thorga (phobosgekko). **Built for humans and dragons first**; agents keep the command line.
+- **It is a viewer for every game and every framework the owner mods, mainly for the owner and maybe for others too** (owner, 19 Nov
+  2026: "any further work designed, changed, or removed with the Companion should be done around the fact that this is going to
+  be a multi-game, multi-framework, viewer"). Before designing, changing or removing anything, ask what it does for a game other
+  than the one in hand, and for a person who is not the owner:
+  - **Build the general thing first.** A page reads what every repository has (a changelog, git history, a config file it opts in
+    with), and a game's own knowledge reaches it through the kit's manifest and adapters. A feature that can only ever serve one
+    game says so in the design record, with the reason.
+  - **Check it on more than one game** before calling it done: run the kit tool behind it on at least two games' repositories and
+    say which in the changelog. A game that cannot use it yet is told so on the page in words, never shown a blank.
+  - **Nothing personal is built in.** No path, game name, repository name or account of the owner's in code, words or tests;
+    they come from `.local/games.json` and the kit's settings. Words name "your mods" and "the repository", not one game's terms.
+  - **Removing is a change for every game.** Before taking a page or a field away, say which games lose it.
 - Practical working slices over speculative frameworks. Explain what works, what was checked and what remains uncertain. Never
   invent hour estimates.
 - **Nothing counts as tested on screen until the owner says so.** A build, a test or a browser audit is not that.
@@ -30,6 +42,8 @@ and method follow Republic Observatory and OnAir WyrmGrid, without their code or
   manifest still calls it `writes` or `runs` (`src-tauri/src/installs_page.rs`). The host checks the repository, the move and every
   name; the kit refuses installing, going back and encoding while the game runs, and never deletes: the install it replaces becomes
   a backup.
+- **The Changes page and the code viewer only read**: the kit's `changes`, through `src-tauri/src/changes_page.rs`, which checks
+  the repository is one of the game's and the changelog a plain path inside it before the kit sees either.
 - **Otherwise read-only towards games, saves and repositories.** The only other things the program writes are the owner's test verdicts and, since
   0.9.0, their word on notes no row names ("make a row" or "no row needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks),
   each appended to its own data folder (`test-verdicts/<repository>.jsonl` and `test-key-decisions/<repository>.jsonl`,
@@ -58,6 +72,15 @@ and method follow Republic Observatory and OnAir WyrmGrid, without their code or
   `src/lib/atlas/globeScene.ts` is the only module that imports three.js, on demand, and `planet.ts` holds the arithmetic,
   tested without a screen. Every move has a button and a key; dragging and the wheel are shortcuts. Colours for a measure
   come from `colours.ts`'s ramps, chosen by the dataviz rules; a category layer brings the kit's own colours.
+- **Code is coloured by one module, from the theme.** `src/lib/code/highlightCore.ts` is the only module that imports highlight.js,
+  on demand, a grammar at a time; the kit names what a file is and never a colour. Token colours are the theme's roles, set in
+  `CodeViewer.svelte`; the "something went wrong" colour is never used for code. A changed line carries a `+` or `−` mark beside it.
+  Code reaches the page escaped (by the highlighter, or by `hunkHtml`): never put file text into `{@html}` any other way.
+- **Work that takes time shows a bar and says what it is doing** (owner, 19 Nov 2026). Every request that runs a tool gives the host
+  a progress channel (`progressChannel` in `src/lib/shell/desktopClient.ts`); the host passes on the tool's progress lines
+  (`kit::run_hearing`), and `ProgressBar.svelte` is the one component that draws them: filled when the tool can count its steps,
+  moving when it cannot, always with words, and its latest line of output beneath. A new tool that can take more than a moment
+  speaks progress lines (phobos-modkit `docs/manifest.md`, Progress) before its page is built.
 - **Quantities are preset buttons or the game's own kind of control**, not sliders.
 - **Dark first.**
 - **A new library has to earn it**: a real need now, less upkeep than a small local version, one place it can be replaced from,

@@ -89,6 +89,8 @@ export type LookOut = { id: string; title: string; version: string };
 export type ModInstall = {
   mod: string;
   name: string;
+  /** The repository copy's changelog, as a path in the repository (kit 1.24.1), for showing an entry's code. */
+  changelog: string;
   state: ModState;
   repository: Copy;
   installed: Copy | null;

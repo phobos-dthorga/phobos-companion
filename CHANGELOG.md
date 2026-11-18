@@ -4,6 +4,29 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-19
+
+Progress bars, a code viewer, and a direction: the owner asked (19 November 2026) for progress bars with status updates wherever they fit, a code viewer "that helps show off all the new and shiny code associated with any particular CHANGELOG item", and for all further work to treat this as a multi-game, multi-framework viewer, mainly for them and maybe for others. Not yet tested on screen.
+
+### Added
+
+- A Changes page, for any game: each repository's changelogs by product, the newest five versions of each with their entries by section, and Show the code beside every entry.
+- The code viewer. It opens over the window with the entry at the top, the commit that wrote it, and the files that commit changed, code first, then data and definitions, words and other files. One file shows at a time with line numbers and a plus or minus mark beside each changed line, coloured by what each piece of code is (C#, XML, Lua, Python, Rust, TypeScript, JSON and more). What changed and The code as it now stands switch between the change and the result. It opens the code itself before its tests.
+- When one commit wrote several entries, the viewer says so and lists the others: git cannot say which lines belong to which entry. An entry in no commit yet shows the uncommitted changes. A picture or other file that isn't text says so.
+- Show the code beside every changelog entry on the Mods page, in both columns and under each backup.
+- Progress bars: reading the Mods page (each mod named as it is compared), the texture check (counting mods), Build (each project of the count), Install and Install everything that changed (projects, then each mod, then its textures), encoding, backups and going back, the Atlas and every report that reads a save (finding it, reading it, working out the answer), the Changes page and the code viewer. Each bar says what is being done, counts where the work can be counted, moves where it cannot, and shows the work's latest line of output beneath.
+
+### Changed
+
+- The pinned phobos-modkit moves from 1.21.0 to 1.24.1: progress lines, the changes tool, and each mod's changelog path.
+- The first new library since the atlas: highlight.js 11.11.1, loaded only when code is first shown, one language at a time.
+
+### Compatibility and limits
+
+- Checked on more than one game: the tool behind the Changes page read the changelogs of RimWorld, Ostranauts, Project Zomboid and Kenshi repositories, and the Companion's own. The Farming Simulator 25 repositories keep no CHANGELOG.md, so their page says there is nothing to list.
+- A changelog needs nothing new written in it. The view is as sharp as the commit is small.
+- A file's change is cut at 600 lines and says so.
+
 ## [0.11.0] - 2026-11-18
 
 The Mods page's second round, from the owner's four asks after seeing the first (18 November 2026): compile as needed, refresh after, see before and after ahead of a compile, and know whether textures need encoding before the next launch, since "it's always a wild guess currently". Their picks: check and fix textures, a Build button and Install everything that changed, all four before-and-after extras, and a Before you play strip. Not yet tested on screen.

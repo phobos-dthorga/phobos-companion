@@ -318,6 +318,73 @@ four before-and-after extras (files, settings, test rows, side by side); a Befor
 move (unlike verdicts, these change the game's files); the backup button stays live while the game runs, since it only reads; lists
 show eight entries before Show all.
 
+## Who it is for, and what follows from that (owner, 19 Nov 2026)
+
+**"A multi-game, multi-framework, viewer to primarily help me but maybe also others."** From this version on, every design,
+change and removal starts from that sentence (the rule is in `AGENTS.md`):
+
+| It means | So |
+| --- | --- |
+| Every game the owner mods, and every modding framework under them | A page reads what any repository has (a changelog, git, a file it opts in with). A game's own knowledge comes through the kit's manifest and adapters, never from the window or the host |
+| Mainly the owner | Their questions lead: where was I, what changed, is it installed, is it ready to play |
+| Maybe others | Nothing personal is built in; words say "your mods", not one game's terms; and what stands between this and another person is written down, below |
+
+**Where each page stands (19 Nov 2026):**
+
+| Page | Any game today? | What a game needs |
+| --- | --- | --- |
+| Home ("where was I?") | Yes | A repository on the list |
+| Changes and the code viewer | Yes | A `CHANGELOG.md` in the repository |
+| Tests | Yes, where a repository keeps a test list | `config/test-evidence.json` |
+| Mods (install, back up, go back) | Where the kit has an install adapter: RimWorld today | `config/installs.json`, and `games/<game>/installs.py` in the kit |
+| Mods (textures) | RimWorld only | A kit command with the `textures` surface; most games have no such step |
+| Reports, Atlas | RimWorld only | Kit commands for that game's saves and logs |
+
+**What stands between this and another person** (not built; listed so later work does not add to it): the program finds the kit
+and the games list by the folder it was built in; it needs Python; and each repository's install is that repository's own script.
+
+## Progress (built 19 Nov 2026)
+
+**The owner asked for "progress bars along with some associated status updates, wherever the two would be appropriate".**
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See that work is going on, what it is doing right now, and how far along it is where that can be counted |
+| What does it stop them doing? | Guessing whether the program has hung, and pressing a button twice |
+| How does it change the way they work? | A build or an install can be left to run and glanced at |
+
+| Part | How |
+| --- | --- |
+| The tools | phobos-modkit 1.24.0 writes progress lines to standard error when asked: a label, a step and a count where it can count, and a line of the work's own output. A repository's own build or install speaks the same lines |
+| The host | `kit::run_hearing` reads them as they come and sends each through the channel the window gave with its request |
+| The window | `ProgressBar.svelte`: filled by the count, or moving when there is none; words always; the latest output line beneath. With reduced motion the moving band stands still |
+
+A step being worked on counts as not yet done, so step 3 of 23 shows two done (agent choice). Where a tool says nothing, the bar
+moves under the page's own words.
+
+## The Changes page and the code viewer (built 19 Nov 2026)
+
+**The owner asked for "a code-viewer that helps show off all the new and shiny code associated with any particular CHANGELOG
+item", with "a decent syntax highlighter", for the Mods page "and for any future modding I do as well".**
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Read what changed in any game's mods, and open the code behind any entry: which files, which lines, coloured by language |
+| What does it stop them doing? | Mistaking a whole commit for one entry's work: when a commit wrote several entries, the viewer says so and names them |
+| How does it change the way they work? | A changelog becomes a way in to the code, without a terminal or a git client |
+
+| Part | How |
+| --- | --- |
+| Finding the code | phobos-modkit `changes entry`: the oldest commit in which the entry's opening appears in its changelog (`git log -S`), then that commit's diff. Nothing extra is written in a changelog |
+| Order | Code, then data and definitions, then words, then other files; the viewer opens the code file with the most new lines, and the code before its tests |
+| Colours | highlight.js, one grammar at a time, through `highlightCore.ts`; each side of a change is coloured whole so a comment or string over several lines reads right; token colours are the theme's roles |
+| Two views | What changed (both line numbers, a plus or minus mark) and The code as it now stands (removed lines left out) |
+
+**What it means for how changes are written** (the owner asked to be told): nothing has to change. The view is as sharp as the
+commit is small, so one commit that wrote eight entries shows the same 21 files for each of them. The owner's choices, cheapest
+first: leave commits as they are (agent default); commit separate changes separately where they are separate anyway (the rule
+added to phobos-rimworld's AGENTS.md, no extra cost); or one commit for every entry, which costs a full check run each.
+
 ## What comes next
 
 **Step 5, the rest of the report viewer.** Forms built from the manifest for the 19 reports that need an input, then the kit's

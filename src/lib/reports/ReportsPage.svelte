@@ -3,6 +3,8 @@
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
+  import ProgressBar from "../shell/ProgressBar.svelte";
+  import { heard, started } from "../shell/progress";
   import ReportView from "./ReportView.svelte";
   import { readCatalogue, runReport } from "./desktopClient";
   import { DEFAULT_TOP, hasMoreRows, MAX_TOP, nextTop } from "./presentation";
@@ -14,6 +16,7 @@
   let open = $state<ReportEntry | null>(null);
   let run = $state<RunReading | null>(null);
   let running = $state(false);
+  let progress = $state(started());
   let top = $state(DEFAULT_TOP);
   let copied = $state<"idle" | "done" | "failed">("idle");
   let heading = $state<HTMLElement | undefined>();
@@ -31,9 +34,12 @@
     open = entry;
     top = limit;
     running = true;
+    progress = started();
     copied = "idle";
     if (opening) run = null;
-    const answer = await runReport(game.id, entry, limit);
+    const answer = await runReport(game.id, entry, limit, (message) => {
+      if (mine === request) progress = heard(progress, message);
+    });
     if (mine !== request) return;
     run = answer;
     running = false;
@@ -83,10 +89,8 @@
   <h1 tabindex="-1" bind:this={heading}>{open.question}</h1>
 
   {#if running}
-    <p class="working" role="status">
-      {t("reports-running")}
-      <span class="muted">{t("reports-running-note")}</span>
-    </p>
+    <ProgressBar {progress} fallback={t("reports-running")} />
+    <p class="muted">{t("reports-running-note")}</p>
   {/if}
 
   {#if run?.state === "failed"}
@@ -156,16 +160,6 @@
     align-items: center;
     gap: 8px 12px;
     margin-bottom: 20px;
-  }
-
-  .working {
-    margin-bottom: 12px;
-    color: var(--colour-comparison);
-    font-weight: 600;
-  }
-
-  .working span {
-    font-weight: 400;
   }
 
   ul {

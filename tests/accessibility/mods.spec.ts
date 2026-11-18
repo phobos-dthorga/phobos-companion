@@ -65,6 +65,7 @@ function sampleInstalls(running: string[]) {
             {
               mod: "SampleMod",
               name: "Sample Mod",
+              changelog: "mods/SampleMod/CHANGELOG.md",
               state: "behind",
               repository: copy("repository", "1.3.0"),
               installed: copy("installed", "1.2.0", {
@@ -154,6 +155,7 @@ function sampleInstalls(running: string[]) {
             {
               mod: "OtherMod",
               name: "Other Sample",
+              changelog: "mods/OtherMod/CHANGELOG.md",
               state: "up-to-date",
               repository: copy("repository", "0.4.0"),
               installed: copy("installed", "0.4.0"),
@@ -221,11 +223,42 @@ async function open(page: Page, running: string[] = []) {
     mod_installs: sampleInstalls(running),
     texture_status: sampleTextures(running),
     move_install: {
+      pauseMs: 400,
+      progress: [
+        {
+          label: "Building Sample",
+          step: 1,
+          of: 3,
+          detail: "building src/Sample/Sample.csproj",
+        },
+      ],
       result: {
         ok: true,
         title: "Backed up SampleMod",
         refusal: null,
         data: { backup: "SampleMod-20261118-210000" },
+      },
+    },
+    entry_code: {
+      result: {
+        found: true,
+        refusal: null,
+        command_line: "",
+        code: {
+          repository: "first-mods",
+          changelog: "mods/SampleMod/CHANGELOG.md",
+          commit: {
+            hash: "4d332ddf0123456789",
+            time: "2026-11-18T08:52:50+00:00",
+            author: "Sample Author",
+            subject: "Sample Mod 1.3.0: boats",
+          },
+          writtenWith: [],
+          files: [],
+          filesLeftOut: 0,
+          additions: 0,
+          deletions: 0,
+        },
       },
     },
   });
@@ -360,6 +393,42 @@ for (const [name, viewport] of [
       await expect(
         strip.getByRole("button", { name: "Build now" }),
       ).toBeEnabled();
+    });
+
+    test("a move shows how far along it is, with its latest line", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("region", { name: "Before you play" })
+        .getByRole("button", { name: "Build now" })
+        .click();
+      const bar = page.locator("main").getByRole("progressbar").first();
+      await expect(bar).toHaveAttribute("aria-valuemax", "3");
+      await expect(page.locator("main")).toContainText("Building Sample");
+      await expect(page.locator("main")).toContainText("1 of 3");
+      await expect(page.locator("main")).toContainText(
+        "building src/Sample/Sample.csproj",
+      );
+      await audit(page);
+      await expect(page.locator("main p.status")).toContainText(
+        "Backed up SampleMod",
+      );
+    });
+
+    test("an entry opens the code behind it", async ({ page }) => {
+      await open(page);
+      await page
+        .getByRole("article", { name: "Sample Mod" })
+        .getByRole("button", {
+          name: "Show the code behind: Sample boats float.",
+        })
+        .click();
+      const viewer = page.getByRole("dialog");
+      await expect(viewer).toContainText("Sample Mod 1.3.0: boats");
+      await expect(viewer).toContainText(
+        "This commit changed nothing but the changelog itself.",
+      );
     });
   });
 }

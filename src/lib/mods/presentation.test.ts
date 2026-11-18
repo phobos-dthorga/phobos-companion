@@ -86,6 +86,7 @@ function mod(extra: Partial<ModInstall> = {}): ModInstall {
   return {
     mod: "Sample",
     name: "Sample",
+    changelog: "mods/Sample/CHANGELOG.md",
     state: "up-to-date",
     repository: { ...copy, kind: "repository" },
     installed: copy,

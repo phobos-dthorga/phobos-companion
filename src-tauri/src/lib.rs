@@ -1,6 +1,7 @@
 //! The desktop host: it reads what the window shows. The window only presents.
 
 mod changelog;
+mod changes_page;
 mod failure;
 mod games;
 mod git;
@@ -14,6 +15,15 @@ mod tests_page;
 
 use failure::{Failure, FailureCode};
 use tauri::Manager;
+use tauri::ipc::Channel;
+
+/// Sends each progress line of a working tool to the window, through the channel the window gave with its request. A window that
+/// has gone away is not an error: the work carries on.
+fn hearing(channel: Channel<kit::Progress>) -> impl Fn(kit::Progress) + Sync {
+    move |progress| {
+        let _ = channel.send(progress);
+    }
+}
 
 /// How the tools are: read on a worker thread, since it starts a process.
 #[tauri::command]
@@ -46,10 +56,13 @@ async fn run_report(
     command: String,
     report: Option<String>,
     top: u32,
+    on_progress: Channel<kit::Progress>,
 ) -> Result<reports::ReportResult, Failure> {
-    tauri::async_runtime::spawn_blocking(move || reports::run(&game, &command, report.as_deref(), top))
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    tauri::async_runtime::spawn_blocking(move || {
+        reports::run(&game, &command, report.as_deref(), top, Some(&hearing(on_progress)))
+    })
+    .await
+    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
 /// This program's own data folder, where the owner's test verdicts are kept.
@@ -102,8 +115,11 @@ async fn record_key_decision(
 
 /// Each repository's mods: installed, in the repository and in backups, with what moving between them gains or loses.
 #[tauri::command]
-async fn mod_installs(game: String) -> Result<Vec<installs_page::RepositoryInstalls>, Failure> {
-    tauri::async_runtime::spawn_blocking(move || installs_page::read(&game))
+async fn mod_installs(
+    game: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<Vec<installs_page::RepositoryInstalls>, Failure> {
+    tauri::async_runtime::spawn_blocking(move || installs_page::read(&game, Some(&hearing(on_progress))))
         .await
         .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
@@ -116,9 +132,10 @@ async fn move_install(
     action: String,
     mods: Vec<String>,
     backup: Option<String>,
+    on_progress: Channel<kit::Progress>,
 ) -> Result<installs_page::MoveResult, Failure> {
     tauri::async_runtime::spawn_blocking(move || {
-        installs_page::make_move(&game, &repository, &action, &mods, backup.as_deref())
+        installs_page::make_move(&game, &repository, &action, &mods, backup.as_deref(), Some(&hearing(on_progress)))
     })
     .await
     .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
@@ -126,18 +143,54 @@ async fn move_install(
 
 /// Whether any active mod's textures need encoding before the next launch; None for a game with no texture check.
 #[tauri::command]
-async fn texture_status(game: String) -> Result<Option<serde_json::Value>, Failure> {
-    tauri::async_runtime::spawn_blocking(move || installs_page::read_textures(&game))
+async fn texture_status(
+    game: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<Option<serde_json::Value>, Failure> {
+    tauri::async_runtime::spawn_blocking(move || installs_page::read_textures(&game, Some(&hearing(on_progress))))
         .await
         .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
 /// Encodes the named mods' textures, once the owner has confirmed.
 #[tauri::command]
-async fn encode_textures(game: String, mods: Vec<String>) -> Result<installs_page::MoveResult, Failure> {
-    tauri::async_runtime::spawn_blocking(move || installs_page::encode_textures(&game, &mods))
+async fn encode_textures(
+    game: String,
+    mods: Vec<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<installs_page::MoveResult, Failure> {
+    tauri::async_runtime::spawn_blocking(move || {
+        installs_page::encode_textures(&game, &mods, Some(&hearing(on_progress)))
+    })
+    .await
+    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
+/// What each repository's changelogs say changed lately, for any game.
+#[tauri::command]
+async fn changes_list(
+    game: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<Vec<changes_page::RepositoryChanges>, Failure> {
+    tauri::async_runtime::spawn_blocking(move || changes_page::read(&game, Some(&hearing(on_progress))))
         .await
         .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
+/// The code behind one changelog entry: the commit that wrote it, and what that commit changed.
+#[tauri::command]
+async fn entry_code(
+    game: String,
+    repository: String,
+    changelog: String,
+    text: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<changes_page::EntryCode, Failure> {
+    tauri::async_runtime::spawn_blocking(move || {
+        changes_page::entry_code(&game, &repository, &changelog, &text, Some(&hearing(on_progress)))
+    })
+    .await
+    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
 /// Starts the program.
@@ -154,7 +207,9 @@ pub fn run() {
             mod_installs,
             move_install,
             texture_status,
-            encode_textures
+            encode_textures,
+            changes_list,
+            entry_code
         ])
         .run(tauri::generate_context!())
         .expect("the desktop window could not start");

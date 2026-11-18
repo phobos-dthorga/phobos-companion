@@ -75,7 +75,13 @@ export function sampleHome() {
   };
 }
 
-type Answer = { result?: unknown; failure?: unknown };
+/** What the stand-in host answers: a result or a failure, after any progress messages, each sent a pause apart. */
+type Answer = {
+  result?: unknown;
+  failure?: unknown;
+  progress?: unknown[];
+  pauseMs?: number;
+};
 
 /** Stands in for the desktop host, through the same hooks Tauri provides. */
 export async function mockHost(
@@ -85,10 +91,25 @@ export async function mockHost(
   await page.addInitScript((given) => {
     const scope = window as unknown as Record<string, unknown>;
     scope.isTauri = true;
+    let callbacks = 0;
+    const pause = (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
     scope.__TAURI_INTERNALS__ = {
-      invoke: async (command: string, args?: { top?: number }) => {
+      // A progress channel registers its callback here; the stand-in reaches the channel through the request instead.
+      transformCallback: () => ++callbacks,
+      invoke: async (
+        command: string,
+        args?: {
+          top?: number;
+          onProgress?: { onmessage?: (message: unknown) => void };
+        },
+      ) => {
         const more = command === "run_report" && (args?.top ?? 0) > 100;
         const answer = given[more ? "run_report_more" : command];
+        for (const message of answer.progress ?? []) {
+          args?.onProgress?.onmessage?.(message);
+          await pause(answer.pauseMs ?? 0);
+        }
         if (answer.failure) throw answer.failure;
         return answer.result;
       },

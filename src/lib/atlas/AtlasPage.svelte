@@ -11,6 +11,8 @@
   import { DEFAULT_TOP } from "../reports/presentation";
   import type { ReportEntry, RunReading } from "../reports/types";
   import FailurePanel from "../shell/FailurePanel.svelte";
+  import ProgressBar from "../shell/ProgressBar.svelte";
+  import { heard, started } from "../shell/progress";
 
   const GLOBE = "globe";
 
@@ -25,9 +27,11 @@
     | { state: "ran"; entry: ReportEntry; run: RunReading };
 
   let page = $state<State>({ state: "reading" });
+  let progress = $state(started());
 
   async function load() {
     page = { state: "reading" };
+    progress = started();
     const catalogue = await readCatalogue(game.id);
     if (catalogue.state === "browser") return (page = { state: "browser" });
     if (catalogue.state === "failed")
@@ -36,7 +40,9 @@
     const entry = catalogue.entries.find((e) => e.surface === GLOBE);
     if (!entry) return (page = { state: "none" });
     page = { state: "running", entry };
-    const run = await runReport(game.id, entry, DEFAULT_TOP);
+    const run = await runReport(game.id, entry, DEFAULT_TOP, (message) => {
+      progress = heard(progress, message);
+    });
     page = { state: "ran", entry, run };
   }
 
@@ -55,10 +61,8 @@
 <h1>{t("atlas-title", { game: game.name })}</h1>
 
 {#if page.state === "reading" || page.state === "running"}
-  <p class="working" role="status">
-    {t("atlas-reading")}
-    <span class="muted">{t("atlas-reading-note")}</span>
-  </p>
+  <ProgressBar {progress} fallback={t("atlas-reading")} />
+  <p class="muted">{t("atlas-reading-note")}</p>
 {:else if page.state === "browser"}
   <p class="muted">{t("atlas-browser")}</p>
 {:else if page.state === "none"}
@@ -93,15 +97,5 @@
   .lead {
     max-width: 64ch;
     font-size: var(--type-lead);
-  }
-
-  .working {
-    margin-bottom: 12px;
-    color: var(--colour-comparison);
-    font-weight: 600;
-  }
-
-  .working span {
-    font-weight: 400;
   }
 </style>

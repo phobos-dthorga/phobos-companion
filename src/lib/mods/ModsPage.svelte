@@ -2,7 +2,16 @@
   import { onMount } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
+  import CodeViewer from "../code/CodeViewer.svelte";
+  import type { EntryRequest } from "../code/types";
   import FailurePanel from "../shell/FailurePanel.svelte";
+  import ProgressBar from "../shell/ProgressBar.svelte";
+  import {
+    heard,
+    started,
+    type OnProgress,
+    type ProgressState,
+  } from "../shell/progress";
   import {
     encodeTextures,
     makeMove,
@@ -74,6 +83,28 @@
   let said = $state("");
   let output = $state<string[]>([]);
   let showAll = $state<Record<string, boolean>>({});
+  /** How far along the first read, the texture check and the move in hand are; a move's is null when none is being made. */
+  let readProgress = $state(started());
+  let textureProgress = $state(started());
+  let working = $state<ProgressState | null>(null);
+  /** The changelog entry whose code is being shown, over the page. */
+  let viewing = $state<EntryRequest | null>(null);
+
+  /** Where a mod's changelog entries are found, for showing their code. */
+  type Source = { repository: string; mod: ModInstall };
+
+  const hearWork: OnProgress = (message) => {
+    if (working !== null) working = heard(working, message);
+  };
+
+  function showCode(source: Source, entry: Entry) {
+    viewing = {
+      repository: source.repository,
+      changelog: source.mod.changelog,
+      product: source.mod.name,
+      entry,
+    };
+  }
 
   const repositories = $derived(
     reading.state === "ready" ? reading.repositories : [],
@@ -90,10 +121,16 @@
     if (!quiet) {
       reading = { state: "reading" };
       textures = { state: "reading" };
+      readProgress = started();
+      textureProgress = started();
     }
     const [nextInstalls, nextTextures] = await Promise.all([
-      readInstalls(game.id),
-      readTextures(game.id),
+      readInstalls(game.id, (message) => {
+        readProgress = heard(readProgress, message);
+      }),
+      readTextures(game.id, (message) => {
+        textureProgress = heard(textureProgress, message);
+      }),
     ]);
     if (!quiet || nextInstalls.state === "ready") reading = nextInstalls;
     if (!quiet || nextTextures.state === "ready") textures = nextTextures;
@@ -137,24 +174,37 @@
   /** Builds every project. It writes only inside the repository, so it needs no question and no closed game. */
   async function build() {
     busy = "build";
-    said = t(MOVE_WORDS.build.working);
+    said = "";
+    working = started(t(MOVE_WORDS.build.working));
     output = [];
     for (const repository of repositories.filter((r) => r.status.canBuild)) {
       hear(
-        await makeMove(game.id, repository.repository, "build", [], null),
+        await makeMove(
+          game.id,
+          repository.repository,
+          "build",
+          [],
+          null,
+          hearWork,
+        ),
         repository.repository,
       );
     }
-    busy = null;
+    working = started(t("mods-working-reading"));
     await load(true);
+    working = null;
+    busy = null;
   }
 
   async function confirm() {
     if (asking === null) return;
     const now = asking;
     busy = now.place;
+    said = "";
     if (now.kind === "mod") {
-      said = t(MOVE_WORDS[now.move].working, { name: now.mod.name });
+      working = started(
+        t(MOVE_WORDS[now.move].working, { name: now.mod.name }),
+      );
       hear(
         await makeMove(
           game.id,
@@ -162,11 +212,12 @@
           now.move,
           [now.mod.mod],
           now.backup?.backup ?? null,
+          hearWork,
         ),
         now.mod.name,
       );
     } else if (now.kind === "all") {
-      said = t("mods-working-install-all");
+      working = started(t("mods-working-install-all"));
       for (const group of now.groups) {
         hear(
           await makeMove(
@@ -175,23 +226,27 @@
             "install",
             group.mods.map((m) => m.mod),
             null,
+            hearWork,
           ),
           group.repository,
         );
       }
     } else {
-      said = t("mods-working-encode", { count: now.mods.length });
+      working = started(t("mods-working-encode", { count: now.mods.length }));
       hear(
         await encodeTextures(
           game.id,
           now.mods.map((m) => m.folderName),
+          hearWork,
         ),
         t("mods-textures-name"),
       );
     }
-    busy = null;
     asking = null;
+    working = started(t("mods-working-reading"));
     await load(true);
+    working = null;
+    busy = null;
   }
 
   /** Puts the keyboard on the confirmation when it opens, so it is read out and answered first. */
@@ -232,6 +287,7 @@
   list: Entry[],
   summaries: Record<string, string>,
   key: string,
+  source: Source,
 )}
   {@const shown = showAll[key] ? list : list.slice(0, FIRST_ENTRIES)}
   {#each groupByVersion(shown, summaries) as group (group.version)}
@@ -249,6 +305,14 @@
             >{/if}
           {#if parts.lead}<strong>{parts.lead}</strong>{/if}
           {parts.rest}
+          <button
+            type="button"
+            class="action code-button"
+            aria-label={t("code-show-for", { entry: entry.lead })}
+            onclick={() => showCode(source, entry)}
+          >
+            {t("code-show")}
+          </button>
         </li>
       {/each}
     </ul>
@@ -296,21 +360,21 @@
   {/if}
 {/snippet}
 
-{#snippet deltaView(delta: Delta, key: string)}
+{#snippet deltaView(delta: Delta, key: string, source: Source)}
   {@render saveNotes(delta)}
   {#if delta.gain.length > 0}
     <h5 class="gain">
       <span aria-hidden="true">+</span>
       {t("mods-gain", { count: delta.gain.length })}
     </h5>
-    {@render entryList(delta.gain, delta.summaries, `${key}/gain`)}
+    {@render entryList(delta.gain, delta.summaries, `${key}/gain`, source)}
   {/if}
   {#if delta.lose.length > 0}
     <h5 class="lose">
       <span aria-hidden="true">−</span>
       {t("mods-lose", { count: delta.lose.length })}
     </h5>
-    {@render entryList(delta.lose, delta.summaries, `${key}/lose`)}
+    {@render entryList(delta.lose, delta.summaries, `${key}/lose`, source)}
   {/if}
   {@render reworded(delta)}
   {#if delta.gain.length === 0 && delta.lose.length === 0 && delta.reworded.length === 0}
@@ -423,7 +487,7 @@
   {/if}
 {/snippet}
 
-{#snippet nowColumn(mod: ModInstall, key: string)}
+{#snippet nowColumn(mod: ModInstall, key: string, source: Source)}
   {@const record = mod.installed?.record ?? null}
   <section class="column" aria-label={t("mods-now")}>
     <h4>{t("mods-now")}</h4>
@@ -454,14 +518,19 @@
         <span aria-hidden="true">−</span>
         {t("mods-lose", { count: mod.update.lose.length })}
       </h5>
-      {@render entryList(mod.update.lose, mod.update.summaries, `${key}/lose`)}
+      {@render entryList(
+        mod.update.lose,
+        mod.update.summaries,
+        `${key}/lose`,
+        source,
+      )}
     {:else}
       <p class="muted small">{t("mods-lose-nothing")}</p>
     {/if}
   </section>
 {/snippet}
 
-{#snippet afterColumn(mod: ModInstall, key: string)}
+{#snippet afterColumn(mod: ModInstall, key: string, source: Source)}
   <section class="column" aria-label={t("mods-after")}>
     <h4>{t("mods-after")}</h4>
     <p class="column-version">{mod.repository.version || "?"}</p>
@@ -481,7 +550,12 @@
         <span aria-hidden="true">+</span>
         {t("mods-gain", { count: mod.update.gain.length })}
       </h5>
-      {@render entryList(mod.update.gain, mod.update.summaries, `${key}/gain`)}
+      {@render entryList(
+        mod.update.gain,
+        mod.update.summaries,
+        `${key}/gain`,
+        source,
+      )}
     {/if}
     {#if unlogged(mod)}
       <p class="small unlogged">
@@ -555,7 +629,11 @@
 <h1>{t("mods-title", { game: game.name })}</h1>
 <p class="lead">{t("mods-lead")}</p>
 
-<p class="status" role="status" aria-live="polite">{said}</p>
+{#if working !== null}
+  <ProgressBar progress={working} fallback={t("mods-working")} />
+{:else}
+  <p class="status" role="status" aria-live="polite">{said}</p>
+{/if}
 {#if output.length > 0}
   <details class="output">
     <summary>{t("mods-output")}</summary>
@@ -564,7 +642,7 @@
 {/if}
 
 {#if reading.state === "reading"}
-  <p class="muted" role="status">{t("mods-reading")}</p>
+  <ProgressBar progress={readProgress} fallback={t("mods-reading")} />
 {:else if reading.state === "browser"}
   <p class="muted">{t("mods-browser")}</p>
 {:else if reading.state === "failed"}
@@ -585,7 +663,16 @@
                 ? "◆"
                 : "●"}</span
           >
-          <span class="check-words">{t(check.words, check.args)}</span>
+          {#if check.words === "mods-pre-textures-reading"}
+            <span class="check-bar">
+              <ProgressBar
+                progress={textureProgress}
+                fallback={t(check.words, check.args)}
+              />
+            </span>
+          {:else}
+            <span class="check-words">{t(check.words, check.args)}</span>
+          {/if}
           {#if check.action}
             <button
               type="button"
@@ -668,8 +755,14 @@
             {:else if hasChanges(mod)}
               {@render saveNotes(mod.update)}
               <div class="columns">
-                {@render nowColumn(mod, key)}
-                {@render afterColumn(mod, key)}
+                {@render nowColumn(mod, key, {
+                  repository: repository.repository,
+                  mod,
+                })}
+                {@render afterColumn(mod, key, {
+                  repository: repository.repository,
+                  mod,
+                })}
               </div>
             {:else}
               <p class="muted small">
@@ -751,7 +844,10 @@
                       </div>
                       {#if showAll[backupKey]}
                         <div class="backup-delta">
-                          {@render deltaView(backup.delta, backupKey)}
+                          {@render deltaView(backup.delta, backupKey, {
+                            repository: repository.repository,
+                            mod,
+                          })}
                         </div>
                       {/if}
                       {#if asking?.place === backupKey}
@@ -812,6 +908,16 @@
     </section>
   {/if}
   <p class="muted how">{t("mods-how")}</p>
+{/if}
+
+{#if viewing}
+  {#key `${viewing.changelog}/${viewing.entry.text}`}
+    <CodeViewer
+      game={game.id}
+      request={viewing}
+      onclose={() => (viewing = null)}
+    />
+  {/key}
 {/if}
 
 <style>
@@ -1013,6 +1119,16 @@
 
   .entries li + li {
     margin-top: 4px;
+  }
+
+  .code-button {
+    display: block;
+    margin-block: 4px 8px;
+  }
+
+  .check-bar {
+    flex: 1;
+    min-width: 240px;
   }
 
   .files li {

@@ -1,4 +1,6 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
+import { progressChannel } from "../shell/desktopClient";
+import type { OnProgress } from "../shell/progress";
 import type { Failure } from "../shell/types";
 import type {
   InstallsReading,
@@ -11,11 +13,15 @@ import type {
 } from "./types";
 
 /** Every repository of a game that says where its mods are installed, read by the host through the kit. */
-export async function readInstalls(game: string): Promise<InstallsReading> {
+export async function readInstalls(
+  game: string,
+  onProgress?: OnProgress,
+): Promise<InstallsReading> {
   if (!isTauri()) return { state: "browser" };
   try {
     const repositories = await invoke<RepositoryInstalls[]>("mod_installs", {
       game,
+      onProgress: progressChannel(onProgress),
     });
     return { state: "ready", repositories };
   } catch (failure) {
@@ -30,6 +36,7 @@ export async function makeMove(
   action: Move,
   mods: string[],
   backup: string | null,
+  onProgress?: OnProgress,
 ): Promise<MoveReading> {
   try {
     const result = await invoke<MoveResult>("move_install", {
@@ -38,6 +45,7 @@ export async function makeMove(
       action,
       mods,
       backup,
+      onProgress: progressChannel(onProgress),
     });
     return { state: "ready", result };
   } catch (failure) {
@@ -46,11 +54,15 @@ export async function makeMove(
 }
 
 /** Whether any active mod's textures need encoding; "none" for a game the tools have no texture check for. */
-export async function readTextures(game: string): Promise<TexturesReading> {
+export async function readTextures(
+  game: string,
+  onProgress?: OnProgress,
+): Promise<TexturesReading> {
   if (!isTauri()) return { state: "browser" };
   try {
     const status = await invoke<TexturesStatus | null>("texture_status", {
       game,
+      onProgress: progressChannel(onProgress),
     });
     return status ? { state: "ready", status } : { state: "none" };
   } catch (failure) {
@@ -62,9 +74,14 @@ export async function readTextures(game: string): Promise<TexturesReading> {
 export async function encodeTextures(
   game: string,
   mods: string[],
+  onProgress?: OnProgress,
 ): Promise<MoveReading> {
   try {
-    const result = await invoke<MoveResult>("encode_textures", { game, mods });
+    const result = await invoke<MoveResult>("encode_textures", {
+      game,
+      mods,
+      onProgress: progressChannel(onProgress),
+    });
     return { state: "ready", result };
   } catch (failure) {
     return { state: "failed", failure: failure as Failure };

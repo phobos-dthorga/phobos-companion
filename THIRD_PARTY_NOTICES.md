@@ -14,6 +14,7 @@ first release anyone else can install.
 | [Fluent](https://projectfluent.org/) (`@fluent/bundle`) | Apache-2.0 | Words in one catalogue, with counts said properly |
 | [serde](https://serde.rs/), `serde_json` | MIT OR Apache-2.0 | Reading the tools' answers |
 | [Apache ECharts](https://echarts.apache.org/) (`echarts` 6.1.0), with its `zrender` 6.1.0 and `tslib` 2.3.0 | Apache-2.0; BSD-3-Clause; 0BSD | Drawing the tools' charts (read 10 November 2026). Only `src/lib/charts/echartsCore.ts` imports it, and only when a report has a chart |
+| [highlight.js](https://highlightjs.org/) (`highlight.js` 11.11.1) | BSD-3-Clause | Colouring code in the code viewer by what each piece is (read 19 November 2026). Only `src/lib/code/highlightCore.ts` imports it, its core and one grammar at a time, and only when code is first shown. Chosen over a larger highlighter because it needs no web assembly or theme files of its own, covers every language the owner's mods use, and gives plain class names the theme can colour |
 | [three.js](https://threejs.org/) (`three` 0.186.1), with its addons for orbit controls and wide lines | MIT | Drawing the atlas's globe (read 10 November 2026). Only `src/lib/atlas/globeScene.ts` imports it, and only when the atlas opens |
 
 ## Only to build and check it

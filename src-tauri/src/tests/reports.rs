@@ -123,8 +123,8 @@ fn the_pinned_kit_offers_reports_for_rimworld() {
 #[test]
 #[ignore = "needs a real game on this PC"]
 fn runs_a_real_report_on_this_pc() {
-    let result = run("rimworld", "rimworld-startup", Some("summary"), 100).unwrap();
+    let result = run("rimworld", "rimworld-startup", Some("summary"), 100, None).unwrap();
     assert!(result.report["title"].is_string());
     assert!(result.command_line.ends_with("rimworld-startup summary --top 100"));
-    assert_eq!(run("rimworld", "steam-publish", Some("upload"), 100).unwrap_err().code, FailureCode::Refused);
+    assert_eq!(run("rimworld", "steam-publish", Some("upload"), 100, None).unwrap_err().code, FailureCode::Refused);
 }

@@ -16,6 +16,10 @@ what you did, and what your saves and logs say, without typing a command.
 - **A RimWorld save holds only half of a colonist's mood.** The mood report counts the remembered events exactly and gives the
   rest (rooms, pain, beliefs) as one figure; see the [design record](docs/design-record.md#colony-mood-built-10-nov-2026).
 - **Not yet tested on screen.** It builds and passes its checks; nobody has judged the window yet.
+- **The Changes page lists what each changelog says changed, for any game**, and **Show the code** opens the code behind an
+  entry: the commit that wrote it, its files with code first, coloured by language. Nothing extra is written in a changelog for
+  this. **A commit that wrote several entries is shown whole**, with the others named.
+- **Anything that takes a while shows a progress bar** with what it is doing, and a count where the work can be counted.
 - **The Mods page starts with "Before you play"**: ready to play, or what needs building, installing or encoding first, each
   with its button. Each mod shows what it has now beside what installing would bring (changelog entries, files, settings, things
   to look out for in play), and what going back to each backup would take away. **Its buttons change your installed mods and

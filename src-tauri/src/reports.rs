@@ -34,11 +34,17 @@ pub fn catalogue(game: &str) -> Result<Vec<ReportEntry>, Failure> {
 }
 
 /// Runs one report, after checking again that it is one the window may run.
-pub fn run(game: &str, command: &str, report: Option<&str>, top: u32) -> Result<ReportResult, Failure> {
+pub fn run(
+    game: &str,
+    command: &str,
+    report: Option<&str>,
+    top: u32,
+    listener: Option<kit::Listener>,
+) -> Result<ReportResult, Failure> {
     let manifest = kit::read_manifest()?;
     let options = find_runnable(&manifest, game, command, report)?;
     let arguments = arguments(command, report, options, top);
-    let answer = kit::run(command, &arguments)?;
+    let answer = kit::run_hearing(command, &arguments, listener)?;
     Ok(ReportResult { report: answer["report"].clone(), command_line: command_line(command, report, options, top) })
 }
 

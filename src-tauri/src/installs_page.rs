@@ -60,10 +60,10 @@ fn config_path(path: &Path) -> PathBuf {
 }
 
 /// Every repository of a game that opts in, read through the kit.
-pub fn read(game: &str) -> Result<Vec<RepositoryInstalls>, Failure> {
+pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<Vec<RepositoryInstalls>, Failure> {
     let mut found = Vec::new();
     for repository in with_installs(game)? {
-        let answer = kit::run(TOOL, &status_arguments(&repository.path))?;
+        let answer = kit::run_hearing(TOOL, &status_arguments(&repository.path), listener)?;
         refusal_as_failure(&answer)?;
         found.push(RepositoryInstalls {
             status: answer["data"].clone(),
@@ -96,6 +96,7 @@ pub fn make_move(
     action: &str,
     mods: &[String],
     backup: Option<&str>,
+    listener: Option<kit::Listener>,
 ) -> Result<MoveResult, Failure> {
     let refused = |detail: String| Failure::new(FailureCode::Refused, detail);
     let found = with_installs(game)?
@@ -107,7 +108,7 @@ pub fn make_move(
     }
     allowed_by_manifest(&kit::read_manifest()?, TOOL, action).map_err(refused)?;
     let arguments = move_arguments(&found.path, action, mods, backup).map_err(refused)?;
-    Ok(result_of(&kit::run(TOOL, &arguments)?))
+    Ok(result_of(&kit::run_hearing(TOOL, &arguments, listener)?))
 }
 
 /// The kit's manifest still says this report writes or runs (never owner-only, never one it does not have).
@@ -222,19 +223,19 @@ fn with_settings(mut arguments: Vec<String>, settings: Option<PathBuf>) -> Vec<S
 }
 
 /// Whether any active mod's textures need encoding; None when the game has no texture check.
-pub fn read_textures(game: &str) -> Result<Option<Value>, Failure> {
+pub fn read_textures(game: &str, listener: Option<kit::Listener>) -> Result<Option<Value>, Failure> {
     let manifest = kit::read_manifest()?;
     let Some(command) = textures_command(&manifest, game) else {
         return Ok(None);
     };
     let arguments = with_settings(vec![command.clone(), STATUS.to_owned()], settings_file(game)?);
-    let answer = kit::run(&command, &arguments)?;
+    let answer = kit::run_hearing(&command, &arguments, listener)?;
     refusal_as_failure(&answer)?;
     Ok(Some(answer["data"].clone()))
 }
 
 /// Encodes the named mods' textures, after the same kind of checks as the moves.
-pub fn encode_textures(game: &str, mods: &[String]) -> Result<MoveResult, Failure> {
+pub fn encode_textures(game: &str, mods: &[String], listener: Option<kit::Listener>) -> Result<MoveResult, Failure> {
     let refused = |detail: String| Failure::new(FailureCode::Refused, detail);
     let manifest = kit::read_manifest()?;
     let command = textures_command(&manifest, game).ok_or_else(|| refused(format!("{game} has no texture check")))?;
@@ -244,7 +245,7 @@ pub fn encode_textures(game: &str, mods: &[String]) -> Result<MoveResult, Failur
     }
     let mut arguments = vec![command.clone(), ENCODE.to_owned()];
     arguments.extend(mod_arguments(mods).map_err(refused)?);
-    Ok(result_of(&kit::run(&command, &with_settings(arguments, settings_file(game)?))?))
+    Ok(result_of(&kit::run_hearing(&command, &with_settings(arguments, settings_file(game)?), listener)?))
 }
 
 #[cfg(test)]

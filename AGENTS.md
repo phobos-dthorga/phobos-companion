@@ -7,8 +7,10 @@ and method follow Republic Observatory and OnAir WyrmGrid, without their code or
 ## Rules shared by every repository
 
 **The owner's rules for every game, mod and tool repository live once, in phobos-modkit's `rules/` folder** (owner, 19 Nov 2026).
-**Read [`external/phobos-modkit/rules/every-session.md`](external/phobos-modkit/rules/every-session.md) at the start of every
-session**; `CLAUDE.md` imports it. This file adds what is particular to this program. A rule that would hold in another
+**Read `external/phobos-modkit/rules/every-session.md` at the start of every session**; `CLAUDE.md` imports it. (On GitHub that
+folder is a pointer to the other repository:
+[read the rules there](https://github.com/phobos-dthorga/phobos-modkit/blob/main/rules/every-session.md).) This file adds what is
+particular to this program. A rule that would hold in another
 repository too goes there, on the owner's word (`external/phobos-modkit/rules/README.md` says how), and a rule here that the
 shared rules now state is dropped in the commit that moves the pin. The gate's "shared rules" step checks this repository still
 reads them.

@@ -8,6 +8,7 @@ mod connections_page;
 mod history_page;
 mod home;
 mod installs_page;
+mod logs_page;
 mod open_work;
 mod pending;
 mod reports;
@@ -240,6 +241,12 @@ async fn connections(
     .await
 }
 
+/// The game's log, grouped and compared with the run before, by the game's own log reader; says when the game has none yet.
+#[tauri::command]
+async fn read_log(game: String, on_progress: Channel<kit::Progress>) -> Result<logs_page::LogReading, Failure> {
+    blocking(move || logs_page::read(&game, Some(&hearing(on_progress)))).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -276,6 +283,7 @@ pub fn run() {
             settings_list,
             set_setting,
             connections,
+            read_log,
             read_shortcuts,
             save_shortcuts
         ])

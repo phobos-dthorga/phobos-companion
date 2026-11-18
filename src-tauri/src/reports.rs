@@ -66,7 +66,7 @@ fn runnable(report: &Value) -> bool {
         && !options_of(report).iter().any(|option| option["required"].as_bool().unwrap_or(true))
 }
 
-fn entries(manifest: &Value, game: &str) -> Vec<ReportEntry> {
+pub(crate) fn entries(manifest: &Value, game: &str) -> Vec<ReportEntry> {
     commands_of(manifest)
         .iter()
         .filter(|command| command["game"].as_str() == Some(game))
@@ -81,7 +81,7 @@ fn entries(manifest: &Value, game: &str) -> Vec<ReportEntry> {
         .collect()
 }
 
-fn find_runnable<'a>(
+pub(crate) fn find_runnable<'a>(
     manifest: &'a Value,
     game: &str,
     command: &str,
@@ -96,7 +96,7 @@ fn find_runnable<'a>(
     if runnable(found) { Ok(options_of(found)) } else { Err(refused()) }
 }
 
-fn option<'a>(options: &'a [Value], name: &str) -> Option<&'a Value> {
+pub(crate) fn option<'a>(options: &'a [Value], name: &str) -> Option<&'a Value> {
     options.iter().find(|option| option["name"].as_str() == Some(name))
 }
 
@@ -106,7 +106,7 @@ fn base(command: &str, report: Option<&str>) -> Vec<String> {
     arguments
 }
 
-fn arguments(command: &str, report: Option<&str>, options: &[Value], top: u32) -> Vec<String> {
+pub(crate) fn arguments(command: &str, report: Option<&str>, options: &[Value], top: u32) -> Vec<String> {
     let mut arguments = base(command, report);
     arguments.push(JSON_OPTION.to_owned());
     if option(options, JSON_OPTION).is_some_and(|json| json["kind"].as_str() != Some(FLAG_KIND)) {
@@ -125,7 +125,7 @@ fn top_arguments(options: &[Value], top: u32) -> Vec<String> {
 }
 
 /// The same report as a person would run it, for pasting into a console or a session.
-fn command_line(command: &str, report: Option<&str>, options: &[Value], top: u32) -> String {
+pub(crate) fn command_line(command: &str, report: Option<&str>, options: &[Value], top: u32) -> String {
     let mut words = vec!["python".to_owned(), "-m".to_owned(), "phobos_modkit".to_owned()];
     words.extend(base(command, report));
     words.extend(top_arguments(options, top));

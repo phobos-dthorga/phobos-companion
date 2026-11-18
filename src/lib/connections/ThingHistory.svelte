@@ -6,7 +6,7 @@
   import { formatWhen } from "../shell/dates";
   import { plainText } from "../shell/inline";
   import type { Failure } from "../shell/types";
-  import { openDialog } from "../navigation/navigation.svelte";
+  import { go, openDialog } from "../navigation/navigation.svelte";
   import { askConnections } from "./desktopClient";
   import type { History } from "./types";
 
@@ -52,6 +52,27 @@
         : asked.answer.ok
           ? { state: "ready", data: asked.answer.data }
           : { state: "refused", reason: asked.answer.refusal ?? "" };
+  }
+
+  /** Each changelog a commit wrote in, once: the products whose backups from before it may undo it. */
+  function productsOf(commit: History["commits"][number]) {
+    const seen = new Map<string, string>();
+    for (const entry of commit.entries)
+      if (!seen.has(entry.changelog)) seen.set(entry.changelog, entry.product);
+    return [...seen].map(([changelog, product]) => ({ changelog, product }));
+  }
+
+  /** The Mods page, at that product's newest backup from before the commit (cross-links L1). */
+  function backupsBefore(
+    commit: History["commits"][number],
+    changelog: string,
+  ) {
+    go({
+      page: "mods",
+      game,
+      focus: { repository, changelog, before: commit.time },
+      dialog: null,
+    });
   }
 
   function show(
@@ -122,6 +143,17 @@
                 </li>
               {/each}
             </ul>
+            <div class="befores">
+              {#each productsOf(commit) as found (found.changelog)}
+                <button
+                  type="button"
+                  class="action"
+                  onclick={() => backupsBefore(commit, found.changelog)}
+                >
+                  {t("connections-history-before", { product: found.product })}
+                </button>
+              {/each}
+            </div>
           {:else}
             <button
               type="button"
@@ -214,6 +246,12 @@
   .entry:hover,
   .entry:focus-visible {
     border-color: var(--colour-accent);
+  }
+
+  .befores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .product {

@@ -27,7 +27,13 @@ what you did, and what your saves and logs say, without typing a command.
   with what calls it, what it calls, what it belongs to, builds on, overrides, patches and uses; press anything to put it in the
   middle. **C# is exact from what was last built, so build first**; Lua, and C# with nothing built, are read by name and drawn
   dashed.
-- **Keyboard shortcuts, one key each**: 1 to 9 for the pages, [ and ] for the games, ? for the full list. They never act while
+- **Back and Forward work across everything** (the buttons under the page bar, the , and . keys, or the mouse's side buttons),
+  and **/ opens Go to anything**: one search over pages, code, changelog entries, test rows, settings and reports. **Copy address**
+  gives a link to where you are, to paste back in later.
+- **The Logs page reads the game's last log** (RimWorld's today): messages grouped, what is new since the run before, and each
+  one's stack. **Find in the code** opens a step of the stack on the Code map, where **Show its history** lists the changes that
+  touched it, and **backups from before this** leads to the Mods page's backup from before a change.
+- **Keyboard shortcuts, one key each**: 1 to 9 for the first nine pages and G for Logs, [ and ] for the games, ? for the full list. They never act while
   you type in a box. **Change any of them, or turn them off, under Settings, Change keyboard shortcuts.**
 - **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central
   settings file**, for every repository and game; a repository's own settings still win where they set something.

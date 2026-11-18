@@ -450,6 +450,34 @@ for (const [name, viewport] of [
       );
     });
 
+    test("an address naming a changelog and a moment marks the newest backup from before it", async ({
+      page,
+    }) => {
+      await open(page);
+      const visit = async (before: string) => {
+        await page.getByRole("button", { name: "Go to anything" }).click();
+        await page
+          .getByLabel("Search for anything, or paste an address")
+          .fill(
+            `dthorga://mods/first?repository=first-mods&changelog=${encodeURIComponent(
+              "mods/SampleMod/CHANGELOG.md",
+            )}&before=${encodeURIComponent(before)}`,
+          );
+        await page.getByRole("button", { name: /Open this address/ }).click();
+      };
+      await visit("2026-11-18T09:00:00+00:00");
+      const card = page.getByRole("article", { name: "Sample Mod" });
+      await expect(card).toContainText(
+        "The newest backup from before the change you came from",
+      );
+      await expect(card.locator("li.backup.before")).toContainText("1.1.0");
+      await audit(page);
+      await visit("2026-11-01T09:00:00+00:00");
+      await expect(card).toContainText(
+        "No backup of this mod is older than the change you came from",
+      );
+    });
+
     test("an entry opens the code behind it", async ({ page }) => {
       await open(page);
       await page

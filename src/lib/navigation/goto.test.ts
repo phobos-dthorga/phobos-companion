@@ -8,7 +8,7 @@ import {
   rank,
   type Candidate,
 } from "./goto";
-import { addressOf, place } from "./place";
+import { addressOf, PAGE_NAMES, place } from "./place";
 
 const changes = [
   {
@@ -101,7 +101,7 @@ describe("go to anything", () => {
         node: "cs:Sample.Boat.Tick",
       }),
     );
-    expect(fromPages("sample", (p) => p)).toHaveLength(9);
+    expect(fromPages("sample", (p) => p)).toHaveLength(PAGE_NAMES.length);
   });
 
   it("matches every word, best first, a few of each kind", () => {

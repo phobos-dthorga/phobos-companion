@@ -339,6 +339,11 @@ for (const [name, viewport] of [
       await expect(
         history.getByRole("button", { name: "See this commit's code" }),
       ).toBeVisible();
+      await expect(
+        history.getByRole("button", {
+          name: "Boats: backups from before this",
+        }),
+      ).toBeVisible();
       await audit(page);
       expect(await smallControls(page, "main")).toBe(0);
       await history

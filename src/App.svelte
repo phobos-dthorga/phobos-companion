@@ -34,6 +34,7 @@
   import TimelinePage from "./lib/timeline/TimelinePage.svelte";
   import SettingsPage from "./lib/settings/SettingsPage.svelte";
   import CodeMapPage from "./lib/connections/CodeMapPage.svelte";
+  import LogsPage from "./lib/logs/LogsPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
   import ProgressBar from "./lib/shell/ProgressBar.svelte";
@@ -88,6 +89,7 @@
     ["page.timeline", "timeline"],
     ["page.codemap", "codemap"],
     ["page.settings", "settings"],
+    ["page.logs", "logs"],
   ];
 
   /** Moves to the game before or after the one shown, in the list's order. */
@@ -223,6 +225,13 @@
         aria-current={page === "settings" ? "page" : undefined}
         onclick={() => goPage("settings")}>{t("page-settings")}</button
       >
+      <button
+        type="button"
+        class="page"
+        class:current={page === "logs"}
+        aria-current={page === "logs" ? "page" : undefined}
+        onclick={() => goPage("logs")}>{t("page-logs")}</button
+      >
     </nav>
   </header>
 
@@ -319,6 +328,10 @@
         {#key selected.id}
           <CodeMapPage game={selected} />
         {/key}
+      {:else if selected && page === "logs"}
+        {#key selected.id}
+          <LogsPage game={selected} />
+        {/key}
       {:else if selected && page === "mods"}
         {#key selected.id}
           <ModsPage game={selected} />
@@ -360,7 +373,9 @@
                 ? t("source-body-settings")
                 : page === "codemap"
                   ? t("source-body-codemap")
-                  : t("source-body")}
+                  : page === "logs"
+                    ? t("source-body-logs")
+                    : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

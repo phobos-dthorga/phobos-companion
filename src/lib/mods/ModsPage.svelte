@@ -289,15 +289,45 @@
     return null;
   }
 
-  /** A mod the place names is scrolled to and outlined once the mods are read. */
-  const focusMod = $derived(
-    here().focus.repository && here().focus.mod
-      ? `mod-${here().focus.repository}/${here().focus.mod}`
-      : null,
-  );
+  /**
+   * A mod the place names is scrolled to and outlined once the mods are read: by its folder (`mod`) or by its changelog (a
+   * thing's history names the changelog an entry is in). With `before`, a moment, its newest backup from before then is opened
+   * and marked: the way back from a change that broke something (cross-links L1).
+   */
+  const focusKey = $derived.by(() => {
+    const focus = here().focus;
+    if (!focus.repository) return null;
+    if (focus.mod) return `${focus.repository}/${focus.mod}`;
+    if (!focus.changelog) return null;
+    const mod = repositories
+      .find((r) => r.repository === focus.repository)
+      ?.status.mods.find((m) => m.changelog === focus.changelog);
+    return mod ? `${focus.repository}/${mod.mod}` : null;
+  });
+  const before = $derived(here().focus.before ?? null);
+
+  /** The newest backup taken before the moment the place names, for the focused mod. */
+  function backupBefore(key: string, mod: ModInstall): Backup | null {
+    if (!before || key !== focusKey) return null;
+    const moment = Date.parse(before);
+    if (Number.isNaN(moment)) return null;
+    return (
+      mod.backups
+        .filter((b) => b.taken && Date.parse(b.taken) < moment)
+        .sort(
+          (a, b) => Date.parse(b.taken ?? "") - Date.parse(a.taken ?? ""),
+        )[0] ?? null
+    );
+  }
+
   $effect(() => {
-    if (focusMod && reading.state === "ready")
-      untrack(() => void reveal(focusMod));
+    if (focusKey && reading.state === "ready") {
+      const target = before ? `${focusKey}/before` : focusKey;
+      untrack(async () => {
+        if (before) showAll[`${focusKey}/backups`] = true;
+        if (!(await reveal(`mod-${target}`))) await reveal(`mod-${focusKey}`);
+      });
+    }
   });
 
   onMount(() => {
@@ -783,6 +813,7 @@
     <ol class="mods">
       {#each repository.status.mods as mod (mod.mod)}
         {@const key = `${repository.repository}/${mod.mod}`}
+        {@const fromBefore = backupBefore(key, mod)}
         {@const words = STATE_WORDS[mod.state]}
         {@const backupsShown = showAll[`${key}/backups`]
           ? mod.backups
@@ -849,8 +880,13 @@
               {@render question()}
             {/if}
 
+            {#if before && key === focusKey && !fromBefore}
+              <p class="before-note" id={`mod-${key}/before`}>
+                {t("mods-before-none", { when: formatWhen(before) })}
+              </p>
+            {/if}
             {#if mod.backups.length > 0}
-              <details class="backups">
+              <details class="backups" open={fromBefore !== null || undefined}>
                 <summary>
                   {t("mods-backups", {
                     count: mod.backups.length,
@@ -862,7 +898,18 @@
                 <ol class="backup-list">
                   {#each backupsShown as backup (backup.backup)}
                     {@const backupKey = `${key}/${backup.backup}`}
-                    <li class="backup">
+                    <li
+                      class="backup"
+                      class:before={backup === fromBefore}
+                      id={backup === fromBefore
+                        ? `mod-${key}/before`
+                        : undefined}
+                    >
+                      {#if backup === fromBefore}
+                        <p class="before-note">
+                          {t("mods-before-this", { when: formatWhen(before) })}
+                        </p>
+                      {/if}
                       <p>
                         <strong>{formatWhen(backup.taken)}</strong>
                         <span>· {backup.version || "?"}</span>
@@ -1281,6 +1328,18 @@
     padding: 10px 12px;
     border: 1px solid var(--colour-line);
     border-radius: 4px;
+  }
+
+  .backup.before {
+    border-color: var(--colour-accent);
+    border-width: 2px;
+  }
+
+  .before-note {
+    margin: 0 0 6px;
+    font-size: var(--type-small);
+    font-weight: 600;
+    color: var(--colour-accent);
   }
 
   .backup p {

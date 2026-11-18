@@ -12,6 +12,7 @@ export const PAGE_NAMES = [
   "timeline",
   "codemap",
   "settings",
+  "logs",
 ] as const;
 
 export type PageName = (typeof PAGE_NAMES)[number];

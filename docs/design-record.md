@@ -468,6 +468,10 @@ those further to their needs within the Settings Dialog somewhere, perhaps as it
 
 ## What comes next
 
+**Cross-links, on the owner's word.** [Cross-links](cross-links.md) (19 Nov 2026) lists proposals for joining what the pages
+already show: a way back and a search first, then links such as a log error to its code to the change that broke it. Nothing there
+is built until the owner chooses.
+
 **Shared code, on the owner's word.** The [shared code audit](shared-code-audit.md) (19 Nov 2026) found code written 3 to 17
 times across the host and the window, and proposes a `companion-core` library crate for the host and a grown `src/lib/shell/` for
 the window. Nothing is moved until the owner says.

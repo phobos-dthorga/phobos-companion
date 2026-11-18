@@ -1,0 +1,61 @@
+# Cross-links: joining what the Companion already shows
+
+**Status (19 Nov 2026):** proposals only, **nothing built**. The owner asked for ideas for "further improving the Companion,
+particularly in ways of cross-linking more things together", then asked for them written down first. Every item is the agent's
+proposal; the owner chooses which are built, and in what order.
+
+## Read this first (gotchas)
+
+- **Links go on the things already on screen, as small chips, not on new pages.** The page bar holds nine pages; the one new page
+  proposed here is Logs (L1).
+- **The way back comes before more links** (N1 to N3). Jumping from a Timeline fact to its code to the Code map loses your place
+  today; more links would make that worse.
+- **One thing in the middle stays the rule for pictures.** A picture of a whole repository at once would be an unreadable tangle.
+- **Some links serve one game until its tools exist for others**, and say so in the table (the Companion's rule: a feature that
+  serves one game says so, and a game that cannot use it yet is told in words, never shown a blank).
+- **Each item still answers the three questions when it is built** (what it lets the person do, what it stops, how it changes the
+  way they work), in `design-record.md`. The tables below give the first of the three, briefly.
+
+## N: finding your way (build first)
+
+| # | Proposal | What it lets you do | Needs |
+| --- | --- | --- | --- |
+| N1 | **Back and Forward across pages**: a trail of where you have been, dialogs included, with a key for each (Alt+Left, Alt+Right as defaults, changeable like every shortcut) | Follow a link and return exactly where you were | The window only: page, game and open dialog kept as one trail |
+| N2 | **Go to anything**: one search box (the `/` key) over changelog entries, methods and classes, Defs, test rows, timeline facts, settings and reports, each result labelled by its kind | Reach a thing by name without knowing which page holds it | The tools' existing searches (`connections find`, `changes list`, `settings list`), asked together |
+| N3 | **An address for every thing**: a link that can be copied and pasted back in, to a version, an entry, a method, a Def, a test row, a fact | Keep and share a pointer; every link below is one of these | The "address" property in phobos-modkit's `rules/first-class.md`, given one written form |
+
+## L: the links worth most
+
+| # | Proposal | What it lets you do | Needs | Games |
+| --- | --- | --- | --- | --- |
+| L1 | **Log error to code to change to backup**: a Logs page showing the tools' triage of the game's log; a stack line naming a method opens it in the Code map; from there, the changelog entry that last changed it (L2), and from that, "go back to the backup before it" on the Mods page | Walk the whole "what broke it?" chain without a terminal | The kit's log triage as a page; L2; the Mods page taking a mod and a moment | RimWorld first (its log triage exists); others when theirs do |
+| L2 | **A thing's own history**: on any Code map node, when it last changed and every changelog entry that touched it | See why a method is as it is, and what else changed with it | A kit addition: commits that touched a thing's lines, joined to the entries those commits wrote | Every game with a changelog |
+| L3 | **Test rows joined to code and changes**: on a changelog entry, the test rows waiting on it; on a method, the row that watches it; on a test row, the code that notes it and the version that brought it | Go from "what needs testing" to "what it is" and back | A kit addition: which code notes which key (the note's key is a string in the call) | Repositories with a test list (phobos-rimworld today) |
+| L4 | **"What was I running then?"**: pick any moment on the Timeline and see every mod's installed version at that moment; later, tie each save to that set | Know which versions a save, a fault or a memory belongs to | Only the history log (kept from 19 Nov 2026), so nothing new from the kit | Every game whose installs are recorded |
+| L5 | **Upstream and patch badges**: a Code map node says when the game or mod method it patches changed in the last update, and how many other mods patch the same method | See risk where it sits, before an update bites | The kit's `rimworld-upstream` and `rimworld-patches`, joined to the connections | RimWorld |
+
+## S: smaller ones
+
+| # | Proposal | What it lets you do | Needs |
+| --- | --- | --- | --- |
+| S1 | **Design records joined to code**: a record naming a class or method links to its node, and the node lists the records that name it | Go from "why" to "what" and back; suits re-reading | A kit addition: names in `docs/` matched to things, by name |
+| S2 | **Tool kit pins as installs**: each repository's pinned phobos-modkit version, with what moving the pin would gain or lose, as the Mods page shows for a mod | See which repositories lag the kit, and by what (on 19 Nov 2026 phobos-rimworld pinned 1.30.0 and the Companion 1.33.0) | The kit's changelog compared between two tags, as `installs` compares two copies |
+| S3 | **Merge arrows on the Timeline**: a line from an ended mod's lane into the lane of the mod that took it in | See at a glance where a mod went | The window only: the fact already names where it merged |
+| S4 | **Home page items become links**: a latest commit opens its code; something not yet released opens its changelog on the Changes page | Start from "where was I?" and keep going | The window only |
+| S5 | **Rules joined to checks**: each shared rule shows which check enforces it, if any | See which rules are held by tools and which only by memory | Rules given IDs (an open question in `rules/first-class.md`), and each gate step naming the rule it holds |
+
+## Proposed order
+
+1. **N1, N2, N3**: the way back, the search, the address. Every later link leans on them.
+2. **L4**: nearly free, and useful from the first install recorded.
+3. **L2**: a thing's own history, which L1 needs.
+4. **L1**: the log chain.
+5. **L3, L5**, then the S items as they earn their place.
+
+## Open questions for the owner
+
+| Question | Agent lean |
+| --- | --- |
+| Is a Logs page worth a tenth place in the page bar, or should the bar be grouped first? | Add Logs; group the bar when an eleventh page appears |
+| Should Back and Forward also remember scroll position and which mod or changelog was chosen? | Yes for the choice, scroll position if it proves cheap |
+| Should an address open the Companion from outside it (a link in a note or a commit message)? | Later; copy and paste inside the Companion first |

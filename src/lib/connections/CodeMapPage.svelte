@@ -159,7 +159,12 @@
         </div>
       </form>
 
-      {#if found.state === "failed"}
+      {#if found.state === "reading"}
+        <ProgressBar
+          progress={started()}
+          fallback={t("codemap-searching-bar", { name: search.trim() })}
+        />
+      {:else if found.state === "failed"}
         <FailurePanel failure={found.failure} onretry={find} />
       {:else if found.state === "refused"}
         <p class="lead">{t("connections-refused", { reason: found.reason })}</p>

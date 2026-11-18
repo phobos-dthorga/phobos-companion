@@ -88,6 +88,8 @@
   let showAll = $state<Record<string, boolean>>({});
   /** How far along the first read, the texture check and the move in hand are; a move's is null when none is being made. */
   let readProgress = $state(started());
+  /** A read again that keeps the page on screen: its own bar at the top, so the work never looks stalled. */
+  let refreshing = $state<ProgressState | null>(null);
   let textureProgress = $state(started());
   let working = $state<ProgressState | null>(null);
   /** The changelog entry whose code is being shown, over the page. */
@@ -121,6 +123,7 @@
 
   /** Reads again. A quiet read keeps what is on screen until the answer arrives. */
   async function load(quiet = false) {
+    if (quiet) refreshing = started(t("mods-reading-again"));
     if (!quiet) {
       reading = { state: "reading" };
       textures = { state: "reading" };
@@ -130,6 +133,7 @@
     const [nextInstalls, nextTextures] = await Promise.all([
       readInstalls(game.id, (message) => {
         readProgress = heard(readProgress, message);
+        if (refreshing !== null) refreshing = heard(refreshing, message);
       }),
       readTextures(game.id, (message) => {
         textureProgress = heard(textureProgress, message);
@@ -138,6 +142,7 @@
     if (!quiet || nextInstalls.state === "ready") reading = nextInstalls;
     if (!quiet || nextTextures.state === "ready") textures = nextTextures;
     readAt = Date.now();
+    refreshing = null;
   }
 
   /** Coming back to the window reads again, so a change made elsewhere shows without a button. */
@@ -663,6 +668,8 @@
 
 {#if working !== null}
   <ProgressBar progress={working} fallback={t("mods-working")} />
+{:else if refreshing !== null}
+  <ProgressBar progress={refreshing} fallback={t("mods-reading-again")} />
 {:else}
   <p class="status" role="status" aria-live="polite">{said}</p>
 {/if}
@@ -733,10 +740,12 @@
       <button
         type="button"
         class="action"
-        disabled={busy !== null}
+        disabled={busy !== null || refreshing !== null}
         onclick={() => load(true)}
       >
-        {t("mods-action-read-again")}
+        {refreshing !== null
+          ? t("mods-action-reading")
+          : t("mods-action-read-again")}
       </button>
       {#if repositories.some((r) => r.status.canBuild)}
         <button

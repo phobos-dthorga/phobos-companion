@@ -19,6 +19,8 @@
   import CodeMapPage from "./lib/connections/CodeMapPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
+  import ProgressBar from "./lib/shell/ProgressBar.svelte";
+  import { started } from "./lib/shell/progress";
   import { readKit } from "./lib/shell/desktopClient";
   import type { KitReading } from "./lib/shell/types";
 
@@ -210,6 +212,11 @@
         {looking ? t("action-looking") : t("action-look-again")}
       </button>
     </span>
+    {#if looking && home.state === "ready"}
+      <div class="looking-bar">
+        <ProgressBar progress={started()} fallback={t("action-looking-bar")} />
+      </div>
+    {/if}
   </section>
 
   <div class="workspace">
@@ -406,6 +413,11 @@
     font-size: var(--type-small);
     background: var(--colour-canvas);
     border-bottom: 1px solid var(--colour-line);
+  }
+
+  .looking-bar {
+    flex-basis: 100%;
+    padding-bottom: 8px;
   }
 
   .look-again {

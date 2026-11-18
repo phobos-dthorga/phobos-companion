@@ -216,11 +216,24 @@ function sampleTextures(running: string[]) {
   };
 }
 
-async function open(page: Page, running: string[] = []) {
+async function open(page: Page, running: string[] = [], slowRead = false) {
+  const installs = sampleInstalls(running);
   await mockHost(page, {
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
-    mod_installs: sampleInstalls(running),
+    // A slow read, for the bars a read again shows: the tools speak three progress lines, a moment apart.
+    mod_installs: slowRead
+      ? {
+          ...installs,
+          pauseMs: 500,
+          progress: [1, 2, 3].map((step) => ({
+            label: "Reading the installed mods",
+            step,
+            of: 3,
+            detail: `mod ${step} of 3`,
+          })),
+        }
+      : installs,
     texture_status: sampleTextures(running),
     move_install: {
       pauseMs: 400,
@@ -282,6 +295,27 @@ for (const [name, viewport] of [
 ] as const) {
   test.describe(`Mods page, ${name}`, () => {
     test.use({ viewport });
+
+    test("a read again shows a bar while it works, and the button says so", async ({
+      page,
+    }) => {
+      await open(page, [], true);
+      const card = page.getByRole("article", { name: "Sample Mod" });
+      await expect(card).toBeVisible({ timeout: 10_000 });
+      await page
+        .getByRole("button", { name: "Read again", exact: true })
+        .click();
+      await expect(page.getByRole("progressbar").first()).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Reading…", exact: true }),
+      ).toBeDisabled();
+      await expect(card).toBeVisible();
+      await audit(page);
+      await expect(
+        page.getByRole("button", { name: "Read again", exact: true }),
+      ).toBeEnabled({ timeout: 10_000 });
+      await expect(page.getByRole("progressbar")).toHaveCount(0);
+    });
 
     test("shows what installing would give, save notes first, and passes the audit", async ({
       page,

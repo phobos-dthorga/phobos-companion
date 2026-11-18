@@ -619,6 +619,10 @@
     "settings-keyboard-title": "Keyboard shortcuts",
     "settings-keyboard-body": "One key for each common move, such as 7 for the Timeline and ? for the full list. Change any key, turn one off, or turn them all off.",
     "settings-keyboard-open": "Change keyboard shortcuts",
-    "shortcuts-list-label": "Every keyboard shortcut"
+    "shortcuts-list-label": "Every keyboard shortcut",
+    "mods-reading-again": "Reading your mods again: installed, in the repository and in backups, and their textures…",
+    "mods-action-reading": "Reading…",
+    "action-looking-bar": "Looking at every game again: their repositories, what is not yet released, what is unfinished…",
+    "codemap-searching-bar": "Searching for { $name }…"
   }
 }

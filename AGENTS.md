@@ -111,7 +111,9 @@ reads them.
   a progress channel (`progressChannel` in `src/lib/shell/desktopClient.ts`); the host passes on the tool's progress lines
   (`kit::run_hearing`), and `ProgressBar.svelte` is the one component that draws them: filled when the tool can count its steps,
   moving when it cannot, always with words, and its latest line of output beneath. A new tool that can take more than a moment
-  speaks progress lines (phobos-modkit `docs/manifest.md`, Progress) before its page is built.
+  speaks progress lines (phobos-modkit `docs/manifest.md`, Progress) before its page is built. **A read again that keeps the page on
+  screen still shows a bar** (owner, 19 Nov 2026: a silent Read again "you ... think that the app ... is broken"), and its button
+  says it is working until it is done.
 - **Quantities are preset buttons or the game's own kind of control**, not sliders.
 - **A page's common moves have keyboard shortcuts** (owner, 19 Nov 2026): one key each, never two held together, listed once in
   `src/lib/shortcuts/actions.ts` with its default, and offered by the view while it is on screen (`register` in

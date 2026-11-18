@@ -4,6 +4,16 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.18.1] - 2026-11-19
+
+The owner found the Mods page's Read again silent (19 November 2026): "while its doing calculations, you have no idea anything's happening and think that the app or said functionality is broken", and asked for other places like it. Not yet tested on screen.
+
+### Fixed
+
+- **Read again on the Mods page shows a bar at the top while it works**, with what the tools are reading, and its button says Reading… until it is done; the page stays on screen underneath. The same bar shows when the page reads again by itself as you come back to the window.
+- **Look again**, in the bar at the top, shows a moving bar under it while it looks at every game, instead of only changing its button's words.
+- **Search on the Code map page** shows a bar while it searches.
+- Checked every other button that starts work: the Changes, Timeline, Atlas, Reports and Settings pages already show a bar while they read, and recording a test verdict or a keyboard shortcut is immediate.
 ## [0.18.0] - 2026-11-19
 
 The owner asked for it (19 November 2026): "some common-sense keyboard shortcuts as a default setting, and the ability for the end-user to configure those further to their needs within the Settings Dialog somewhere, perhaps as its own modal deeper within". Not yet tested on screen.

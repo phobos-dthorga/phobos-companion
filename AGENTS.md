@@ -82,8 +82,7 @@ Build output stays out of the repository: `scripts/with-target.mjs` and the gate
   `CHANGELOG.md` in the same commit. The version lives in `package.json` and `src-tauri/Cargo.toml`, and a test keeps them equal.
 - **Build the installer for the owner after every new version** (owner, 18 Nov 2026: "build it ahead of time for me"): once the
   version is committed, run `npm run installer` and tell the owner the setup file's full path
-  (`%LOCALAPPDATA%\phobos-modkit	argeteleaseundle
-sis\D’thorga Companion_<version>_x64-setup.exe`), so all they do is run
+  (`%LOCALAPPDATA%\phobos-modkit\target\release\bundle\nsis\D’thorga Companion_<version>_x64-setup.exe`), so all they do is run
   it. Run `npm ci` first only when `package-lock.json` changed. **VS Code's Svelte language server holds `node_modules` files open**
   (its esbuild helper and rollup's native module), so `npm ci` fails with EPERM while it runs, after deleting most of
   `node_modules`: stop only that server first (a `Code.exe` whose command line names `svelte-language-server`, never a filter that

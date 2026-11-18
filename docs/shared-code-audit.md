@@ -1,7 +1,7 @@
 # Shared code audit (19 Nov 2026)
 
-**Status (19 Nov 2026):** the host core (R1 to R6) and the window's pieces (W1 to W6) are built in Companion 0.16.0, on the
-owner's word (a library crate; all four steps); W7 was set aside. "What was built" says where the build differs from the
+**Status (19 Nov 2026):** built in Companion 0.16.0, on the owner's word (a library crate; all four steps): the host core (R1 to
+R6), the window's pieces (W1 to W6) and the Home page reading the kit (X1); W7 was set aside. "What was built" says where the build differs from the
 proposal; the audit itself is kept as it was found. Written at the owner's request: "We should be using a common library ...
 that contains all the shared code/functions/etc that is common to more than just one area of Companion ... I call for an audit".
 
@@ -78,6 +78,7 @@ another program for someone else) could use it whole.
 | W5 | Functions and two components | The functions only (`versionWords`, `releasedCount`, `sections`); the "version" styles turned out to be different things sharing a name |
 | W6 | One `dates.ts` | As proposed, with the locale read from the words file everywhere, numbers included |
 | W7 | A loading helper | Set aside: three lines a page, and Svelte's reactive state makes a shared helper harder to read than the lines it saves |
+| X1 | The Home page asks the kit | As proposed, through a new quick report, phobos-modkit 1.32.0's `changes pending`: every repository in one run, files only, about 0.8 s for 19 repositories; `changelog.rs` became `pending.rs`, which only asks and matches the answer |
 
 ## Proposed order
 

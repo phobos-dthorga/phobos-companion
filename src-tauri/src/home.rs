@@ -1,12 +1,14 @@
 //! The home page's answer to "where was I?", game by game. It only reads.
 
-use crate::changelog::{self, PendingRelease};
 use crate::open_work;
+use crate::pending::{self, PendingRelease};
 use companion_core::failure::Failure;
 use companion_core::games::{self, Game, Repository};
 use companion_core::git::{self, ReadFailure, Reading, RepositoryProblem};
 use serde::Serialize;
 use std::cmp::Reverse;
+use std::collections::HashMap;
+use std::path::PathBuf;
 use std::thread;
 
 const COMMITS_PER_REPOSITORY: usize = 5;
@@ -53,18 +55,34 @@ pub struct Home {
 struct RepositoryReading {
     name: String,
     git: Result<Reading, ReadFailure>,
-    pending: Vec<PendingRelease>,
     open_work: Vec<String>,
 }
 
-/// Reads every game on the owner's list, each repository on its own thread.
+/// Reads every game on the owner's list, each repository on its own thread, while the tool kit reads every changelog's unreleased
+/// work in one run beside them.
 pub fn read_home() -> Result<Home, Failure> {
     let Some(listed) = games::load()? else {
         return Ok(Home { list_found: false, games: Vec::new() });
     };
-    let mut games: Vec<GameHome> = listed.iter().map(read_game).collect();
+    let repositories: Vec<&Repository> = listed.iter().flat_map(|game| &game.repositories).collect();
+    let (pending, mut games) = thread::scope(|scope| {
+        let pending = scope.spawn(|| pending::read_all(&repositories));
+        let games: Vec<GameHome> = listed.iter().map(read_game).collect();
+        (pending.join().unwrap_or_default(), games)
+    });
+    for (home, game) in games.iter_mut().zip(&listed) {
+        attach_pending(home, game, &pending);
+    }
     sort_games(&mut games);
     Ok(Home { list_found: true, games })
+}
+
+/// A game's unreleased work, from every one of its repositories, the newest draft first.
+fn attach_pending(home: &mut GameHome, game: &Game, pending: &HashMap<PathBuf, Vec<PendingRelease>>) {
+    for repository in &game.repositories {
+        home.pending.extend(pending.get(&repository.path).into_iter().flatten().cloned());
+    }
+    home.pending.sort_by(|a, b| (Reverse(&a.draft_date), &a.product).cmp(&(Reverse(&b.draft_date), &b.product)));
 }
 
 fn read_game(game: &Game) -> GameHome {
@@ -83,7 +101,6 @@ fn read_repository(repository: &Repository) -> RepositoryReading {
     RepositoryReading {
         name: repository.name.clone(),
         git: git::read(&repository.path, COMMITS_PER_REPOSITORY),
-        pending: changelog::read_pending(&repository.path, &repository.name),
         open_work: open_work::read_open(&repository.path),
     }
 }
@@ -95,7 +112,6 @@ fn panicked(repository: &Repository) -> RepositoryReading {
             problem: RepositoryProblem::GitFailed,
             detail: "the reader stopped unexpectedly".to_owned(),
         }),
-        pending: Vec::new(),
         open_work: Vec::new(),
     }
 }
@@ -131,7 +147,6 @@ fn assemble(game: &Game, readings: Vec<RepositoryReading>) -> GameHome {
                 });
             }
         }
-        home.pending.extend(reading.pending);
         home.open_work.extend(reading.open_work);
     }
     home.latest.sort_by(|a, b| {
@@ -140,7 +155,6 @@ fn assemble(game: &Game, readings: Vec<RepositoryReading>) -> GameHome {
     home.last_worked = home.latest.first().map(|item| item.unix);
     home.latest.truncate(LATEST_SHOWN);
     home.unfinished.sort_by(|a, b| (Reverse(a.files), &a.repository).cmp(&(Reverse(b.files), &b.repository)));
-    home.pending.sort_by(|a, b| (Reverse(&a.draft_date), &a.product).cmp(&(Reverse(&b.draft_date), &b.product)));
     home
 }
 

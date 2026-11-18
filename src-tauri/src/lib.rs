@@ -3,12 +3,12 @@
 //! What more than one part uses, and needs no window, lives in the `companion-core` crate (`core/`): the games list, the tool kit,
 //! request checks, failures. This file holds the Tauri commands, each one line of delegation on a worker thread.
 
-mod changelog;
 mod changes_page;
 mod history_page;
 mod home;
 mod installs_page;
 mod open_work;
+mod pending;
 mod reports;
 mod settings_page;
 mod tests_page;

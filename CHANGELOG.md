@@ -12,10 +12,17 @@ The owner asked for one shared library for code more than one part of the Compan
 
 - **The host's shared code is one library, companion-core** (src-tauri/core): the games list, running the tool kit, failures, checks on what the window asks for, and building the kit's arguments, with no window in it, so it is tested on its own and a second front end could use it whole. Every page's host module and the 17 commands now go through it.
 - **The window's shared code lives once too**: one way to ask the host (16 requests in 8 files), one set of date and time formats in the words' own locale (written 4 ways, with the locale typed in 11 places), one module for showing a changelog, one frame for the code viewer and the changelog as it stood, and one style each for a page's title, its opening paragraph, its closing note and a pressed choice (copied up to 9 times). Small differences in spacing between pages are gone: every page now uses the same.
+- **The Home page asks the tools what is not yet released**, instead of reading changelogs with a parser of its own: one run for every repository on your list (about 0.8 s for 19, beside the git reading Home already does), so Home, Changes and Timeline read a changelog the same way. Home now also finds changelogs deeper in a repository than its root and its mods folder, so it may list a few more unreleased items than before.
 
 ### Fixed
 
 - The pages read a tool's answer by one rule. Before, the Changes and Timeline pages counted an answer that did not say whether it worked as a success, and the Mods and Settings pages as a failure.
+
+### Compatibility and limits
+
+- The pinned phobos-modkit moves from 1.31.0 to 1.32.0, which adds changes pending for the Home page and reads the Changes page's list faster (about 0.95 s instead of 1.65 s for phobos-rimworld).
+- Checked on more than one game: the Home page's new reading ran over all 19 repositories on your list (RimWorld, Kenshi, Ostranauts, Workers & Resources, Farming Simulator 25, Project Zomboid).
+
 ## [0.15.1] - 2026-11-19
 
 The owner asked for the Timeline's day-by-day list to be tidied and more streamlined (19 November 2026), "and if other areas can benefit too, then go for it". Not yet tested on screen.

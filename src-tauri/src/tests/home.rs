@@ -16,7 +16,6 @@ fn repository(name: &str, commits: &[(i64, &str)], uncommitted: usize) -> Reposi
                 .collect(),
             uncommitted,
         }),
-        pending: Vec::new(),
         open_work: Vec::new(),
     }
 }
@@ -54,7 +53,6 @@ fn a_repository_that_cannot_be_read_is_reported_and_the_rest_still_show() {
     let failed = RepositoryReading {
         name: "broken".to_owned(),
         git: Err(ReadFailure { problem: RepositoryProblem::Missing, detail: "gone".to_owned() }),
-        pending: Vec::new(),
         open_work: Vec::new(),
     };
     let home = assemble(&game(), vec![failed, repository("fine", &[(5, "ok")], 0)]);

@@ -1,6 +1,12 @@
 import type { Failure, Waiting } from "../shell/types";
 
-export type WorkItem = { repository: string; unix: number; subject: string };
+export type WorkItem = {
+  repository: string;
+  /** The commit's short hash (0.19.0), to open its code. */
+  hash?: string;
+  unix: number;
+  subject: string;
+};
 
 export type Unfinished = { repository: string; files: number };
 

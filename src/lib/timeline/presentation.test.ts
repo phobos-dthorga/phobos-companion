@@ -6,6 +6,7 @@ import {
   dayOf,
   KIND_LOOKS,
   lanes,
+  mergedFrom,
   monthStarts,
   rows,
   runningOn,
@@ -84,6 +85,10 @@ describe("the overview's lanes", () => {
       ["Thing", false],
       ["Old", true],
     ]);
+    expect(found.lanes[1].mergedInto).toBe("Thing");
+    expect(found.lanes[0].mergedInto).toBeNull();
+    expect(mergedFrom(found.lanes, "Thing")).toEqual(["Old"]);
+    expect(mergedFrom(found.lanes, "Old")).toEqual([]);
     expect(found.lanes[0].cells.get("2026-11-05")?.strongest).toBe(
       "version-released",
     );

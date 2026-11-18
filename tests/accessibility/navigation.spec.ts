@@ -201,4 +201,29 @@ test.describe("The way back, the search and addresses", () => {
       page.getByRole("button", { name: "Sample Carts" }),
     ).toHaveAttribute("aria-pressed", "true");
   });
+
+  test("Home's latest commit opens its code, and a mod not yet released opens its changelog", async ({
+    page,
+  }) => {
+    await open(page);
+    await page
+      .getByRole("button", {
+        name: "A sample change made today: open this commit's code",
+      })
+      .click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.keyboard.press(",");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await page
+      .getByRole("button", {
+        name: "Sample Mod: open its changelog on the Changes page",
+      })
+      .click();
+    await expect(changesTitle(page)).toBeVisible();
+    await page.getByRole("button", { name: "Copy address" }).click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
+      "product=Sample+Mod",
+    );
+    await audit(page);
+  });
 });

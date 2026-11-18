@@ -18,6 +18,7 @@
     dayWords,
     KIND_LOOKS,
     lanes,
+    mergedFrom,
     laneOf,
     monthStarts,
     rows,
@@ -44,6 +45,8 @@
   let progress = $state(started());
   let showing = $state<Showing>("all");
   let only = $state<string | null>(null);
+  /** The lane names' column: fixed, so a long name ("merged into ...") wraps instead of widening the column over the marks. */
+  const LANE_NAME_PX = 160;
   let shownDays = $state(DAYS_AT_ONCE);
   let focusedDay = $state<string | null>(null);
   /** The day whose "what was I running then?" is open. */
@@ -273,7 +276,7 @@
       >
         <div
           class="grid"
-          style:grid-template-columns={`minmax(160px, max-content) repeat(${overview.days.length}, 44px)`}
+          style:grid-template-columns={`${LANE_NAME_PX}px repeat(${overview.days.length}, 44px)`}
         >
           <span class="corner"></span>
           {#each overview.days as day (day)}
@@ -297,7 +300,9 @@
             >
               {lane.name}
               {#if lane.ended}<span class="muted"
-                  >{t("timeline-lane-ended")}</span
+                  >{lane.mergedInto
+                    ? t("timeline-lane-merged", { into: lane.mergedInto })
+                    : t("timeline-lane-ended")}</span
                 >{/if}
             </button>
             {#each overview.days as day (day)}
@@ -353,6 +358,17 @@
         <button type="button" class="action" onclick={() => (only = null)}>
           {t("timeline-only-clear", { product: only })}
         </button>
+        {@const into = overview.lanes.find((l) => l.name === only)?.mergedInto}
+        {#if into && overview.lanes.some((l) => l.name === into)}
+          <button type="button" class="action" onclick={() => (only = into)}>
+            {t("timeline-follow-into", { into })}
+          </button>
+        {/if}
+        {#each mergedFrom(overview.lanes, only) as from (from)}
+          <button type="button" class="action" onclick={() => (only = from)}>
+            {t("timeline-follow-from", { from })}
+          </button>
+        {/each}
       {/if}
     </div>
     {#each days.slice(0, shownDays) as group (group.day)}
@@ -639,8 +655,10 @@
 
   .lane-name {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
+    gap: 0 6px;
+    overflow-wrap: anywhere;
     margin-inline-end: 8px;
     text-align: start;
     font-size: var(--type-small);

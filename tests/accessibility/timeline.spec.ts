@@ -283,6 +283,37 @@ for (const [name, viewport] of [
       await expect(page.locator("main")).toContainText("Installed");
     });
 
+    test("an ended mod names where it merged, and the filter follows it there and back", async ({
+      page,
+    }) => {
+      await open(page);
+      const overview = page.getByRole("group", {
+        name: "What happened to each mod, day by day",
+      });
+      await expect(overview).toContainText("(merged into Sample Mod)");
+      await overview
+        .getByRole("button", { name: /^Old Sample/ })
+        .first()
+        .click();
+      await page
+        .getByRole("button", { name: "Follow it into Sample Mod" })
+        .click();
+      await expect(
+        page.getByRole("button", {
+          name: "Showing only Sample Mod: show every mod",
+        }),
+      ).toBeVisible();
+      await page
+        .getByRole("button", { name: "Show Old Sample, which merged into it" })
+        .click();
+      await expect(
+        page.getByRole("button", {
+          name: "Showing only Old Sample: show every mod",
+        }),
+      ).toBeVisible();
+      await audit(page);
+    });
+
     test("says what was installed at the end of a day", async ({ page }) => {
       await open(page);
       await page

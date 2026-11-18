@@ -7,6 +7,8 @@
     problemKey,
   } from "./presentation";
   import type { GameHome } from "./types";
+  import { go, openDialog } from "../navigation/navigation.svelte";
+  import { commitRequest } from "../code/presentation";
 
   const PENDING_SHOWN = 6;
   const OPEN_SHOWN = 6;
@@ -15,6 +17,24 @@
 
   const headline = $derived(headlineWords(game, now));
   const last = $derived(game.latest[0]);
+
+  /** A latest commit opens its code (cross-links S4). */
+  function openCommit(repository: string, hash: string, subject: string) {
+    openDialog({
+      kind: "code",
+      request: commitRequest(repository, hash, subject),
+    });
+  }
+
+  /** Something not yet released opens its changelog on the Changes page. */
+  function openChangelog(repository: string, product: string) {
+    go({
+      page: "changes",
+      game: game.id,
+      focus: { repository, product },
+      dialog: null,
+    });
+  }
 </script>
 
 <div class="eyebrow accent">{t("home-kicker")}</div>
@@ -49,7 +69,18 @@
         <li class="dated">
           <div class="read">{formatUnixDate(item.unix)}</div>
           <div class="body">
-            <div>{item.subject}</div>
+            {#if item.hash}
+              <button
+                type="button"
+                class="link"
+                aria-label={t("home-open-commit", { subject: item.subject })}
+                onclick={() =>
+                  openCommit(item.repository, item.hash ?? "", item.subject)}
+                >{item.subject}</button
+              >
+            {:else}
+              <div>{item.subject}</div>
+            {/if}
             <div class="muted small">{item.repository}</div>
           </div>
         </li>
@@ -66,7 +97,13 @@
       {#each shown as item (`${item.repository}-${item.product}`)}
         {@const words = pendingWords(item)}
         <li>
-          <div>{item.product}</div>
+          <button
+            type="button"
+            class="link"
+            aria-label={t("home-open-changelog", { product: item.product })}
+            onclick={() => openChangelog(item.repository, item.product)}
+            >{item.product}</button
+          >
           <div class="muted small">
             {t(words.key, words.args)}{#if item.earlier_drafts > 0}{" "}{t(
                 "pending-earlier",
@@ -178,6 +215,27 @@
   .count {
     margin-bottom: 8px;
     color: var(--colour-comparison);
+  }
+
+  .link {
+    display: block;
+    min-height: var(--control-min);
+    padding: 0;
+    font: inherit;
+    color: var(--colour-text);
+    text-align: start;
+    text-decoration: underline;
+    text-decoration-color: var(--colour-line);
+    text-underline-offset: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .link:hover,
+  .link:focus-visible {
+    color: var(--colour-accent);
+    text-decoration-color: currentColor;
   }
 
   .more {

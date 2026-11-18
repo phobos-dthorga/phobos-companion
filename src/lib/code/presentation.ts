@@ -1,5 +1,11 @@
 export { formatDay } from "../shell/dates";
-import type { DiffLine, FileChange, FileKind, Hunk } from "./types";
+import type {
+  DiffLine,
+  EntryRequest,
+  FileChange,
+  FileKind,
+  Hunk,
+} from "./types";
 
 /** How the viewer shows a file: everything that changed, or only the code as it now stands. */
 export type ViewMode = "changes" | "new" | "connections";
@@ -166,4 +172,28 @@ export function entryParts(entry: { text: string; lead: string }): {
 export function writtenWords(written: string, limit = 110): string {
   const plain = written.replaceAll("**", "");
   return plain.length > limit ? `${plain.slice(0, limit).trimEnd()}…` : plain;
+}
+
+/**
+ * The changelog path a request for a whole commit names when no entry of the commit is in view. The host asks for a changelog's
+ * path; with a commit named, the tools show the commit whole and read that path only for the entries it wrote, and a path the
+ * repository does not have simply gives none. The repository's top changelog stands in.
+ */
+export const COMMIT_ONLY_CHANGELOG = "CHANGELOG.md";
+
+/** A code viewer request for one whole commit, from anywhere that names a commit but no entry (Home, a thing's history). */
+export function commitRequest(
+  repository: string,
+  commit: string,
+  subject: string,
+  changelog: string = COMMIT_ONLY_CHANGELOG,
+  product = "",
+): EntryRequest {
+  return {
+    repository,
+    changelog,
+    product,
+    entry: { version: "", section: "", text: subject, lead: subject },
+    commit,
+  };
 }

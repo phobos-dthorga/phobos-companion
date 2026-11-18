@@ -49,8 +49,21 @@
         )
       : [],
   );
+  /** A link may name the product instead of its changelog (the Home page's "not yet released"). */
+  const chosenProduct = $derived(
+    here().focus.repository && here().focus.product
+      ? choices.find(
+          (c) =>
+            c.repository === here().focus.repository &&
+            c.log.product === here().focus.product,
+        )
+      : undefined,
+  );
   const chosen = $derived(
-    choices.find((c) => keyOf(c) === chosenKey) ?? choices[0] ?? null,
+    choices.find((c) => keyOf(c) === chosenKey) ??
+      chosenProduct ??
+      choices[0] ??
+      null,
   );
 
   function keyOf(choice: Choice) {

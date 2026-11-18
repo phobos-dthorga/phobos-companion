@@ -62,6 +62,8 @@ export type Lane = {
   name: string;
   /** The product ended (merged into another, or its changelog removed) and nothing happened to it after. */
   ended: boolean;
+  /** The product it merged into, when it ended that way (cross-links S3). */
+  mergedInto: string | null;
   /** Its newest fact's time, which orders the lanes. */
   latest: string;
   cells: Map<string, LaneCell>;
@@ -83,11 +85,18 @@ export function lanes(facts: Fact[]): { days: string[]; lanes: Lane[] } {
     days.add(day);
     let lane = found.get(name);
     if (!lane) {
-      lane = { name, ended: false, latest: fact.time, cells: new Map() };
+      lane = {
+        name,
+        ended: false,
+        mergedInto: null,
+        latest: fact.time,
+        cells: new Map(),
+      };
       found.set(name, lane);
     }
     lane.latest = fact.time;
     lane.ended = fact.kind === "product-ended";
+    lane.mergedInto = lane.ended ? (fact.mergedInto ?? null) : null;
     const cell = lane.cells.get(day);
     if (!cell)
       lane.cells.set(day, { day, facts: [fact], strongest: fact.kind });
@@ -218,4 +227,9 @@ export function runningOn(facts: Fact[], day: string): Running[] {
       fact,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** The lanes that merged into a product: where it took them in (cross-links S3). */
+export function mergedFrom(all: Lane[], name: string): string[] {
+  return all.filter((lane) => lane.mergedInto === name).map((l) => l.name);
 }

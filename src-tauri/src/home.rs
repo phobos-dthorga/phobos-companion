@@ -16,6 +16,8 @@ const LATEST_SHOWN: usize = 8;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct WorkItem {
+    /// The commit's short hash, so the window can open its code.
+    pub hash: String,
     pub repository: String,
     pub unix: i64,
     pub subject: String,
@@ -137,6 +139,7 @@ fn assemble(game: &Game, readings: Vec<RepositoryReading>) -> GameHome {
                     home.unfinished.push(Unfinished { repository: reading.name.clone(), files: git.uncommitted });
                 }
                 home.latest.extend(git.commits.into_iter().map(|commit| WorkItem {
+                    hash: commit.hash,
                     repository: reading.name.clone(),
                     unix: commit.unix,
                     subject: commit.subject,

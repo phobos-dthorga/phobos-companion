@@ -17,6 +17,7 @@ export function sampleHome() {
         latest: [
           {
             repository: "first-mods",
+            hash: "4d332dd",
             unix: now,
             subject: "A sample change made today",
           },

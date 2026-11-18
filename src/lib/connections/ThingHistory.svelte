@@ -7,6 +7,7 @@
   import { plainText } from "../shell/inline";
   import type { Failure } from "../shell/types";
   import { go, openDialog } from "../navigation/navigation.svelte";
+  import { commitRequest } from "../code/presentation";
   import { askConnections } from "./desktopClient";
   import type { History } from "./types";
 
@@ -80,16 +81,17 @@
     entry: { changelog: string; product: string; text: string } | null,
   ) {
     const first = entry ?? commit.entries[0] ?? null;
-    const text = first?.text ?? commit.subject;
     openDialog({
       kind: "code",
-      request: {
-        repository,
-        changelog: first?.changelog ?? "",
-        product: first?.product ?? "",
-        entry: { version: "", section: "", text, lead: text },
-        commit: commit.hash,
-      },
+      request: first
+        ? commitRequest(
+            repository,
+            commit.hash,
+            first.text,
+            first.changelog,
+            first.product,
+          )
+        : commitRequest(repository, commit.hash, commit.subject),
     });
   }
 </script>

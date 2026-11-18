@@ -32,6 +32,7 @@ pub enum Question {
     Around(String),
     Flow(String, u8),
     Changed(String),
+    History(String),
 }
 
 pub fn arguments(root: &Path, question: &Question) -> Result<Vec<String>, String> {
@@ -45,7 +46,10 @@ pub fn arguments(root: &Path, question: &Question) -> Result<Vec<String>, String
         Question::Flow(node, depth) if checks::node_id(node) && (1..=3).contains(depth) => {
             Args::new(TOOL, "flow").root(root).given("--node", node).pair("--depth", &depth.to_string())
         }
-        Question::Around(_) | Question::Flow(..) => return Err("that is not a thing the tools can show".to_owned()),
+        Question::History(node) if checks::node_id(node) => Args::new(TOOL, "history").root(root).given("--node", node),
+        Question::Around(_) | Question::Flow(..) | Question::History(_) => {
+            return Err("that is not a thing the tools can show".to_owned());
+        }
         Question::Changed(commit) if checks::commit_hash(commit) => {
             Args::new(TOOL, "changed").root(root).given("--commit", commit)
         }
@@ -81,6 +85,7 @@ pub fn question(kind: &str, value: Option<String>, depth: Option<u8>) -> Result<
         "around" => Question::Around(value()?),
         "flow" => Question::Flow(value()?, depth.unwrap_or(2)),
         "changed" => Question::Changed(value()?),
+        "history" => Question::History(value()?),
         other => return Err(Failure::refused(format!("{other:?} is not a question the tools answer"))),
     })
 }

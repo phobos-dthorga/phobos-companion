@@ -466,11 +466,19 @@ those further to their needs within the Settings Dialog somewhere, perhaps as it
 | Changing them | The Settings page's "Change keyboard shortcuts" dialog (owner's idea: a modal deeper within Settings). A key another action has is refused in words; Tab, Enter, Space and Escape are kept |
 | Keeping them | `shortcuts.json` in the program's own folder, holding only what differs from the defaults, so new defaults still arrive; the host checks its shape before writing |
 
-## What comes next
+## Cross-links (built 19 Nov 2026, 0.19.0)
 
-**Cross-links, on the owner's word.** [Cross-links](cross-links.md) (19 Nov 2026) lists proposals for joining what the pages
-already show: a way back and a search first, then links such as a log error to its code to the change that broke it. Nothing there
-is built until the owner chooses.
+**The owner asked for the whole proposed order of [cross-links](cross-links.md) to be built overnight: "Proceed with your entire
+proposed order, step-wise if necessary".** Each item answers the three questions here; what differs from its proposal is in that
+record's "As built".
+
+| Item | What does it let the person do? | What does it stop them doing? | How does it change the way they work? |
+| --- | --- | --- | --- |
+| N1 Back and Forward | Follow any link and return exactly where they were, dialogs included | Losing their place when a link jumps pages | Wandering is safe, so links can be followed freely |
+| N2 Go to anything | Reach a method, entry, row, setting or report by name from any page | Hunting through pages for where a thing lives | One search box first, pages second |
+| N3 Addresses | Keep or share a pointer to any place, and paste it back in | Describing a place in words to find it again | A place can be noted in a file and reopened later, which suits re-reading |
+| L4 What was I running then? | See every mod's installed version at the end of any day | Guessing which versions a fault or a memory belongs to | A fault report starts from the versions that were in play |
+| L2 A thing's history | See every commit that changed a method, class, Def or function, with the changelog entries each wrote, and open any of them | Reading git's history by hand to learn why code is as it is | From any node in a picture, "why is it like this?" is one button away |
 
 **Shared code, on the owner's word.** The [shared code audit](shared-code-audit.md) (19 Nov 2026) found code written 3 to 17
 times across the host and the window, and proposes a `companion-core` library crate for the host and a grown `src/lib/shell/` for

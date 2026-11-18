@@ -27,6 +27,7 @@
     whereWords,
   } from "./presentation";
   import type { Around, Flow, Layout, Relation, Thing } from "./types";
+  import ThingHistory from "./ThingHistory.svelte";
 
   /**
    * How one thing connects: drawn around it (each kind of connection a hub, its members beyond), as a flow of calls from callers on
@@ -522,6 +523,9 @@
       {/if}
     </aside>
   </div>
+  {#if centre && !centre.external && centre.file}
+    <ThingHistory {game} {repository} node={centre.id} name={centre.name} />
+  {/if}
 </div>
 
 <style>

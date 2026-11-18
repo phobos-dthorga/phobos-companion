@@ -87,6 +87,20 @@ export type Asked<T> =
   | { state: "ready"; answer: Answer<T> }
   | { state: "failed"; failure: Failure };
 
-export type Question = "summary" | "find" | "around" | "flow" | "changed";
+export type Question =
+  "summary" | "find" | "around" | "flow" | "changed" | "history";
+
+/** A thing's own history (kit 1.34.0): the commits that changed its lines, each with the changelog entries it wrote. */
+export type History = {
+  file: string;
+  lines: [number, number];
+  more: boolean;
+  commits: {
+    hash: string;
+    time: string;
+    subject: string;
+    entries: { changelog: string; product: string; text: string }[];
+  }[];
+};
 
 export type Layout = "radial" | "flow" | "list";

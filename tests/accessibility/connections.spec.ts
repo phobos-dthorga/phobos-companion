@@ -139,6 +139,37 @@ const sampleFound = {
   data: { things: [tick, thing("cs:Sample.Raft.Tick", "Raft.Tick")] },
 };
 
+const sampleHistory = {
+  ok: true,
+  refusal: null,
+  data: {
+    node: "cs:Sample.Boat.Tick",
+    file: "src/Sample/Boat.cs",
+    lines: [20, 34],
+    more: false,
+    commits: [
+      {
+        hash: "401c6a93aa11bb22cc33dd44ee55ff6677889900",
+        time: "2026-11-18T09:07:00+00:00",
+        subject: "Boats 0.2.0: boats tick faster",
+        entries: [
+          {
+            changelog: "CHANGELOG.md",
+            product: "Boats",
+            text: "**Faster ticks.** Boats tick twice as often.",
+          },
+        ],
+      },
+      {
+        hash: "1234abcd99887766554433221100ffeeddccbbaa",
+        time: "2026-11-01T02:00:00+00:00",
+        subject: "First boats",
+        entries: [],
+      },
+    ],
+  },
+};
+
 async function openCodeMap(page: Page) {
   await mockHost(page, {
     home_status: { result: sampleHome() },
@@ -147,6 +178,7 @@ async function openCodeMap(page: Page) {
     "connections:find": { result: sampleFound },
     "connections:around": { result: sampleAround },
     "connections:flow": { result: sampleFlow },
+    "connections:history": { result: sampleHistory },
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Code map", exact: true }).click();
@@ -286,6 +318,38 @@ for (const [name, viewport] of [
       expect(await address()).toContain("node=cs%3ASample.Harbour.Moor");
       await page.keyboard.press(",");
       expect(await address()).toContain("node=cs%3ASample.Boat.Tick");
+    });
+
+    test("reads a thing's history only when asked, and an entry opens its commit's code as a step", async ({
+      page,
+    }) => {
+      await page
+        .context()
+        .grantPermissions(["clipboard-read", "clipboard-write"]);
+      await openCodeMap(page);
+      await search(page);
+      const history = page.getByRole("region", {
+        name: "The history of Boat.Tick",
+      });
+      await history.getByRole("button", { name: "Show its history" }).click();
+      await expect(history).toContainText("Boats 0.2.0: boats tick faster");
+      await expect(history).toContainText(
+        "lines 20 to 34 of src/Sample/Boat.cs",
+      );
+      await expect(
+        history.getByRole("button", { name: "See this commit's code" }),
+      ).toBeVisible();
+      await audit(page);
+      expect(await smallControls(page, "main")).toBe(0);
+      await history
+        .getByRole("button", { name: /Faster ticks\. Boats tick twice/ })
+        .click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await page.getByRole("dialog").press("Escape");
+      await page.getByRole("button", { name: "Copy address" }).click();
+      expect(
+        await page.evaluate(() => navigator.clipboard.readText()),
+      ).not.toContain("dialog=code");
     });
   });
 }

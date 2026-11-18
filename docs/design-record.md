@@ -380,10 +380,11 @@ item", with "a decent syntax highlighter", for the Mods page "and for any future
 | Colours | highlight.js, one grammar at a time, through `highlightCore.ts`; each side of a change is coloured whole so a comment or string over several lines reads right; token colours are the theme's roles |
 | Two views | What changed (both line numbers, a plus or minus mark) and The code as it now stands (removed lines left out) |
 
-**What it means for how changes are written** (the owner asked to be told): nothing has to change. The view is as sharp as the
-commit is small, so one commit that wrote eight entries shows the same 21 files for each of them. The owner's choices, cheapest
-first: leave commits as they are (agent default); commit separate changes separately where they are separate anyway (the rule
-added to phobos-rimworld's AGENTS.md, no extra cost); or one commit for every entry, which costs a full check run each.
+**What it means for how changes are written** (the owner asked to be told): nothing new is written in a changelog. The view is
+as sharp as the commit is small, so one commit that wrote eight entries shows the same 21 files for each of them. Of three choices
+(leave commits as they are; commit separate changes separately where they are separate anyway; one commit for every entry), **the
+owner chose the second (19 Nov 2026)**. It is a rule for every repository now, in phobos-modkit's `rules/every-session.md`: one
+change is finished and committed before an unrelated one is started, and nothing is untangled afterwards.
 
 ## What comes next
 

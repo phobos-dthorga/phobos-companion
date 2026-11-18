@@ -3,6 +3,24 @@
   "description": "This repository's checks: python scripts/check-all.py runs them all.",
   "stages": [
     {
+      "name": "Rules",
+      "steps": [
+        {
+          "name": "shared rules",
+          "cwd": "external/phobos-modkit/python",
+          "run": [
+            "{python}",
+            "-m",
+            "phobos_modkit",
+            "rules",
+            "check",
+            "--root",
+            "../../.."
+          ]
+        }
+      ]
+    },
+    {
       "name": "Web",
       "steps": [
         {
@@ -51,7 +69,9 @@
           "parser": "cargo",
           "requires": "cargo",
           "cwd": "src-tauri",
-          "env": { "CARGO_TARGET_DIR": "{cargo_target}" },
+          "env": {
+            "CARGO_TARGET_DIR": "{cargo_target}"
+          },
           "run": ["cargo", "fmt", "--all", "--", "--check"]
         },
         {
@@ -60,7 +80,9 @@
           "parser": "cargo",
           "requires": "cargo",
           "cwd": "src-tauri",
-          "env": { "CARGO_TARGET_DIR": "{cargo_target}" },
+          "env": {
+            "CARGO_TARGET_DIR": "{cargo_target}"
+          },
           "run": [
             "cargo",
             "clippy",
@@ -77,7 +99,9 @@
           "parser": "cargo",
           "requires": "cargo",
           "cwd": "src-tauri",
-          "env": { "CARGO_TARGET_DIR": "{cargo_target}" },
+          "env": {
+            "CARGO_TARGET_DIR": "{cargo_target}"
+          },
           "run": ["cargo", "test", "--locked"]
         }
       ]
@@ -95,7 +119,9 @@
           "name": "desktop program",
           "lane": "window",
           "requires": "node",
-          "env": { "CARGO_TARGET_DIR": "{cargo_target}" },
+          "env": {
+            "CARGO_TARGET_DIR": "{cargo_target}"
+          },
           "run": [
             "node",
             "node_modules/@tauri-apps/cli/tauri.js",

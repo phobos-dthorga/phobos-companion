@@ -4,6 +4,15 @@ Standing rules for this repository, stated once in their current form. What each
 design is `docs/design-record.md`. Created on 9 November 2026 at the owner's request, as a sibling of phobos-modkit. Its layout
 and method follow Republic Observatory and OnAir WyrmGrid, without their code or identity.
 
+## Rules shared by every repository
+
+**The owner's rules for every game, mod and tool repository live once, in phobos-modkit's `rules/` folder** (owner, 19 Nov 2026).
+**Read [`external/phobos-modkit/rules/every-session.md`](external/phobos-modkit/rules/every-session.md) at the start of every
+session**; `CLAUDE.md` imports it. This file adds what is particular to this program. A rule that would hold in another
+repository too goes there, on the owner's word (`external/phobos-modkit/rules/README.md` says how), and a rule here that the
+shared rules now state is dropped in the commit that moves the pin. The gate's "shared rules" step checks this repository still
+reads them.
+
 ## Working with the owner
 
 - Author: Phobos A. D'thorga (phobosgekko). **Built for humans and dragons first**; agents keep the command line.

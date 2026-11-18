@@ -80,4 +80,12 @@ Build output stays out of the repository: `scripts/with-target.mjs` and the gate
   sessions may share a tree: commit explicit paths and leave others' work alone.
 - Versions: a fix raises the last number, new functionality the middle, an incompatible change the first. Every change updates
   `CHANGELOG.md` in the same commit. The version lives in `package.json` and `src-tauri/Cargo.toml`, and a test keeps them equal.
+- **Build the installer for the owner after every new version** (owner, 18 Nov 2026: "build it ahead of time for me"): once the
+  version is committed, run `npm run installer` and tell the owner the setup file's full path
+  (`%LOCALAPPDATA%\phobos-modkit	argeteleaseundle
+sis\D’thorga Companion_<version>_x64-setup.exe`), so all they do is run
+  it. Run `npm ci` first only when `package-lock.json` changed. **VS Code's Svelte language server holds `node_modules` files open**
+  (its esbuild helper and rollup's native module), so `npm ci` fails with EPERM while it runs, after deleting most of
+  `node_modules`: stop only that server first (a `Code.exe` whose command line names `svelte-language-server`, never a filter that
+  matches the stopping command itself), then run `npm ci` at once; it restarts itself when a `.svelte` file is next opened.
 - Never commit credentials, personal paths, saves, logs or game files.

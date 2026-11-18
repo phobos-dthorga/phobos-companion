@@ -11,6 +11,8 @@
   import TestsPage from "./lib/tests/TestsPage.svelte";
   import ModsPage from "./lib/mods/ModsPage.svelte";
   import ChangesPage from "./lib/code/ChangesPage.svelte";
+  import TimelinePage from "./lib/timeline/TimelinePage.svelte";
+  import SettingsPage from "./lib/settings/SettingsPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
   import { readKit } from "./lib/shell/desktopClient";
@@ -21,7 +23,14 @@
   let looking = $state(true);
   let chosenId = $state<string | null>(null);
   let page = $state<
-    "home" | "reports" | "atlas" | "tests" | "mods" | "changes"
+    | "home"
+    | "reports"
+    | "atlas"
+    | "tests"
+    | "mods"
+    | "changes"
+    | "timeline"
+    | "settings"
   >("home");
   let now = $state(new Date());
 
@@ -95,6 +104,20 @@
         aria-current={page === "changes" ? "page" : undefined}
         onclick={() => (page = "changes")}>{t("page-changes")}</button
       >
+      <button
+        type="button"
+        class="page"
+        class:current={page === "timeline"}
+        aria-current={page === "timeline" ? "page" : undefined}
+        onclick={() => (page = "timeline")}>{t("page-timeline")}</button
+      >
+      <button
+        type="button"
+        class="page"
+        class:current={page === "settings"}
+        aria-current={page === "settings" ? "page" : undefined}
+        onclick={() => (page = "settings")}>{t("page-settings")}</button
+      >
     </nav>
   </header>
 
@@ -139,7 +162,9 @@
     </nav>
 
     <main class="canvas">
-      {#if selected && page === "reports"}
+      {#if page === "settings" && home.state !== "reading"}
+        <SettingsPage {games} />
+      {:else if selected && page === "reports"}
         {#key selected.id}
           <ReportsPage game={selected} />
         {/key}
@@ -150,6 +175,10 @@
       {:else if selected && page === "changes"}
         {#key selected.id}
           <ChangesPage game={selected} />
+        {/key}
+      {:else if selected && page === "timeline"}
+        {#key selected.id}
+          <TimelinePage game={selected} />
         {/key}
       {:else if selected && page === "mods"}
         {#key selected.id}
@@ -186,7 +215,11 @@
           ? t("source-body-mods")
           : page === "changes"
             ? t("source-body-changes")
-            : t("source-body")}
+            : page === "timeline"
+              ? t("source-body-timeline")
+              : page === "settings"
+                ? t("source-body-settings")
+                : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

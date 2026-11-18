@@ -55,6 +55,12 @@ reads them.
   a backup.
 - **The Changes page and the code viewer only read**: the kit's `changes`, through `src-tauri/src/changes_page.rs`, which checks
   the repository is one of the game's and the changelog a plain path inside it before the kit sees either.
+- **The Timeline page only reads**: the kit's `history`, through `src-tauri/src/history_page.rs`, which checks the repository is one
+  of the game's, the changelog a plain path inside it, and the commit or moment plain text of the right shape. The history log it
+  shows is written by the tools as they work, never by this program.
+- **The Settings page writes one file, the central settings file**, through the kit's `settings set`
+  (`src-tauri/src/settings_page.rs`): only when the owner presses Save or Use the default, only while the manifest still calls it
+  `writes`, and only a setting the tools list, as one line. It never writes a repository's own settings.
 - **Otherwise read-only towards games, saves and repositories.** The only other things the program writes are the owner's test verdicts and, since
   0.9.0, their word on notes no row names ("make a row" or "no row needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks),
   each appended to its own data folder (`test-verdicts/<repository>.jsonl` and `test-key-decisions/<repository>.jsonl`,

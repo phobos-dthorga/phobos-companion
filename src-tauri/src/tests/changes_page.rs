@@ -53,6 +53,16 @@ fn a_refusal_comes_back_in_words_and_an_answer_as_found() {
 }
 
 #[test]
+fn a_commits_code_is_asked_for_by_its_hash_alone() {
+    assert_eq!(
+        commit_arguments(Path::new("repo"), "mods/Old/CHANGELOG.md", "401c6a93").unwrap(),
+        ["changes", "entry", "--root", "repo", "--changelog", "mods/Old/CHANGELOG.md", "--commit=401c6a93", "--json"]
+    );
+    assert!(commit_arguments(Path::new("repo"), "mods/Old/CHANGELOG.md", "--all").is_err());
+    assert!(commit_arguments(Path::new("repo"), "../CHANGELOG.md", "401c6a93").is_err());
+}
+
+#[test]
 fn the_list_asks_for_the_newest_versions_of_one_repository() {
     assert_eq!(list_arguments(Path::new("repo")), ["changes", "list", "--root", "repo", "--versions", "5", "--json"]);
 }

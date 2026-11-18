@@ -19,6 +19,12 @@ what you did, and what your saves and logs say, without typing a command.
 - **The Changes page lists what each changelog says changed, for any game**, and **Show the code** opens the code behind an
   entry: the commit that wrote it, its files with code first, coloured by language. Nothing extra is written in a changelog for
   this. **A commit that wrote several entries is shown whole**, with the others named.
+- **The Timeline page shows what happened to each game's mods over time**: an at-a-glance row a mod with a mark on each day,
+  and every fact day by day beneath. **Read it as it stood** opens any changelog exactly as it was then, marking what has been
+  reworded or taken out since. Installs, go-backs, backups, builds and encodings are recorded from 19 Nov 2026 on, in the history
+  log in the Companion's own folder.
+- **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central
+  settings file**, for every repository and game; a repository's own settings still win where they set something.
 - **Anything that takes a while shows a progress bar** with what it is doing, and a count where the work can be counted.
 - **The Mods page starts with "Before you play"**: ready to play, or what needs building, installing or encoding first, each
   with its button. Each mod shows what it has now beside what installing would bring (changelog entries, files, settings, things
@@ -27,7 +33,7 @@ what you did, and what your saves and logs say, without typing a command.
   building doesn't. A repository opts in with `config/installs.json`; see the
   [design record](docs/design-record.md#the-mods-page-built-18-nov-2026).
 - **What it changes, and only when you ask:** your test verdicts, in its own folder; your installed mods and their textures, from
-  the Mods page; and the repository's build output when you press Build. It never changes a save, and never deletes anything.
+  the Mods page; the repository's build output when you press Build; and the central settings file, from the Settings page. It never changes a save, and never deletes anything.
 - **It needs Python on the PATH**, or `PHOBOS_COMPANION_PYTHON` naming one.
 - **Open it from the Start menu once installed** (see [Install it](#install-it-windows)).
 - **It can't be handed to anyone else yet**: it finds its tools by the folder it was built from, or `PHOBOS_COMPANION_KIT`.

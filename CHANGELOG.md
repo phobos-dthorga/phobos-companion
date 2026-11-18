@@ -4,6 +4,23 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-19
+
+The owner asked for it (19 November 2026): "a timeline (with suitable graph(ic)s) that records/shows how updates were applied, changed, removed, etc. over time ... I like coming back and reading the CHANGELOGs from a particular update-in-moment but I can't because it is now lost to time", with the history kept in the Companion's own folder and "a central settings page where everything or at least, most, of these sorts of things are managed". Not yet tested on screen.
+
+### Added
+
+- **A Timeline page for every game.** At a glance: one row a mod and one column a day something happened, each mark the biggest thing that day (released, ended or merged, installed, went back, version written, entries added, reworded or taken out, and more), with a key to the marks. Pressing a mark takes you to that day; pressing a mod's name shows only that mod. Beneath, every fact day by day, newest first: versions and entries from the changelogs back to each repository's first commit, and installs, go-backs, backups, builds and texture encodings on this PC from now on. Show only what the repositories did, or only what was done on this PC.
+- **Read it as it stood**: any changelog exactly as it was at that moment, each entry marked reworded (with its words now) or taken out since, and a count of what was added since. A changelog since removed (a mod merged into another) can still be read. Only what changed since can be shown on its own.
+- Show the code on a timeline fact opens the code viewer on that commit, with every entry it wrote.
+- **A Settings page**: every folder and file the tools read, for every game, with where each value comes from (the default, the central settings file, a repository's own settings, an environment variable) and whether it is there on this PC. Change writes one setting into the central settings file, for every repository; Use the default takes it out again. A repository's own settings still win, and the page says where they do.
+
+### Compatibility and limits
+
+- The pinned phobos-modkit moves from 1.29.0 to 1.30.0, which brings the history tool, the history log and the central settings file.
+- Checked on more than one game: the history tool read phobos-rimworld (676 facts), phobos-ostranauts (609, including 11 releases) and a Project Zomboid repository (60). The history log is named by the game's ID on your list, so a repository's config/installs.json must use the same name (RimWorld's does).
+- Installs and the rest before 19 November 2026 are not on the timeline (your choice): the backups hold the copies, but not when they were installed.
+- The Settings page changes paths only: a folder or a file, typed as a full path.
 ## [0.13.0] - 2026-11-19
 
 The owner's look at 0.12.0 (19 November 2026): "I absolutely love how the code is tracked to every particular item in question", a request to tidy the busiest areas, and "It seems to see changes in DLLs, across the board, where there might not be any". Not yet tested on screen.

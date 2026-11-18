@@ -5,12 +5,14 @@ mod changes_page;
 mod failure;
 mod games;
 mod git;
+mod history_page;
 mod home;
 mod installs_page;
 mod kit;
 mod open_work;
 mod process;
 mod reports;
+mod settings_page;
 mod tests_page;
 
 use failure::{Failure, FailureCode};
@@ -184,10 +186,65 @@ async fn entry_code(
     repository: String,
     changelog: String,
     text: String,
+    commit: Option<String>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<changes_page::EntryCode, Failure> {
     tauri::async_runtime::spawn_blocking(move || {
-        changes_page::entry_code(&game, &repository, &changelog, &text, Some(&hearing(on_progress)))
+        changes_page::entry_code(&game, &repository, &changelog, &text, commit.as_deref(), Some(&hearing(on_progress)))
+    })
+    .await
+    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
+/// Every fact about a game's products over time: from git, and from this PC's history log.
+#[tauri::command]
+async fn timeline(game: String, on_progress: Channel<kit::Progress>) -> Result<history_page::Timeline, Failure> {
+    tauri::async_runtime::spawn_blocking(move || history_page::read(&game, Some(&hearing(on_progress))))
+        .await
+        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
+/// A changelog as it stood at a commit, or at a moment when no commit is named.
+#[tauri::command]
+async fn as_it_stood(
+    game: String,
+    repository: String,
+    changelog: String,
+    commit: Option<String>,
+    when: Option<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<history_page::AsItStood, Failure> {
+    tauri::async_runtime::spawn_blocking(move || {
+        history_page::as_it_stood(
+            &game,
+            &repository,
+            &changelog,
+            commit.as_deref(),
+            when.as_deref(),
+            Some(&hearing(on_progress)),
+        )
+    })
+    .await
+    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
+/// Every setting the tools read, with where each value comes from.
+#[tauri::command]
+async fn settings_list(on_progress: Channel<kit::Progress>) -> Result<settings_page::SettingsReading, Failure> {
+    tauri::async_runtime::spawn_blocking(move || settings_page::read(Some(&hearing(on_progress))))
+        .await
+        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
+/// Sets one setting in the central settings file, or clears it when no value is given, once the owner presses the button.
+#[tauri::command]
+async fn set_setting(
+    key: String,
+    value: Option<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<settings_page::SetResult, Failure> {
+    tauri::async_runtime::spawn_blocking(move || {
+        settings_page::set(&key, value.as_deref(), Some(&hearing(on_progress)))
     })
     .await
     .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
@@ -209,7 +266,11 @@ pub fn run() {
             texture_status,
             encode_textures,
             changes_list,
-            entry_code
+            entry_code,
+            timeline,
+            as_it_stood,
+            settings_list,
+            set_setting
         ])
         .run(tauri::generate_context!())
         .expect("the desktop window could not start");

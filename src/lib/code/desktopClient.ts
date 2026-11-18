@@ -39,6 +39,7 @@ export async function readEntryCode(
       repository: request.repository,
       changelog: request.changelog,
       text: request.entry.text,
+      commit: request.commit ?? null,
       onProgress: progressChannel(onProgress),
     });
     return { state: "ready", found };

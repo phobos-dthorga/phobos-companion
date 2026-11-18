@@ -90,6 +90,8 @@ export type EntryRequest = {
   changelog: string;
   product: string;
   entry: Pick<ChangelogEntry, "version" | "section" | "text" | "lead">;
+  /** A commit to show whole, with every entry it wrote, instead of looking the entry up: a fact on the Timeline page names one. */
+  commit?: string | null;
 };
 
 export type ChangesReading =

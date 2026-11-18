@@ -399,6 +399,32 @@ saw "changes in DLLs, across the board, where there might not be any".
 | "Up to date" beside files that differ | Two states: Only rebuilt, and Files differ (with the sources) |
 | A tall, empty Installed now column | Columns sit at the top; the after column is wider |
 
+## The Timeline page and the Settings page (built 19 Nov 2026, 0.14.0)
+
+**The owner asked for "a timeline (with suitable graph(ic)s) that records/shows how updates were applied, changed, removed, etc.
+over time with a suitably recorded history and its facts", because "I like coming back and reading the CHANGELOGs from a particular
+update-in-moment but I can't because it is now lost to time"**, and, once the history log needed a home, "a central settings page
+where everything or at least, most, of these sorts of things are managed".
+
+| Question | Timeline | Settings |
+| --- | --- | --- |
+| What does it let the person do? | See what happened to every mod over time at a glance, read any day's facts, and read any changelog exactly as it stood then | See every path the tools read and where each value comes from, and change one for every repository at once |
+| What does it stop them doing? | Losing a version's words once a later version rewords or removes them; mistaking today's changelog for what was installed then | Hunting through repositories' ignored files and environment variables to learn why a tool looks where it does |
+| How does it change the way they work? | A changelog becomes a history to walk back through, not only today's page | Settings that hold everywhere live in one place, the Companion's own folder |
+
+| Part | How |
+| --- | --- |
+| Facts from git | phobos-modkit `history timeline` reads every commit that touched a changelog, back to the first, once, and keeps the facts in its cache (about 4 s the first time for phobos-rimworld, under a second after) |
+| Facts from this PC | The history log, one JSON line a fact, one file a game, in this program's own folder by default (owner's choice); the kit's installs, deploy and texture encoding write it as they work. Recorded from 19 Nov 2026; earlier installs were not recovered (owner's choice) |
+| The overview (owner's choice: both views) | One lane a product, one column a day anything happened; quiet days are left out so a long gap takes no room. Each cell is a 44 px button with the strongest mark of the day and a count; its colour comes from the theme by role and never carries the meaning alone (each mark has words, in its label and in the key) |
+| Day by day | Newest first, ten days at a time; each fact names its product, version, time, source and commit, lists its entries (up to eight, with how many more), and offers Read it as it stood and Show the code |
+| As it stood | `history at`: the changelog at the fact's commit, or, for a fact from this PC, at its moment; each entry marked kept, reworded (with its words now) or taken out since |
+| Settings | `settings list` names every repository on the owner's list, so a repository's own settings show; `settings set` writes only the central file, after a press of Save or Use the default |
+
+**The history's ideas are a design to edit** (owner's choice): phobos-modkit's `rules/first-class.md` names what makes a thing a
+first-class citizen (an identity that outlives its label, an address, a history of facts, the same shape in every game), and the
+timeline is built on the first five: Change, Version, Product, Install and Event. Nothing there is a rule until the owner says so.
+
 ## What comes next
 
 **Step 5, the rest of the report viewer.** Forms built from the manifest for the 19 reports that need an input, then the kit's
@@ -422,6 +448,8 @@ that folder.
   yet.
 - It needs Python on the PATH, or `PHOBOS_COMPANION_PYTHON`.
 - `node_modules` sits inside this repository, in a synced folder if the clone is in one, as Observatory's does.
+- The Timeline finds a game's history log by the game's ID on the owner's list, which must match the name in each repository's
+  `config/installs.json`. A game whose tools write no log shows only what its repositories did, and says so.
 
 ## Who chose what
 
@@ -434,6 +462,11 @@ borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
 **Owner (17 Nov 2026):** the Tests page here rather than in the game; a note never passes a row; an NSIS installer.
 
 **Owner (18 Nov 2026):** the Mods page, for updating, going back and backups, led by what the changelogs say each move gains or loses.
+
+**Owner (19 Nov 2026):** the Timeline page with both views (the lanes and the day-by-day list); the history log in this program's
+own folder, with a central settings page to change it; installs recorded from now on, not recovered from backups; the first-class
+citizens written up as a design to edit. **Agent choices:** the marks and their order of strength, ten days at a time, quiet days
+left out of the overview, and paths only on the Settings page for now.
 
 **Agent defaults, owner to revise:** the palette and what each colour means; system fonts; the empty window's wording.
 

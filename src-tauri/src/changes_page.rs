@@ -100,12 +100,34 @@ pub fn entry_arguments(root: &Path, changelog: &str, text: &str) -> Result<Vec<S
     ])
 }
 
-/// The code behind one entry of one of the game's repositories.
+/// The code of one commit, with every entry it wrote into the changelog: for a fact on the Timeline page, whose entries may since
+/// have been reworded or removed. The changelog may be one the repository no longer has; the kit checks the commit is there.
+pub fn commit_arguments(root: &Path, changelog: &str, commit: &str) -> Result<Vec<String>, String> {
+    if !changelog_path(changelog) {
+        return Err(format!("{changelog:?} is not a changelog's path in a repository"));
+    }
+    if !crate::history_page::commit_hash(commit) {
+        return Err(format!("{commit:?} is not a commit"));
+    }
+    Ok(vec![
+        TOOL.to_owned(),
+        ENTRY.to_owned(),
+        "--root".to_owned(),
+        root.display().to_string(),
+        "--changelog".to_owned(),
+        changelog.to_owned(),
+        format!("--commit={commit}"),
+        "--json".to_owned(),
+    ])
+}
+
+/// The code behind one entry of one of the game's repositories, or, with a commit named, behind that commit.
 pub fn entry_code(
     game: &str,
     repository: &str,
     changelog: &str,
     text: &str,
+    commit: Option<&str>,
     listener: Option<kit::Listener>,
 ) -> Result<EntryCode, Failure> {
     let refused = |detail: String| Failure::new(FailureCode::Refused, detail);
@@ -113,7 +135,11 @@ pub fn entry_code(
         .into_iter()
         .find(|r| r.name == repository)
         .ok_or_else(|| refused(format!("{repository} is not one of this game's repositories")))?;
-    let arguments = entry_arguments(&found.path, changelog, text).map_err(refused)?;
+    let arguments = match commit {
+        Some(commit) => commit_arguments(&found.path, changelog, commit),
+        None => entry_arguments(&found.path, changelog, text),
+    }
+    .map_err(refused)?;
     let answer = kit::run_hearing(TOOL, &arguments, listener)?;
     Ok(result_of(&answer, repository))
 }

@@ -12,29 +12,6 @@ fn the_timeline_asks_for_every_repository_and_the_games_log_in_one_run() {
 }
 
 #[test]
-fn a_commit_is_plain_hexadecimal_of_a_sane_length() {
-    assert!(commit_hash("401c6a93"));
-    assert!(commit_hash(&"a".repeat(40)));
-    assert!(!commit_hash("401c6a"));
-    assert!(!commit_hash(&"a".repeat(41)));
-    assert!(!commit_hash("401C6A93"));
-    assert!(!commit_hash("--all"));
-    assert!(!commit_hash("HEAD~1xx"));
-}
-
-#[test]
-fn a_moment_is_an_iso_date_or_time() {
-    assert!(moment("2026-11-12"));
-    assert!(moment("2026-11-18T16:06:49+00:00"));
-    assert!(moment("2026-11-18T16:06:49Z"));
-    assert!(!moment(""));
-    assert!(!moment("--before"));
-    assert!(!moment("yesterday"));
-    assert!(!moment("2026-11-12 15:00"));
-    assert!(!moment(&"1".repeat(MAX_MOMENT + 1)));
-}
-
-#[test]
 fn reading_as_it_stood_names_a_commit_or_a_moment_and_stays_in_the_repository() {
     let by_commit = at_arguments(Path::new("repo"), "mods/Thing/CHANGELOG.md", Some("401c6a93"), None).unwrap();
     assert_eq!(

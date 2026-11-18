@@ -5,9 +5,11 @@
 //! path inside it ending in the changelog's file name, and the entry's text of a sane length. The kit then checks the changelog is
 //! one of the repository's and the entry is in it.
 
-use crate::failure::{Failure, FailureCode};
-use crate::games::{self, Repository};
-use crate::kit;
+use companion_core::args::Args;
+use companion_core::checks;
+use companion_core::failure::Failure;
+use companion_core::games;
+use companion_core::kit::{self, Outcome};
 use serde::Serialize;
 use serde_json::Value;
 use std::path::Path;
@@ -15,9 +17,7 @@ use std::path::Path;
 const TOOL: &str = "changes";
 const LIST: &str = "list";
 const ENTRY: &str = "entry";
-const CHANGELOG_NAME: &str = "CHANGELOG.md";
 const VERSIONS: &str = "5";
-const MAX_PATH: usize = 300;
 const MAX_TEXT: usize = 4000;
 
 /// One repository's changelogs, as the kit reads them.
@@ -38,15 +38,10 @@ pub struct EntryCode {
     pub command_line: String,
 }
 
-fn repositories(game: &str) -> Result<Vec<Repository>, Failure> {
-    let listed = games::load()?.unwrap_or_default();
-    Ok(listed.into_iter().find(|g| g.id == game).map(|g| g.repositories).unwrap_or_default())
-}
-
 /// Every repository of a game that keeps at least one changelog.
 pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<Vec<RepositoryChanges>, Failure> {
     let mut found = Vec::new();
-    for repository in repositories(game)?.into_iter().filter(|r| r.path.is_dir()) {
+    for repository in games::repositories_of(game)?.into_iter().filter(|r| r.path.is_dir()) {
         let answer = kit::run_hearing(TOOL, &list_arguments(&repository.path), listener)?;
         let changelogs = &answer["data"]["changelogs"];
         if changelogs.as_array().is_some_and(|list| !list.is_empty()) {
@@ -57,68 +52,34 @@ pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<Vec<Repositor
 }
 
 fn list_arguments(root: &Path) -> Vec<String> {
-    vec![
-        TOOL.to_owned(),
-        LIST.to_owned(),
-        "--root".to_owned(),
-        root.display().to_string(),
-        "--versions".to_owned(),
-        VERSIONS.to_owned(),
-        "--json".to_owned(),
-    ]
+    Args::new(TOOL, LIST).root(root).pair("--versions", VERSIONS).json()
 }
 
-/// A changelog's path inside a repository: relative, forward slashes, no step upwards, ending in the changelog's file name.
-/// Folder names may hold spaces, as some games' mod folders do.
-pub fn changelog_path(path: &str) -> bool {
-    !path.is_empty()
-        && path.len() <= MAX_PATH
-        && !path.starts_with(['/', '-'])
-        && !path.contains(['\\', ':', '\0', '\n', '\r'])
-        && path.split('/').all(|part| !part.is_empty() && part != "." && part != "..")
-        && path.rsplit('/').next() == Some(CHANGELOG_NAME)
+fn changelog_checked(changelog: &str) -> Result<(), String> {
+    if checks::changelog_path(changelog) {
+        Ok(())
+    } else {
+        Err(format!("{changelog:?} is not a changelog's path in a repository"))
+    }
 }
 
 pub fn entry_arguments(root: &Path, changelog: &str, text: &str) -> Result<Vec<String>, String> {
-    if !changelog_path(changelog) {
-        return Err(format!("{changelog:?} is not a changelog's path in a repository"));
-    }
-    let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
+    changelog_checked(changelog)?;
+    let text = checks::one_line(text);
     if text.is_empty() || text.chars().count() > MAX_TEXT {
         return Err("that entry's text is empty or too long to look for".to_owned());
     }
-    Ok(vec![
-        TOOL.to_owned(),
-        ENTRY.to_owned(),
-        "--root".to_owned(),
-        root.display().to_string(),
-        "--changelog".to_owned(),
-        changelog.to_owned(),
-        // One argument, so text that opens with a dash is never read as an option.
-        format!("--text={text}"),
-        "--json".to_owned(),
-    ])
+    Ok(Args::new(TOOL, ENTRY).root(root).pair("--changelog", changelog).given("--text", &text).json())
 }
 
 /// The code of one commit, with every entry it wrote into the changelog: for a fact on the Timeline page, whose entries may since
 /// have been reworded or removed. The changelog may be one the repository no longer has; the kit checks the commit is there.
 pub fn commit_arguments(root: &Path, changelog: &str, commit: &str) -> Result<Vec<String>, String> {
-    if !changelog_path(changelog) {
-        return Err(format!("{changelog:?} is not a changelog's path in a repository"));
-    }
-    if !crate::history_page::commit_hash(commit) {
+    changelog_checked(changelog)?;
+    if !checks::commit_hash(commit) {
         return Err(format!("{commit:?} is not a commit"));
     }
-    Ok(vec![
-        TOOL.to_owned(),
-        ENTRY.to_owned(),
-        "--root".to_owned(),
-        root.display().to_string(),
-        "--changelog".to_owned(),
-        changelog.to_owned(),
-        format!("--commit={commit}"),
-        "--json".to_owned(),
-    ])
+    Ok(Args::new(TOOL, ENTRY).root(root).pair("--changelog", changelog).given("--commit", commit).json())
 }
 
 /// The code behind one entry of one of the game's repositories, or, with a commit named, behind that commit.
@@ -130,26 +91,22 @@ pub fn entry_code(
     commit: Option<&str>,
     listener: Option<kit::Listener>,
 ) -> Result<EntryCode, Failure> {
-    let refused = |detail: String| Failure::new(FailureCode::Refused, detail);
-    let found = repositories(game)?
-        .into_iter()
-        .find(|r| r.name == repository)
-        .ok_or_else(|| refused(format!("{repository} is not one of this game's repositories")))?;
+    let found = games::named_repository(game, repository)?;
     let arguments = match commit {
         Some(commit) => commit_arguments(&found.path, changelog, commit),
         None => entry_arguments(&found.path, changelog, text),
     }
-    .map_err(refused)?;
+    .map_err(Failure::refused)?;
     let answer = kit::run_hearing(TOOL, &arguments, listener)?;
     Ok(result_of(&answer, repository))
 }
 
 fn result_of(answer: &Value, repository: &str) -> EntryCode {
-    let data = &answer["data"];
+    let outcome = Outcome::of(answer);
     EntryCode {
-        found: data["ok"] != Value::Bool(false),
-        refusal: data["refusal"].as_str().map(str::to_owned),
-        code: data.clone(),
+        found: outcome.ok,
+        refusal: outcome.refusal,
+        code: answer["data"].clone(),
         command_line: format!("python -m phobos_modkit changes entry   (on {repository})"),
     }
 }

@@ -8,9 +8,11 @@
 //! one this program makes, and the kit's manifest must still call it `writes` or `runs`, never `owner-only`; every name is a plain
 //! folder name or package ID. The kit then checks again (a known mod, a real backup, the game closed) and refuses in words.
 
-use crate::failure::{Failure, FailureCode};
-use crate::games::{self, Repository};
-use crate::kit;
+use companion_core::args::Args;
+use companion_core::checks::plain_name;
+use companion_core::failure::Failure;
+use companion_core::games::{self, Repository};
+use companion_core::kit::{self, Outcome, allowed_by_manifest};
 use serde::Serialize;
 use serde_json::Value;
 use std::fs;
@@ -22,8 +24,6 @@ const ENCODE: &str = "encode";
 const TEXTURES_SURFACE: &str = "textures";
 const CONFIG: [&str; 2] = ["config", "installs.json"];
 const MOVES: [&str; 4] = ["build", "install", "backup", "restore"];
-const ALLOWED_EFFECTS: [&str; 2] = ["writes", "runs"];
-const MAX_NAME: usize = 120;
 const MAX_MODS: usize = 400;
 
 /// One repository's mods, as the kit reads them.
@@ -46,9 +46,7 @@ pub struct MoveResult {
 
 /// The repositories of one game that say where their mods are installed.
 fn with_installs(game: &str) -> Result<Vec<Repository>, Failure> {
-    let listed = games::load()?.unwrap_or_default();
-    let found = listed.into_iter().find(|g| g.id == game);
-    Ok(found.map(|g| g.repositories.into_iter().filter(|r| opts_in(&r.path)).collect()).unwrap_or_default())
+    Ok(games::repositories_of(game)?.into_iter().filter(|r| opts_in(&r.path)).collect())
 }
 
 fn opts_in(path: &Path) -> bool {
@@ -64,7 +62,7 @@ pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<Vec<Repositor
     let mut found = Vec::new();
     for repository in with_installs(game)? {
         let answer = kit::run_hearing(TOOL, &status_arguments(&repository.path), listener)?;
-        refusal_as_failure(&answer)?;
+        Outcome::required(&answer)?;
         found.push(RepositoryInstalls {
             status: answer["data"].clone(),
             command_line: format!("python scripts/installs.py status   (in {})", repository.name),
@@ -74,18 +72,8 @@ pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<Vec<Repositor
     Ok(found)
 }
 
-fn refusal_as_failure(answer: &Value) -> Result<(), Failure> {
-    if answer["data"]["ok"] == Value::Bool(false) {
-        return Err(Failure::new(
-            FailureCode::ToolFailed,
-            answer["data"]["refusal"].as_str().unwrap_or_default().to_owned(),
-        ));
-    }
-    Ok(())
-}
-
 fn status_arguments(root: &Path) -> Vec<String> {
-    vec![TOOL.to_owned(), STATUS.to_owned(), "--root".to_owned(), root.display().to_string(), "--json".to_owned()]
+    Args::new(TOOL, STATUS).root(root).json()
 }
 
 /// Makes one move the owner asked for, after the checks above. `mods` names the mods (none for a build, one for a backup or going
@@ -98,42 +86,16 @@ pub fn make_move(
     backup: Option<&str>,
     listener: Option<kit::Listener>,
 ) -> Result<MoveResult, Failure> {
-    let refused = |detail: String| Failure::new(FailureCode::Refused, detail);
     let found = with_installs(game)?
         .into_iter()
         .find(|r| r.name == repository)
-        .ok_or_else(|| refused(format!("{repository} does not say where its mods are installed")))?;
+        .ok_or_else(|| Failure::refused(format!("{repository} does not say where its mods are installed")))?;
     if !MOVES.contains(&action) {
-        return Err(refused(format!("{action:?} is not a move this program makes")));
+        return Err(Failure::refused(format!("{action:?} is not a move this program makes")));
     }
-    allowed_by_manifest(&kit::read_manifest()?, TOOL, action).map_err(refused)?;
-    let arguments = move_arguments(&found.path, action, mods, backup).map_err(refused)?;
+    allowed_by_manifest(&kit::read_manifest()?, TOOL, action).map_err(Failure::refused)?;
+    let arguments = move_arguments(&found.path, action, mods, backup).map_err(Failure::refused)?;
     Ok(result_of(&kit::run_hearing(TOOL, &arguments, listener)?))
-}
-
-/// The kit's manifest still says this report writes or runs (never owner-only, never one it does not have).
-pub fn allowed_by_manifest(manifest: &Value, command: &str, report: &str) -> Result<(), String> {
-    let commands = manifest["data"]["commands"].as_array().map_or(&[][..], Vec::as_slice);
-    let found = commands
-        .iter()
-        .find(|c| c["name"].as_str() == Some(command))
-        .and_then(|c| c["reports"].as_array())
-        .and_then(|reports| reports.iter().find(|r| r["name"].as_str() == Some(report)))
-        .ok_or_else(|| format!("the tool kit has no {command} {report}"))?;
-    let effect = found["effect"].as_str().unwrap_or_default();
-    if ALLOWED_EFFECTS.contains(&effect) {
-        Ok(())
-    } else {
-        Err(format!("the tool kit says {command} {report} is {effect:?}, which this program does not run"))
-    }
-}
-
-/// A mod's folder name, a backup's or a package ID: letters, digits, dots, dashes and underscores, never starting with either.
-pub fn plain_name(name: &str) -> bool {
-    !name.is_empty()
-        && name.len() <= MAX_NAME
-        && !name.starts_with(['-', '.'])
-        && name.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_'))
 }
 
 fn mod_arguments(mods: &[String]) -> Result<Vec<String>, String> {
@@ -145,36 +107,32 @@ fn mod_arguments(mods: &[String]) -> Result<Vec<String>, String> {
         if !plain_name(name) {
             return Err(format!("{name:?} is not a mod's folder name"));
         }
-        arguments.extend(["--mod".to_owned(), name.clone()]);
+        arguments.extend(Args::default().pair("--mod", name).done());
     }
     Ok(arguments)
 }
 
 pub fn move_arguments(root: &Path, action: &str, mods: &[String], backup: Option<&str>) -> Result<Vec<String>, String> {
-    let mut arguments = vec![TOOL.to_owned(), action.to_owned(), "--root".to_owned(), root.display().to_string()];
-    match (action, mods.len(), backup) {
-        ("build", 0, None) => {}
+    let arguments = Args::new(TOOL, action).root(root);
+    let arguments = match (action, mods.len(), backup) {
+        ("build", 0, None) => arguments,
         ("build", _, _) => return Err("a build names no mod".to_owned()),
         ("install", n, None) if n > 0 => arguments.extend(mod_arguments(mods)?),
         ("backup", 1, None) => arguments.extend(mod_arguments(mods)?),
-        ("restore", 1, Some(name)) if plain_name(name) => {
-            arguments.extend(mod_arguments(mods)?);
-            arguments.extend(["--backup".to_owned(), name.to_owned()]);
-        }
+        ("restore", 1, Some(name)) if plain_name(name) => arguments.extend(mod_arguments(mods)?).pair("--backup", name),
         ("restore", 1, _) => return Err("going back needs one of the mod's backups".to_owned()),
         _ => return Err(format!("{action} was asked with the wrong mods or backup")),
-    }
-    arguments.push("--json".to_owned());
-    Ok(arguments)
+    };
+    Ok(arguments.json())
 }
 
 fn result_of(answer: &Value) -> MoveResult {
-    let data = &answer["data"];
+    let outcome = Outcome::of(answer);
     MoveResult {
-        ok: data["ok"].as_bool().unwrap_or(false),
+        ok: outcome.ok,
         title: answer["report"]["title"].as_str().unwrap_or_default().to_owned(),
-        refusal: data["refusal"].as_str().map(str::to_owned),
-        data: data.clone(),
+        refusal: outcome.refusal,
+        data: answer["data"].clone(),
     }
 }
 
@@ -230,21 +188,21 @@ pub fn read_textures(game: &str, listener: Option<kit::Listener>) -> Result<Opti
     };
     let arguments = with_settings(vec![command.clone(), STATUS.to_owned()], settings_file(game)?);
     let answer = kit::run_hearing(&command, &arguments, listener)?;
-    refusal_as_failure(&answer)?;
+    Outcome::required(&answer)?;
     Ok(Some(answer["data"].clone()))
 }
 
 /// Encodes the named mods' textures, after the same kind of checks as the moves.
 pub fn encode_textures(game: &str, mods: &[String], listener: Option<kit::Listener>) -> Result<MoveResult, Failure> {
-    let refused = |detail: String| Failure::new(FailureCode::Refused, detail);
     let manifest = kit::read_manifest()?;
-    let command = textures_command(&manifest, game).ok_or_else(|| refused(format!("{game} has no texture check")))?;
-    allowed_by_manifest(&manifest, &command, ENCODE).map_err(refused)?;
+    let command =
+        textures_command(&manifest, game).ok_or_else(|| Failure::refused(format!("{game} has no texture check")))?;
+    allowed_by_manifest(&manifest, &command, ENCODE).map_err(Failure::refused)?;
     if mods.is_empty() {
-        return Err(refused("name at least one mod".to_owned()));
+        return Err(Failure::refused("name at least one mod"));
     }
     let mut arguments = vec![command.clone(), ENCODE.to_owned()];
-    arguments.extend(mod_arguments(mods).map_err(refused)?);
+    arguments.extend(mod_arguments(mods).map_err(Failure::refused)?);
     Ok(result_of(&kit::run_hearing(&command, &with_settings(arguments, settings_file(game)?), listener)?))
 }
 

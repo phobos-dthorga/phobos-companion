@@ -24,4 +24,9 @@ impl Failure {
     pub fn new(code: FailureCode, detail: impl Into<String>) -> Self {
         Self { code, detail: detail.into() }
     }
+
+    /// The host would not do what the window asked, with the reason in words.
+    pub fn refused(detail: impl Into<String>) -> Self {
+        Self::new(FailureCode::Refused, detail)
+    }
 }

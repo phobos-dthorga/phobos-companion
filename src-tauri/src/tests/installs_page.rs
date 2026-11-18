@@ -34,19 +34,6 @@ fn moves_run_only_while_the_kit_says_they_write_or_run() {
 }
 
 #[test]
-fn names_are_plain_folder_names_or_package_ids() {
-    assert!(plain_name("PhobosFramework"));
-    assert!(plain_name("PhobosFramework-20261118-200751"));
-    assert!(plain_name("ludeon.rimworld_steam"));
-    assert!(!plain_name(""));
-    assert!(!plain_name("--apply"));
-    assert!(!plain_name(".."));
-    assert!(!plain_name("Mods/Other"));
-    assert!(!plain_name("a b"));
-    assert!(!plain_name(&"x".repeat(MAX_NAME + 1)));
-}
-
-#[test]
 fn each_move_takes_the_mods_it_needs_and_no_others() {
     let root = Path::new("repo");
     let restore = move_arguments(root, "restore", &names(&["Thing"]), Some("Thing-20261118-200751")).unwrap();
@@ -86,7 +73,7 @@ fn a_refusal_comes_back_in_words() {
     let result = result_of(&answer);
     assert!(!result.ok);
     assert_eq!(result.refusal.as_deref(), Some("The game is running."));
-    assert!(refusal_as_failure(&answer).is_err());
+    assert!(Outcome::required(&answer).is_err());
     let done = result_of(&json!({"report": {"title": "Backed up Thing"}, "data": {"ok": true, "backup": "Thing-1"}}));
     assert!(done.ok);
     assert_eq!(done.title, "Backed up Thing");

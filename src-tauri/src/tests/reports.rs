@@ -1,4 +1,5 @@
 use super::*;
+use companion_core::failure::FailureCode;
 use serde_json::json;
 
 fn read_report(name: &str, question: Option<&str>) -> Value {

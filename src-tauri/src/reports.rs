@@ -1,8 +1,8 @@
 //! Which of the kit's reports the window may offer for a game, and running them. The rule lives here, not in the window:
 //! a report runs only if the manifest says it only reads, has a plain question, and needs nothing typed.
 
-use crate::failure::{Failure, FailureCode};
-use crate::kit;
+use companion_core::failure::Failure;
+use companion_core::kit;
 use serde::Serialize;
 use serde_json::Value;
 
@@ -87,7 +87,7 @@ fn find_runnable<'a>(
     command: &str,
     report: Option<&str>,
 ) -> Result<&'a [Value], Failure> {
-    let refused = || Failure::new(FailureCode::Refused, format!("{command} {}", report.unwrap_or_default()));
+    let refused = || Failure::refused(format!("{command} {}", report.unwrap_or_default()));
     let entry = commands_of(manifest)
         .iter()
         .find(|c| c["name"].as_str() == Some(command) && c["game"].as_str() == Some(game))

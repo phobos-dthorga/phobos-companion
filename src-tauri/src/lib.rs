@@ -1,23 +1,33 @@
 //! The desktop host: it reads what the window shows. The window only presents.
 
+//! What more than one part uses, and needs no window, lives in the `companion-core` crate (`core/`): the games list, the tool kit,
+//! request checks, failures. This file holds the Tauri commands, each one line of delegation on a worker thread.
+
 mod changelog;
 mod changes_page;
-mod failure;
-mod games;
-mod git;
 mod history_page;
 mod home;
 mod installs_page;
-mod kit;
 mod open_work;
-mod process;
 mod reports;
 mod settings_page;
 mod tests_page;
 
-use failure::{Failure, FailureCode};
+use companion_core::failure::{Failure, FailureCode};
+use companion_core::kit;
 use tauri::Manager;
 use tauri::ipc::Channel;
+
+/// Runs work that starts processes or reads files on a worker thread, so the window never waits on it.
+async fn blocking<T, F>(work: F) -> Result<T, Failure>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T, Failure> + Send + 'static,
+{
+    tauri::async_runtime::spawn_blocking(work)
+        .await
+        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
 
 /// Sends each progress line of a working tool to the window, through the channel the window gave with its request. A window that
 /// has gone away is not an error: the work carries on.
@@ -30,25 +40,19 @@ fn hearing(channel: Channel<kit::Progress>) -> impl Fn(kit::Progress) + Sync {
 /// How the tools are: read on a worker thread, since it starts a process.
 #[tauri::command]
 async fn kit_status() -> Result<kit::KitStatus, Failure> {
-    tauri::async_runtime::spawn_blocking(kit::read_status)
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(kit::read_status).await
 }
 
 /// Where the owner left each game: read on a worker thread, since it starts git for every repository.
 #[tauri::command]
 async fn home_status() -> Result<home::Home, Failure> {
-    tauri::async_runtime::spawn_blocking(home::read_home)
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(home::read_home).await
 }
 
 /// The reports on offer for a game.
 #[tauri::command]
 async fn report_catalogue(game: String) -> Result<Vec<reports::ReportEntry>, Failure> {
-    tauri::async_runtime::spawn_blocking(move || reports::catalogue(&game))
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || reports::catalogue(&game)).await
 }
 
 /// Runs one report the host agrees the window may run.
@@ -60,11 +64,7 @@ async fn run_report(
     top: u32,
     on_progress: Channel<kit::Progress>,
 ) -> Result<reports::ReportResult, Failure> {
-    tauri::async_runtime::spawn_blocking(move || {
-        reports::run(&game, &command, report.as_deref(), top, Some(&hearing(on_progress)))
-    })
-    .await
-    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || reports::run(&game, &command, report.as_deref(), top, Some(&hearing(on_progress)))).await
 }
 
 /// This program's own data folder, where the owner's test verdicts are kept.
@@ -76,9 +76,7 @@ fn data_folder(app: &tauri::AppHandle) -> Result<std::path::PathBuf, Failure> {
 #[tauri::command]
 async fn test_lists(app: tauri::AppHandle, game: String) -> Result<Vec<tests_page::TestList>, Failure> {
     let data = data_folder(&app)?;
-    tauri::async_runtime::spawn_blocking(move || tests_page::read(&game, &data))
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || tests_page::read(&game, &data)).await
 }
 
 /// Records the owner's verdict on one test row, in this program's own folder.
@@ -92,9 +90,7 @@ async fn record_verdict(
     note: String,
 ) -> Result<tests_page::Recorded, Failure> {
     let data = data_folder(&app)?;
-    tauri::async_runtime::spawn_blocking(move || tests_page::record(&game, &repository, &row, &verdict, &note, &data))
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || tests_page::record(&game, &repository, &row, &verdict, &note, &data)).await
 }
 
 /// Records the owner's decision on a note no row names ("make a row" or "no row needed"), beside the verdicts.
@@ -108,11 +104,7 @@ async fn record_key_decision(
     note: String,
 ) -> Result<tests_page::RecordedDecision, Failure> {
     let data = data_folder(&app)?;
-    tauri::async_runtime::spawn_blocking(move || {
-        tests_page::record_decision(&game, &repository, &key, &decision, &note, &data)
-    })
-    .await
-    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || tests_page::record_decision(&game, &repository, &key, &decision, &note, &data)).await
 }
 
 /// Each repository's mods: installed, in the repository and in backups, with what moving between them gains or loses.
@@ -121,9 +113,7 @@ async fn mod_installs(
     game: String,
     on_progress: Channel<kit::Progress>,
 ) -> Result<Vec<installs_page::RepositoryInstalls>, Failure> {
-    tauri::async_runtime::spawn_blocking(move || installs_page::read(&game, Some(&hearing(on_progress))))
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || installs_page::read(&game, Some(&hearing(on_progress)))).await
 }
 
 /// Makes one move the owner asked for on the Mods page: build, install, back up, or go back to a backup.
@@ -136,11 +126,10 @@ async fn move_install(
     backup: Option<String>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<installs_page::MoveResult, Failure> {
-    tauri::async_runtime::spawn_blocking(move || {
+    blocking(move || {
         installs_page::make_move(&game, &repository, &action, &mods, backup.as_deref(), Some(&hearing(on_progress)))
     })
     .await
-    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
 /// Whether any active mod's textures need encoding before the next launch; None for a game with no texture check.
@@ -149,9 +138,7 @@ async fn texture_status(
     game: String,
     on_progress: Channel<kit::Progress>,
 ) -> Result<Option<serde_json::Value>, Failure> {
-    tauri::async_runtime::spawn_blocking(move || installs_page::read_textures(&game, Some(&hearing(on_progress))))
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || installs_page::read_textures(&game, Some(&hearing(on_progress)))).await
 }
 
 /// Encodes the named mods' textures, once the owner has confirmed.
@@ -161,11 +148,7 @@ async fn encode_textures(
     mods: Vec<String>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<installs_page::MoveResult, Failure> {
-    tauri::async_runtime::spawn_blocking(move || {
-        installs_page::encode_textures(&game, &mods, Some(&hearing(on_progress)))
-    })
-    .await
-    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || installs_page::encode_textures(&game, &mods, Some(&hearing(on_progress)))).await
 }
 
 /// What each repository's changelogs say changed lately, for any game.
@@ -174,9 +157,7 @@ async fn changes_list(
     game: String,
     on_progress: Channel<kit::Progress>,
 ) -> Result<Vec<changes_page::RepositoryChanges>, Failure> {
-    tauri::async_runtime::spawn_blocking(move || changes_page::read(&game, Some(&hearing(on_progress))))
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || changes_page::read(&game, Some(&hearing(on_progress)))).await
 }
 
 /// The code behind one changelog entry: the commit that wrote it, and what that commit changed.
@@ -189,19 +170,16 @@ async fn entry_code(
     commit: Option<String>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<changes_page::EntryCode, Failure> {
-    tauri::async_runtime::spawn_blocking(move || {
+    blocking(move || {
         changes_page::entry_code(&game, &repository, &changelog, &text, commit.as_deref(), Some(&hearing(on_progress)))
     })
     .await
-    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
 /// Every fact about a game's products over time: from git, and from this PC's history log.
 #[tauri::command]
 async fn timeline(game: String, on_progress: Channel<kit::Progress>) -> Result<history_page::Timeline, Failure> {
-    tauri::async_runtime::spawn_blocking(move || history_page::read(&game, Some(&hearing(on_progress))))
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || history_page::read(&game, Some(&hearing(on_progress)))).await
 }
 
 /// A changelog as it stood at a commit, or at a moment when no commit is named.
@@ -214,7 +192,7 @@ async fn as_it_stood(
     when: Option<String>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<history_page::AsItStood, Failure> {
-    tauri::async_runtime::spawn_blocking(move || {
+    blocking(move || {
         history_page::as_it_stood(
             &game,
             &repository,
@@ -225,15 +203,12 @@ async fn as_it_stood(
         )
     })
     .await
-    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
 /// Every setting the tools read, with where each value comes from.
 #[tauri::command]
 async fn settings_list(on_progress: Channel<kit::Progress>) -> Result<settings_page::SettingsReading, Failure> {
-    tauri::async_runtime::spawn_blocking(move || settings_page::read(Some(&hearing(on_progress))))
-        .await
-        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || settings_page::read(Some(&hearing(on_progress)))).await
 }
 
 /// Sets one setting in the central settings file, or clears it when no value is given, once the owner presses the button.
@@ -243,11 +218,7 @@ async fn set_setting(
     value: Option<String>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<settings_page::SetResult, Failure> {
-    tauri::async_runtime::spawn_blocking(move || {
-        settings_page::set(&key, value.as_deref(), Some(&hearing(on_progress)))
-    })
-    .await
-    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+    blocking(move || settings_page::set(&key, value.as_deref(), Some(&hearing(on_progress)))).await
 }
 
 /// Starts the program.

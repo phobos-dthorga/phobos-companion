@@ -44,7 +44,7 @@ pub struct Game {
 fn list_path() -> PathBuf {
     env::var_os(LIST_VARIABLE)
         .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join(".local").join("games.json"))
+        .unwrap_or_else(|| crate::repository_root().join(".local").join("games.json"))
 }
 
 /// The games on the list, or None when there is no list yet.
@@ -57,6 +57,37 @@ pub fn load() -> Result<Option<Vec<Game>>, Failure> {
         Err(problem) if problem.kind() == ErrorKind::NotFound => Ok(None),
         Err(problem) => Err(unreadable(problem.to_string())),
     }
+}
+
+/// One game on the owner's list, or None when it is not there (or there is no list).
+pub fn find(id: &str) -> Result<Option<Game>, Failure> {
+    Ok(load()?.unwrap_or_default().into_iter().find(|game| game.id == id))
+}
+
+/// Every repository of one game; none for a game not on the list.
+pub fn repositories_of(id: &str) -> Result<Vec<Repository>, Failure> {
+    Ok(find(id)?.map(|game| game.repositories).unwrap_or_default())
+}
+
+/// One of a game's repositories by name, refused in words when it is not one of the game's.
+pub fn named_repository(id: &str, name: &str) -> Result<Repository, Failure> {
+    repositories_of(id)?
+        .into_iter()
+        .find(|repository| repository.name == name)
+        .ok_or_else(|| Failure::refused(format!("{name} is not one of this game's repositories")))
+}
+
+/// Every repository of every game, each once, in the list's order.
+pub fn every_repository() -> Result<Vec<Repository>, Failure> {
+    let mut found: Vec<Repository> = Vec::new();
+    for game in load()?.unwrap_or_default() {
+        for repository in game.repositories {
+            if !found.iter().any(|known| known.path == repository.path) {
+                found.push(repository);
+            }
+        }
+    }
+    Ok(found)
 }
 
 fn parse(text: &str) -> Result<Vec<Game>, String> {

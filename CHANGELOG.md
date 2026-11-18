@@ -4,6 +4,17 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-11-19
+
+The owner asked for one shared library for code more than one part of the Companion uses (19 November 2026), after an audit (docs/shared-code-audit.md) found the same code written 3 to 17 times, and in two places already drifting apart. Owner's choices: a library crate for the host rather than a DLL, and all four steps of the audit. Nothing should look or behave differently, except where the copies had drifted. Not yet tested on screen.
+
+### Changed
+
+- **The host's shared code is one library, companion-core** (src-tauri/core): the games list, running the tool kit, failures, checks on what the window asks for, and building the kit's arguments, with no window in it, so it is tested on its own and a second front end could use it whole. Every page's host module and the 17 commands now go through it.
+
+### Fixed
+
+- The pages read a tool's answer by one rule. Before, the Changes and Timeline pages counted an answer that did not say whether it worked as a success, and the Mods and Settings pages as a failure.
 ## [0.15.1] - 2026-11-19
 
 The owner asked for the Timeline's day-by-day list to be tidied and more streamlined (19 November 2026), "and if other areas can benefit too, then go for it". Not yet tested on screen.

@@ -81,3 +81,15 @@ fn hears_a_real_tool_while_it_works_and_still_reads_its_answer() {
     // Without a listener the same tool is run silently and answers the same.
     assert_eq!(run("changes", &arguments).unwrap()["data"]["changelogs"], answer["data"]["changelogs"]);
 }
+
+#[test]
+fn one_rule_reads_every_answer() {
+    use serde_json::json;
+    assert!(Outcome::of(&json!({"data": {"files": []}})).ok);
+    assert!(Outcome::of(&json!({"data": {"ok": true}})).ok);
+    let refused = Outcome::of(&json!({"data": {"ok": false, "refusal": "The game is running."}}));
+    assert!(!refused.ok);
+    assert_eq!(refused.refusal.as_deref(), Some("The game is running."));
+    assert!(Outcome::required(&json!({"data": {"ok": false, "refusal": "no"}})).is_err());
+    assert!(Outcome::required(&json!({"data": {}})).is_ok());
+}

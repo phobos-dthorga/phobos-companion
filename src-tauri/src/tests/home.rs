@@ -1,5 +1,5 @@
 use super::*;
-use crate::git::Commit;
+use companion_core::git::Commit;
 use std::path::PathBuf;
 
 fn game() -> Game {

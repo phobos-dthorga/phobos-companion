@@ -54,9 +54,9 @@ pub struct KitStatus {
 
 /// The kit's Python folder. A packaged program will carry its own copy; for now it is the submodule it was built from.
 fn kit_folder() -> PathBuf {
-    env::var_os(KIT_FOLDER_VARIABLE).map(PathBuf::from).unwrap_or_else(|| {
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join("external").join("phobos-modkit").join("python")
-    })
+    env::var_os(KIT_FOLDER_VARIABLE)
+        .map(PathBuf::from)
+        .unwrap_or_else(|| crate::repository_root().join("external").join("phobos-modkit").join("python"))
 }
 
 fn python() -> String {
@@ -121,6 +121,51 @@ pub fn run_hearing(tool: &str, arguments: &[String], listener: Option<Listener>)
     match parse_envelope(&bytes.map_err(failed)?, tool) {
         Err(_) if !status.success() => Err(Failure::new(FailureCode::ToolFailed, said)),
         answer => answer,
+    }
+}
+
+/// Whether the kit did what it was asked: one rule for every answer. A tool that refuses says so with `ok: false` and its reason in
+/// `refusal`; an answer without `ok` is a report, which succeeded.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Outcome {
+    pub ok: bool,
+    pub refusal: Option<String>,
+}
+
+impl Outcome {
+    pub fn of(answer: &Value) -> Self {
+        let data = &answer["data"];
+        Self { ok: data["ok"] != Value::Bool(false), refusal: data["refusal"].as_str().map(str::to_owned) }
+    }
+
+    /// A refusal as a failure, for a reading the page cannot show without.
+    pub fn required(answer: &Value) -> Result<(), Failure> {
+        let outcome = Self::of(answer);
+        if outcome.ok {
+            Ok(())
+        } else {
+            Err(Failure::new(FailureCode::ToolFailed, outcome.refusal.unwrap_or_default()))
+        }
+    }
+}
+
+const ALLOWED_EFFECTS: [&str; 2] = ["writes", "runs"];
+
+/// The kit's manifest still says this report writes or runs (never owner-only, never one it does not have): checked before every
+/// change the program makes for the owner.
+pub fn allowed_by_manifest(manifest: &Value, command: &str, report: &str) -> Result<(), String> {
+    let commands = manifest["data"]["commands"].as_array().map_or(&[][..], Vec::as_slice);
+    let found = commands
+        .iter()
+        .find(|c| c["name"].as_str() == Some(command))
+        .and_then(|c| c["reports"].as_array())
+        .and_then(|reports| reports.iter().find(|r| r["name"].as_str() == Some(report)))
+        .ok_or_else(|| format!("the tool kit has no {command} {report}"))?;
+    let effect = found["effect"].as_str().unwrap_or_default();
+    if ALLOWED_EFFECTS.contains(&effect) {
+        Ok(())
+    } else {
+        Err(format!("the tool kit says {command} {report} is {effect:?}, which this program does not run"))
     }
 }
 

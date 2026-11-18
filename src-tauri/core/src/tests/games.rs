@@ -40,6 +40,6 @@ fn refuses_the_same_game_twice() {
 
 #[test]
 fn the_example_list_is_valid() {
-    let text = include_str!("../../../config/games.example.json");
+    let text = include_str!("../../../../config/games.example.json");
     assert_eq!(parse(text).unwrap().len(), 2);
 }

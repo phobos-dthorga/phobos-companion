@@ -1,10 +1,10 @@
 //! The home page's answer to "where was I?", game by game. It only reads.
 
 use crate::changelog::{self, PendingRelease};
-use crate::failure::Failure;
-use crate::games::{self, Game, Repository};
-use crate::git::{self, ReadFailure, Reading, RepositoryProblem};
 use crate::open_work;
+use companion_core::failure::Failure;
+use companion_core::games::{self, Game, Repository};
+use companion_core::git::{self, ReadFailure, Reading, RepositoryProblem};
 use serde::Serialize;
 use std::cmp::Reverse;
 use std::thread;

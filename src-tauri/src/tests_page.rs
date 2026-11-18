@@ -6,9 +6,11 @@
 //! `test-key-decisions/<repository>.jsonl`). The kit's `test-pass` reads both; `apply` later writes verdicts into the test list
 //! when an agent session or the owner runs it. Nothing here touches a game, a save or a repository.
 
-use crate::failure::{Failure, FailureCode};
-use crate::games::{self, Repository};
-use crate::kit;
+use companion_core::args::Args;
+use companion_core::checks;
+use companion_core::failure::{Failure, FailureCode};
+use companion_core::games::{self, Repository};
+use companion_core::kit;
 use serde::Serialize;
 use serde_json::Value;
 use std::fs::{self, OpenOptions};
@@ -59,9 +61,7 @@ pub struct RecordedDecision {
 
 /// The repositories of one game that keep a test list.
 fn with_test_lists(game: &str) -> Result<Vec<Repository>, Failure> {
-    let listed = games::load()?.unwrap_or_default();
-    let found = listed.into_iter().find(|g| g.id == game);
-    Ok(found.map(|g| g.repositories.into_iter().filter(|r| has_test_list(&r.path)).collect()).unwrap_or_default())
+    Ok(games::repositories_of(game)?.into_iter().filter(|r| has_test_list(&r.path)).collect())
 }
 
 fn has_test_list(path: &Path) -> bool {
@@ -82,20 +82,13 @@ pub fn decisions_file(data: &Path, repository: &str) -> PathBuf {
 pub fn read(game: &str, data: &Path) -> Result<Vec<TestList>, Failure> {
     let mut lists = Vec::new();
     for repository in with_test_lists(game)? {
-        let arguments = vec![
-            TOOL.to_owned(),
-            "report".to_owned(),
-            "--root".to_owned(),
-            repository.path.display().to_string(),
-            "--verdicts".to_owned(),
-            verdicts_file(data, &repository.name).display().to_string(),
-            "--decisions".to_owned(),
-            decisions_file(data, &repository.name).display().to_string(),
-            "--all".to_owned(),
-            "--top".to_owned(),
-            MAX_ROWS.to_owned(),
-            "--json".to_owned(),
-        ];
+        let arguments = Args::new(TOOL, "report")
+            .root(&repository.path)
+            .path("--verdicts", &verdicts_file(data, &repository.name))
+            .path("--decisions", &decisions_file(data, &repository.name))
+            .flag("--all")
+            .pair("--top", MAX_ROWS)
+            .json();
         let answer = kit::run(TOOL, &arguments)?;
         lists.push(TestList {
             title: answer["report"]["title"].as_str().unwrap_or_default().to_owned(),
@@ -144,11 +137,10 @@ pub fn record_decision(
 
 /// Appends a checked line to a file of this program's own, once the repository is known to keep a test list.
 fn write_line(game: &str, repository: &str, line: Result<String, String>, file: &Path) -> Result<String, Failure> {
-    let refused = |detail: &str| Failure::new(FailureCode::Refused, detail);
     if !with_test_lists(game)?.iter().any(|r| r.name == repository) {
-        return Err(refused("that repository keeps no test list"));
+        return Err(Failure::refused("that repository keeps no test list"));
     }
-    let line = line.map_err(|detail| refused(&detail))?;
+    let line = line.map_err(Failure::refused)?;
     append(file, &line)
         .map_err(|problem| Failure::new(FailureCode::WriteFailed, format!("{}: {problem}", file.display())))?;
     Ok(now_utc())
@@ -165,7 +157,7 @@ fn append(file: &Path, line: &str) -> std::io::Result<()> {
 
 /// A note folded onto one line, or why it is refused.
 fn one_line_note(note: &str) -> Result<String, String> {
-    let note: String = note.split_whitespace().collect::<Vec<_>>().join(" ");
+    let note = checks::one_line(note);
     if note.chars().count() > MAX_NOTE {
         return Err(format!("the note is longer than {MAX_NOTE} characters"));
     }

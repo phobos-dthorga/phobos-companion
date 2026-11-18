@@ -2,23 +2,6 @@ use super::*;
 use serde_json::json;
 
 #[test]
-fn a_changelog_path_stays_inside_its_repository() {
-    assert!(changelog_path("CHANGELOG.md"));
-    assert!(changelog_path("mods/PhobosFramework/CHANGELOG.md"));
-    assert!(changelog_path("mods/Amber Eyrie Peace/CHANGELOG.md"));
-    assert!(!changelog_path(""));
-    assert!(!changelog_path("../other/CHANGELOG.md"));
-    assert!(!changelog_path("mods/../../CHANGELOG.md"));
-    assert!(!changelog_path("/CHANGELOG.md"));
-    assert!(!changelog_path("C:/Users/someone/CHANGELOG.md"));
-    assert!(!changelog_path("mods\\Thing\\CHANGELOG.md"));
-    assert!(!changelog_path("mods//CHANGELOG.md"));
-    assert!(!changelog_path("mods/Thing/README.md"));
-    assert!(!changelog_path("--root/CHANGELOG.md"));
-    assert!(!changelog_path(&format!("{}/CHANGELOG.md", "x".repeat(MAX_PATH))));
-}
-
-#[test]
 fn an_entry_is_asked_for_as_one_argument_folded_onto_one_line() {
     let arguments =
         entry_arguments(Path::new("repo"), "mods/Thing/CHANGELOG.md", "  **Boats float.**\n On water. ").unwrap();

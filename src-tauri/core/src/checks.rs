@@ -1,0 +1,64 @@
+//! Checks on what the window asks for, before the tool kit sees it. The kit checks again; these keep a malformed or hostile
+//! request from ever becoming a command line. Each returns whether the text is acceptable; callers refuse in words.
+
+const CHANGELOG_NAME: &str = "CHANGELOG.md";
+pub const MAX_PATH: usize = 300;
+pub const MAX_NAME: usize = 120;
+pub const MAX_MOMENT: usize = 40;
+pub const MAX_KEY: usize = 64;
+pub const MAX_VALUE: usize = 500;
+
+/// A changelog's path inside a repository: relative, forward slashes, no step upwards, ending in the changelog's file name.
+/// Folder names may hold spaces, as some games' mod folders do.
+pub fn changelog_path(path: &str) -> bool {
+    !path.is_empty()
+        && path.len() <= MAX_PATH
+        && !path.starts_with(['/', '-'])
+        && !path.contains(['\\', ':', '\0', '\n', '\r'])
+        && path.split('/').all(|part| !part.is_empty() && part != "." && part != "..")
+        && path.rsplit('/').next() == Some(CHANGELOG_NAME)
+}
+
+/// A commit's hash: 7 to 40 lower-case hexadecimal characters.
+pub fn commit_hash(text: &str) -> bool {
+    (7..=40).contains(&text.len()) && text.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+}
+
+/// A moment as the kit's facts write it: an ISO date or time, digits and the few marks between them.
+pub fn moment(text: &str) -> bool {
+    !text.is_empty()
+        && text.len() <= MAX_MOMENT
+        && text.as_bytes()[0].is_ascii_digit()
+        && text.bytes().all(|b| b.is_ascii_digit() || b"-:T+Z.".contains(&b))
+}
+
+/// A mod's folder name, a backup's or a package ID: letters, digits, dots, dashes and underscores, never starting with either.
+pub fn plain_name(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() <= MAX_NAME
+        && !name.starts_with(['-', '.'])
+        && name.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_'))
+}
+
+/// A setting's name: letters and digits only, as the kit's keys are.
+pub fn setting_key(key: &str) -> bool {
+    !key.is_empty() && key.len() <= MAX_KEY && key.bytes().all(|b| b.is_ascii_alphanumeric())
+}
+
+/// A setting's value to write: one line, of a sane length, not read as an option. The kit checks it is a full path.
+pub fn setting_value(value: &str) -> bool {
+    let value = value.trim();
+    !value.is_empty()
+        && value.chars().count() <= MAX_VALUE
+        && !value.starts_with('-')
+        && !value.contains(['\n', '\r', '\0'])
+}
+
+/// Text folded onto one line: every run of spaces and line breaks becomes one space.
+pub fn one_line(text: &str) -> String {
+    text.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+#[cfg(test)]
+#[path = "tests/checks.rs"]
+mod tests;

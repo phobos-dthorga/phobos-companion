@@ -75,7 +75,12 @@ reads them.
 ## How it is built
 
 - **The window presents, the host decides.** Svelte components show what they are given. Only a `desktopClient.ts` may import
-  `@tauri-apps/*`. Tauri commands stay thin.
+  `@tauri-apps/*`. Tauri commands stay thin: one line of delegation each, through `blocking` in `src-tauri/src/lib.rs`.
+- **Code more than one part uses lives once** (owner, 19 Nov 2026; `docs/shared-code-audit.md`). In the host, that is the
+  `companion-core` crate (`src-tauri/core`), which holds no Tauri: the games list (`games::find`, `repositories_of`,
+  `named_repository`), the kit (`kit::run_hearing`, `Outcome` for every answer, `allowed_by_manifest` before every change), failures
+  (`Failure::refused`), request checks (`checks`) and arguments (`args::Args`, where the window's text is always `given`, one
+  argument). A page's host module keeps only what is its own. Before writing a helper, look there first.
 - **Words live in `locales/en-AU.json`**, never in a component; a test holds every key to it. Fluent, with named variables.
 - **Colours come from the theme file**, by role. A test holds them to the contrast rules. Colour never carries a meaning alone.
 - **Controls are at least 44 px**, nothing needs a drag or appears only on hover, everything is reachable from the keyboard, and

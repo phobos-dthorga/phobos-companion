@@ -8,25 +8,6 @@ fn the_list_names_every_repository_and_asks_for_full_paths() {
 }
 
 #[test]
-fn a_key_is_letters_and_digits_only() {
-    assert!(setting_key("historyPath"));
-    assert!(!setting_key(""));
-    assert!(!setting_key("--clear"));
-    assert!(!setting_key("history path"));
-    assert!(!setting_key(&"a".repeat(MAX_KEY + 1)));
-}
-
-#[test]
-fn a_value_is_one_line_never_read_as_an_option() {
-    assert!(setting_value("K:\\phobos-modkit\\history"));
-    assert!(setting_value("  /home/someone/history  "));
-    assert!(!setting_value("   "));
-    assert!(!setting_value("--clear"));
-    assert!(!setting_value("K:\\one\nK:\\two"));
-    assert!(!setting_value(&"x".repeat(MAX_VALUE + 1)));
-}
-
-#[test]
 fn setting_and_clearing_are_asked_for_as_single_arguments() {
     let roots = [PathBuf::from("repo")];
     assert_eq!(

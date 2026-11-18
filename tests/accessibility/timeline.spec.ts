@@ -112,6 +112,7 @@ const sampleStood = {
             lead: "Sample wheels turn.",
             since: "reworded",
             now: "**Sample wheels turn.** As they should, on ice too.",
+            commit: "bbbbbbbb0123",
           },
           {
             section: "Added",
@@ -119,6 +120,7 @@ const sampleStood = {
             lead: "Sample lamps.",
             since: "removed",
             now: null,
+            commit: "bbbbbbbb0123",
           },
           {
             section: "Added",
@@ -126,6 +128,7 @@ const sampleStood = {
             lead: "Sample oars.",
             since: "kept",
             now: null,
+            commit: "eeeeeeee0123",
           },
         ],
       },
@@ -139,6 +142,28 @@ async function open(page: Page) {
     kit_status: healthyKit,
     timeline: { result: sampleTimeline },
     as_it_stood: { result: sampleStood },
+    entry_code: {
+      result: {
+        found: true,
+        refusal: null,
+        command_line: "python -m phobos_modkit changes entry   (on first-mods)",
+        code: {
+          repository: "first-mods",
+          changelog: "mods/Sample Mod/CHANGELOG.md",
+          commit: {
+            hash: "bbbbbbbb0123456789",
+            time: "2026-11-10T12:00:00+00:00",
+            author: "Sample Author",
+            subject: "Sample Mod: clearer wheels",
+          },
+          writtenWith: ["**Sample lamps.** Lamps glow."],
+          files: [],
+          filesLeftOut: 0,
+          additions: 0,
+          deletions: 0,
+        },
+      },
+    },
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Timeline", exact: true }).click();
@@ -263,6 +288,33 @@ for (const [name, viewport] of [
         .getByRole("button", { name: "Only what changed since" })
         .click();
       await expect(stood).not.toContainText("Sample oars.");
+      await stood.getByRole("button", { name: "Close" }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+    });
+
+    test("shows the code behind entries as they stood, a button a commit", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("button", {
+          name: /^Read Sample Mod's changelog as it stood on .*10 Nov/,
+        })
+        .click();
+      const stood = page.getByRole("dialog");
+      await expect(stood).toContainText(
+        "This version was written in 2 commits",
+      );
+      await stood
+        .getByRole("button", {
+          name: "Show the code behind: Sample wheels turn., and one more entry the same commit wrote",
+        })
+        .click();
+      const viewer = page.getByRole("dialog", { name: "Sample wheels turn." });
+      await expect(viewer).toContainText("Sample Mod: clearer wheels");
+      await audit(page);
+      await viewer.getByRole("button", { name: "Close" }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(1);
       await stood.getByRole("button", { name: "Close" }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
     });

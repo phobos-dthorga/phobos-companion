@@ -4,6 +4,17 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-19
+
+From the owner's first look at the Timeline (19 November 2026): "I'm unable to view the applicable changes to the code, as you can in normal views". Not yet tested on screen.
+
+### Added
+
+- **Show the code in Read it as it stood**, as on the Changes page: the entries a commit wrote are grouped with one button that opens the code viewer on that commit, and a version written over several commits says so. Each entry's commit is the one that wrote it as the changelog stood then.
+
+### Compatibility and limits
+
+- The pinned phobos-modkit moves from 1.30.0 to 1.31.0, which gives each entry of an old changelog its commit.
 ## [0.14.0] - 2026-11-19
 
 The owner asked for it (19 November 2026): "a timeline (with suitable graph(ic)s) that records/shows how updates were applied, changed, removed, etc. over time ... I like coming back and reading the CHANGELOGs from a particular update-in-moment but I can't because it is now lost to time", with the history kept in the Companion's own folder and "a central settings page where everything or at least, most, of these sorts of things are managed". Not yet tested on screen.

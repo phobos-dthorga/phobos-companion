@@ -81,6 +81,8 @@ export type StoodEntry = {
   /** What happened to it since: kept, reworded (with its words now) or removed. */
   since: "kept" | "reworded" | "removed";
   now: string | null;
+  /** The commit that wrote it, as the changelog stood then: its first 12 characters, or null (kit 1.31.0). */
+  commit?: string | null;
 };
 
 export type StoodVersion = {

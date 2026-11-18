@@ -5,9 +5,12 @@
   import ProgressBar from "../shell/ProgressBar.svelte";
   import RichText from "../shell/RichText.svelte";
   import { heard, started } from "../shell/progress";
+  import CodeViewer from "../code/CodeViewer.svelte";
+  import type { EntryRequest } from "../code/types";
+  import { commitRuns, plainText } from "../shell/inline";
   import { readAsItStood } from "./desktopClient";
   import { dayOf, dayWords, stoodEntries, timeWords } from "./presentation";
-  import type { StoodReading, StoodRequest } from "./types";
+  import type { StoodEntry, StoodReading, StoodRequest } from "./types";
 
   /**
    * A changelog exactly as it stood at a commit or a moment, over the whole window, each entry marked by what has happened to it
@@ -23,6 +26,7 @@
   let reading = $state<StoodReading>({ state: "reading" });
   let progress = $state(started());
   let changedOnly = $state(false);
+  let code = $state<EntryRequest | null>(null);
 
   const stood = $derived(
     reading.state === "ready" && reading.found.found
@@ -36,6 +40,33 @@
     reading = await readAsItStood(game, request, (message) => {
       progress = heard(progress, message);
     });
+  }
+
+  /** Opens the code viewer on the commit that wrote these entries, as the changelog stood then. */
+  function showCode(version: string, run: StoodEntry[]) {
+    const first = run[0];
+    code = {
+      repository: request.repository,
+      changelog: request.changelog,
+      product: request.product,
+      entry: {
+        version,
+        section: first.section,
+        text: first.text,
+        lead: first.lead,
+      },
+      commit: first.commit ?? null,
+    };
+  }
+
+  /** What a "show the code" button reads out: the entry it opens, and how many more the same commit wrote. */
+  function codeLabel(run: StoodEntry[]) {
+    return run.length > 1
+      ? t("code-show-for-run", {
+          entry: plainText(run[0].lead),
+          more: run.length - 1,
+        })
+      : t("code-show-for", { entry: plainText(run[0].lead) });
   }
 
   onMount(() => {
@@ -132,28 +163,50 @@
             {#if shown.length === 0}
               <p class="muted small">{t("changes-no-entries")}</p>
             {:else}
-              <ul class="entries">
-                {#each shown as entry, index (index)}
-                  <li class="since-{entry.since}">
-                    {#if entry.section}<span class="section muted"
-                        >{entry.section}</span
-                      >{/if}
-                    <RichText text={entry.text} />
-                    {#if entry.since === "reworded"}
-                      <p class="fate">
-                        <span aria-hidden="true">✎</span>
-                        {t("stood-reworded")}
-                        <RichText text={entry.now ?? ""} />
-                      </p>
-                    {:else if entry.since === "removed"}
-                      <p class="fate">
-                        <span aria-hidden="true">✖</span>
-                        {t("stood-removed")}
-                      </p>
-                    {/if}
-                  </li>
-                {/each}
-              </ul>
+              {@const runs = commitRuns(shown)}
+              {#if runs.length > 1}
+                <p class="muted small">
+                  {t("changes-several-commits", { count: runs.length })}
+                </p>
+              {/if}
+              {#each runs as run, runIndex (runIndex)}
+                <div class:run={runs.length > 1}>
+                  <ul class="entries">
+                    {#each run as entry, index (index)}
+                      <li class="since-{entry.since}">
+                        {#if entry.section}<span class="section muted"
+                            >{entry.section}</span
+                          >{/if}
+                        <RichText text={entry.text} />
+                        {#if entry.since === "reworded"}
+                          <p class="fate">
+                            <span aria-hidden="true">✎</span>
+                            {t("stood-reworded")}
+                            <RichText text={entry.now ?? ""} />
+                          </p>
+                        {:else if entry.since === "removed"}
+                          <p class="fate">
+                            <span aria-hidden="true">✖</span>
+                            {t("stood-removed")}
+                          </p>
+                        {/if}
+                      </li>
+                    {/each}
+                  </ul>
+                  {#if run[0].commit && stood}
+                    <button
+                      type="button"
+                      class="action run-button"
+                      aria-label={codeLabel(run)}
+                      onclick={() => showCode(version.version, run)}
+                    >
+                      {run.length > 1
+                        ? t("code-show-run", { count: run.length })
+                        : t("code-show")}
+                    </button>
+                  {/if}
+                </div>
+              {/each}
             {/if}
           </section>
         {/if}
@@ -161,6 +214,12 @@
     </div>
   {/if}
 </dialog>
+
+{#if code}
+  {#key `${code.changelog}/${code.commit}`}
+    <CodeViewer {game} request={code} onclose={() => (code = null)} />
+  {/key}
+{/if}
 
 <style>
   .viewer {
@@ -301,6 +360,16 @@
     margin: 2px 0 0;
     padding-inline-start: 10px;
     border-inline-start: 2px solid var(--colour-observed);
+  }
+
+  .run {
+    margin-block: 8px 12px;
+    padding-inline-start: 12px;
+    border-inline-start: 2px solid var(--colour-line);
+  }
+
+  .run-button {
+    margin-top: 6px;
   }
 
   .since-removed .fate {

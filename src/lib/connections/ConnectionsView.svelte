@@ -38,11 +38,14 @@
     repository,
     start,
     changed = new Set<string>(),
+    onrecentre,
   }: {
     game: string;
     repository: string;
     start: string;
     changed?: Set<string>;
+    /** When given, putting something in the middle is the caller's step (the Code map's trail), not this view's own. */
+    onrecentre?: (id: string) => void;
   } = $props();
 
   type Reading<T> =
@@ -120,6 +123,10 @@
 
   function recentre(thing: Thing | null) {
     if (!thing || thing.id === centreId) return;
+    if (onrecentre) {
+      onrecentre(thing.id);
+      return;
+    }
     trail = [...trail, thing.id];
     pan = { x: 0, y: 0 };
   }

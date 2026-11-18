@@ -120,6 +120,7 @@
 </script>
 
 <WindowDialog
+  copyable
   kicker={t("code-kicker", {
     product: request.product,
     version: request.entry.version,

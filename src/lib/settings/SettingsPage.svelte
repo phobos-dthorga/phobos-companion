@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { here, setFocus } from "../navigation/navigation.svelte";
+  import { reveal } from "../shell/reveal";
+  import { untrack } from "svelte";
   import { onMount, tick } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
@@ -91,6 +94,13 @@
   }
 
   onMount(load);
+
+  /** A setting the place names is scrolled to and outlined once the list is read. */
+  const focusKey = $derived(here().focus.key ?? null);
+  $effect(() => {
+    if (focusKey && reading.state === "ready")
+      untrack(() => void reveal(`setting-${focusKey}`));
+  });
 </script>
 
 <div class="eyebrow accent">{t("settings-kicker")}</div>
@@ -140,7 +150,7 @@
       </h2>
       <ul class="settings">
         {#each group.settings as setting (setting.key)}
-          <li class="setting">
+          <li class="setting" id={`setting-${setting.key}`}>
             <h3>{setting.description}</h3>
             <p class="value">
               {#if setting.value}

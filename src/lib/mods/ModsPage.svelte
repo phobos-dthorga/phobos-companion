@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { here, setFocus } from "../navigation/navigation.svelte";
+  import { reveal } from "../shell/reveal";
+  import { openDialog } from "../navigation/navigation.svelte";
+  import { onMount, untrack } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
-  import CodeViewer from "../code/CodeViewer.svelte";
   import type { EntryRequest } from "../code/types";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import RichText from "../shell/RichText.svelte";
@@ -93,7 +95,6 @@
   let textureProgress = $state(started());
   let working = $state<ProgressState | null>(null);
   /** The changelog entry whose code is being shown, over the page. */
-  let viewing = $state<EntryRequest | null>(null);
 
   /** Where a mod's changelog entries are found, for showing their code. */
   type Source = { repository: string; mod: ModInstall };
@@ -102,13 +103,17 @@
     if (working !== null) working = heard(working, message);
   };
 
+  function viewCode(request: EntryRequest) {
+    openDialog({ kind: "code", request });
+  }
+
   function showCode(source: Source, entry: Entry) {
-    viewing = {
+    viewCode({
       repository: source.repository,
       changelog: source.mod.changelog,
       product: source.mod.name,
       entry,
-    };
+    });
   }
 
   const repositories = $derived(
@@ -283,6 +288,17 @@
       return running.length > 0 ? "mods-blocked-running" : null;
     return null;
   }
+
+  /** A mod the place names is scrolled to and outlined once the mods are read. */
+  const focusMod = $derived(
+    here().focus.repository && here().focus.mod
+      ? `mod-${here().focus.repository}/${here().focus.mod}`
+      : null,
+  );
+  $effect(() => {
+    if (focusMod && reading.state === "ready")
+      untrack(() => void reveal(focusMod));
+  });
 
   onMount(() => {
     void load();
@@ -772,7 +788,7 @@
           ? mod.backups
           : mod.backups.slice(0, FIRST_BACKUPS)}
         <li>
-          <article class="mod" aria-label={mod.name}>
+          <article class="mod" aria-label={mod.name} id={`mod-${key}`}>
             <div class="mod-head">
               <h3>{mod.name}</h3>
               <p class="state state-{mod.state}">
@@ -949,16 +965,6 @@
     </section>
   {/if}
   <p class="muted how">{t("mods-how")}</p>
-{/if}
-
-{#if viewing}
-  {#key `${viewing.changelog}/${viewing.entry.text}`}
-    <CodeViewer
-      game={game.id}
-      request={viewing}
-      onclose={() => (viewing = null)}
-    />
-  {/key}
 {/if}
 
 <style>

@@ -124,3 +124,9 @@ h1 {
     transition: none !important;
   }
 }
+
+/* Where a link led: outlined for a moment (src/lib/shell/reveal.ts). */
+.revealed {
+  outline: 3px solid var(--colour-accent);
+  outline-offset: 3px;
+}

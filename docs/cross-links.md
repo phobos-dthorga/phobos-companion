@@ -1,8 +1,8 @@
 # Cross-links: joining what the Companion already shows
 
-**Status (19 Nov 2026):** proposals only, **nothing built**. The owner asked for ideas for "further improving the Companion,
-particularly in ways of cross-linking more things together", then asked for them written down first. Every item is the agent's
-proposal; the owner chooses which are built, and in what order.
+**Status (19 Nov 2026):** the owner asked for the whole proposed order to be built overnight ("Proceed with your entire proposed
+order, step-wise if necessary"), in Companion 0.19.0, one commit a step. Built so far: N1, N2, N3. "As built" below says where a
+build differs from its proposal.
 
 ## Read this first (gotchas)
 
@@ -43,6 +43,26 @@ proposal; the owner chooses which are built, and in what order.
 | S3 | **Merge arrows on the Timeline**: a line from an ended mod's lane into the lane of the mod that took it in | See at a glance where a mod went | The window only: the fact already names where it merged |
 | S4 | **Home page items become links**: a latest commit opens its code; something not yet released opens its changelog on the Changes page | Start from "where was I?" and keep going | The window only |
 | S5 | **Rules joined to checks**: each shared rule shows which check enforces it, if any | See which rules are held by tools and which only by memory | Rules given IDs (an open question in `rules/first-class.md`), and each gate step naming the rule it holds |
+
+## As built
+
+| # | Differs from the proposal |
+| --- | --- |
+| N1 | **Keys , and . rather than Alt+Left and Alt+Right**: the Companion's own rule is one key each, never two held together (agent's choice, owner to change in Settings); the mouse's side buttons work too. A link to a dialog on another page arrives in two steps, so Back closes the dialog first. On the Code map, each new thing in the middle is a step, so the window's Back walks the picture; the picture's own button is renamed "Previous in the picture" |
+| N2 | The / key now opens it (it used to jump to the page's search box). Timeline facts are searched as versions written, released, installed or gone back to |
+| N3 | Written as `dthorga://page/game?key=value`, with `dialog=code` or `dialog=stood` and `dialog.`-prefixed fields for an open dialog. The keys each page reads are in the table below |
+
+**What each page takes from an address:**
+
+| Page | Keys |
+| --- | --- |
+| Changes | `repository`, `changelog` |
+| Code map | `repository`, `node` (a thing's id, `cs:...`, `def:...`, `lua:...`, `py:...`) |
+| Timeline | `day` (YYYY-MM-DD) |
+| Tests | `repository`, `row` |
+| Settings | `key` |
+| Mods | `repository`, `mod` |
+| Reports | `command`, `report` |
 
 ## Proposed order
 

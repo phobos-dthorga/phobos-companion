@@ -265,23 +265,27 @@ for (const [name, viewport] of [
       await audit(page);
     });
 
-    test("puts a pressed thing in the middle, and Back returns", async ({
+    test("puts a pressed thing in the middle as a step, and Back returns", async ({
       page,
     }) => {
+      await page
+        .context()
+        .grantPermissions(["clipboard-read", "clipboard-write"]);
       await openCodeMap(page);
       await search(page);
+      const address = async () => {
+        await page.getByRole("button", { name: "Copy address" }).click();
+        return page.evaluate(() => navigator.clipboard.readText());
+      };
+      expect(await address()).toContain("node=cs%3ASample.Boat.Tick");
       const picture = page.getByRole("group", {
         name: "How Boat.Tick connects, drawn around it",
       });
       await picture.getByRole("button", { name: /^Harbour\.Moor/ }).focus();
       await page.keyboard.press("Enter");
-      await expect(
-        page.getByRole("button", { name: "Back", exact: true }),
-      ).toBeVisible();
-      await page.getByRole("button", { name: "Back", exact: true }).click();
-      await expect(
-        page.getByRole("button", { name: "Back", exact: true }),
-      ).toHaveCount(0);
+      expect(await address()).toContain("node=cs%3ASample.Harbour.Moor");
+      await page.keyboard.press(",");
+      expect(await address()).toContain("node=cs%3ASample.Boat.Tick");
     });
   });
 }

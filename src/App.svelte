@@ -1,6 +1,23 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import CodeViewer from "./lib/code/CodeViewer.svelte";
+  import AsItStood from "./lib/timeline/AsItStood.svelte";
+  import { addressOf, type PageName } from "./lib/navigation/place";
+  import {
+    back,
+    canGoBack,
+    canGoForward,
+    closeDialog,
+    copyAddress,
+    forward,
+    go,
+    goGame,
+    goPage,
+    here,
+    settleGame,
+  } from "./lib/navigation/navigation.svelte";
   import ShortcutsDialog from "./lib/shortcuts/ShortcutsDialog.svelte";
+  import GoTo from "./lib/navigation/GoTo.svelte";
   import { register, dispatch } from "./lib/shortcuts/registry";
   import { loadShortcuts, shortcuts } from "./lib/shortcuts/state.svelte";
   import GamesNavigator from "./lib/home/GamesNavigator.svelte";
@@ -27,23 +44,24 @@
   let kit = $state<KitReading>({ state: "reading" });
   let home = $state<HomeReading>({ state: "reading" });
   let looking = $state(true);
-  let chosenId = $state<string | null>(null);
-  let page = $state<
-    | "home"
-    | "reports"
-    | "atlas"
-    | "tests"
-    | "mods"
-    | "changes"
-    | "timeline"
-    | "codemap"
-    | "settings"
-  >("home");
+  /** Where the owner is: the trail's place (docs/cross-links.md, N1). */
+  const place = $derived(here());
+  const page = $derived(place.page);
+
+  // The first place names no game until the list of games is read; then it is the game shown.
+  $effect(() => {
+    if (place.game === null && selected) settleGame(selected.id);
+  });
+  let copied = $state<"yes" | "no" | null>(null);
+
+  async function copyHere() {
+    copied = (await copyAddress()) ? "yes" : "no";
+  }
   let now = $state(new Date());
 
   const games = $derived(home.state === "ready" ? home.home.games : []);
   const selected = $derived(
-    games.find((game) => game.id === chosenId) ?? games[0] ?? null,
+    games.find((game) => game.id === place.game) ?? games[0] ?? null,
   );
 
   /** Keeps what is on screen until the new reading arrives, so looking again doesn't blank the page. */
@@ -57,8 +75,9 @@
   }
 
   let helpOpen = $state(false);
+  let goToOpen = $state(false);
 
-  type Page = typeof page;
+  type Page = PageName;
   const PAGES: [string, Page][] = [
     ["page.home", "home"],
     ["page.reports", "reports"],
@@ -78,7 +97,7 @@
       0,
       games.findIndex((game) => game.id === selected?.id),
     );
-    chosenId = games[(index + step + games.length) % games.length].id;
+    goGame(games[(index + step + games.length) % games.length].id);
   }
 
   onMount(() => {
@@ -89,18 +108,32 @@
       inDialog: false,
       run: {
         ...Object.fromEntries(
-          PAGES.map(([id, next]) => [id, () => (page = next)]),
+          PAGES.map(([id, next]) => [id, () => goPage(next)]),
         ),
         "game.previous": () => stepGame(-1),
         "game.next": () => stepGame(1),
         "look-again": () => void refresh(),
-        search: () =>
-          document
-            .querySelector<HTMLElement>("[data-shortcut-search]")
-            ?.focus(),
+        search: () => (goToOpen = true),
         help: () => (helpOpen = true),
+        "nav.back": back,
+        "nav.forward": forward,
       },
     });
+    // Back and Forward work over a dialog too: closing it is a step back.
+    const unregisterInDialog = register({
+      scope: "everywhere",
+      inDialog: true,
+      run: { "nav.back": back, "nav.forward": forward },
+    });
+    // The mouse's side buttons, as in a browser.
+    const sideButtons = (event: MouseEvent) => {
+      if (event.button === 3 || event.button === 4) {
+        event.preventDefault();
+        if (event.button === 3) back();
+        else forward();
+      }
+    };
+    window.addEventListener("mouseup", sideButtons);
     const listen = (event: KeyboardEvent) =>
       dispatch(
         event,
@@ -110,6 +143,8 @@
     window.addEventListener("keydown", listen);
     return () => {
       unregister();
+      unregisterInDialog();
+      window.removeEventListener("mouseup", sideButtons);
       window.removeEventListener("keydown", listen);
     };
   });
@@ -130,63 +165,63 @@
         class="page"
         class:current={page === "home"}
         aria-current={page === "home" ? "page" : undefined}
-        onclick={() => (page = "home")}>{t("page-home")}</button
+        onclick={() => goPage("home")}>{t("page-home")}</button
       >
       <button
         type="button"
         class="page"
         class:current={page === "reports"}
         aria-current={page === "reports" ? "page" : undefined}
-        onclick={() => (page = "reports")}>{t("page-reports")}</button
+        onclick={() => goPage("reports")}>{t("page-reports")}</button
       >
       <button
         type="button"
         class="page"
         class:current={page === "atlas"}
         aria-current={page === "atlas" ? "page" : undefined}
-        onclick={() => (page = "atlas")}>{t("page-atlas")}</button
+        onclick={() => goPage("atlas")}>{t("page-atlas")}</button
       >
       <button
         type="button"
         class="page"
         class:current={page === "tests"}
         aria-current={page === "tests" ? "page" : undefined}
-        onclick={() => (page = "tests")}>{t("page-tests")}</button
+        onclick={() => goPage("tests")}>{t("page-tests")}</button
       >
       <button
         type="button"
         class="page"
         class:current={page === "mods"}
         aria-current={page === "mods" ? "page" : undefined}
-        onclick={() => (page = "mods")}>{t("page-mods")}</button
+        onclick={() => goPage("mods")}>{t("page-mods")}</button
       >
       <button
         type="button"
         class="page"
         class:current={page === "changes"}
         aria-current={page === "changes" ? "page" : undefined}
-        onclick={() => (page = "changes")}>{t("page-changes")}</button
+        onclick={() => goPage("changes")}>{t("page-changes")}</button
       >
       <button
         type="button"
         class="page"
         class:current={page === "timeline"}
         aria-current={page === "timeline" ? "page" : undefined}
-        onclick={() => (page = "timeline")}>{t("page-timeline")}</button
+        onclick={() => goPage("timeline")}>{t("page-timeline")}</button
       >
       <button
         type="button"
         class="page"
         class:current={page === "codemap"}
         aria-current={page === "codemap" ? "page" : undefined}
-        onclick={() => (page = "codemap")}>{t("page-codemap")}</button
+        onclick={() => goPage("codemap")}>{t("page-codemap")}</button
       >
       <button
         type="button"
         class="page"
         class:current={page === "settings"}
         aria-current={page === "settings" ? "page" : undefined}
-        onclick={() => (page = "settings")}>{t("page-settings")}</button
+        onclick={() => goPage("settings")}>{t("page-settings")}</button
       >
     </nav>
   </header>
@@ -202,6 +237,31 @@
         <strong class="read">{formatUnixDate(selected.last_worked)}</strong>
       </span>
     {/if}
+    <span class="trail" role="group" aria-label={t("trail-label")}>
+      <button
+        type="button"
+        class="action"
+        disabled={!canGoBack()}
+        onclick={back}>{t("trail-back")}</button
+      >
+      <button
+        type="button"
+        class="action"
+        disabled={!canGoForward()}
+        onclick={forward}>{t("trail-forward")}</button
+      >
+      <button type="button" class="action" onclick={() => (goToOpen = true)}
+        >{t("goto-button")}</button
+      >
+      <button type="button" class="action" onclick={copyHere}
+        >{t("trail-copy")}</button
+      >
+      {#if copied}
+        <span class="muted small" role="status"
+          >{copied === "yes" ? t("trail-copied") : t("trail-copy-failed")}</span
+        >
+      {/if}
+    </span>
     <span class="look-again">
       {#if !looking && home.state === "ready"}
         <span class="muted" role="status"
@@ -227,7 +287,7 @@
           {games}
           selectedId={selected?.id ?? null}
           {now}
-          onselect={(id) => (chosenId = id)}
+          onselect={(id) => goGame(id)}
         />
       {:else if home.state === "reading"}
         <p class="muted">{t("games-reading")}</p>
@@ -330,6 +390,35 @@
     </aside>
   </div>
 
+  {#if place.dialog?.kind === "code" && selected}
+    {#key addressOf(place)}
+      <CodeViewer
+        game={selected.id}
+        request={place.dialog.request}
+        onclose={closeDialog}
+      />
+    {/key}
+  {:else if place.dialog?.kind === "stood" && selected}
+    {#key addressOf(place)}
+      <AsItStood
+        game={selected.id}
+        request={place.dialog.request}
+        onclose={closeDialog}
+      />
+    {/key}
+  {/if}
+
+  {#if goToOpen}
+    <GoTo
+      game={selected}
+      onclose={() => (goToOpen = false)}
+      onchoose={(where) => {
+        goToOpen = false;
+        go({ ...where, game: where.game ?? selected?.id ?? null });
+      }}
+    />
+  {/if}
+
   {#if helpOpen}
     <ShortcutsDialog editable={false} onclose={() => (helpOpen = false)} />
   {/if}
@@ -418,6 +507,13 @@
   .looking-bar {
     flex-basis: 100%;
     padding-bottom: 8px;
+  }
+
+  .trail {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
   }
 
   .look-again {

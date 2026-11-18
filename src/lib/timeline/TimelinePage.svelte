@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
-  import CodeViewer from "../code/CodeViewer.svelte";
+  import { here, openDialog, setFocus } from "../navigation/navigation.svelte";
+  import { onMount, tick, untrack } from "svelte";
   import type { EntryRequest } from "../code/types";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
@@ -8,7 +8,6 @@
   import ProgressBar from "../shell/ProgressBar.svelte";
   import RichText from "../shell/RichText.svelte";
   import { heard, started } from "../shell/progress";
-  import AsItStood from "./AsItStood.svelte";
   import { sections, versionWords } from "../changelog/presentation";
   import { readTimeline } from "./desktopClient";
   import {
@@ -45,8 +44,6 @@
   let only = $state<string | null>(null);
   let shownDays = $state(DAYS_AT_ONCE);
   let focusedDay = $state<string | null>(null);
-  let stood = $state<StoodRequest | null>(null);
-  let code = $state<EntryRequest | null>(null);
   let scroller = $state<HTMLDivElement | null>(null);
 
   const facts = $derived(
@@ -141,6 +138,7 @@
 
   /** Opens a day in the list below and puts the keyboard on its heading. */
   async function jump(day: string) {
+    if (here().focus.day !== day) setFocus({ day });
     const index = days.findIndex((d) => d.day === day);
     if (index >= shownDays) shownDays = index + 1;
     focusedDay = day;
@@ -150,20 +148,28 @@
     heading?.focus();
   }
 
+  function viewStood(request: StoodRequest) {
+    openDialog({ kind: "stood", request });
+  }
+
+  function viewCode(request: EntryRequest) {
+    openDialog({ kind: "code", request });
+  }
+
   function readStood(fact: Fact) {
-    stood = {
+    viewStood({
       repository: fact.repository ?? "",
       changelog: fact.changelog ?? "",
       product: laneOf(fact) ?? "",
       commit: fact.source === "git" ? (fact.commit ?? null) : null,
       when: fact.time,
-    };
+    });
   }
 
   function showCode(fact: Fact) {
     const first = fact.entries?.[0];
     const lead = first?.lead ?? fact.subject ?? "";
-    code = {
+    viewCode({
       repository: fact.repository ?? "",
       changelog: fact.changelog ?? "",
       product: laneOf(fact) ?? "",
@@ -174,7 +180,7 @@
         lead,
       },
       commit: fact.commit ?? null,
-    };
+    });
   }
 
   function cellWords(
@@ -194,6 +200,13 @@
   }
 
   onMount(load);
+
+  /** A day the place names (a link, or Back) is opened once the facts are read. */
+  const focusDay = $derived(here().focus.day ?? null);
+  $effect(() => {
+    if (focusDay && reading.state === "ready")
+      untrack(() => void jump(focusDay));
+  });
 </script>
 
 <div class="eyebrow accent">{t("timeline-kicker")}</div>
@@ -507,18 +520,6 @@
     {/if}
   </section>
   <p class="muted how">{t("timeline-how")}</p>
-{/if}
-
-{#if stood}
-  {#key `${stood.changelog}/${stood.commit ?? stood.when}`}
-    <AsItStood game={game.id} request={stood} onclose={() => (stood = null)} />
-  {/key}
-{/if}
-
-{#if code}
-  {#key `${code.changelog}/${code.commit}`}
-    <CodeViewer game={game.id} request={code} onclose={() => (code = null)} />
-  {/key}
 {/if}
 
 <style>

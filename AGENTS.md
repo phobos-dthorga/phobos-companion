@@ -115,6 +115,10 @@ reads them.
   screen still shows a bar** (owner, 19 Nov 2026: a silent Read again "you ... think that the app ... is broken"), and its button
   says it is working until it is done.
 - **Quantities are preset buttons or the game's own kind of control**, not sliders.
+- **Every move goes through the window's trail** (owner, 19 Nov 2026: `docs/cross-links.md`, N1 to N3): a link calls `go` or
+  `openDialog` (`src/lib/navigation/navigation.svelte.ts`), a choice on a page calls `setFocus` and reads it back from `here()`, and
+  the code viewer and the changelog as it stood are drawn by the App from the trail, never by a page. A new page lists the focus keys
+  it reads in `docs/cross-links.md`, and a new kind of thing joins Go to anything (`src/lib/navigation/goto.ts`).
 - **A page's common moves have keyboard shortcuts** (owner, 19 Nov 2026): one key each, never two held together, listed once in
   `src/lib/shortcuts/actions.ts` with its default, and offered by the view while it is on screen (`register` in
   `src/lib/shortcuts/registry.ts`). They never act in a text box or a part that takes keys itself, and every one can be changed or

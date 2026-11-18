@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { here, setFocus } from "../navigation/navigation.svelte";
+  import { openDialog } from "../navigation/navigation.svelte";
   import { onMount } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
-  import CodeViewer from "./CodeViewer.svelte";
   import { readChanges } from "./desktopClient";
   import {
     releasedCount,
@@ -31,8 +32,12 @@
 
   let reading = $state<ChangesReading>({ state: "reading" });
   let progress = $state(started());
-  let chosenKey = $state<string | null>(null);
-  let viewing = $state<EntryRequest | null>(null);
+  /** The chosen changelog is part of the place, so Back returns to it and an address names it. */
+  const chosenKey = $derived(
+    here().focus.repository && here().focus.changelog
+      ? `${here().focus.repository}/${here().focus.changelog}`
+      : null,
+  );
 
   const choices = $derived<Choice[]>(
     reading.state === "ready"
@@ -58,12 +63,16 @@
   }
 
   function show(choice: Choice, entry: ChangelogEntry) {
-    viewing = {
+    viewCode({
       repository: choice.repository,
       changelog: choice.log.changelog,
       product: choice.log.product,
       entry,
-    };
+    });
+  }
+
+  function viewCode(request: EntryRequest) {
+    openDialog({ kind: "code", request });
   }
 
   /** The label a "show the code" button reads out: the entry it opens, and how many more the same commit wrote. */
@@ -98,7 +107,11 @@
         type="button"
         class="toggle"
         aria-pressed={keyOf(choice) === keyOf(chosen)}
-        onclick={() => (chosenKey = keyOf(choice))}
+        onclick={() =>
+          setFocus({
+            repository: choice.repository,
+            changelog: choice.log.changelog,
+          })}
       >
         {choice.log.product}
       </button>
@@ -191,16 +204,6 @@
     </p>
   {/if}
   <p class="muted how">{t("changes-how")}</p>
-{/if}
-
-{#if viewing}
-  {#key `${viewing.changelog}/${viewing.entry.text}`}
-    <CodeViewer
-      game={game.id}
-      request={viewing}
-      onclose={() => (viewing = null)}
-    />
-  {/key}
 {/if}
 
 <style>

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { here, setFocus } from "../navigation/navigation.svelte";
+  import { onMount, tick, untrack } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
@@ -31,6 +32,11 @@
   async function show(entry: ReportEntry, limit: number) {
     const mine = ++request;
     const opening = open === null;
+    if (
+      here().focus.command !== entry.command ||
+      (here().focus.report ?? "") !== (entry.report ?? "")
+    )
+      setFocus({ command: entry.command, report: entry.report ?? "" });
     open = entry;
     top = limit;
     running = true;
@@ -50,6 +56,7 @@
   }
 
   function back() {
+    setFocus({ command: "", report: "" });
     request += 1;
     open = null;
     run = null;
@@ -66,6 +73,32 @@
   }
 
   onMount(load);
+
+  /** A report the place names (a link, or Back) is run once the list of reports is read; none named closes it. */
+  const focusReport = $derived(
+    here().focus.command
+      ? `${here().focus.command}/${here().focus.report ?? ""}`
+      : null,
+  );
+  $effect(() => {
+    if (catalogue.state !== "ready") return;
+    const wanted = focusReport;
+    untrack(() => {
+      const current = open ? `${open.command}/${open.report ?? ""}` : null;
+      if (wanted === current) return;
+      if (!wanted) {
+        back();
+        return;
+      }
+      const entry =
+        catalogue.state === "ready"
+          ? catalogue.entries.find(
+              (e) => `${e.command}/${e.report ?? ""}` === wanted,
+            )
+          : null;
+      if (entry) void show(entry, DEFAULT_TOP);
+    });
+  });
 </script>
 
 {#if open}

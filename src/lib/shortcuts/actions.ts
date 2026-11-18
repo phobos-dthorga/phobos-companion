@@ -94,6 +94,18 @@ export const ACTIONS: Action[] = [
   },
   { id: "help", scope: "everywhere", defaultKey: "?", words: "shortcut-help" },
   {
+    id: "nav.back",
+    scope: "everywhere",
+    defaultKey: ",",
+    words: "shortcut-nav-back",
+  },
+  {
+    id: "nav.forward",
+    scope: "everywhere",
+    defaultKey: ".",
+    words: "shortcut-nav-forward",
+  },
+  {
     id: "code.changes",
     scope: "code",
     defaultKey: "c",

@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { here, setFocus } from "../navigation/navigation.svelte";
+  import { reveal } from "../shell/reveal";
+  import { untrack } from "svelte";
   import { onMount } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
@@ -104,6 +107,17 @@
   }
 
   onMount(load);
+
+  /** A row the place names is scrolled to and outlined once the lists are read. */
+  const focusRow = $derived(
+    here().focus.repository && here().focus.row
+      ? `row-${here().focus.repository}/${here().focus.row}`
+      : null,
+  );
+  $effect(() => {
+    if (focusRow && reading.state === "ready")
+      untrack(() => void reveal(focusRow));
+  });
 </script>
 
 <div class="eyebrow accent">{t("tests-kicker")}</div>

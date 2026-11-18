@@ -4,6 +4,8 @@
 
 <script lang="ts">
   import { onMount, type Snippet } from "svelte";
+  import { t } from "../i18n/runtime";
+  import { copyAddress } from "../navigation/navigation.svelte";
 
   /**
    * A dialog over the whole window, opened as soon as it is shown: a kicker, a title that names the dialog, a Close button, and
@@ -14,6 +16,7 @@
     title,
     closeLabel,
     width = 1500,
+    copyable = false,
     onclose,
     below,
     children,
@@ -23,6 +26,8 @@
     closeLabel: string;
     /** Its widest, in pixels; never wider than the window. */
     width?: number;
+    /** Offers "Copy address" for the place it shows (docs/cross-links.md, N3). */
+    copyable?: boolean;
     onclose: () => void;
     /** Anything under the title, inside the header. */
     below?: Snippet;
@@ -31,6 +36,12 @@
 
   const titleId = `window-dialog-title-${++made}`;
   let dialog: HTMLDialogElement;
+
+  let copied = $state<"yes" | "no" | null>(null);
+
+  async function copy() {
+    copied = (await copyAddress()) ? "yes" : "no";
+  }
 
   onMount(() => dialog.showModal());
 </script>
@@ -48,6 +59,20 @@
       <h2 id={titleId}>{title}</h2>
       {@render below?.()}
     </div>
+    {#if copyable}
+      <span class="copy">
+        <button type="button" class="action" onclick={copy}
+          >{t("trail-copy")}</button
+        >
+        {#if copied}
+          <span class="muted small" role="status"
+            >{copied === "yes"
+              ? t("trail-copied-short")
+              : t("trail-copy-failed")}</span
+          >
+        {/if}
+      </span>
+    {/if}
     <button type="button" class="action close" onclick={() => dialog.close()}>
       {closeLabel}
     </button>
@@ -95,6 +120,14 @@
     font-size: 1.5rem;
     font-weight: 600;
     line-height: 1.25;
+  }
+
+  .copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    flex: none;
   }
 
   .close {

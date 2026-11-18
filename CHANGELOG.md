@@ -4,6 +4,21 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-11-19
+
+The owner asked for the whole proposed order of docs/cross-links.md to be built overnight (19 November 2026): "Proceed with your entire proposed order, step-wise if necessary". Each step is its own commit under this version. Not yet tested on screen.
+
+### Added
+
+- **Back and Forward** across pages, games, choices and dialogs: buttons under the page bar, the , and . keys (one key each, changeable in Settings), and the mouse's side buttons. Closing a dialog is a step back, so Forward opens it again. A link to a dialog on another page arrives in two steps, so Back closes the dialog and leaves you on its page.
+- **Go to anything** (the / key, or its button): one search over pages, methods, classes and Defs, changelog versions and entries, test rows, versions on the timeline, settings and reports, for the game shown. Enter opens the first result. Code is searched as you type, in every repository of the game.
+- **Addresses**: Copy address puts where you are on the clipboard (dthorga://page/game?...), including the chosen changelog, method, test row, setting or report and any open code or as-it-stood dialog; pasted into Go to anything, it opens the same place. The code viewer and the changelog as it stood have their own Copy address.
+- What is chosen on a page is part of where you are, so Back returns to it and a link can name it: the changelog on Changes, the repository and the thing in the middle on the Code map (each new thing in the middle is a step), the day on the Timeline, the open report on Reports. A link to a test row, a setting or a mod scrolls to it and outlines it for a moment.
+
+### Changed
+
+- The / key opens Go to anything instead of jumping to the page's own search box, which is a Tab away.
+- The connections picture's own back button is now called Previous in the picture, beside the window's Back; on the Code map, the window's Back does the same job.
 ## [0.18.1] - 2026-11-19
 
 The owner found the Mods page's Read again silent (19 November 2026): "while its doing calculations, you have no idea anything's happening and think that the app or said functionality is broken", and asked for other places like it. Not yet tested on screen.

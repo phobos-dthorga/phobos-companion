@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { openDialog } from "../navigation/navigation.svelte";
   import { onMount } from "svelte";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
@@ -6,7 +7,6 @@
   import RichText from "../shell/RichText.svelte";
   import WindowDialog from "../shell/WindowDialog.svelte";
   import { heard, started } from "../shell/progress";
-  import CodeViewer from "../code/CodeViewer.svelte";
   import type { EntryRequest } from "../code/types";
   import { commitRuns, plainText } from "../shell/inline";
   import { versionWords } from "../changelog/presentation";
@@ -27,7 +27,6 @@
   let reading = $state<StoodReading>({ state: "reading" });
   let progress = $state(started());
   let changedOnly = $state(false);
-  let code = $state<EntryRequest | null>(null);
 
   const stood = $derived(
     reading.state === "ready" && reading.found.found
@@ -43,10 +42,14 @@
     });
   }
 
+  function viewCode(next: EntryRequest) {
+    openDialog({ kind: "code", request: next });
+  }
+
   /** Opens the code viewer on the commit that wrote these entries, as the changelog stood then. */
   function showCode(version: string, run: StoodEntry[]) {
     const first = run[0];
-    code = {
+    viewCode({
       repository: request.repository,
       changelog: request.changelog,
       product: request.product,
@@ -57,7 +60,7 @@
         lead: first.lead,
       },
       commit: first.commit ?? null,
-    };
+    });
   }
 
   /** What a "show the code" button reads out: the entry it opens, and how many more the same commit wrote. */
@@ -76,6 +79,7 @@
 </script>
 
 <WindowDialog
+  copyable
   kicker={t("stood-kicker", { product: request.product })}
   title={stood
     ? t("stood-title", {
@@ -199,12 +203,6 @@
     </div>
   {/if}
 </WindowDialog>
-
-{#if code}
-  {#key `${code.changelog}/${code.commit}`}
-    <CodeViewer {game} request={code} onclose={() => (code = null)} />
-  {/key}
-{/if}
 
 <style>
   h3 {

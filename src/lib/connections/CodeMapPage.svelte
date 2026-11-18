@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { go, here, setFocus } from "../navigation/navigation.svelte";
+  import { untrack } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
@@ -25,13 +26,13 @@
     | { state: "failed"; failure: Failure };
 
   const repositories = $derived(game.repositories ?? []);
-  // svelte-ignore state_referenced_locally
-  let repository = $state<string | null>(null);
+  /** The repository and the thing in the middle are part of the place. */
+  const repository = $derived(here().focus.repository || null);
+  const chosenId = $derived(here().focus.node || null);
   let summary = $state<Reading<Summary>>({ state: "idle" });
   let found = $state<Reading<Found>>({ state: "idle" });
   let progress = $state(started());
   let search = $state("");
-  let chosen = $state<Thing | null>(null);
 
   const current = $derived(repository ?? repositories[0] ?? null);
 
@@ -39,7 +40,6 @@
     if (!current) return;
     summary = { state: "reading" };
     progress = started();
-    chosen = null;
     found = { state: "idle" };
     const asked = await askConnections<Summary>(
       game.id,
@@ -74,11 +74,13 @@
   }
 
   function pick(name: string) {
-    repository = name;
-    void read();
+    setFocus({ repository: name, node: "" });
   }
 
-  onMount(read);
+  // Reads again whenever the repository changes: chosen here, by Back, or by a link.
+  $effect(() => {
+    if (current) untrack(() => void read());
+  });
 </script>
 
 <div class="eyebrow accent">{t("codemap-kicker")}</div>
@@ -168,7 +170,7 @@
         <FailurePanel failure={found.failure} onretry={find} />
       {:else if found.state === "refused"}
         <p class="lead">{t("connections-refused", { reason: found.reason })}</p>
-      {:else if found.state === "ready" && !chosen}
+      {:else if found.state === "ready" && !chosenId}
         {#if found.data.things.length === 0}
           <p class="muted">
             {t("codemap-none-found", { repository: current ?? "" })}
@@ -183,7 +185,7 @@
                 <button
                   type="button"
                   class="result"
-                  onclick={() => (chosen = thing)}
+                  onclick={() => setFocus({ node: thing.id })}
                 >
                   <span class="mark-letter" aria-hidden="true"
                     >{kindMark(thing)}</span
@@ -199,17 +201,20 @@
         {/if}
       {/if}
 
-      {#if chosen && current}
+      {#if chosenId && current}
         <button
           type="button"
           class="action back"
-          onclick={() => (chosen = null)}>{t("codemap-back-to-results")}</button
+          onclick={() => setFocus({ node: "" })}
+          >{t("codemap-back-to-results")}</button
         >
-        {#key `${current}/${chosen.id}`}
+        {#key `${current}/${chosenId}`}
           <ConnectionsView
             game={game.id}
             repository={current}
-            start={chosen.id}
+            start={chosenId}
+            onrecentre={(id) =>
+              go({ ...here(), focus: { ...here().focus, node: id } })}
           />
         {/key}
       {/if}

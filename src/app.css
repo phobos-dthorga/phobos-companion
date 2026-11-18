@@ -45,6 +45,58 @@ p {
   color: var(--colour-text-muted);
 }
 
+/* A page's title, its opening paragraph, small print and its closing note on how it works: styled once, for every page
+   (docs/shared-code-audit.md, W2). A page styles only what is its own. */
+h1 {
+  margin-block: 4px 8px;
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.lead {
+  max-width: 70ch;
+  margin-bottom: 14px;
+  font-size: var(--type-lead);
+}
+
+.how {
+  max-width: 80ch;
+  margin-top: 14px;
+  font-size: var(--type-small);
+}
+
+.small {
+  font-size: var(--type-small);
+}
+
+/* One choice among several, shown pressed when chosen (docs/shared-code-audit.md, W3): which facts to show, which changelog,
+   which view. A group of them is .toggles; each sets aria-pressed. */
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toggle {
+  min-height: var(--control-min);
+  padding-inline: 16px;
+  font: inherit;
+  color: var(--colour-text-muted);
+  background: transparent;
+  border: 1px solid var(--colour-line);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.toggle[aria-pressed="true"] {
+  font-weight: 600;
+  color: var(--colour-text);
+  background: var(--colour-surface-soft);
+  border: 2px solid var(--colour-accent);
+}
+
 .action {
   min-height: var(--control-min);
   padding-inline: 18px;

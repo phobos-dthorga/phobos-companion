@@ -122,11 +122,11 @@
   <p class="lead">{t("tests-none", { game: game.name })}</p>
 {:else}
   {@const lists = reading.lists}
-  <div class="shelves" role="group" aria-label={t("tests-shelves-label")}>
+  <div class="toggles" role="group" aria-label={t("tests-shelves-label")}>
     {#each SHELVES as which (which)}
       <button
         type="button"
-        class="shelf"
+        class="toggle"
         aria-pressed={shelf === which}
         onclick={() => (shelf = which)}
       >
@@ -348,48 +348,11 @@
 {/if}
 
 <style>
-  h1 {
-    margin-block: 4px 8px;
-    font-family: var(--font-display);
-    font-size: 2.25rem;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
-  .lead {
-    max-width: 70ch;
-    font-size: var(--type-lead);
-  }
-
   .status {
     min-height: 1.5em;
     margin-block: 8px;
     font-weight: 600;
     color: var(--colour-observed);
-  }
-
-  .shelves {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .shelf {
-    min-height: var(--control-min);
-    padding-inline: 18px;
-    font: inherit;
-    color: var(--colour-text-muted);
-    background: transparent;
-    border: 1px solid var(--colour-line);
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .shelf[aria-pressed="true"] {
-    font-weight: 600;
-    color: var(--colour-text);
-    background: var(--colour-surface-soft);
-    border: 2px solid var(--colour-accent);
   }
 
   .shelf-note {
@@ -557,11 +520,5 @@
   .verdict-button:disabled {
     cursor: progress;
     opacity: 0.7;
-  }
-
-  .how {
-    margin-top: 20px;
-    font-size: var(--type-small);
-    max-width: 80ch;
   }
 </style>

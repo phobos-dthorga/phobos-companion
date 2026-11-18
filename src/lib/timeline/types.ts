@@ -1,4 +1,4 @@
-import type { Failure } from "../shell/types";
+import type { Failure, Waiting, Pending } from "../shell/types";
 
 /** What a fact says happened (phobos-modkit `history`, kit 1.30.0). */
 export type FactKind =
@@ -59,11 +59,7 @@ export type Timeline = {
   log_exists: boolean;
 };
 
-export type TimelineReading =
-  | { state: "reading" }
-  | { state: "browser" }
-  | { state: "ready"; timeline: Timeline }
-  | { state: "failed"; failure: Failure };
+export type TimelineReading = Waiting | { state: "ready"; timeline: Timeline };
 
 /** Which changelog to read as it stood, and at which commit or moment. */
 export type StoodRequest = {
@@ -107,7 +103,4 @@ export type AsItStood = {
   stood: Stood;
 };
 
-export type StoodReading =
-  | { state: "reading" }
-  | { state: "ready"; found: AsItStood }
-  | { state: "failed"; failure: Failure };
+export type StoodReading = Pending | { state: "ready"; found: AsItStood };

@@ -1,3 +1,4 @@
+import { LOCALE } from "../i18n/runtime";
 import type {
   ChartBlockData,
   ChartRole,
@@ -36,8 +37,8 @@ export function formatValue(value: number | null, unit: string): string {
   if (value === null) return "";
   const rounded =
     Number.isInteger(value) || Math.abs(value) >= 100
-      ? Math.round(value).toLocaleString("en-AU")
-      : value.toLocaleString("en-AU", { maximumFractionDigits: 1 });
+      ? Math.round(value).toLocaleString(LOCALE)
+      : value.toLocaleString(LOCALE, { maximumFractionDigits: 1 });
   if (!unit) return rounded;
   return unit === "%" ? `${rounded}%` : `${rounded} ${unit}`;
 }

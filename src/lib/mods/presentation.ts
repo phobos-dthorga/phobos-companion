@@ -1,3 +1,5 @@
+import { LOCALE } from "../i18n/runtime";
+export { formatWhen } from "../shell/dates";
 import type {
   Entry,
   ModInstall,
@@ -98,21 +100,7 @@ export function formatSize(bytes: number | null | undefined): string {
   if (bytes == null) return "";
   const mb = bytes / 1024 ** 2;
   if (mb >= 1024) return `${(mb / 1024).toFixed(1)} GB`;
-  return `${Math.max(1, Math.round(mb)).toLocaleString("en-AU")} MB`;
-}
-
-/** "18 Nov 2026, 8:07 pm" from an ISO time; the text itself when it isn't one. */
-export function formatWhen(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const moment = new Date(iso);
-  if (Number.isNaN(moment.getTime())) return iso;
-  return moment.toLocaleString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return `${Math.max(1, Math.round(mb)).toLocaleString(LOCALE)} MB`;
 }
 
 /** A commit's first eight characters. */

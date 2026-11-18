@@ -1,3 +1,4 @@
+export { formatDay } from "../shell/dates";
 import type {
   DecisionWord,
   PartCheck,
@@ -159,17 +160,6 @@ export function steps(row: TestRow): { todo: string; passes: string } {
     todo: plainText(cells[2] ?? ""),
     passes: plainText(cells[cells.length - 1] ?? ""),
   };
-}
-
-/** "17 Nov 2026" from an ISO time, in the reader's own time zone. */
-export function formatDay(iso: string): string {
-  const moment = new Date(iso);
-  if (Number.isNaN(moment.getTime())) return iso;
-  return moment.toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
 }
 
 /** The latest sighting of a row, or null. */

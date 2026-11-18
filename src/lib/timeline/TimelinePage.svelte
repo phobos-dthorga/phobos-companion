@@ -9,13 +9,13 @@
   import RichText from "../shell/RichText.svelte";
   import { heard, started } from "../shell/progress";
   import AsItStood from "./AsItStood.svelte";
+  import { sections, versionWords } from "../changelog/presentation";
   import { readTimeline } from "./desktopClient";
   import {
     byDay,
     canReadAsItStood,
     canShowCode,
     dayWords,
-    entrySections,
     KIND_LOOKS,
     lanes,
     laneOf,
@@ -129,11 +129,6 @@
     return t("timeline-batch-installed", { count });
   }
 
-  function versionWords(version: string | undefined): string {
-    if (!version) return "";
-    return version === "Unreleased" ? t("changes-unreleased") : version;
-  }
-
   async function load() {
     reading = { state: "reading" };
     progress = started();
@@ -215,22 +210,22 @@
   <p class="lead">{t("timeline-none", { game: game.name })}</p>
 {:else}
   <div class="controls">
-    <div class="choices" role="group" aria-label={t("timeline-showing-label")}>
+    <div class="toggles" role="group" aria-label={t("timeline-showing-label")}>
       <button
         type="button"
-        class="choice"
+        class="toggle"
         aria-pressed={showing === "all"}
         onclick={() => (showing = "all")}>{t("timeline-showing-all")}</button
       >
       <button
         type="button"
-        class="choice"
+        class="toggle"
         aria-pressed={showing === "git"}
         onclick={() => (showing = "git")}>{t("timeline-showing-git")}</button
       >
       <button
         type="button"
-        class="choice"
+        class="toggle"
         aria-pressed={showing === "log"}
         onclick={() => (showing = "log")}>{t("timeline-showing-log")}</button
       >
@@ -278,7 +273,7 @@
           {#each overview.lanes as lane (lane.name)}
             <button
               type="button"
-              class="lane-name"
+              class="lane-name toggle"
               aria-pressed={only === lane.name}
               title={t("timeline-only", { product: lane.name })}
               onclick={() => (only = only === lane.name ? null : lane.name)}
@@ -456,7 +451,7 @@
                   {/if}
                   {#if fact.entries && fact.entries.length > 0}
                     <div class="sections">
-                      {#each entrySections(fact.entries) as section, sectionIndex (sectionIndex)}
+                      {#each sections(fact.entries) as section, sectionIndex (sectionIndex)}
                         <span class="section-name">{section.section}</span>
                         <ul class="entries">
                           {#each section.entries as entry, entryIndex (entryIndex)}
@@ -527,14 +522,6 @@
 {/if}
 
 <style>
-  h1 {
-    margin-block: 4px 8px;
-    font-family: var(--font-display);
-    font-size: 2.25rem;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
   h2 {
     margin: 0 0 4px;
     font-family: var(--font-display);
@@ -548,16 +535,6 @@
     font-weight: 600;
   }
 
-  .lead {
-    max-width: 75ch;
-    margin-bottom: 14px;
-    font-size: var(--type-lead);
-  }
-
-  .small {
-    font-size: var(--type-small);
-  }
-
   .note {
     max-width: 80ch;
   }
@@ -567,32 +544,6 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 8px 16px;
-  }
-
-  .choices {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .choice,
-  .lane-name {
-    min-height: var(--control-min);
-    padding-inline: 14px;
-    font: inherit;
-    color: var(--colour-text-muted);
-    background: transparent;
-    border: 1px solid var(--colour-line);
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .choice[aria-pressed="true"],
-  .lane-name[aria-pressed="true"] {
-    font-weight: 600;
-    color: var(--colour-text);
-    background: var(--colour-surface-soft);
-    border: 2px solid var(--colour-accent);
   }
 
   .overview,
@@ -869,11 +820,5 @@
 
   .more {
     margin-top: 12px;
-  }
-
-  .how {
-    max-width: 80ch;
-    margin-top: 14px;
-    font-size: var(--type-small);
   }
 </style>

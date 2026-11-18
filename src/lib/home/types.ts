@@ -1,4 +1,4 @@
-import type { Failure } from "../shell/types";
+import type { Failure, Waiting } from "../shell/types";
 
 export type WorkItem = { repository: string; unix: number; subject: string };
 
@@ -35,8 +35,4 @@ export type GameHome = {
 
 export type Home = { list_found: boolean; games: GameHome[] };
 
-export type HomeReading =
-  | { state: "reading" }
-  | { state: "browser" }
-  | { state: "ready"; home: Home }
-  | { state: "failed"; failure: Failure };
+export type HomeReading = Waiting | { state: "ready"; home: Home };

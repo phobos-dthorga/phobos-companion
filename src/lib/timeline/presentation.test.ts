@@ -4,7 +4,6 @@ import {
   canReadAsItStood,
   canShowCode,
   dayOf,
-  entrySections,
   KIND_LOOKS,
   lanes,
   monthStarts,
@@ -214,19 +213,5 @@ describe("a day's rows", () => {
         fact("entries-added", noon("2026-11-18")),
       ]),
     ).toHaveLength(2);
-  });
-
-  it("puts entries under their sections, in the order the sections first appear", () => {
-    const found = entrySections([
-      { lead: "a", section: "Added" },
-      { lead: "b", section: "Fixed" },
-      { lead: "c", section: "Added" },
-    ]);
-    expect(found.map((s) => [s.section, s.entries.map((e) => e.lead)])).toEqual(
-      [
-        ["Added", ["a", "c"]],
-        ["Fixed", ["b"]],
-      ],
-    );
   });
 });

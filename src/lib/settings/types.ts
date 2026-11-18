@@ -1,4 +1,4 @@
-import type { Failure } from "../shell/types";
+import type { Failure, Waiting } from "../shell/types";
 
 /** Where a setting's value comes from, first that names one wins (phobos-modkit `settings`, kit 1.30.0). */
 export type Layer = "environment" | "repository" | "central" | "default";
@@ -31,11 +31,7 @@ export type SettingsList = {
   settings: Setting[];
 };
 
-export type SettingsReading =
-  | { state: "reading" }
-  | { state: "browser" }
-  | { state: "ready"; list: SettingsList }
-  | { state: "failed"; failure: Failure };
+export type SettingsReading = Waiting | { state: "ready"; list: SettingsList };
 
 export type SetResult = {
   ok: boolean;

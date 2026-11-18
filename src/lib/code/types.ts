@@ -1,4 +1,4 @@
-import type { Failure } from "../shell/types";
+import type { Failure, Waiting, Pending } from "../shell/types";
 
 /** One entry of a changelog, as phobos-modkit reads it. */
 export type ChangelogEntry = {
@@ -95,12 +95,6 @@ export type EntryRequest = {
 };
 
 export type ChangesReading =
-  | { state: "reading" }
-  | { state: "browser" }
-  | { state: "ready"; repositories: RepositoryChanges[] }
-  | { state: "failed"; failure: Failure };
+  Waiting | { state: "ready"; repositories: RepositoryChanges[] };
 
-export type EntryCodeReading =
-  | { state: "reading" }
-  | { state: "ready"; found: EntryCode }
-  | { state: "failed"; failure: Failure };
+export type EntryCodeReading = Pending | { state: "ready"; found: EntryCode };

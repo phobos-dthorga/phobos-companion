@@ -85,17 +85,4 @@
     justify-content: space-between;
     gap: 8px 12px;
   }
-
-  h1 {
-    margin-block: 4px 12px;
-    font-family: var(--font-display);
-    font-size: 2.25rem;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
-  .lead {
-    max-width: 64ch;
-    font-size: var(--type-lead);
-  }
 </style>

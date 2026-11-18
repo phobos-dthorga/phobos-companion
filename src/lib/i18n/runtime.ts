@@ -2,7 +2,10 @@ import { FluentBundle, FluentResource } from "@fluent/bundle";
 import type { FluentVariable } from "@fluent/bundle";
 import catalogue from "../../../locales/en-AU.json";
 
-const bundle = new FluentBundle(catalogue.locale, { useIsolating: false });
+/** The words' locale, which every date and number follows. */
+export const LOCALE = catalogue.locale;
+
+const bundle = new FluentBundle(LOCALE, { useIsolating: false });
 
 for (const [key, pattern] of Object.entries(catalogue.messages)) {
   const problems = bundle.addResource(

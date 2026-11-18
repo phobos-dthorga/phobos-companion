@@ -1,4 +1,4 @@
-import type { Failure } from "../shell/types";
+import type { Failure, Waiting } from "../shell/types";
 
 /** One changelog entry, as phobos-modkit's installs status gives it (kit 1.20.0). */
 export type Entry = {
@@ -174,11 +174,7 @@ export type TexturesStatus = {
 };
 
 export type TexturesReading =
-  | { state: "reading" }
-  | { state: "browser" }
-  | { state: "none" }
-  | { state: "ready"; status: TexturesStatus }
-  | { state: "failed"; failure: Failure };
+  Waiting | { state: "none" } | { state: "ready"; status: TexturesStatus };
 
 export type MoveResult = {
   ok: boolean;
@@ -192,10 +188,7 @@ export type MoveResult = {
 };
 
 export type InstallsReading =
-  | { state: "reading" }
-  | { state: "browser" }
-  | { state: "ready"; repositories: RepositoryInstalls[] }
-  | { state: "failed"; failure: Failure };
+  Waiting | { state: "ready"; repositories: RepositoryInstalls[] };
 
 export type MoveReading =
   | { state: "ready"; result: MoveResult }

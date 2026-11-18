@@ -1,3 +1,4 @@
+import { LOCALE } from "../i18n/runtime";
 /*
  * What the atlas says in words: a tile's details, the places grouped for the list, and the order things are offered
  * in. Reads the decoded globe; draws nothing.
@@ -102,7 +103,7 @@ export function formatValue(layer: GlobeLayerData, raw: number): string {
   const smallest = 10 ** -layer.precision;
   if (raw !== 0 && shown > 0 && shown < smallest / 2)
     return t("atlas-under", { value: `${smallest}${unitSuffix(layer.unit)}` });
-  return `${shown.toLocaleString("en-AU", {
+  return `${shown.toLocaleString(LOCALE, {
     minimumFractionDigits: layer.precision,
     maximumFractionDigits: layer.precision,
   })}${unitSuffix(layer.unit)}`;
@@ -150,7 +151,7 @@ export function tileDetails(atlas: Atlas, tile: number): Detail[] {
     });
   details.push({
     label: t("atlas-detail-tile"),
-    value: tile.toLocaleString("en-AU"),
+    value: tile.toLocaleString(LOCALE),
   });
   return details;
 }

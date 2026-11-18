@@ -1,5 +1,4 @@
-import { invoke, isTauri } from "@tauri-apps/api/core";
-import type { Failure } from "../shell/types";
+import { ask, BROWSER, inBrowser } from "../shell/desktopClient";
 import type {
   DecisionReading,
   DecisionWord,
@@ -13,13 +12,11 @@ import type {
 
 /** Every test list of a game, read by the host through the kit. */
 export async function readTestLists(game: string): Promise<TestsReading> {
-  if (!isTauri()) return { state: "browser" };
-  try {
-    const lists = await invoke<TestList[]>("test_lists", { game });
-    return { state: "ready", lists };
-  } catch (failure) {
-    return { state: "failed", failure: failure as Failure };
-  }
+  if (inBrowser()) return BROWSER;
+  return ask<TestList[], TestsReading>("test_lists", { game }, (lists) => ({
+    state: "ready",
+    lists,
+  }));
 }
 
 /** Asks the host to record the owner's verdict on one row. The host checks it before writing. */
@@ -30,18 +27,11 @@ export async function recordVerdict(
   verdict: VerdictWord,
   note: string,
 ): Promise<RecordReading> {
-  try {
-    const recorded = await invoke<Recorded>("record_verdict", {
-      game,
-      repository,
-      row,
-      verdict,
-      note,
-    });
-    return { state: "ready", recorded };
-  } catch (failure) {
-    return { state: "failed", failure: failure as Failure };
-  }
+  return ask<Recorded, RecordReading>(
+    "record_verdict",
+    { game, repository, row, verdict, note },
+    (recorded) => ({ state: "ready", recorded }),
+  );
 }
 
 /** Asks the host to record the owner's decision on a note no row names. The host checks it before writing. */
@@ -52,16 +42,9 @@ export async function recordKeyDecision(
   decision: DecisionWord,
   note: string,
 ): Promise<DecisionReading> {
-  try {
-    const recorded = await invoke<RecordedDecision>("record_key_decision", {
-      game,
-      repository,
-      key,
-      decision,
-      note,
-    });
-    return { state: "ready", recorded };
-  } catch (failure) {
-    return { state: "failed", failure: failure as Failure };
-  }
+  return ask<RecordedDecision, DecisionReading>(
+    "record_key_decision",
+    { game, repository, key, decision, note },
+    (recorded) => ({ state: "ready", recorded }),
+  );
 }

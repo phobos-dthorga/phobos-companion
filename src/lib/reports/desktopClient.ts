@@ -1,7 +1,10 @@
-import { invoke, isTauri } from "@tauri-apps/api/core";
-import { progressChannel } from "../shell/desktopClient";
+import {
+  ask,
+  BROWSER,
+  inBrowser,
+  progressChannel,
+} from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
-import type { Failure } from "../shell/types";
 import type {
   CatalogueReading,
   ReportEntry,
@@ -11,13 +14,12 @@ import type {
 
 /** The reports the host offers for a game. */
 export async function readCatalogue(game: string): Promise<CatalogueReading> {
-  if (!isTauri()) return { state: "browser" };
-  try {
-    const entries = await invoke<ReportEntry[]>("report_catalogue", { game });
-    return { state: "ready", entries };
-  } catch (failure) {
-    return { state: "failed", failure: failure as Failure };
-  }
+  if (inBrowser()) return BROWSER;
+  return ask<ReportEntry[], CatalogueReading>(
+    "report_catalogue",
+    { game },
+    (entries) => ({ state: "ready", entries }),
+  );
 }
 
 /** Asks the host to run one report. The host decides whether it may. */
@@ -27,16 +29,15 @@ export async function runReport(
   top: number,
   onProgress?: OnProgress,
 ): Promise<RunReading> {
-  try {
-    const result = await invoke<ReportResult>("run_report", {
+  return ask<ReportResult, RunReading>(
+    "run_report",
+    {
       game,
       command: entry.command,
       report: entry.report,
       top,
       onProgress: progressChannel(onProgress),
-    });
-    return { state: "ready", result };
-  } catch (failure) {
-    return { state: "failed", failure: failure as Failure };
-  }
+    },
+    (result) => ({ state: "ready", result }),
+  );
 }

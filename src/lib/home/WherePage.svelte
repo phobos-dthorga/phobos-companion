@@ -117,20 +117,6 @@
 {/if}
 
 <style>
-  h1 {
-    margin-block: 4px 8px;
-    font-family: var(--font-display);
-    font-size: 2.25rem;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
-  .lead {
-    max-width: 64ch;
-    margin-bottom: 24px;
-    font-size: var(--type-lead);
-  }
-
   .panel {
     margin-bottom: 16px;
     padding: 20px 24px;
@@ -187,10 +173,6 @@
   .body {
     flex: 1 1 320px;
     min-width: 0;
-  }
-
-  .small {
-    font-size: var(--type-small);
   }
 
   .count {

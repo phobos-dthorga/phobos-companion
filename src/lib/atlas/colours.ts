@@ -1,3 +1,4 @@
+import { LOCALE } from "../i18n/runtime";
 /*
  * How each view of the planet is coloured. A category layer brings its own colours from the kit (a biome's look); a
  * measure is coloured by a ramp chosen here, by the dataviz rules: one hue light to dark for a magnitude, two hues
@@ -191,7 +192,7 @@ export function keyEntries(
   } else {
     for (const stop of RAMPS[layer.ramp]) {
       entries.push({
-        label: `${stop.value.toLocaleString("en-AU")}${unitSuffix(layer.unit)}`,
+        label: `${stop.value.toLocaleString(LOCALE)}${unitSuffix(layer.unit)}`,
         colour: stop.colour,
       });
     }

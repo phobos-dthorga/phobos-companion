@@ -953,23 +953,10 @@
 {/if}
 
 <style>
-  h1 {
-    margin-block: 4px 8px;
-    font-family: var(--font-display);
-    font-size: 2.25rem;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
   h2 {
     margin-block: 0 8px;
     font-family: var(--font-display);
     font-size: 1.25rem;
-  }
-
-  .lead {
-    max-width: 70ch;
-    font-size: var(--type-lead);
   }
 
   .status {
@@ -1298,12 +1285,6 @@
     white-space: pre-wrap;
     background: var(--colour-canvas);
     border: 1px solid var(--colour-line);
-  }
-
-  .how {
-    margin-top: 16px;
-    font-size: var(--type-small);
-    max-width: 80ch;
   }
 
   @media (max-width: 700px) {

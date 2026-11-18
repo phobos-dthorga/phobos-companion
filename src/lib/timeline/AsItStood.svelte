@@ -4,10 +4,12 @@
   import FailurePanel from "../shell/FailurePanel.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import RichText from "../shell/RichText.svelte";
+  import WindowDialog from "../shell/WindowDialog.svelte";
   import { heard, started } from "../shell/progress";
   import CodeViewer from "../code/CodeViewer.svelte";
   import type { EntryRequest } from "../code/types";
   import { commitRuns, plainText } from "../shell/inline";
+  import { versionWords } from "../changelog/presentation";
   import { readAsItStood } from "./desktopClient";
   import { dayOf, dayWords, stoodEntries, timeWords } from "./presentation";
   import type { StoodEntry, StoodReading, StoodRequest } from "./types";
@@ -22,7 +24,6 @@
     onclose,
   }: { game: string; request: StoodRequest; onclose: () => void } = $props();
 
-  let dialog: HTMLDialogElement;
   let reading = $state<StoodReading>({ state: "reading" });
   let progress = $state(started());
   let changedOnly = $state(false);
@@ -70,36 +71,22 @@
   }
 
   onMount(() => {
-    dialog.showModal();
     void load();
   });
 </script>
 
-<dialog
-  bind:this={dialog}
-  class="viewer"
-  aria-labelledby="stood-title"
+<WindowDialog
+  kicker={t("stood-kicker", { product: request.product })}
+  title={stood
+    ? t("stood-title", {
+        day: dayWords(dayOf(stood.commit.time)),
+        time: timeWords(stood.commit.time),
+      })
+    : request.product}
+  closeLabel={t("stood-close")}
+  width={1100}
   {onclose}
 >
-  <header class="head">
-    <div class="head-words">
-      <div class="eyebrow accent">
-        {t("stood-kicker", { product: request.product })}
-      </div>
-      <h2 id="stood-title">
-        {stood
-          ? t("stood-title", {
-              day: dayWords(dayOf(stood.commit.time)),
-              time: timeWords(stood.commit.time),
-            })
-          : request.product}
-      </h2>
-    </div>
-    <button type="button" class="action close" onclick={() => dialog.close()}
-      >{t("stood-close")}</button
-    >
-  </header>
-
   {#if reading.state === "reading"}
     <ProgressBar {progress} fallback={t("stood-reading")} />
   {:else if reading.state === "failed"}
@@ -127,16 +114,16 @@
       {#if !stood.stillThere}
         <p class="muted">{t("stood-gone")}</p>
       {/if}
-      <div class="choices" role="group" aria-label={t("stood-showing-label")}>
+      <div class="toggles" role="group" aria-label={t("stood-showing-label")}>
         <button
           type="button"
-          class="choice"
+          class="toggle"
           aria-pressed={!changedOnly}
           onclick={() => (changedOnly = false)}>{t("stood-showing-all")}</button
         >
         <button
           type="button"
-          class="choice"
+          class="toggle"
           aria-pressed={changedOnly}
           onclick={() => (changedOnly = true)}
           >{t("stood-showing-changed")}</button
@@ -150,9 +137,7 @@
         {#if !changedOnly || shown.length > 0}
           <section class="version" aria-label={version.version}>
             <h3>
-              {version.version === "Unreleased"
-                ? t("changes-unreleased")
-                : version.version}
+              {versionWords(version.version)}
               {#if version.heading}<span class="muted heading-rest"
                   >{version.heading}</span
                 >{/if}
@@ -213,7 +198,7 @@
       {/each}
     </div>
   {/if}
-</dialog>
+</WindowDialog>
 
 {#if code}
   {#key `${code.changelog}/${code.commit}`}
@@ -222,47 +207,6 @@
 {/if}
 
 <style>
-  .viewer {
-    width: min(1100px, 96vw);
-    height: 92vh;
-    max-width: none;
-    max-height: none;
-    padding: 20px 24px;
-    color: var(--colour-text);
-    background: var(--colour-surface);
-    border: 2px solid var(--colour-accent);
-    border-radius: 6px;
-  }
-
-  .viewer[open] {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .viewer::backdrop {
-    background: rgb(0 0 0 / 70%);
-  }
-
-  .head {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .head-words {
-    flex: 1;
-    min-width: 0;
-  }
-
-  h2 {
-    margin: 2px 0 4px;
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.25;
-  }
-
   h3 {
     margin: 0 0 6px;
     font-family: var(--font-display);
@@ -270,47 +214,10 @@
     font-weight: 600;
   }
 
-  .close {
-    flex: none;
-  }
-
   .about p {
     margin: 0 0 4px;
     font-size: var(--type-small);
     overflow-wrap: anywhere;
-  }
-
-  .lead {
-    font-size: var(--type-lead);
-  }
-
-  .small {
-    font-size: var(--type-small);
-  }
-
-  .choices {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  .choice {
-    min-height: var(--control-min);
-    padding-inline: 14px;
-    font: inherit;
-    color: var(--colour-text-muted);
-    background: transparent;
-    border: 1px solid var(--colour-line);
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .choice[aria-pressed="true"] {
-    font-weight: 600;
-    color: var(--colour-text);
-    background: var(--colour-surface-soft);
-    border: 2px solid var(--colour-accent);
   }
 
   .body {
@@ -374,5 +281,8 @@
 
   .since-removed .fate {
     border-color: var(--colour-risk);
+  }
+  .about .toggles {
+    margin-top: 8px;
   }
 </style>

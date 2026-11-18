@@ -4,6 +4,7 @@
   import FailurePanel from "../shell/FailurePanel.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import RichText from "../shell/RichText.svelte";
+  import WindowDialog from "../shell/WindowDialog.svelte";
   import { plainText } from "../shell/inline";
   import { heard, started } from "../shell/progress";
   import { readEntryCode } from "./desktopClient";
@@ -38,7 +39,6 @@
   /** The most changed lines the tools keep for one file (phobos-modkit `changes`). */
   const FILE_LINE_LIMIT = 600;
 
-  let dialog: HTMLDialogElement;
   let reading = $state<EntryCodeReading>({ state: "reading" });
   let progress = $state(started());
   let chosen = $state<string | null>(null);
@@ -89,34 +89,24 @@
   }
 
   onMount(() => {
-    dialog.showModal();
     void load();
   });
 </script>
 
-<dialog
-  bind:this={dialog}
-  class="viewer"
-  aria-labelledby="code-viewer-title"
+<WindowDialog
+  kicker={t("code-kicker", {
+    product: request.product,
+    version: request.entry.version,
+  })}
+  title={plainText(parts.lead || parts.rest)}
+  closeLabel={t("code-close")}
   {onclose}
 >
-  <header class="head">
-    <div class="head-words">
-      <div class="eyebrow accent">
-        {t("code-kicker", {
-          product: request.product,
-          version: request.entry.version,
-        })}
-      </div>
-      <h2 id="code-viewer-title">{plainText(parts.lead || parts.rest)}</h2>
-      {#if parts.lead && parts.rest}
-        <p class="entry-rest"><RichText text={parts.rest} /></p>
-      {/if}
-    </div>
-    <button type="button" class="action close" onclick={() => dialog.close()}>
-      {t("code-close")}
-    </button>
-  </header>
+  {#snippet below()}
+    {#if parts.lead && parts.rest}
+      <p class="entry-rest"><RichText text={parts.rest} /></p>
+    {/if}
+  {/snippet}
 
   {#if reading.state === "reading"}
     <ProgressBar {progress} fallback={t("code-reading")} />
@@ -170,16 +160,16 @@
     {#if code.files.length === 0}
       <p class="lead">{t("code-no-files")}</p>
     {:else}
-      <div class="modes" role="group" aria-label={t("code-mode-label")}>
+      <div class="toggles" role="group" aria-label={t("code-mode-label")}>
         <button
           type="button"
-          class="mode"
+          class="toggle"
           aria-pressed={mode === "changes"}
           onclick={() => (mode = "changes")}>{t("code-mode-changes")}</button
         >
         <button
           type="button"
-          class="mode"
+          class="toggle"
           aria-pressed={mode === "new"}
           onclick={() => (mode = "new")}>{t("code-mode-new")}</button
         >
@@ -288,58 +278,13 @@
       </div>
     {/if}
   {/if}
-</dialog>
+</WindowDialog>
 
 <style>
-  .viewer {
-    width: min(1500px, 96vw);
-    height: 92vh;
-    max-width: none;
-    max-height: none;
-    padding: 20px 24px;
-    color: var(--colour-text);
-    background: var(--colour-surface);
-    border: 2px solid var(--colour-accent);
-    border-radius: 6px;
-  }
-
-  .viewer[open] {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .viewer::backdrop {
-    background: rgb(0 0 0 / 70%);
-  }
-
-  .head {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .head-words {
-    flex: 1;
-    min-width: 0;
-  }
-
-  h2 {
-    margin: 2px 0 4px;
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.25;
-  }
-
   .entry-rest {
     max-width: 110ch;
     margin: 0;
     font-size: var(--type-small);
-  }
-
-  .close {
-    flex: none;
   }
 
   .about p {
@@ -375,30 +320,6 @@
   .refused {
     font-weight: 600;
     color: var(--colour-risk);
-  }
-
-  .modes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .mode {
-    min-height: var(--control-min);
-    padding-inline: 18px;
-    font: inherit;
-    color: var(--colour-text-muted);
-    background: transparent;
-    border: 1px solid var(--colour-line);
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .mode[aria-pressed="true"] {
-    font-weight: 600;
-    color: var(--colour-text);
-    background: var(--colour-surface-soft);
-    border: 2px solid var(--colour-accent);
   }
 
   .body {

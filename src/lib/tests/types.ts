@@ -1,4 +1,4 @@
-import type { Failure } from "../shell/types";
+import type { Failure, Waiting } from "../shell/types";
 
 /** What the game has seen working, from its seen-in-play notes (phobos-modkit test-pass). */
 export type Sighting = {
@@ -100,11 +100,7 @@ export type RecordedDecision = {
   time: string;
 };
 
-export type TestsReading =
-  | { state: "reading" }
-  | { state: "browser" }
-  | { state: "ready"; lists: TestList[] }
-  | { state: "failed"; failure: Failure };
+export type TestsReading = Waiting | { state: "ready"; lists: TestList[] };
 
 export type RecordReading =
   | { state: "ready"; recorded: Recorded }

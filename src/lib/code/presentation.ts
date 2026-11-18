@@ -1,3 +1,4 @@
+export { formatDay } from "../shell/dates";
 import type { DiffLine, FileChange, FileKind, Hunk } from "./types";
 
 /** How the viewer shows a file: everything that changed, or only the code as it now stands. */
@@ -148,18 +149,6 @@ export function hunkHtml(
 /** A commit's first eight characters. */
 export function shortHash(hash: string): string {
   return hash.slice(0, 8);
-}
-
-/** "18 Nov 2026" from an ISO time; the text itself when it isn't one. */
-export function formatDay(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const moment = new Date(iso);
-  if (Number.isNaN(moment.getTime())) return iso;
-  return moment.toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
 }
 
 /** An entry split into its bold opening and the rest; an entry with no bold opening is all rest. */

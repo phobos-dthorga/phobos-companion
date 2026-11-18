@@ -1,9 +1,9 @@
+import { LOCALE } from "../i18n/runtime";
 import type { Block, Cell, Report, Sort, TableBlockData } from "./types";
 
 export const DEFAULT_TOP = 100;
 export const MAX_TOP = 5000;
 const SHOW_MORE_FACTOR = 5;
-const LOCALE = "en-AU";
 
 const collator = new Intl.Collator(LOCALE, {
   numeric: true,

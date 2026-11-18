@@ -7,6 +7,11 @@
   import { heard, started } from "../shell/progress";
   import CodeViewer from "./CodeViewer.svelte";
   import { readChanges } from "./desktopClient";
+  import {
+    releasedCount,
+    sections,
+    versionWords,
+  } from "../changelog/presentation";
   import RichText from "../shell/RichText.svelte";
   import { commitRuns, plainText } from "../shell/inline";
   import type {
@@ -71,20 +76,6 @@
       : t("code-show-for", { entry: plainText(run[0].lead) });
   }
 
-  /** The sections of one version, in the order its entries name them. */
-  function bySection(entries: ChangelogEntry[]) {
-    const sections: { section: string; entries: ChangelogEntry[] }[] = [];
-    for (const entry of entries) {
-      let found = sections.find((s) => s.section === entry.section);
-      if (!found) {
-        found = { section: entry.section, entries: [] };
-        sections.push(found);
-      }
-      found.entries.push(entry);
-    }
-    return sections;
-  }
-
   onMount(load);
 </script>
 
@@ -101,11 +92,11 @@
 {:else if choices.length === 0}
   <p class="lead">{t("changes-none", { game: game.name })}</p>
 {:else if chosen}
-  <div class="products" role="group" aria-label={t("changes-products-label")}>
+  <div class="toggles" role="group" aria-label={t("changes-products-label")}>
     {#each choices as choice (keyOf(choice))}
       <button
         type="button"
-        class="product"
+        class="toggle"
         aria-pressed={keyOf(choice) === keyOf(chosen)}
         onclick={() => (chosenKey = keyOf(choice))}
       >
@@ -128,9 +119,7 @@
     <section class="version" aria-label={version.version}>
       <div class="version-head">
         <h2>
-          {version.version === "Unreleased"
-            ? t("changes-unreleased")
-            : version.version}
+          {versionWords(version.version)}
           {#if version.heading}
             <span class="muted heading-rest">{version.heading}</span>
           {/if}
@@ -152,7 +141,7 @@
       {#if version.entries.length === 0}
         <p class="muted">{t("changes-no-entries")}</p>
       {:else if runs.length === 1}
-        {#each bySection(version.entries) as section (section.section)}
+        {#each sections(version.entries) as section (section.section)}
           {#if section.section}
             <h3>{section.section}</h3>
           {/if}
@@ -168,7 +157,7 @@
         </p>
         {#each runs as run, runIndex (runIndex)}
           <div class="run">
-            {#each bySection(run) as section (section.section)}
+            {#each sections(run) as section (section.section)}
               {#if section.section}
                 <h3>{section.section}</h3>
               {/if}
@@ -193,12 +182,10 @@
       {/if}
     </section>
   {/each}
-  {#if chosen.log.versionsInAll > chosen.log.versions.filter((v) => v.version !== "Unreleased").length}
+  {#if chosen.log.versionsInAll > releasedCount(chosen.log.versions)}
     <p class="muted how">
       {t("changes-older", {
-        count:
-          chosen.log.versionsInAll -
-          chosen.log.versions.filter((v) => v.version !== "Unreleased").length,
+        count: chosen.log.versionsInAll - releasedCount(chosen.log.versions),
         path: chosen.log.changelog,
       })}
     </p>
@@ -217,44 +204,6 @@
 {/if}
 
 <style>
-  h1 {
-    margin-block: 4px 8px;
-    font-family: var(--font-display);
-    font-size: 2.25rem;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
-  .lead {
-    max-width: 70ch;
-    margin-bottom: 14px;
-    font-size: var(--type-lead);
-  }
-
-  .products {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .product {
-    min-height: var(--control-min);
-    padding-inline: 18px;
-    font: inherit;
-    color: var(--colour-text-muted);
-    background: transparent;
-    border: 1px solid var(--colour-line);
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .product[aria-pressed="true"] {
-    font-weight: 600;
-    color: var(--colour-text);
-    background: var(--colour-surface-soft);
-    border: 2px solid var(--colour-accent);
-  }
-
   .where {
     display: flex;
     flex-wrap: wrap;
@@ -332,12 +281,6 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    font-size: var(--type-small);
-  }
-
-  .how {
-    max-width: 80ch;
-    margin-top: 14px;
     font-size: var(--type-small);
   }
 </style>

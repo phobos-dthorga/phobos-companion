@@ -1,5 +1,5 @@
 import type { GlobeBlockData } from "../atlas/types";
-import type { Failure } from "../shell/types";
+import type { Failure, Waiting } from "../shell/types";
 
 export type Cell = string | number | boolean | null;
 
@@ -60,10 +60,7 @@ export type ReportEntry = {
 export type ReportResult = { report: Report; command_line: string };
 
 export type CatalogueReading =
-  | { state: "reading" }
-  | { state: "browser" }
-  | { state: "ready"; entries: ReportEntry[] }
-  | { state: "failed"; failure: Failure };
+  Waiting | { state: "ready"; entries: ReportEntry[] };
 
 export type RunReading =
   | { state: "ready"; result: ReportResult }

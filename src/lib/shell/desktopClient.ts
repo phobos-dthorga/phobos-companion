@@ -1,6 +1,30 @@
 import { Channel, invoke, isTauri } from "@tauri-apps/api/core";
 import type { OnProgress, ProgressMessage } from "./progress";
-import type { Failure, KitReading, KitStatus } from "./types";
+import type { Failed, Failure, KitReading, KitStatus } from "./types";
+
+/** What a page shows outside the desktop program, where there is no host to ask. */
+export const BROWSER = { state: "browser" } as const;
+
+/** Whether the window runs in a browser rather than the desktop program. */
+export function inBrowser(): boolean {
+  return !isTauri();
+}
+
+/**
+ * Asks the host one thing, the one way every page does: the answer, shaped by `ready` into what the page shows, or the host's
+ * failure. Only the `desktopClient.ts` files call it, so only they talk to the host.
+ */
+export async function ask<T, R>(
+  command: string,
+  args: Record<string, unknown>,
+  ready: (answer: T) => R,
+): Promise<R | Failed> {
+  try {
+    return ready(await invoke<T>(command, args));
+  } catch (failure) {
+    return { state: "failed", failure: failure as Failure };
+  }
+}
 
 /**
  * The channel a request gives the host so progress can come back while the host works. Every request that can report progress
@@ -16,10 +40,9 @@ export function progressChannel(
 
 /** Asks the host how the tools are. The only place the window talks to the host about them. */
 export async function readKit(): Promise<KitReading> {
-  if (!isTauri()) return { state: "browser" };
-  try {
-    return { state: "ready", status: await invoke<KitStatus>("kit_status") };
-  } catch (failure) {
-    return { state: "failed", failure: failure as Failure };
-  }
+  if (inBrowser()) return BROWSER;
+  return ask<KitStatus, KitReading>("kit_status", {}, (status) => ({
+    state: "ready",
+    status,
+  }));
 }

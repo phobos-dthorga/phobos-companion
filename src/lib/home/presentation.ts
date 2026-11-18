@@ -1,53 +1,15 @@
+import { daysSince, formatIsoDate, formatUnixDate } from "../shell/dates";
 import type { GameHome, PendingRelease, RepositoryProblem } from "./types";
 
+export {
+  daysSince,
+  formatDate,
+  formatIsoDate,
+  formatTime,
+  formatUnixDate,
+} from "../shell/dates";
+
 export type Words = { key: string; args?: Record<string, string | number> };
-
-const LOCALE = "en-AU";
-const DAY_MS = 86_400_000;
-
-function startOfDay(date: Date): number {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-  ).getTime();
-}
-
-/** Whole calendar days between a moment and now, in the viewer's own time zone. */
-export function daysSince(unix: number, now: Date): number {
-  const days = Math.round(
-    (startOfDay(now) - startOfDay(new Date(unix * 1000))) / DAY_MS,
-  );
-  return Math.max(days, 0);
-}
-
-export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat(LOCALE, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(date);
-}
-
-export function formatUnixDate(unix: number): string {
-  return formatDate(new Date(unix * 1000));
-}
-
-export function formatTime(date: Date): string {
-  return new Intl.DateTimeFormat(LOCALE, {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
-}
-
-/** A changelog's YYYY-MM-DD as a date, or the text as written if it isn't one. */
-export function formatIsoDate(text: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
-  if (!match) return text;
-  return formatDate(
-    new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])),
-  );
-}
 
 /** The short "when" beside a game's name. */
 export function whenWords(lastWorked: number | null, now: Date): Words {

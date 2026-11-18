@@ -11,6 +11,7 @@ The owner asked for one shared library for code more than one part of the Compan
 ### Changed
 
 - **The host's shared code is one library, companion-core** (src-tauri/core): the games list, running the tool kit, failures, checks on what the window asks for, and building the kit's arguments, with no window in it, so it is tested on its own and a second front end could use it whole. Every page's host module and the 17 commands now go through it.
+- **The window's shared code lives once too**: one way to ask the host (16 requests in 8 files), one set of date and time formats in the words' own locale (written 4 ways, with the locale typed in 11 places), one module for showing a changelog, one frame for the code viewer and the changelog as it stood, and one style each for a page's title, its opening paragraph, its closing note and a pressed choice (copied up to 9 times). Small differences in spacing between pages are gone: every page now uses the same.
 
 ### Fixed
 

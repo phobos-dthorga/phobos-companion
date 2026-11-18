@@ -1,8 +1,9 @@
 # Shared code audit (19 Nov 2026)
 
-**Status (19 Nov 2026):** an audit and a proposal, **nothing moved yet**. Written at the owner's request: "We should be using a
-common library ... that contains all the shared code/functions/etc that is common to more than just one area of Companion ... I
-call for an audit". Every proposal below waits for the owner's word.
+**Status (19 Nov 2026):** the host core (R1 to R6) and the window's pieces (W1 to W6) are built in Companion 0.16.0, on the
+owner's word (a library crate; all four steps); W7 was set aside. "What was built" says where the build differs from the
+proposal; the audit itself is kept as it was found. Written at the owner's request: "We should be using a common library ...
+that contains all the shared code/functions/etc that is common to more than just one area of Companion ... I call for an audit".
 
 ## Read this first (gotchas)
 
@@ -64,6 +65,19 @@ another program for someone else) could use it whole.
 - Each page's own layout and styles, where only that page uses them.
 - The host's checks *and* the kit's checks of the same request (on purpose).
 - `ModsPage.svelte` (1,314 lines) gets smaller from W2 to W5, but splitting it further is a separate decision.
+
+## What was built (0.16.0)
+
+| # | As proposed | As built |
+| --- | --- | --- |
+| R1 to R6 | A `companion-core` crate | As proposed: `src-tauri/core`, with `Outcome` the one rule for answers (an answer without `ok` is a success) |
+| W1 | `request<T>` and one `Reading<T>` | `ask(command, args, ready)` and the shared `Waiting` and `Pending` readings; each page keeps its own name for what is ready, so no page changed |
+| W2 | A `PageHeading` component | Shared styles in `app.css`: the pages' headings differ in markup (a button, a focused title, a paragraph with choices), so a component fitted half; the copied styles were the real repeat |
+| W3 | A `ChoiceGroup` component | A shared `.toggle` style, for the same reason: the markup around each group differs |
+| W4 | `WindowDialog.svelte` | As proposed |
+| W5 | Functions and two components | The functions only (`versionWords`, `releasedCount`, `sections`); the "version" styles turned out to be different things sharing a name |
+| W6 | One `dates.ts` | As proposed, with the locale read from the words file everywhere, numbers included |
+| W7 | A loading helper | Set aside: three lines a page, and Svelte's reactive state makes a shared helper harder to read than the lines it saves |
 
 ## Proposed order
 

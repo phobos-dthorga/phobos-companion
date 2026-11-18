@@ -378,20 +378,6 @@
     min-width: 0;
   }
 
-  h1 {
-    margin-block: 4px 8px;
-    font-family: var(--font-display);
-    font-size: 2.25rem;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
-  .lead {
-    max-width: 64ch;
-    margin-bottom: 16px;
-    font-size: var(--type-lead);
-  }
-
   .inspector h2 {
     margin-block: 20px 8px;
     font-family: var(--font-display);

@@ -232,14 +232,6 @@
 {/if}
 
 <style>
-  h1 {
-    margin-block: 4px 8px;
-    font-family: var(--font-display);
-    font-size: 2.25rem;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
   h2 {
     margin: 0 0 6px;
     font-family: var(--font-display);
@@ -251,16 +243,6 @@
     margin: 0 0 4px;
     font-size: var(--type-body);
     font-weight: 600;
-  }
-
-  .lead {
-    max-width: 75ch;
-    margin-bottom: 14px;
-    font-size: var(--type-lead);
-  }
-
-  .small {
-    font-size: var(--type-small);
   }
 
   .where {
@@ -336,11 +318,5 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 6px;
-  }
-
-  .how {
-    max-width: 80ch;
-    margin-top: 14px;
-    font-size: var(--type-small);
   }
 </style>

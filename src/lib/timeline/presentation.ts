@@ -1,3 +1,5 @@
+import { dayOf } from "../shell/dates";
+export { dayOf, dayWords, shortDay, timeWords } from "../shell/dates";
 import type { Fact, FactKind, StoodEntry } from "./types";
 
 /** How a kind of fact is shown: its mark, its colour's role, and how much it says about a day (the strongest shows in a lane). */
@@ -31,15 +33,6 @@ export type Showing = "all" | "git" | "log";
 /** The lane a fact belongs to: its product, else its mod, else none (something done for the whole game, such as encoding). */
 export function laneOf(fact: Fact): string | null {
   return fact.product || fact.mod || null;
-}
-
-/** A fact's day in the viewer's own time zone, as YYYY-MM-DD. */
-export function dayOf(time: string): string {
-  const date = new Date(time);
-  if (Number.isNaN(date.getTime())) return time.slice(0, 10);
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 export function showingFilter(showing: Showing): (fact: Fact) => boolean {
@@ -157,45 +150,6 @@ export function stoodEntries(
     : entries;
 }
 
-/** A day, written for people: "Tue 18 Nov 2026". */
-export function dayWords(day: string, locale = "en-AU"): string {
-  const [year, month, date] = day.split("-").map(Number);
-  if (!year || !month || !date) return day;
-  return new Intl.DateTimeFormat(locale, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(year, month - 1, date));
-}
-
-/** A day's short label in the overview: its date number, with its month's name above where the month begins. */
-export function shortDay(
-  day: string,
-  locale = "en-AU",
-): { date: string; month: string } {
-  const [year, month, date] = day.split("-").map(Number);
-  if (!year || !month || !date) return { date: day, month: "" };
-  const at = new Date(year, month - 1, date);
-  return {
-    date: String(date),
-    month: new Intl.DateTimeFormat(locale, {
-      month: "short",
-      year: "2-digit",
-    }).format(at),
-  };
-}
-
-/** A fact's time of day, in the viewer's time zone. */
-export function timeWords(time: string, locale = "en-AU"): string {
-  const date = new Date(time);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat(locale, {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
-}
-
 /** Kinds done to several mods at once from this PC, shown as one row when they happen together. */
 const BATCHED: FactKind[] = ["installed", "backed-up", "went-back"];
 
@@ -233,20 +187,4 @@ export function rows(facts: Fact[]): Row[] {
     }
   }
   return found;
-}
-
-/** A fact's entries under their sections, in the order the sections first appear. */
-export function entrySections<T extends { section: string }>(
-  entries: T[],
-): { section: string; entries: T[] }[] {
-  const sections: { section: string; entries: T[] }[] = [];
-  for (const entry of entries) {
-    let found = sections.find((s) => s.section === entry.section);
-    if (!found) {
-      found = { section: entry.section, entries: [] };
-      sections.push(found);
-    }
-    found.entries.push(entry);
-  }
-  return sections;
 }

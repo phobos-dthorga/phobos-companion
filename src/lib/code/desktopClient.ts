@@ -1,7 +1,10 @@
-import { invoke, isTauri } from "@tauri-apps/api/core";
-import { progressChannel } from "../shell/desktopClient";
+import {
+  ask,
+  BROWSER,
+  inBrowser,
+  progressChannel,
+} from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
-import type { Failure } from "../shell/types";
 import type {
   ChangesReading,
   EntryCode,
@@ -15,35 +18,30 @@ export async function readChanges(
   game: string,
   onProgress?: OnProgress,
 ): Promise<ChangesReading> {
-  if (!isTauri()) return { state: "browser" };
-  try {
-    const repositories = await invoke<RepositoryChanges[]>("changes_list", {
-      game,
-      onProgress: progressChannel(onProgress),
-    });
-    return { state: "ready", repositories };
-  } catch (failure) {
-    return { state: "failed", failure: failure as Failure };
-  }
+  if (inBrowser()) return BROWSER;
+  return ask<RepositoryChanges[], ChangesReading>(
+    "changes_list",
+    { game, onProgress: progressChannel(onProgress) },
+    (repositories) => ({ state: "ready", repositories }),
+  );
 }
 
-/** The code behind one changelog entry: the commit that wrote it, and what that commit changed. The host checks the request. */
+/** The code behind one changelog entry, or one commit: what it changed. The host checks the request. */
 export async function readEntryCode(
   game: string,
   request: EntryRequest,
   onProgress?: OnProgress,
 ): Promise<EntryCodeReading> {
-  try {
-    const found = await invoke<EntryCode>("entry_code", {
+  return ask<EntryCode, EntryCodeReading>(
+    "entry_code",
+    {
       game,
       repository: request.repository,
       changelog: request.changelog,
       text: request.entry.text,
       commit: request.commit ?? null,
       onProgress: progressChannel(onProgress),
-    });
-    return { state: "ready", found };
-  } catch (failure) {
-    return { state: "failed", failure: failure as Failure };
-  }
+    },
+    (found) => ({ state: "ready", found }),
+  );
 }

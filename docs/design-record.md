@@ -280,6 +280,31 @@ The owner had trouble finding the program each time and asked for an NSIS setup 
 The installed program still finds the kit and `.local/games.json` by the folder it was built from (see Limits), so it is for the
 PC that built it. The data folder is named by the identifier, which is unchanged, so test verdicts carry over.
 
+## The Mods page (built 18 Nov 2026)
+
+**The owner asked for it (18 Nov 2026):** a part "dedicated to the updating, reversing changes, making backups, etc. all with regard
+to our mods", starting with seeing the changelogs "track and update to what I'm either benefitting from or losing as certain changes
+are made". The design behind it is phobos-rimworld's
+[mod installs record](https://github.com/phobos-dthorga/phobos-rimworld/blob/main/docs/development/mod-installs.md); the tool is
+phobos-modkit 1.20.0's `installs` (its `docs/installs.md`).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the owner do? | See, mod by mod, what installing from the repository or going back to any backup would give or take away, by changelog entry, with save notes first; then make that move with one confirmed press |
+| What does it stop them doing? | Going back or installing while the game runs; making a move without being asked first; losing the install a move replaces |
+| How does it change the way they work? | Updating no longer needs a session to run deploy; a bad update can be undone from here without knowing where backups live |
+
+| Part | How |
+| --- | --- |
+| Reading | `installs status --json` for every repository of the game with `config/installs.json`; again when the window regains focus (after 15 s) or on Read again |
+| Gains and losses | From the changelog each copy carries: an entry one has and the other lacks. Matched by text, so an Unreleased entry that later gets a version is neither |
+| Moves | Install from the repository, Back up the installed copy, Go back to this. Each opens a confirmation in words on the card, with the keyboard moved to it; the host checks the repository, the move (against the kit's manifest) and the names, then the kit checks again |
+| Safety | Going back and installing wait for the game to close (the button says so); nothing is deleted: the replaced install becomes a backup and the backup stays |
+
+**The second write, and the first outside this program's folder.** Agent choices, for the owner to revise: a confirmation step for every
+move (unlike verdicts, these change the game's files); the backup button stays live while the game runs, since it only reads; lists
+show eight entries before Show all.
+
 ## What comes next
 
 **Step 5, the rest of the report viewer.** Forms built from the manifest for the 19 reports that need an input, then the kit's
@@ -313,6 +338,8 @@ advice labelled as such, and colonists, slaves and prisoners together; the atlas
 borrowed, read-only first, the kit changes (phobos-modkit 1.0.0).
 
 **Owner (17 Nov 2026):** the Tests page here rather than in the game; a note never passes a row; an NSIS installer.
+
+**Owner (18 Nov 2026):** the Mods page, for updating, going back and backups, led by what the changelogs say each move gains or loses.
 
 **Agent defaults, owner to revise:** the palette and what each colour means; system fonts; the empty window's wording.
 

@@ -16,7 +16,12 @@ what you did, and what your saves and logs say, without typing a command.
 - **A RimWorld save holds only half of a colonist's mood.** The mood report counts the remembered events exactly and gives the
   rest (rooms, pain, beliefs) as one figure; see the [design record](docs/design-record.md#colony-mood-built-10-nov-2026).
 - **Not yet tested on screen.** It builds and passes its checks; nobody has judged the window yet.
-- **It only reads.** It does not change a game, a save or a repository.
+- **The Mods page shows what updating or going back would give you or take away**, read from the changelog each copy of a mod
+  carries: the installed copy, the repository's and every backup. **Its three buttons change your installed mods** (back up, go
+  back to a backup, install from the repository), each only after you confirm. Going back and installing wait until the game is
+  closed. A repository opts in with `config/installs.json`; see the [design record](docs/design-record.md#the-mods-page-built-18-nov-2026).
+- **What it changes, and only when you ask:** your test verdicts, in its own folder, and your installed mods, from the Mods page.
+  It never changes a save or a repository.
 - **It needs Python on the PATH**, or `PHOBOS_COMPANION_PYTHON` naming one.
 - **Open it from the Start menu once installed** (see [Install it](#install-it-windows)).
 - **It can't be handed to anyone else yet**: it finds its tools by the folder it was built from, or `PHOBOS_COMPANION_KIT`.

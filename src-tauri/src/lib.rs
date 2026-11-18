@@ -5,6 +5,7 @@ mod failure;
 mod games;
 mod git;
 mod home;
+mod installs_page;
 mod kit;
 mod open_work;
 mod process;
@@ -99,6 +100,30 @@ async fn record_key_decision(
     .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
+/// Each repository's mods: installed, in the repository and in backups, with what moving between them gains or loses.
+#[tauri::command]
+async fn mod_installs(game: String) -> Result<Vec<installs_page::RepositoryInstalls>, Failure> {
+    tauri::async_runtime::spawn_blocking(move || installs_page::read(&game))
+        .await
+        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
+/// Makes one move the owner confirmed on the Mods page: back up, go back to a backup, or install from the repository.
+#[tauri::command]
+async fn move_install(
+    game: String,
+    repository: String,
+    action: String,
+    mod_name: String,
+    backup: Option<String>,
+) -> Result<installs_page::MoveResult, Failure> {
+    tauri::async_runtime::spawn_blocking(move || {
+        installs_page::make_move(&game, &repository, &action, &mod_name, backup.as_deref())
+    })
+    .await
+    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
 /// Starts the program.
 pub fn run() {
     tauri::Builder::default()
@@ -109,7 +134,9 @@ pub fn run() {
             run_report,
             test_lists,
             record_verdict,
-            record_key_decision
+            record_key_decision,
+            mod_installs,
+            move_install
         ])
         .run(tauri::generate_context!())
         .expect("the desktop window could not start");

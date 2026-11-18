@@ -4,6 +4,23 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-18
+
+The Mods page, asked for by the owner (18 November 2026): a part "dedicated to the updating, reversing changes, making backups, etc. all with regard to our mods", starting with seeing the changelogs "track and update to what I'm either benefitting from or losing as certain changes are made". Not yet tested on screen.
+
+### Added
+
+- A Mods page. For each mod of every repository with config/installs.json: the installed version, where and when it was installed (once the repository's install writes a record), the repository's version and any uncommitted changes, and what installing from the repository would give you and take away, entry by entry, grouped by version, with the changelog's save notes first.
+- Backups for each mod, newest first, each saying what going back to it would take away and give, and how many of those entries are about saves; What going back changes lists them.
+- Three buttons, each asking first in words: Install from the repository (builds and installs; the installed copy becomes a backup), Back up the installed copy, and Go back to this (the replaced install becomes a backup, and the backup stays). Going back and installing wait until the game is closed, and say so on the button; a backup can be made while it runs. What a move did, or why it was refused, is said at the top, with an install's last lines folded away.
+- The page reads again when the window comes back into focus, so a change made elsewhere shows up without pressing anything; Read again does it at once.
+
+### Changed
+
+- The pinned phobos-modkit moves from 1.19.1 to 1.20.0, whose installs tool the page runs.
+- The page buttons wrap onto a second line in a narrow window.
+- The status bar and README say what the program changes, and only when asked: your test verdicts, and your installed mods from the Mods page.
+
 ## [0.9.0] - 2026-11-18
 
 The Tests page shows when the game's notes are weaker than they look, as phobos-rimworld's seen-in-play checks asked (owner, 18 November 2026: "write up the design record, please, and then get it built"). Not yet tested on screen.

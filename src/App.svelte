@@ -9,6 +9,7 @@
   import AtlasPage from "./lib/atlas/AtlasPage.svelte";
   import ReportsPage from "./lib/reports/ReportsPage.svelte";
   import TestsPage from "./lib/tests/TestsPage.svelte";
+  import ModsPage from "./lib/mods/ModsPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
   import { readKit } from "./lib/shell/desktopClient";
@@ -18,7 +19,7 @@
   let home = $state<HomeReading>({ state: "reading" });
   let looking = $state(true);
   let chosenId = $state<string | null>(null);
-  let page = $state<"home" | "reports" | "atlas" | "tests">("home");
+  let page = $state<"home" | "reports" | "atlas" | "tests" | "mods">("home");
   let now = $state(new Date());
 
   const games = $derived(home.state === "ready" ? home.home.games : []);
@@ -77,6 +78,13 @@
         aria-current={page === "tests" ? "page" : undefined}
         onclick={() => (page = "tests")}>{t("page-tests")}</button
       >
+      <button
+        type="button"
+        class="page"
+        class:current={page === "mods"}
+        aria-current={page === "mods" ? "page" : undefined}
+        onclick={() => (page = "mods")}>{t("page-mods")}</button
+      >
     </nav>
   </header>
 
@@ -128,6 +136,10 @@
       {:else if selected && page === "tests"}
         {#key selected.id}
           <TestsPage game={selected} />
+        {/key}
+      {:else if selected && page === "mods"}
+        {#key selected.id}
+          <ModsPage game={selected} />
         {/key}
       {:else if selected && page === "atlas"}
         {#key selected.id}
@@ -236,6 +248,7 @@
 
   .pages {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
   }
 

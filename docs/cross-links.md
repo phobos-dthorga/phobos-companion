@@ -1,7 +1,7 @@
 # Cross-links: joining what the Companion already shows
 
 **Status (19 Nov 2026):** the owner asked for the whole proposed order to be built overnight ("Proceed with your entire proposed
-order, step-wise if necessary"), in Companion 0.19.0, one commit a step. Built so far: N1, N2, N3. "As built" below says where a
+order, step-wise if necessary"), in Companion 0.19.0, one commit a step. Built so far: N1, N2, N3, L4. "As built" below says where a
 build differs from its proposal.
 
 ## Read this first (gotchas)
@@ -50,6 +50,7 @@ build differs from its proposal.
 | --- | --- |
 | N1 | **Keys , and . rather than Alt+Left and Alt+Right**: the Companion's own rule is one key each, never two held together (agent's choice, owner to change in Settings); the mouse's side buttons work too. A link to a dialog on another page arrives in two steps, so Back closes the dialog first. On the Code map, each new thing in the middle is a step, so the window's Back walks the picture; the picture's own button is renamed "Previous in the picture" |
 | N2 | The / key now opens it (it used to jump to the page's search box). Timeline facts are searched as versions written, released, installed or gone back to |
+| L4 | Built on the Timeline: a "What was I running then?" button on every day. **Tying each save to its set is not built yet**: it needs each game's saves read with their dates, which only RimWorld's tools do today |
 | N3 | Written as `dthorga://page/game?key=value`, with `dialog=code` or `dialog=stood` and `dialog.`-prefixed fields for an open dialog. The keys each page reads are in the table below |
 
 **What each page takes from an address:**

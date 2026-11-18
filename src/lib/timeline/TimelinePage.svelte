@@ -14,12 +14,14 @@
     byDay,
     canReadAsItStood,
     canShowCode,
+    dayOf,
     dayWords,
     KIND_LOOKS,
     lanes,
     laneOf,
     monthStarts,
     rows,
+    runningOn,
     shortDay,
     showingFilter,
     timeWords,
@@ -44,6 +46,8 @@
   let only = $state<string | null>(null);
   let shownDays = $state(DAYS_AT_ONCE);
   let focusedDay = $state<string | null>(null);
+  /** The day whose "what was I running then?" is open. */
+  let runningDay = $state<string | null>(null);
   let scroller = $state<HTMLDivElement | null>(null);
 
   const facts = $derived(
@@ -357,9 +361,66 @@
         class:focused={focusedDay === group.day}
         aria-labelledby={`timeline-day-${group.day}`}
       >
-        <h3 id={`timeline-day-${group.day}`} tabindex="-1">
-          {dayWords(group.day)}
-        </h3>
+        <div class="day-head">
+          <h3 id={`timeline-day-${group.day}`} tabindex="-1">
+            {dayWords(group.day)}
+          </h3>
+          <button
+            type="button"
+            class="toggle"
+            aria-pressed={runningDay === group.day}
+            aria-expanded={runningDay === group.day}
+            aria-controls={`timeline-running-${group.day}`}
+            onclick={() =>
+              (runningDay = runningDay === group.day ? null : group.day)}
+            >{t("timeline-running-button")}</button
+          >
+        </div>
+        {#if runningDay === group.day && reading.state === "ready"}
+          {@const running = runningOn(reading.timeline.facts, group.day)}
+          <section
+            class="running"
+            id={`timeline-running-${group.day}`}
+            aria-label={t("timeline-running-title", {
+              day: dayWords(group.day),
+            })}
+          >
+            <h4>{t("timeline-running-title", { day: dayWords(group.day) })}</h4>
+            {#if running.length === 0}
+              <p class="muted small">{t("timeline-running-none")}</p>
+            {:else}
+              <ul class="running-list">
+                {#each running as item (`${item.fact.repository}/${item.fact.mod}`)}
+                  <li>
+                    <strong>{item.name}</strong>
+                    <span class="version">{item.version}</span>
+                    <span class="muted small"
+                      >{t("timeline-running-since", {
+                        time:
+                          dayWords(dayOf(item.fact.time)) +
+                          " " +
+                          timeWords(item.fact.time),
+                      })}</span
+                    >
+                    {#if canReadAsItStood(item.fact)}
+                      <button
+                        type="button"
+                        class="action"
+                        aria-label={t("timeline-read-stood-for", {
+                          product: item.name,
+                          day: dayWords(dayOf(item.fact.time)),
+                        })}
+                        onclick={() => readStood(item.fact)}
+                        >{t("timeline-read-stood")}</button
+                      >
+                    {/if}
+                  </li>
+                {/each}
+              </ul>
+              <p class="muted small">{t("timeline-running-how")}</p>
+            {/if}
+          </section>
+        {/if}
         <ol class="facts">
           {#each rows(group.facts) as row, index (index)}
             {#if row.kind === "batch"}
@@ -701,6 +762,49 @@
     background: var(--colour-surface-raised);
     border: 1px solid var(--colour-line);
     border-radius: 4px;
+  }
+
+  .day-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+    margin-bottom: 8px;
+  }
+
+  .day-head h3 {
+    margin: 0;
+  }
+
+  .running {
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    background: var(--colour-surface-soft);
+    border-inline-start: 3px solid var(--colour-comparison);
+    border-radius: 4px;
+  }
+
+  .running h4 {
+    margin: 0 0 6px;
+    font-size: var(--type-small);
+    font-weight: 600;
+  }
+
+  .running-list {
+    margin: 0 0 6px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .running-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
   }
 
   .day.focused {

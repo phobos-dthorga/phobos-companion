@@ -188,3 +188,34 @@ export function rows(facts: Fact[]): Row[] {
   }
   return found;
 }
+
+/** One mod as it was installed at a moment: its last install or go-back up to then. */
+export type Running = { name: string; version: string; fact: Fact };
+
+/**
+ * What was installed at the end of a day (docs/cross-links.md, L4): for each mod, the version its last install or go-back up to and
+ * including that day put in place, from this PC's history log. A mod installed only before the log began, or never through the
+ * tools, is not known and not listed.
+ */
+export function runningOn(facts: Fact[], day: string): Running[] {
+  const latest = new Map<string, Fact>();
+  for (const fact of facts) {
+    if (
+      fact.source !== "log" ||
+      (fact.kind !== "installed" && fact.kind !== "went-back") ||
+      !fact.version
+    )
+      continue;
+    if (dayOf(fact.time) > day) continue;
+    const key = `${fact.repository ?? ""}/${fact.mod ?? fact.product ?? ""}`;
+    const known = latest.get(key);
+    if (!known || known.time < fact.time) latest.set(key, fact);
+  }
+  return [...latest.values()]
+    .map((fact) => ({
+      name: fact.product ?? fact.mod ?? "",
+      version: fact.version!,
+      fact,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}

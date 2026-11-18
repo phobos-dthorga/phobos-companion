@@ -8,6 +8,7 @@ import {
   lanes,
   monthStarts,
   rows,
+  runningOn,
   showingFilter,
   stoodEntries,
   unlisted,
@@ -213,5 +214,47 @@ describe("a day's rows", () => {
         fact("entries-added", noon("2026-11-18")),
       ]),
     ).toHaveLength(2);
+  });
+});
+
+describe("what was running", () => {
+  const log = (
+    kind: FactKind,
+    time: string,
+    mod: string,
+    version: string,
+  ): Fact => ({
+    kind,
+    time,
+    source: "log",
+    product: mod,
+    mod,
+    repository: "repo",
+    version,
+    changelog: `mods/${mod}/CHANGELOG.md`,
+  });
+
+  it("gives each mod's last install or go-back up to the end of the day", () => {
+    const facts = [
+      log("installed", noon("2026-11-18"), "Boats", "1.2.0"),
+      log("installed", noon("2026-11-19"), "Boats", "1.3.0"),
+      log("went-back", "2026-11-19T12:30:00+00:00", "Boats", "1.2.0"),
+      log("installed", noon("2026-11-18"), "Carts", "0.4.0"),
+      log("installed", noon("2026-11-20"), "Lamps", "2.0.0"),
+      fact("version-written", noon("2026-11-18"), { version: "9.9.9" }),
+    ];
+    expect(
+      runningOn(facts, "2026-11-18").map((r) => [r.name, r.version]),
+    ).toEqual([
+      ["Boats", "1.2.0"],
+      ["Carts", "0.4.0"],
+    ]);
+    expect(
+      runningOn(facts, "2026-11-19").map((r) => [r.name, r.version]),
+    ).toEqual([
+      ["Boats", "1.2.0"],
+      ["Carts", "0.4.0"],
+    ]);
+    expect(runningOn(facts, "2026-11-17")).toEqual([]);
   });
 });

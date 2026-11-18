@@ -652,6 +652,11 @@
     "goto-kind-fact": "On the timeline",
     "goto-kind-setting": "Settings",
     "goto-kind-report": "Reports",
-    "trail-copied-short": "Address copied."
+    "trail-copied-short": "Address copied.",
+    "timeline-running-button": "What was I running then?",
+    "timeline-running-title": "Installed at the end of { $day }",
+    "timeline-running-none": "Nothing installed through the Companion or deploy is recorded by this day. The record began on 19 November 2026; installs before it are not known.",
+    "timeline-running-since": "since { $time }",
+    "timeline-running-how": "From this PC's history log: each mod's last install or go-back up to the end of that day. A mod installed before the record began, or by hand, is not listed."
   }
 }

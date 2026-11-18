@@ -283,6 +283,27 @@ for (const [name, viewport] of [
       await expect(page.locator("main")).toContainText("Installed");
     });
 
+    test("says what was installed at the end of a day", async ({ page }) => {
+      await open(page);
+      await page
+        .getByRole("button", { name: "What was I running then?" })
+        .first()
+        .click();
+      const running = page.getByRole("region", {
+        name: /^Installed at the end of .*18 Nov/,
+      });
+      await expect(running).toContainText("Sample Mod");
+      await expect(running).toContainText("1.3.0");
+      await expect(running).toContainText("Other Sample");
+      await audit(page);
+      await running
+        .getByRole("button", {
+          name: /^Read Sample Mod's changelog as it stood/,
+        })
+        .click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+    });
+
     test("reads a changelog as it stood, marking what changed since", async ({
       page,
     }) => {

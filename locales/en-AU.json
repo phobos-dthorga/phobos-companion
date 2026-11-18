@@ -103,7 +103,7 @@
     "failure-list-unreadable-next": "Open .local/games.json in this program's folder and compare it with config/games.example.json. The technical details below name the problem.",
     "failure-details": "Technical details",
     "action-try-again": "Try again",
-    "status-reading-only": "Reads your games, saves and repositories. It changes only what you ask it to: your test verdicts, in its own folder, and your installed mods and their textures, from the Mods page.",
+    "status-reading-only": "Reads your games, saves and repositories. It changes only what you ask it to: your test verdicts, in its own folder; your installed mods and their textures, from the Mods page; and the central settings file, from the Settings page.",
     "status-independent": "An independent community project",
     "page-atlas": "Atlas",
     "atlas-kicker": "Atlas",
@@ -401,9 +401,7 @@
     "timeline-only-clear": "Showing only { $product }: show every mod",
     "timeline-legend-title": "What the marks mean",
     "timeline-days-title": "Day by day",
-    "timeline-whole-game": "Every mod",
     "timeline-from-pc": "on this PC",
-    "timeline-commit": "Commit { $hash }: { $subject }",
     "timeline-went-back-from": "From version { $version }.",
     "timeline-show-rewording": "Show the words before and after",
     "timeline-was": "Before:",
@@ -488,6 +486,10 @@
     "settings-saved": "Saved { $key } to the central settings file. The tools use it from their next run.",
     "settings-cleared": "{ $key } is out of the central settings file: it uses a repository's own value, or its default.",
     "settings-refused": "Not saved: { $reason }",
-    "settings-how": "The first of these that names a value wins: a command's own option, an environment variable, the repository's own settings file, the central settings file, the default. Saving here writes only the central settings file."
+    "settings-how": "The first of these that names a value wins: a command's own option, an environment variable, the repository's own settings file, the central settings file, the default. Saving here writes only the central settings file.",
+    "timeline-batch-installed": "{ $count } mods installed together",
+    "timeline-batch-backed-up": "{ $count } mods backed up together",
+    "timeline-batch-went-back": "{ $count } mods taken back to an earlier version together",
+    "timeline-batch-hint": "Press a mod to read its changelog as it stood then."
   }
 }

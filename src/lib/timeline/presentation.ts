@@ -195,3 +195,58 @@ export function timeWords(time: string, locale = "en-AU"): string {
     minute: "2-digit",
   }).format(date);
 }
+
+/** Kinds done to several mods at once from this PC, shown as one row when they happen together. */
+const BATCHED: FactKind[] = ["installed", "backed-up", "went-back"];
+
+/** One row of a day: a fact on its own, or several of one kind done together on this PC (one install of many mods). */
+export type Row =
+  | { kind: "single"; fact: Fact }
+  | { kind: "batch"; factKind: FactKind; time: string; facts: Fact[] };
+
+/**
+ * A day's facts as rows: facts from this PC of one batched kind, in the same repository and the same minute, next to each other,
+ * become one row; everything else stays a row of its own. Order is kept.
+ */
+export function rows(facts: Fact[]): Row[] {
+  const found: Row[] = [];
+  const together = (a: Fact, b: Fact) =>
+    a.source === "log" &&
+    b.source === "log" &&
+    a.kind === b.kind &&
+    BATCHED.includes(a.kind) &&
+    a.repository === b.repository &&
+    a.time.slice(0, 16) === b.time.slice(0, 16);
+  for (const fact of facts) {
+    const last = found[found.length - 1];
+    if (last?.kind === "batch" && together(last.facts[0], fact)) {
+      last.facts.push(fact);
+    } else if (last?.kind === "single" && together(last.fact, fact)) {
+      found[found.length - 1] = {
+        kind: "batch",
+        factKind: fact.kind,
+        time: last.fact.time,
+        facts: [last.fact, fact],
+      };
+    } else {
+      found.push({ kind: "single", fact });
+    }
+  }
+  return found;
+}
+
+/** A fact's entries under their sections, in the order the sections first appear. */
+export function entrySections<T extends { section: string }>(
+  entries: T[],
+): { section: string; entries: T[] }[] {
+  const sections: { section: string; entries: T[] }[] = [];
+  for (const entry of entries) {
+    let found = sections.find((s) => s.section === entry.section);
+    if (!found) {
+      found = { section: entry.section, entries: [] };
+      sections.push(found);
+    }
+    found.entries.push(entry);
+  }
+  return sections;
+}

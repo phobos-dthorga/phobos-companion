@@ -25,6 +25,17 @@ const sampleTimeline = {
       commit: "4d332ddf0123",
     },
     {
+      kind: "installed",
+      time: noon("2026-11-18"),
+      source: "log",
+      product: "Other Sample",
+      mod: "OtherSample",
+      repository: "first-mods",
+      changelog: "mods/Other Sample/CHANGELOG.md",
+      version: "0.4.0",
+      commit: "4d332ddf0123",
+    },
+    {
       kind: "version-written",
       time: "2026-11-18T11:00:00+00:00",
       source: "git",
@@ -219,8 +230,14 @@ for (const [name, viewport] of [
         "Version written, with 2 entries",
       );
       await expect(page.locator("main")).toContainText(
-        "Commit 4d332ddf: Sample Mod 1.3.0: boats",
+        "2 mods installed together",
       );
+      await expect(
+        page.getByRole("button", {
+          name: /^Read Other Sample's changelog as it stood on .*18 Nov/,
+        }),
+      ).toBeVisible();
+      await expect(page.locator("main")).not.toContainText("first-mods");
       await audit(page);
       expect(await smallControls(page, "main")).toBe(0);
       const overflow = await page.evaluate(

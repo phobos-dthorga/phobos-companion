@@ -15,10 +15,12 @@
     canReadAsItStood,
     canShowCode,
     dayWords,
+    entrySections,
     KIND_LOOKS,
     lanes,
     laneOf,
     monthStarts,
+    rows,
     shortDay,
     showingFilter,
     timeWords,
@@ -53,6 +55,9 @@
       : [],
   );
   const overview = $derived(lanes(facts));
+  const manyRepositories = $derived(
+    reading.state === "ready" && reading.timeline.repositories.length > 1,
+  );
   const months = $derived(monthStarts(overview.days));
   const days = $derived(
     byDay(only ? facts.filter((fact) => laneOf(fact) === only) : facts),
@@ -108,6 +113,21 @@
     built: "timeline-mark-built",
     encoded: "timeline-mark-encoded",
   };
+
+  /** When a fact happened, where, and in which repository when the game has several. */
+  function whenWords(fact: Fact): string {
+    const parts = [timeWords(fact.time)];
+    if (fact.source === "log") parts.push(t("timeline-from-pc"));
+    if (manyRepositories && fact.repository) parts.push(fact.repository);
+    return parts.join(" · ");
+  }
+
+  /** The words for several mods done together. */
+  function batchWords(kind: FactKind, count: number): string {
+    if (kind === "backed-up") return t("timeline-batch-backed-up", { count });
+    if (kind === "went-back") return t("timeline-batch-went-back", { count });
+    return t("timeline-batch-installed", { count });
+  }
 
   function versionWords(version: string | undefined): string {
     if (!version) return "";
@@ -333,101 +353,148 @@
           {dayWords(group.day)}
         </h3>
         <ol class="facts">
-          {#each group.facts as fact, index (`${fact.time}-${fact.kind}-${index}`)}
-            <li class="fact">
-              <span
-                class="mark tone-{KIND_LOOKS[fact.kind].tone}"
-                aria-hidden="true">{KIND_LOOKS[fact.kind].mark}</span
-              >
-              <div class="fact-body">
-                <p class="fact-head">
-                  <strong>{laneOf(fact) ?? t("timeline-whole-game")}</strong>
-                  {#if fact.version}<span class="version"
-                      >{versionWords(fact.version)}</span
-                    >{/if}
-                  <span>{kindWords(fact)}</span>
-                  <span class="muted small">
-                    {timeWords(fact.time)}
-                    {fact.source === "log" ? t("timeline-from-pc") : ""}
-                    {fact.repository ? `· ${fact.repository}` : ""}
-                  </span>
-                </p>
-                {#if fact.subject}
-                  <p class="muted small subject">
-                    {t("timeline-commit", {
-                      hash: (fact.commit ?? "").slice(0, 8),
-                      subject: fact.subject,
-                    })}
+          {#each rows(group.facts) as row, index (index)}
+            {#if row.kind === "batch"}
+              <li class="fact">
+                <span
+                  class="mark tone-{KIND_LOOKS[row.factKind].tone}"
+                  aria-hidden="true">{KIND_LOOKS[row.factKind].mark}</span
+                >
+                <div class="fact-body">
+                  <p class="fact-head">
+                    <strong>{batchWords(row.factKind, row.facts.length)}</strong
+                    >
+                    <span class="muted small">{whenWords(row.facts[0])}</span>
                   </p>
-                {/if}
-                {#if fact.kind === "went-back" && fact.fromVersion}
-                  <p class="muted small">
-                    {t("timeline-went-back-from", {
-                      version: fact.fromVersion,
-                    })}
-                  </p>
-                {/if}
-                {#if fact.summary}
-                  <p class="small">{fact.summary}</p>
-                {/if}
-                {#if fact.entries && fact.entries.length > 0}
-                  <ul class="entries">
-                    {#each fact.entries as entry, entryIndex (entryIndex)}
-                      <li>
-                        <RichText text={entry.lead} />
-                        {#if entry.section}<span class="muted"
-                            >· {entry.section}</span
-                          >{/if}
-                        {#if entry.was && entry.now}
-                          <details>
-                            <summary>{t("timeline-show-rewording")}</summary>
-                            <p class="small">
-                              <span class="muted">{t("timeline-was")}</span>
-                              <RichText text={entry.was} />
-                            </p>
-                            <p class="small">
-                              <span class="muted">{t("timeline-now")}</span>
-                              <RichText text={entry.now} />
-                            </p>
-                          </details>
-                        {/if}
-                      </li>
+                  <p class="muted small">{t("timeline-batch-hint")}</p>
+                  <div class="chips">
+                    {#each row.facts as fact, chipIndex (chipIndex)}
+                      {#if canReadAsItStood(fact)}
+                        <button
+                          type="button"
+                          class="chip"
+                          aria-label={t("timeline-read-stood-for", {
+                            product: laneOf(fact) ?? "",
+                            day: dayWords(group.day),
+                          })}
+                          onclick={() => readStood(fact)}
+                        >
+                          {laneOf(fact)}
+                          {#if fact.version}<span class="version"
+                              >{versionWords(fact.version)}</span
+                            >{/if}
+                        </button>
+                      {:else}
+                        <span class="chip">
+                          {laneOf(fact)}
+                          {#if fact.version}<span class="version"
+                              >{versionWords(fact.version)}</span
+                            >{/if}
+                        </span>
+                      {/if}
                     {/each}
-                    {#if unlisted(fact) > 0}
-                      <li class="muted">
-                        {t("timeline-unlisted", { count: unlisted(fact) })}
-                      </li>
-                    {/if}
-                  </ul>
-                {/if}
-                {#if canReadAsItStood(fact) || canShowCode(fact)}
-                  <div class="fact-actions">
-                    {#if canReadAsItStood(fact)}
-                      <button
-                        type="button"
-                        class="action"
-                        aria-label={t("timeline-read-stood-for", {
-                          product: laneOf(fact) ?? "",
-                          day: dayWords(group.day),
-                        })}
-                        onclick={() => readStood(fact)}
-                        >{t("timeline-read-stood")}</button
-                      >
-                    {/if}
-                    {#if canShowCode(fact)}
-                      <button
-                        type="button"
-                        class="action"
-                        aria-label={t("timeline-show-code-for", {
-                          subject: fact.subject ?? "",
-                        })}
-                        onclick={() => showCode(fact)}>{t("code-show")}</button
-                      >
+                  </div>
+                </div>
+              </li>
+            {:else}
+              {@const fact = row.fact}
+              <li class="fact">
+                <span
+                  class="mark tone-{KIND_LOOKS[fact.kind].tone}"
+                  aria-hidden="true">{KIND_LOOKS[fact.kind].mark}</span
+                >
+                <div class="fact-body">
+                  <div class="fact-top">
+                    <p class="fact-head">
+                      {#if laneOf(fact)}<strong>{laneOf(fact)}</strong>{/if}
+                      {#if fact.version}<span class="version"
+                          >{versionWords(fact.version)}</span
+                        >{/if}
+                      <span>{kindWords(fact)}</span>
+                      <span class="muted small">{whenWords(fact)}</span>
+                    </p>
+                    {#if canReadAsItStood(fact) || canShowCode(fact)}
+                      <div class="fact-actions">
+                        {#if canReadAsItStood(fact)}
+                          <button
+                            type="button"
+                            class="action"
+                            aria-label={t("timeline-read-stood-for", {
+                              product: laneOf(fact) ?? "",
+                              day: dayWords(group.day),
+                            })}
+                            onclick={() => readStood(fact)}
+                            >{t("timeline-read-stood")}</button
+                          >
+                        {/if}
+                        {#if canShowCode(fact)}
+                          <button
+                            type="button"
+                            class="action"
+                            aria-label={t("timeline-show-code-for", {
+                              subject: fact.subject ?? "",
+                            })}
+                            title={fact.subject}
+                            onclick={() => showCode(fact)}
+                            >{t("code-show")}</button
+                          >
+                        {/if}
+                      </div>
                     {/if}
                   </div>
-                {/if}
-              </div>
-            </li>
+                  {#if fact.summary || fact.subject}
+                    <p class="small about-line">
+                      {fact.summary || fact.subject}
+                    </p>
+                  {/if}
+                  {#if fact.kind === "went-back" && fact.fromVersion}
+                    <p class="muted small">
+                      {t("timeline-went-back-from", {
+                        version: fact.fromVersion,
+                      })}
+                    </p>
+                  {/if}
+                  {#if fact.entries && fact.entries.length > 0}
+                    <div class="sections">
+                      {#each entrySections(fact.entries) as section, sectionIndex (sectionIndex)}
+                        <span class="section-name">{section.section}</span>
+                        <ul class="entries">
+                          {#each section.entries as entry, entryIndex (entryIndex)}
+                            <li>
+                              <RichText text={entry.lead} />
+                              {#if entry.was && entry.now}
+                                <details>
+                                  <summary
+                                    >{t("timeline-show-rewording")}</summary
+                                  >
+                                  <p class="small">
+                                    <span class="muted"
+                                      >{t("timeline-was")}</span
+                                    >
+                                    <RichText text={entry.was} />
+                                  </p>
+                                  <p class="small">
+                                    <span class="muted"
+                                      >{t("timeline-now")}</span
+                                    >
+                                    <RichText text={entry.now} />
+                                  </p>
+                                </details>
+                              {/if}
+                            </li>
+                          {/each}
+                        </ul>
+                      {/each}
+                    </div>
+                    {#if unlisted(fact) > 0}
+                      <p class="muted small">
+                        {t("timeline-unlisted", { count: unlisted(fact) })}
+                      </p>
+                    {/if}
+                  {/if}
+                </div>
+              </li>
+            {/if}
           {/each}
         </ol>
       </section>
@@ -659,6 +726,16 @@
     font-size: 1.125rem;
   }
 
+  /* A fact's mark sits on its first line, which is a control's height tall. */
+  .fact > .mark {
+    flex: none;
+    line-height: var(--control-min);
+  }
+
+  .fact-head {
+    min-height: var(--control-min);
+  }
+
   .days-head {
     display: flex;
     flex-wrap: wrap;
@@ -702,10 +779,69 @@
     margin: 0 0 4px;
   }
 
+  .fact-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 4px 16px;
+  }
+
+  .fact-top .fact-head {
+    flex: 1 1 320px;
+    min-height: var(--control-min);
+    margin: 0;
+  }
+
+  .about-line {
+    max-width: 100ch;
+  }
+
+  .sections {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 2px 14px;
+    max-width: 120ch;
+    margin: 2px 0 4px;
+  }
+
+  .section-name {
+    padding-top: 2px;
+    font-size: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--colour-text-muted);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--control-min);
+    padding-inline: 12px;
+    font: inherit;
+    font-size: var(--type-small);
+    color: var(--colour-text);
+    background: var(--colour-surface-soft);
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
+  }
+
+  button.chip {
+    cursor: pointer;
+    border-color: var(--colour-accent);
+  }
+
   .fact-head {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: center;
     gap: 4px 10px;
   }
 
@@ -716,14 +852,9 @@
     border-radius: 999px;
   }
 
-  .subject {
-    overflow-wrap: anywhere;
-  }
-
   .entries {
-    max-width: 110ch;
-    margin: 4px 0;
-    padding-inline-start: 20px;
+    margin: 0;
+    padding-inline-start: 18px;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -734,7 +865,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 6px;
   }
 
   .more {

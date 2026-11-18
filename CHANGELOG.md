@@ -4,6 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-11-19
+
+The owner asked for the Timeline's day-by-day list to be tidied and more streamlined (19 November 2026), "and if other areas can benefit too, then go for it". Not yet tested on screen.
+
+### Changed
+
+- **Mods installed together are one row on the Timeline**: "7 mods installed together", with each mod as a small button that reads its changelog as it stood. The same for mods backed up or taken back together.
+- A fact's buttons sit at the right end of its line instead of on a line of their own, moving under it only on a narrow window.
+- A fact's entries are grouped under their sections (Added, Fixed...), instead of naming the section after every entry.
+- A version's own summary shows instead of the commit's message, which mostly said the same; the message is still on Show the code, when you point at it.
+- The repository is named only for a game with more than one, and a build or an encoding no longer says Every mod.
+- The status bar names the central settings file among the things the Companion changes when asked.
 ## [0.15.0] - 2026-11-19
 
 From the owner's first look at the Timeline (19 November 2026): "I'm unable to view the applicable changes to the code, as you can in normal views". Not yet tested on screen.

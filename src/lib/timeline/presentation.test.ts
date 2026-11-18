@@ -4,9 +4,11 @@ import {
   canReadAsItStood,
   canShowCode,
   dayOf,
+  entrySections,
   KIND_LOOKS,
   lanes,
   monthStarts,
+  rows,
   showingFilter,
   stoodEntries,
   unlisted,
@@ -166,5 +168,65 @@ describe("what a fact offers", () => {
     ];
     expect(stoodEntries(entries, true).map((e) => e.lead)).toEqual(["b"]);
     expect(stoodEntries(entries, false)).toHaveLength(2);
+  });
+});
+
+describe("a day's rows", () => {
+  const install = (
+    product: string,
+    minute: string,
+    extra: Partial<Fact> = {},
+  ) =>
+    fact("installed", `2026-11-18T12:${minute}:10+00:00`, {
+      source: "log",
+      product,
+      ...extra,
+    });
+
+  it("makes one row of mods installed together, and keeps the rest apart", () => {
+    const found = rows([
+      fact("version-written", noon("2026-11-18")),
+      install("A", "14"),
+      install("B", "14"),
+      install("C", "14"),
+      install("D", "20"),
+      fact("built", "2026-11-18T12:14:00+00:00", {
+        source: "log",
+        product: undefined,
+      }),
+    ]);
+    expect(
+      found.map((r) =>
+        r.kind === "batch" ? r.facts.map((f) => f.product) : r.fact.kind,
+      ),
+    ).toEqual(["version-written", ["A", "B", "C"], "installed", "built"]);
+  });
+
+  it("never joins two repositories' installs, or facts from git", () => {
+    const found = rows([
+      install("A", "14"),
+      install("B", "14", { repository: "other" }),
+    ]);
+    expect(found.map((r) => r.kind)).toEqual(["single", "single"]);
+    expect(
+      rows([
+        fact("entries-added", noon("2026-11-18")),
+        fact("entries-added", noon("2026-11-18")),
+      ]),
+    ).toHaveLength(2);
+  });
+
+  it("puts entries under their sections, in the order the sections first appear", () => {
+    const found = entrySections([
+      { lead: "a", section: "Added" },
+      { lead: "b", section: "Fixed" },
+      { lead: "c", section: "Added" },
+    ]);
+    expect(found.map((s) => [s.section, s.entries.map((e) => e.lead)])).toEqual(
+      [
+        ["Added", ["a", "c"]],
+        ["Fixed", ["b"]],
+      ],
+    );
   });
 });

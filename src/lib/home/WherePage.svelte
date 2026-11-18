@@ -6,7 +6,8 @@
     pendingWords,
     problemKey,
   } from "./presentation";
-  import type { GameHome } from "./types";
+  import type { GameHome, KitPins } from "./types";
+  import { readKitPins } from "./desktopClient";
   import { go, openDialog } from "../navigation/navigation.svelte";
   import { commitRequest } from "../code/presentation";
 
@@ -17,6 +18,16 @@
 
   const headline = $derived(headlineWords(game, now));
   const last = $derived(game.latest[0]);
+
+  /** Each repository's pin of the tool kit (cross-links S2); empty until read, or when the read fails. */
+  let pins = $state<KitPins | null>(null);
+  $effect(() => {
+    const id = game.id;
+    pins = null;
+    void readKitPins(id).then((answer) => {
+      if (answer.state === "ready" && id === game.id) pins = answer.pins;
+    });
+  });
 
   /** A latest commit opens its code (cross-links S4). */
   function openCommit(repository: string, hash: string, subject: string) {
@@ -139,6 +150,58 @@
   </section>
 {/if}
 
+{#if pins && pins.pins.length > 0}
+  <section class="panel" aria-labelledby="pins-title">
+    <h2 id="pins-title">{t("pins-title")}</h2>
+    <ul>
+      {#each pins.pins as pin (`${pin.repository}/${pin.path}`)}
+        <li>
+          <div>
+            {pin.ahead
+              ? t("pins-ahead", {
+                  repository: pin.repository,
+                  version: pin.version,
+                  kit: pin.kit,
+                })
+              : pin.behind === 0
+                ? t("pins-current", {
+                    repository: pin.repository,
+                    version: pin.version,
+                  })
+                : t("pins-behind", {
+                    repository: pin.repository,
+                    version: pin.version,
+                    kit: pin.kit,
+                    count: pin.behind,
+                  })}
+          </div>
+          {#if pin.versions.length > 0}
+            <details class="pin-versions">
+              <summary
+                >{t("pins-gains", { count: pin.versions.length })}</summary
+              >
+              <ul>
+                {#each pin.versions as version (version.version)}
+                  <li>
+                    <strong>{version.version}</strong>
+                    <span class="muted small">{version.heading}</span>
+                    <ul class="leads">
+                      {#each version.entries as lead, index (index)}
+                        <li>{lead}</li>
+                      {/each}
+                    </ul>
+                  </li>
+                {/each}
+              </ul>
+            </details>
+          {/if}
+        </li>
+      {/each}
+    </ul>
+    <p class="muted small more">{t("pins-how")}</p>
+  </section>
+{/if}
+
 {#if game.problems.length > 0}
   <section class="panel">
     <h2 class="problem">{t("problems-title")}</h2>
@@ -236,6 +299,24 @@
   .link:focus-visible {
     color: var(--colour-accent);
     text-decoration-color: currentColor;
+  }
+
+  .pin-versions summary {
+    min-height: var(--control-min);
+    padding-block: 10px;
+    cursor: pointer;
+  }
+
+  .leads {
+    margin: 4px 0 0;
+    padding-inline-start: 18px;
+    list-style: disc;
+  }
+
+  .leads li {
+    padding-block: 2px;
+    border-top: none;
+    font-size: var(--type-small);
   }
 
   .more {

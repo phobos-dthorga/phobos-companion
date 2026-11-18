@@ -99,6 +99,44 @@ async function open(page: Page) {
     changes_list: { result: changes },
     entry_code: { result: code },
     test_lists: { result: [] },
+    kit_pins: {
+      result: {
+        kit: "1.38.0",
+        pins: [
+          {
+            repository: "first-mods",
+            path: "external/phobos-modkit",
+            commit: "7f29b801a2dd",
+            version: "1.30.0",
+            kit: "1.38.0",
+            behind: 2,
+            ahead: false,
+            versions: [
+              {
+                version: "1.38.0",
+                heading: "2026-11-19",
+                entries: ["pins status: which version each repository pins"],
+              },
+              {
+                version: "1.37.0",
+                heading: "2026-11-19",
+                entries: ["rimworld-patches targets"],
+              },
+            ],
+          },
+          {
+            repository: "first-tools",
+            path: "external/phobos-modkit",
+            commit: "5ee11910abcd",
+            version: "1.38.0",
+            kit: "1.38.0",
+            behind: 0,
+            ahead: false,
+            versions: [],
+          },
+        ],
+      },
+    },
     timeline: { result: { repositories: [], facts: [], log_exists: false } },
     settings_list: { result: settings },
     report_catalogue: { result: [] },
@@ -224,6 +262,26 @@ test.describe("The way back, the search and addresses", () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
       "product=Sample+Mod",
     );
+    await audit(page);
+  });
+
+  test("Home says which tool kit each repository uses, and what moving its pin would bring", async ({
+    page,
+  }) => {
+    await open(page);
+    const panel = page.getByRole("region", {
+      name: "The tool kit each repository uses",
+    });
+    await expect(panel).toContainText(
+      "first-mods uses tool kit 1.30.0; the kit is at 1.38.0, 2 versions newer.",
+    );
+    await expect(panel).toContainText(
+      "first-tools uses tool kit 1.38.0, the newest.",
+    );
+    await panel
+      .getByText("What moving its pin would bring: 2 versions")
+      .click();
+    await expect(panel).toContainText("rimworld-patches targets");
     await audit(page);
   });
 });

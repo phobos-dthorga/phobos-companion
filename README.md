@@ -37,6 +37,7 @@ what you did, and what your saves and logs say, without typing a command.
   watches, and each version on the Changes page names the in-game tests still waiting on it.
 - **Patch badges** (RimWorld): under a Code map picture, each method our code patches says how many other mods patch it too and
   what the last update changed in it; a red dotted ring marks the crowded or changed ones in the picture.
+- **Home says which tool kit each repository uses**, how far behind it is, and what moving its pin would bring.
 - **Keyboard shortcuts, one key each**: 1 to 9 for the first nine pages and G for Logs, [ and ] for the games, ? for the full list. They never act while
   you type in a box. **Change any of them, or turn them off, under Settings, Change keyboard shortcuts.**
 - **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central

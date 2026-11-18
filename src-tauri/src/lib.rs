@@ -8,6 +8,7 @@ mod connections_page;
 mod history_page;
 mod home;
 mod installs_page;
+mod kit_pins;
 mod logs_page;
 mod open_work;
 mod patch_targets;
@@ -268,6 +269,12 @@ async fn patch_targets(
     blocking(move || patch_targets::read(&game, &repository, Some(&hearing(on_progress)))).await
 }
 
+/// Which tool kit version each of a game's repositories pins, and what a move would bring (cross-links S2).
+#[tauri::command]
+async fn kit_pins(game: String) -> Result<serde_json::Value, Failure> {
+    blocking(move || kit_pins::read(&game)).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -307,6 +314,7 @@ pub fn run() {
             read_log,
             test_code,
             patch_targets,
+            kit_pins,
             read_shortcuts,
             save_shortcuts
         ])

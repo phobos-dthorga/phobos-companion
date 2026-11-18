@@ -44,3 +44,17 @@ export type GameHome = {
 export type Home = { list_found: boolean; games: GameHome[] };
 
 export type HomeReading = Waiting | { state: "ready"; home: Home };
+
+/** One repository's pin of the tool kit (kit 1.38.0 `pins`): its version, how far behind, and what a move would bring. */
+export type KitPin = {
+  repository: string;
+  path: string;
+  commit: string;
+  version: string;
+  kit: string;
+  behind: number;
+  ahead: boolean;
+  versions: { version: string; heading: string; entries: string[] }[];
+};
+
+export type KitPins = { kit: string | null; pins: KitPin[] };

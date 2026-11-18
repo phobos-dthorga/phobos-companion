@@ -1,7 +1,7 @@
 # Cross-links: joining what the Companion already shows
 
 **Status (19 Nov 2026):** the owner asked for the whole proposed order to be built overnight ("Proceed with your entire proposed
-order, step-wise if necessary"), in Companion 0.19.0, one commit a step. Built so far: N1, N2, N3, L4, L2, L1, L3, L5, S3, S4; S1, S2 and S5 are not built (see As built). "As built" below says where a
+order, step-wise if necessary"), in Companion 0.19.0, one commit a step. Built so far: N1, N2, N3, L4, L2, L1, L3, L5, S3, S4, S2; S1 and S5 are not built (see As built). "As built" below says where a
 build differs from its proposal.
 
 ## Read this first (gotchas)
@@ -57,7 +57,8 @@ build differs from its proposal.
 | L5 | Under the picture rather than on every node: a section lists, for the thing in the middle, each method it patches (or that it is, or that its type's patches touch), with the other active mods on it (phobos-modkit 1.37.0's `rimworld-patches targets`, the repository's own assemblies left out) and what the archive's newest update of that file changed in it (rimworld-upstream's comparison, the last 30 days). In the picture, **a red dotted ring** marks a method three or more other mods patch (agent's threshold, owner to change), or one the last update changed, and our patches on it; its spoken label says so. Found through the manifest's `patch-targets` surface (1.37.1), so the Companion names no game |
 | S3 | **Words and a button rather than an arrow**: an ended lane says "(merged into X)", and with it chosen, **Follow it into X** shows X's lane; X offers the way back. A line across the grid would cross other lanes' marks and could not be read aloud. The lane names' column is now a fixed 160 px, wrapping a long name, so it never covers the marks |
 | S4 | A latest commit opens its code (the host now sends each commit's hash); a mod not yet released opens the Changes page at its changelog (the Changes page takes `product` in an address) |
-| S1, S2, S5 | **Not built tonight** (agent's call). S1 matches names in prose to code by name, which is noisy enough to want the owner's view of what counts first. S2 is worth building next: it needs the kit's changelog compared between two tags. S5 needs rules given IDs, an open question in phobos-modkit's `rules/first-class.md` that is the owner's to settle |
+| S2 | **On the Home page**, a panel per game: each repository's pin, how many versions newer the kit is, and what a move would bring, from phobos-modkit 1.38.0's `pins status` (the pin HEAD records, read against the kit's own changelog). Not on the Mods page, since a pin is not an installed mod |
+| S1, S5 | **Not built tonight** (agent's call). S1 matches names in prose to code by name, which is noisy enough to want the owner's view of what counts first. S5 needs rules given IDs, an open question in phobos-modkit's `rules/first-class.md` that is the owner's to settle |
 | N3 | Written as `dthorga://page/game?key=value`, with `dialog=code` or `dialog=stood` and `dialog.`-prefixed fields for an open dialog. The keys each page reads are in the table below |
 
 **What each page takes from an address:**

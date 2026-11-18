@@ -103,6 +103,22 @@ pub fn read(game: &str, data: &Path) -> Result<Vec<TestList>, Failure> {
 }
 
 /// A list from the kit, or an empty one from a kit too old to send it.
+/// The arguments that ask where a repository's code notes each test row's keys (kit 1.36.0).
+pub fn code_arguments(root: &Path) -> Vec<String> {
+    Args::new(TOOL, "code").root(root).json()
+}
+
+/// Where the code notes each row's keys, in which method, function or type, for one repository that keeps a test list: the
+/// kit's `test-pass code`, which only reads (cross-links L3). Its `places` join a row to its code and a method to its rows.
+pub fn code(game: &str, repository: &str, listener: Option<kit::Listener>) -> Result<Value, Failure> {
+    let found = games::named_repository(game, repository)?;
+    if !has_test_list(&found.path) {
+        return Err(Failure::refused(format!("{repository} keeps no test list")));
+    }
+    let answer = kit::run_hearing(TOOL, &code_arguments(&found.path), listener)?;
+    Ok(answer["data"].clone())
+}
+
 fn list_or_empty(value: &Value) -> Value {
     if value.is_array() { value.clone() } else { Value::Array(Vec::new()) }
 }

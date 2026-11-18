@@ -1,4 +1,11 @@
-import { ask, BROWSER, inBrowser } from "../shell/desktopClient";
+import {
+  ask,
+  BROWSER,
+  inBrowser,
+  progressChannel,
+} from "../shell/desktopClient";
+import type { Failed } from "../shell/types";
+import type { CodePlaces } from "./links";
 import type {
   DecisionReading,
   DecisionWord,
@@ -46,5 +53,17 @@ export async function recordKeyDecision(
     "record_key_decision",
     { game, repository, key, decision, note },
     (recorded) => ({ state: "ready", recorded }),
+  );
+}
+
+/** Where one repository's code notes each of its test rows (kit 1.36.0), or why it could not be read. */
+export async function readTestCode(
+  game: string,
+  repository: string,
+): Promise<{ state: "ready"; code: CodePlaces } | Failed> {
+  return ask<CodePlaces, { state: "ready"; code: CodePlaces }>(
+    "test_code",
+    { game, repository, onProgress: progressChannel() },
+    (code) => ({ state: "ready", code }),
   );
 }

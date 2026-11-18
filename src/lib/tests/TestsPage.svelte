@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { here, setFocus } from "../navigation/navigation.svelte";
+  import { go, here, setFocus } from "../navigation/navigation.svelte";
   import { reveal } from "../shell/reveal";
   import { untrack } from "svelte";
   import { onMount } from "svelte";
@@ -9,10 +9,12 @@
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { started } from "../shell/progress";
   import {
+    readTestCode,
     readTestLists,
     recordKeyDecision,
     recordVerdict,
   } from "./desktopClient";
+  import { codeOfRow, type CodePlace } from "./links";
   import {
     concerns,
     DECISION_WORDS,
@@ -21,6 +23,7 @@
     onShelf,
     partsSummary,
     shelfCount,
+    shelfOf,
     SHELF_WORDS,
     SHELVES,
     steps,
@@ -44,6 +47,8 @@
   let notes = $state<Record<string, string>>({});
   let busy = $state<string | null>(null);
   let said = $state("");
+  /** Where each repository's code notes its rows (kit 1.36.0), read after the lists; missing while read or when it fails. */
+  let code = $state<Record<string, CodePlace[]>>({});
 
   async function load() {
     reading = { state: "reading" };
@@ -53,6 +58,11 @@
       shelf =
         SHELVES.find((s) => s !== "unrowed" && shelfCount(lists, s) > 0) ??
         "waiting";
+      for (const list of lists)
+        void readTestCode(game.id, list.repository).then((answer) => {
+          if (answer.state === "ready")
+            code = { ...code, [list.repository]: answer.code.places };
+        });
     }
   }
 
@@ -116,8 +126,29 @@
   );
   $effect(() => {
     if (focusRow && reading.state === "ready")
-      untrack(() => void reveal(focusRow));
+      untrack(() => {
+        // A row on another shelf is shown on its own shelf first.
+        const { repository, row } = here().focus;
+        const found =
+          reading.state === "ready"
+            ? reading.lists
+                .find((l) => l.repository === repository)
+                ?.rows.find((r) => r.id === row)
+            : undefined;
+        if (found) shelf = shelfOf(found);
+        void reveal(focusRow);
+      });
   });
+
+  /** The Code map, at a thing that notes this row. */
+  function openCode(repository: string, node: string) {
+    go({
+      page: "codemap",
+      game: game.id,
+      focus: { repository, node },
+      dialog: null,
+    });
+  }
 </script>
 
 <div class="eyebrow accent">{t("tests-kicker")}</div>
@@ -220,6 +251,7 @@
           {@const what = steps(row)}
           {@const parts = partsSummary(row)}
           {@const worries = concerns(row)}
+          {@const noted = codeOfRow(code[list.repository] ?? [], row.id)}
           <li>
             <article class="row" aria-labelledby={`row-${key}`}>
               <h3 id={`row-${key}`}>
@@ -262,6 +294,23 @@
                     })}
                   {/if}
                 </p>
+              {/if}
+              {#if noted.length > 0}
+                <div class="noted">
+                  <span class="muted">{t("tests-noted-in")}</span>
+                  {#each noted as where (where.thing.id)}
+                    <button
+                      type="button"
+                      class="action"
+                      onclick={() => openCode(list.repository, where.thing.id)}
+                      >{t("tests-noted-thing", {
+                        name: where.thing.name,
+                        file: where.file,
+                        line: where.line,
+                      })}</button
+                    >
+                  {/each}
+                </div>
               {/if}
               {#if (row.kinds ?? []).length > 0}
                 <p class="muted kinds">
@@ -534,5 +583,13 @@
   .verdict-button:disabled {
     cursor: progress;
     opacity: 0.7;
+  }
+  .noted {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin-block: 6px;
+    overflow-wrap: anywhere;
   }
 </style>

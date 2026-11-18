@@ -33,6 +33,8 @@ what you did, and what your saves and logs say, without typing a command.
 - **The Logs page reads the game's last log** (RimWorld's today): messages grouped, what is new since the run before, and each
   one's stack. **Find in the code** opens a step of the stack on the Code map, where **Show its history** lists the changes that
   touched it, and **backups from before this** leads to the Mods page's backup from before a change.
+- **Test rows are joined to code**: a row on the Tests page names the code that notes it, the Code map names the rows a method
+  watches, and each version on the Changes page names the in-game tests still waiting on it.
 - **Keyboard shortcuts, one key each**: 1 to 9 for the first nine pages and G for Logs, [ and ] for the games, ? for the full list. They never act while
   you type in a box. **Change any of them, or turn them off, under Settings, Change keyboard shortcuts.**
 - **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central

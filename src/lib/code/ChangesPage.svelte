@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { here, setFocus } from "../navigation/navigation.svelte";
+  import { go, here, setFocus } from "../navigation/navigation.svelte";
+  import { readTestLists } from "../tests/desktopClient";
+  import { waitingOn } from "../tests/links";
+  import type { TestList } from "../tests/types";
   import { openDialog } from "../navigation/navigation.svelte";
   import { onMount } from "svelte";
   import type { GameHome } from "../home/types";
@@ -85,7 +88,24 @@
       : t("code-show-for", { entry: plainText(run[0].lead) });
   }
 
-  onMount(load);
+  /** The game's test lists, for the rows still waiting on each version (cross-links L3); empty until read, or with none. */
+  let testLists = $state<TestList[]>([]);
+
+  function openRow(repository: string, row: string) {
+    go({
+      page: "tests",
+      game: game.id,
+      focus: { repository, row },
+      dialog: null,
+    });
+  }
+
+  onMount(() => {
+    void load();
+    void readTestLists(game.id).then((read) => {
+      if (read.state === "ready") testLists = read.lists;
+    });
+  });
 </script>
 
 <div class="eyebrow accent">{t("changes-kicker")}</div>
@@ -129,6 +149,7 @@
 
   {#each chosen.log.versions as version (version.version)}
     {@const runs = commitRuns(version.entries)}
+    {@const waiting = waitingOn(testLists, chosen.log.product, version.version)}
     <section class="version" aria-label={version.version}>
       <div class="version-head">
         <h2>
@@ -150,6 +171,22 @@
       </div>
       {#if version.summary}
         <p class="summary">{version.summary}</p>
+      {/if}
+      {#if waiting.length > 0}
+        <div class="waiting">
+          <span class="muted">{t("changes-tests-waiting")}</span>
+          {#each waiting as found (`${found.repository}/${found.row.id}`)}
+            <button
+              type="button"
+              class="action"
+              onclick={() => openRow(found.repository, found.row.id)}
+              >{t("changes-test-row", {
+                row: found.row.id,
+                title: found.row.title,
+              })}</button
+            >
+          {/each}
+        </div>
       {/if}
       {#if version.entries.length === 0}
         <p class="muted">{t("changes-no-entries")}</p>
@@ -260,6 +297,15 @@
     font-family: var(--font-body, inherit);
     font-size: var(--type-small);
     font-weight: 400;
+  }
+
+  .waiting {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin: 0 0 8px;
+    overflow-wrap: anywhere;
   }
 
   .summary {

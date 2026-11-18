@@ -247,6 +247,16 @@ async fn read_log(game: String, on_progress: Channel<kit::Progress>) -> Result<l
     blocking(move || logs_page::read(&game, Some(&hearing(on_progress)))).await
 }
 
+/// Where a repository's code notes each of its test rows, and in which method (cross-links L3).
+#[tauri::command]
+async fn test_code(
+    game: String,
+    repository: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<serde_json::Value, Failure> {
+    blocking(move || tests_page::code(&game, &repository, Some(&hearing(on_progress)))).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -284,6 +294,7 @@ pub fn run() {
             set_setting,
             connections,
             read_log,
+            test_code,
             read_shortcuts,
             save_shortcuts
         ])

@@ -1,7 +1,7 @@
 # Cross-links: joining what the Companion already shows
 
 **Status (19 Nov 2026):** the owner asked for the whole proposed order to be built overnight ("Proceed with your entire proposed
-order, step-wise if necessary"), in Companion 0.19.0, one commit a step. Built so far: N1, N2, N3, L4, L2, L1. "As built" below says where a
+order, step-wise if necessary"), in Companion 0.19.0, one commit a step. Built so far: N1, N2, N3, L4, L2, L1, L3. "As built" below says where a
 build differs from its proposal.
 
 ## Read this first (gotchas)
@@ -53,6 +53,7 @@ build differs from its proposal.
 | L4 | Built on the Timeline: a "What was I running then?" button on every day. **Tying each save to its set is not built yet**: it needs each game's saves read with their dates, which only RimWorld's tools do today |
 | L2 | Under every picture, for a thing in this repository: **Show its history** reads it only when asked (git follows its lines back through every commit, which takes a moment). Newest 25 commits; an entry or a commit opens the code viewer on that commit, as a step Back returns from. Needs phobos-modkit 1.34.0 (`connections history`) |
 | L1 | **A tenth page, Logs**, at the end of the bar so the number keys keep their pages; its key is G (agent's choice). It shows the tools' grouping (the 60 most serious kinds, phobos-modkit 1.35.0's `--brief`), and each stack step's **Find in the code** searches every repository of the game for that method. The way back is on each change in a thing's history: **backups from before this** opens the Mods page at that mod's newest backup from before the change. Any game whose tools mark a log reader in the manifest gets the page |
+| L3 | **Waiting rows are shown by version, not by entry**: a test row names the versions it covers ("Framework 0.36.0"), not the entry, so each version on the Changes page lists the rows still waiting on it (no verdict yet). That works for the products the test list's `versionNames` names (Framework, Medical and Factory Additions in phobos-rimworld); rows naming another product's version are not matched. The code that notes a row comes from phobos-modkit 1.36.0's `test-pass code`: every string in the code that is a mapped key, or starts with a mapped prefix, placed in the thing holding it. A type watches what its members note |
 | N3 | Written as `dthorga://page/game?key=value`, with `dialog=code` or `dialog=stood` and `dialog.`-prefixed fields for an open dialog. The keys each page reads are in the table below |
 
 **What each page takes from an address:**

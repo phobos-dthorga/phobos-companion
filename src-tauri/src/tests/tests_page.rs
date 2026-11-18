@@ -1,6 +1,11 @@
 use super::*;
 
 #[test]
+fn where_the_code_notes_rows_is_one_read_only_run() {
+    assert_eq!(code_arguments(Path::new("repo")), ["test-pass", "code", "--root", "repo", "--json"]);
+}
+
+#[test]
 fn a_verdict_is_one_json_line_the_kit_reads() {
     let line = verdict_line("127", "passed", "re-fitted on the M1A2", "2026-11-17T12:05:00Z").unwrap();
     let value: Value = serde_json::from_str(&line).unwrap();

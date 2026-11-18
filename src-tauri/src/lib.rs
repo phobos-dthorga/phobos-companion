@@ -10,6 +10,7 @@ mod home;
 mod installs_page;
 mod logs_page;
 mod open_work;
+mod patch_targets;
 mod pending;
 mod reports;
 mod settings_page;
@@ -257,6 +258,16 @@ async fn test_code(
     blocking(move || tests_page::code(&game, &repository, Some(&hearing(on_progress)))).await
 }
 
+/// The methods a repository patches, the other mods on each and what the last update changed (cross-links L5).
+#[tauri::command]
+async fn patch_targets(
+    game: String,
+    repository: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<patch_targets::PatchTargets, Failure> {
+    blocking(move || patch_targets::read(&game, &repository, Some(&hearing(on_progress)))).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -295,6 +306,7 @@ pub fn run() {
             connections,
             read_log,
             test_code,
+            patch_targets,
             read_shortcuts,
             save_shortcuts
         ])

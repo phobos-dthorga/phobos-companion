@@ -170,6 +170,33 @@ const sampleHistory = {
   },
 };
 
+const samplePatches = {
+  available: true,
+  data: {
+    updates: true,
+    updatesNote: null,
+    targets: [
+      {
+        node: "cs:Verse.Thing.Destroy",
+        target: "Verse.Thing.Destroy",
+        name: "Thing.Destroy",
+        assembly: "SampleGame",
+        ours: ["cs:Sample.Boat.Tick"],
+        mods: ["Sample Sails", "Sample Oars", "Sample Anchors"],
+        skippers: 1,
+        changed: [
+          {
+            mod: "Sample Game",
+            file: "SampleGame.dll",
+            versions: "1.0.1 to 1.0.2",
+            change: "new body (+3 -1)",
+          },
+        ],
+      },
+    ],
+  },
+};
+
 async function openCodeMap(page: Page) {
   await mockHost(page, {
     home_status: { result: sampleHome() },
@@ -179,6 +206,7 @@ async function openCodeMap(page: Page) {
     "connections:around": { result: sampleAround },
     "connections:flow": { result: sampleFlow },
     "connections:history": { result: sampleHistory },
+    patch_targets: { result: samplePatches },
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Code map", exact: true }).click();
@@ -355,6 +383,35 @@ for (const [name, viewport] of [
       expect(
         await page.evaluate(() => navigator.clipboard.readText()),
       ).not.toContain("dialog=code");
+    });
+
+    test("a method's patches say who else patches the same method and what the last update changed", async ({
+      page,
+    }) => {
+      await openCodeMap(page);
+      await search(page);
+      const badges = page.getByRole("region", {
+        name: "Patches on Boat.Tick, and who else is there",
+      });
+      await expect(badges).toContainText("Verse.Thing.Destroy");
+      await expect(badges).toContainText(
+        "3 other mods patch it too: Sample Sails, Sample Oars, Sample Anchors.",
+      );
+      await expect(badges).toContainText(
+        "One of their patches may skip the original.",
+      );
+      await expect(badges).toContainText(
+        "Changed by the last update of Sample Game (1.0.1 to 1.0.2): new body (+3 -1).",
+      );
+      const picture = page.getByRole("group", {
+        name: "How Boat.Tick connects, drawn around it",
+      });
+      await expect(
+        picture.getByRole("button", {
+          name: /^Thing\.Destroy, .*Other mods patch the same method/,
+        }),
+      ).toBeVisible();
+      await audit(page);
     });
   });
 }

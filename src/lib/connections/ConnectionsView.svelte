@@ -29,6 +29,8 @@
   import type { Around, Flow, Layout, Relation, Thing } from "./types";
   import ThingHistory from "./ThingHistory.svelte";
   import WatchingRows from "./WatchingRows.svelte";
+  import PatchBadges from "./PatchBadges.svelte";
+  import { patchTargetsOf, riskyNodes, type PatchTargets } from "./patches";
 
   /**
    * How one thing connects: drawn around it (each kind of connection a hub, its members beyond), as a flow of calls from callers on
@@ -159,14 +161,24 @@
 
   function nodeLabel(node: Placed) {
     const thing = node.thing!;
-    return t("connections-node-label", {
+    const label = t("connections-node-label", {
       name: thing.name,
       kind: thing.kind,
       where: whereWords(thing) || t("connections-nowhere"),
       relation: relationWords(node.relation),
       exact: thing.exact === false ? "no" : "yes",
     });
+    return risky.has(thing.id) ? `${label} ${t("patches-risk-mark")}` : label;
   }
+
+  /** The methods this repository patches, from the game's tools where they can say (cross-links L5); null until read. */
+  let patchTargets = $state<PatchTargets | null>(null);
+  const risky = $derived(riskyNodes(patchTargets?.data?.targets ?? []));
+  $effect(() => {
+    void patchTargetsOf(game, repository).then(
+      (found) => (patchTargets = found),
+    );
+  });
 
   function pressed(event: KeyboardEvent, action: () => void) {
     if (event.key === "Enter" || event.key === " ") {
@@ -446,6 +458,10 @@
                         class="changed-ring"
                         r={NODE_RADIUS + 7}
                       />{/if}
+                    {#if risky.has(thing.id)}<circle
+                        class="risk-ring"
+                        r={NODE_RADIUS + 12}
+                      />{/if}
                     <circle
                       class="tone-{node.relation
                         ? RELATION_TONES[node.relation]
@@ -462,6 +478,9 @@
             </g>
           </svg>
           <p class="muted small">{t("connections-hint")}</p>
+          {#if risky.size > 0}
+            <p class="muted small">{t("patches-ring-hint")}</p>
+          {/if}
         {/if}
       {/if}
     </div>
@@ -525,6 +544,7 @@
     </aside>
   </div>
   {#if centre && !centre.external && centre.file}
+    <PatchBadges targets={patchTargets} node={centre.id} name={centre.name} />
     <WatchingRows {game} {repository} node={centre.id} name={centre.name} />
     <ThingHistory {game} {repository} node={centre.id} name={centre.name} />
   {/if}
@@ -632,6 +652,13 @@
 
   .node.external circle {
     stroke-dasharray: 4 3;
+  }
+
+  .node .risk-ring {
+    fill: none;
+    stroke: var(--colour-risk);
+    stroke-width: 3;
+    stroke-dasharray: 3 4;
   }
 
   .node .changed-ring {

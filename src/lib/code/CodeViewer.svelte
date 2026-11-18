@@ -3,6 +3,8 @@
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
+  import RichText from "../shell/RichText.svelte";
+  import { plainText } from "../shell/inline";
   import { heard, started } from "../shell/progress";
   import { readEntryCode } from "./desktopClient";
   import { highlightLines } from "./highlightCore";
@@ -106,9 +108,9 @@
           version: request.entry.version,
         })}
       </div>
-      <h2 id="code-viewer-title">{parts.lead || parts.rest}</h2>
+      <h2 id="code-viewer-title">{plainText(parts.lead || parts.rest)}</h2>
       {#if parts.lead && parts.rest}
-        <p class="entry-rest">{parts.rest}</p>
+        <p class="entry-rest"><RichText text={parts.rest} /></p>
       {/if}
     </div>
     <button type="button" class="action close" onclick={() => dialog.close()}>
@@ -197,12 +199,14 @@
                     aria-pressed={chosen === candidate.path}
                     onclick={() => open(candidate)}
                   >
-                    <span class="file-name">{where.name}</span>
-                    <span class="file-folder muted">{where.folder}</span>
-                    <span class="file-facts">
+                    <span class="file-line">
+                      <span class="file-name">{where.name}</span>
                       <span class="section-tag"
                         >{t(CHANGE_WORDS[candidate.change])}</span
                       >
+                    </span>
+                    <span class="file-facts">
+                      <span class="file-folder muted">{where.folder}</span>
                       {#if !candidate.binary}
                         <span class="plus"
                           >{t("code-added-count", {
@@ -425,17 +429,17 @@
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
   }
 
   .file {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
+    align-items: stretch;
+    gap: 0;
     width: 100%;
     min-height: var(--control-min);
-    padding: 6px 10px;
+    padding: 4px 10px;
     font: inherit;
     font-size: var(--type-small);
     text-align: start;
@@ -449,6 +453,13 @@
   .file[aria-pressed="true"] {
     background: var(--colour-surface-soft);
     border: 2px solid var(--colour-accent);
+  }
+
+  .file-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
   }
 
   .file-name {

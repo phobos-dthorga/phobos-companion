@@ -386,6 +386,19 @@ as sharp as the commit is small, so one commit that wrote eight entries shows th
 owner chose the second (19 Nov 2026)**. It is a rule for every repository now, in phobos-modkit's `rules/every-session.md`: one
 change is finished and committed before an unrelated one is started, and nothing is untangled afterwards.
 
+## Tidying, and telling a rebuild from a change (built 19 Nov 2026, 0.13.0)
+
+The owner, on 0.12.0: "I absolutely love how the code is tracked to every particular item", asked for the busiest areas tidied, and
+saw "changes in DLLs, across the board, where there might not be any".
+
+| Found | Done |
+| --- | --- |
+| A button under every entry, all opening the same commit | One button per run of entries one commit wrote (phobos-modkit gives every entry its commit, from `git blame` by version); a version from one commit has one button beside its heading |
+| Bold marks inside an entry shown as asterisks | `RichText.svelte` shows `**bold**` and `` `code` `` as such, never as markup |
+| Unchanged code read as changed | .NET stamped the git commit into every assembly; phobos-rimworld turned it off, and the kit marks an assembly whose own sources are unchanged as only rebuilt, and names the sources when they did change |
+| "Up to date" beside files that differ | Two states: Only rebuilt, and Files differ (with the sources) |
+| A tall, empty Installed now column | Columns sit at the top; the after column is wider |
+
 ## What comes next
 
 **Step 5, the rest of the report viewer.** Forms built from the manifest for the 19 reports that need an input, then the kit's

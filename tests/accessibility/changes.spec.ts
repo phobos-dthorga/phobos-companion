@@ -5,13 +5,20 @@ import { healthyKit, mockHost, sampleHome } from "./host";
 
 const CONTROL_MIN_PX = 44;
 
-function entry(version: string, section: string, lead: string, rest: string) {
+function entry(
+  version: string,
+  section: string,
+  lead: string,
+  rest: string,
+  commit: string | null = "aaaaaaaaaaaa",
+) {
   return {
     version,
     section,
     text: `**${lead}** ${rest}`,
     lead,
     aboutSaves: section === "Save compatibility",
+    commit,
   };
 }
 
@@ -31,8 +38,19 @@ const sampleChanges = {
               heading: "2026-11-18 - Draft",
               summary: "Boats",
               entries: [
-                entry("1.3.0", "Added", "Sample boats float.", "On water."),
-                entry("1.3.0", "Fixed", "Sample wheels turn.", "At last."),
+                entry(
+                  "1.3.0",
+                  "Added",
+                  "Sample boats float.",
+                  "On **calm** water.",
+                ),
+                entry(
+                  "1.3.0",
+                  "Fixed",
+                  "Sample wheels turn.",
+                  "At last.",
+                  "bbbbbbbbbbbb",
+                ),
               ],
             },
           ],
@@ -316,6 +334,28 @@ for (const [name, viewport] of [
       await expect(page.getByRole("dialog")).toContainText(
         "could not be found. That entry is not in this changelog",
       );
+    });
+
+    test("a version from several commits shows each group's code; one commit, one button", async ({
+      page,
+    }) => {
+      await open(page);
+      const several = page.getByRole("region", { name: "1.3.0" });
+      await expect(several).toContainText("written in 2 commits");
+      await expect(
+        several.getByRole("button", { name: /Show the code/ }),
+      ).toHaveCount(2);
+      await expect(
+        several.locator("strong", { hasText: "calm" }),
+      ).toBeVisible();
+      await expect(several).not.toContainText("**");
+      await page.getByRole("button", { name: "Other Sample" }).click();
+      const single = page.getByRole("region", { name: "0.4.0" });
+      await expect(
+        single.getByRole("button", {
+          name: "Show the code behind: Sample lamps glow.",
+        }),
+      ).toHaveText("Show the code for this version");
     });
   });
 }

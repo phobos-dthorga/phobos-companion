@@ -7,7 +7,8 @@
   import { heard, started } from "../shell/progress";
   import CodeViewer from "./CodeViewer.svelte";
   import { readChanges } from "./desktopClient";
-  import { entryParts } from "./presentation";
+  import RichText from "../shell/RichText.svelte";
+  import { commitRuns, plainText } from "../shell/inline";
   import type {
     ChangelogEntry,
     ChangelogList,
@@ -58,6 +59,16 @@
       product: choice.log.product,
       entry,
     };
+  }
+
+  /** The label a "show the code" button reads out: the entry it opens, and how many more the same commit wrote. */
+  function codeLabel(run: ChangelogEntry[]) {
+    return run.length > 1
+      ? t("code-show-for-run", {
+          entry: plainText(run[0].lead),
+          more: run.length - 1,
+        })
+      : t("code-show-for", { entry: plainText(run[0].lead) });
   }
 
   /** The sections of one version, in the order its entries name them. */
@@ -113,45 +124,73 @@
   </p>
 
   {#each chosen.log.versions as version (version.version)}
+    {@const runs = commitRuns(version.entries)}
     <section class="version" aria-label={version.version}>
-      <h2>
-        {version.version === "Unreleased"
-          ? t("changes-unreleased")
-          : version.version}
-        {#if version.heading}
-          <span class="muted heading-rest">{version.heading}</span>
+      <div class="version-head">
+        <h2>
+          {version.version === "Unreleased"
+            ? t("changes-unreleased")
+            : version.version}
+          {#if version.heading}
+            <span class="muted heading-rest">{version.heading}</span>
+          {/if}
+        </h2>
+        {#if runs.length === 1}
+          <button
+            type="button"
+            class="action"
+            aria-label={codeLabel(runs[0])}
+            onclick={() => show(chosen, runs[0][0])}
+          >
+            {t("code-show-version")}
+          </button>
         {/if}
-      </h2>
+      </div>
       {#if version.summary}
         <p class="summary">{version.summary}</p>
       {/if}
       {#if version.entries.length === 0}
         <p class="muted">{t("changes-no-entries")}</p>
+      {:else if runs.length === 1}
+        {#each bySection(version.entries) as section (section.section)}
+          {#if section.section}
+            <h3>{section.section}</h3>
+          {/if}
+          <ul class="entries">
+            {#each section.entries as entry, index (index)}
+              <li><RichText text={entry.text} /></li>
+            {/each}
+          </ul>
+        {/each}
+      {:else}
+        <p class="muted small">
+          {t("changes-several-commits", { count: runs.length })}
+        </p>
+        {#each runs as run, runIndex (runIndex)}
+          <div class="run">
+            {#each bySection(run) as section (section.section)}
+              {#if section.section}
+                <h3>{section.section}</h3>
+              {/if}
+              <ul class="entries">
+                {#each section.entries as entry, index (index)}
+                  <li><RichText text={entry.text} /></li>
+                {/each}
+              </ul>
+            {/each}
+            <button
+              type="button"
+              class="action run-button"
+              aria-label={codeLabel(run)}
+              onclick={() => show(chosen, run[0])}
+            >
+              {run.length > 1
+                ? t("code-show-run", { count: run.length })
+                : t("code-show")}
+            </button>
+          </div>
+        {/each}
       {/if}
-      {#each bySection(version.entries) as section (section.section)}
-        {#if section.section}
-          <h3>{section.section}</h3>
-        {/if}
-        <ul class="entries">
-          {#each section.entries as entry, index (index)}
-            {@const parts = entryParts(entry)}
-            <li>
-              <p class="entry-words">
-                {#if parts.lead}<strong>{parts.lead}</strong>{/if}
-                {parts.rest}
-              </p>
-              <button
-                type="button"
-                class="action"
-                aria-label={t("code-show-for", { entry: entry.lead })}
-                onclick={() => show(chosen, entry)}
-              >
-                {t("code-show")}
-              </button>
-            </li>
-          {/each}
-        </ul>
-      {/each}
     </section>
   {/each}
   {#if chosen.log.versionsInAll > chosen.log.versions.filter((v) => v.version !== "Unreleased").length}
@@ -234,6 +273,29 @@
     border-radius: 4px;
   }
 
+  .version-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 16px;
+  }
+
+  .run {
+    margin-block: 8px 12px;
+    padding-inline-start: 12px;
+    border-inline-start: 2px solid var(--colour-line);
+  }
+
+  .run-button {
+    margin-top: 6px;
+  }
+
+  .small {
+    margin-block: 4px;
+    font-size: var(--type-small);
+  }
+
   h2 {
     margin: 0 0 4px;
     font-family: var(--font-display);
@@ -264,44 +326,18 @@
   }
 
   .entries {
+    max-width: 110ch;
     margin: 0;
-    padding: 0;
-    list-style: none;
+    padding-inline-start: 20px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-  }
-
-  .entries li {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding-top: 6px;
-    border-top: 1px solid var(--colour-line);
-  }
-
-  .entry-words {
-    flex: 1;
-    min-width: 0;
-    max-width: 100ch;
-    margin: 0;
+    gap: 4px;
     font-size: var(--type-small);
-  }
-
-  .entries .action {
-    flex: none;
   }
 
   .how {
     max-width: 80ch;
     margin-top: 14px;
     font-size: var(--type-small);
-  }
-
-  @media (max-width: 700px) {
-    .entries li {
-      flex-direction: column;
-      gap: 6px;
-    }
   }
 </style>

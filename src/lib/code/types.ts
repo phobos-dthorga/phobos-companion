@@ -7,6 +7,8 @@ export type ChangelogEntry = {
   text: string;
   lead: string;
   aboutSaves: boolean;
+  /** The commit that wrote it, its hash's first 12 characters, or null when no commit holds it yet (kit 1.26.0). */
+  commit?: string | null;
 };
 
 export type ChangelogVersion = {

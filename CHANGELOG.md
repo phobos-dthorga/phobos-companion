@@ -4,6 +4,28 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-19
+
+The owner's look at 0.12.0 (19 November 2026): "I absolutely love how the code is tracked to every particular item in question", a request to tidy the busiest areas, and "It seems to see changes in DLLs, across the board, where there might not be any". Not yet tested on screen.
+
+### Changed
+
+- One Show the code for all the entries one commit wrote, instead of a button under every entry. On the Changes page a version written in one commit has one button beside its heading; a version written over several commits says so and shows each group with its own button. On the Mods page each group of entries from one commit shares a button.
+- Changelog entries show their own bold and code marks as such: no stray asterisks, and no space before a comma after a bold opening. The same on the Mods page, the Changes page, the save notes and the code viewer's heading.
+- A mod's Installed now and After installing columns sit at the top instead of stretching to the taller one, and the after column takes more of the width.
+- The code viewer's file list is more compact: each file's name and what happened to it on one line, its folder and line counts under it.
+
+### Fixed
+
+- A mod whose changelog matched but whose files differed read as Up to date. It now reads Files differ, naming the sources that changed since it was installed, or Only rebuilt when its code files were only built again from unchanged code.
+- Every mod's code file read as changed after almost any commit. The cause was in how the mods are built, not here: .NET stamped the git commit into every assembly, so phobos-rimworld now builds without it, and the tools tell a rebuild from a change (phobos-modkit 1.26.0 to 1.28.0).
+- A line many versions repeat word for word, such as "Not yet tested in game.", was put in a group of its own, because it was given the commit that first ever wrote it. Each entry's commit now comes from where it stands.
+
+### Compatibility and limits
+
+- The pinned phobos-modkit moves from 1.25.0 to 1.28.0.
+- Mods installed before phobos-rimworld's build change carry the old stamp, so each reads Files differ (naming Directory.Build.props) until it is next installed.
+
 ## [0.12.0] - 2026-11-19
 
 Progress bars, a code viewer, and a direction: the owner asked (19 November 2026) for progress bars with status updates wherever they fit, a code viewer "that helps show off all the new and shiny code associated with any particular CHANGELOG item", and for all further work to treat this as a multi-game, multi-framework viewer, mainly for them and maybe for others. Not yet tested on screen.

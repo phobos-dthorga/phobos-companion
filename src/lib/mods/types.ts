@@ -7,6 +7,8 @@ export type Entry = {
   text: string;
   lead: string;
   aboutSaves: boolean;
+  /** The commit that wrote it, its hash's first 12 characters, or null when no commit holds it yet (kit 1.26.0). */
+  commit?: string | null;
 };
 
 /** What moving from one copy of a mod to another gains, loses and rewords, by their changelogs. */
@@ -46,12 +48,25 @@ export type Copy = {
 export type Backup = Copy & { delta: Delta };
 
 export type ModState =
-  "not-installed" | "up-to-date" | "behind" | "ahead" | "differs";
+  | "not-installed"
+  | "up-to-date"
+  | "behind"
+  | "ahead"
+  | "differs"
+  /** The changelogs agree, and every changed file was only rebuilt from unchanged code (kit 1.26.0). */
+  | "rebuilt"
+  /** The changelogs agree, but files differ that no entry describes. */
+  | "unlogged";
 
 /** A file installing would add, change or remove (kit 1.21.0). */
 export type FileChange = {
   path: string;
   change: "added" | "changed" | "removed";
+  /** An assembly whose own code is unchanged since the installed commit: built again, at another commit or against newer code. */
+  rebuilt?: boolean;
+  /** For another changed assembly, the sources that changed since the installed commit, up to five (kit 1.27.0). */
+  sources?: string[];
+  sourcesInAll?: number;
   category: string;
 };
 

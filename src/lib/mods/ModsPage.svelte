@@ -5,6 +5,8 @@
   import CodeViewer from "../code/CodeViewer.svelte";
   import type { EntryRequest } from "../code/types";
   import FailurePanel from "../shell/FailurePanel.svelte";
+  import RichText from "../shell/RichText.svelte";
+  import { commitRuns, plainText } from "../shell/inline";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import {
     heard,
@@ -24,7 +26,6 @@
     CHECK_ACTION_WORDS,
     FILE_CHANGE_WORDS,
     encodeTargets,
-    entryParts,
     FILE_WORDS,
     FIRST_BACKUPS,
     FIRST_ENTRIES,
@@ -37,6 +38,8 @@
     SETTING_WORDS,
     shortCommit,
     STATE_WORDS,
+    changedSources,
+    rebuiltCount,
     unlogged,
     type Check,
   } from "./presentation";
@@ -297,25 +300,34 @@
         <span class="muted">{`— ${group.summary}`}</span>
       {/if}
     </p>
-    <ul class="entries">
-      {#each group.entries as entry, index (index)}
-        {@const parts = entryParts(entry)}
-        <li>
-          {#if entry.section}<span class="section-tag">{entry.section}</span
-            >{/if}
-          {#if parts.lead}<strong>{parts.lead}</strong>{/if}
-          {parts.rest}
-          <button
-            type="button"
-            class="action code-button"
-            aria-label={t("code-show-for", { entry: entry.lead })}
-            onclick={() => showCode(source, entry)}
-          >
-            {t("code-show")}
-          </button>
-        </li>
-      {/each}
-    </ul>
+    {#each commitRuns(group.entries) as run, runIndex (runIndex)}
+      <div class="run" class:shared={run.length > 1}>
+        <ul class="entries">
+          {#each run as entry, index (index)}
+            <li>
+              {#if entry.section}<span class="section-tag">{entry.section}</span
+                >{/if}
+              <RichText text={entry.text} />
+            </li>
+          {/each}
+        </ul>
+        <button
+          type="button"
+          class="action code-button"
+          aria-label={run.length > 1
+            ? t("code-show-for-run", {
+                entry: plainText(run[0].lead),
+                more: run.length - 1,
+              })
+            : t("code-show-for", { entry: plainText(run[0].lead) })}
+          onclick={() => showCode(source, run[0])}
+        >
+          {run.length > 1
+            ? t("code-show-run", { count: run.length })
+            : t("code-show")}
+        </button>
+      </div>
+    {/each}
   {/each}
   {#if list.length > FIRST_ENTRIES}
     <button
@@ -340,7 +352,10 @@
       </p>
       <ul>
         {#each delta.saveNotes as entry, index (index)}
-          <li><strong>{entry.version}:</strong> {entry.text}</li>
+          <li>
+            <strong>{entry.version}:</strong>
+            <RichText text={entry.text} />
+          </li>
         {/each}
       </ul>
     </div>
@@ -353,7 +368,10 @@
       <summary>{t("mods-reworded", { count: delta.reworded.length })}</summary>
       <ul class="entries">
         {#each delta.reworded as pair, index (index)}
-          <li><strong>{pair.would.version}:</strong> {pair.would.text}</li>
+          <li>
+            <strong>{pair.would.version}:</strong>
+            <RichText text={pair.would.text} />
+          </li>
         {/each}
       </ul>
     </details>
@@ -558,9 +576,20 @@
       )}
     {/if}
     {#if unlogged(mod)}
+      {@const sources = changedSources(mod)}
       <p class="small unlogged">
         <span aria-hidden="true">⚠</span>
-        {t("mods-unlogged")}
+        {sources.names.length > 0
+          ? t("mods-unlogged-sources", {
+              names: sources.names.join(", "),
+              more: sources.more,
+            })
+          : t("mods-unlogged")}
+      </p>
+    {:else if rebuiltCount(mod) > 0}
+      <p class="small rebuilt-note">
+        <span aria-hidden="true">⚙</span>
+        {t("mods-rebuilt", { count: rebuiltCount(mod) })}
       </p>
     {/if}
     {#if mod.files && mod.files.total > 0}
@@ -588,6 +617,9 @@
                 >{t(FILE_CHANGE_WORDS[file.change])}</span
               >
               {file.path}
+              {#if file.rebuilt}
+                <span class="muted">{t("mods-file-rebuilt")}</span>
+              {/if}
             </li>
           {/each}
         </ul>
@@ -1082,7 +1114,8 @@
 
   .columns {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    align-items: start;
     gap: 12px;
     margin-block: 10px;
   }
@@ -1121,9 +1154,22 @@
     margin-top: 4px;
   }
 
+  .run {
+    margin-block: 4px 10px;
+  }
+
+  .run.shared {
+    padding-inline-start: 10px;
+    border-inline-start: 2px solid var(--colour-line);
+  }
+
   .code-button {
     display: block;
-    margin-block: 4px 8px;
+    margin-top: 6px;
+  }
+
+  .rebuilt-note {
+    color: var(--colour-text-muted);
   }
 
   .check-bar {

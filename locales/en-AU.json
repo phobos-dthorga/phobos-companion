@@ -365,6 +365,15 @@
     "code-binary": "A picture, a sound or another file that isn't text, so there is nothing to show line by line.",
     "code-no-lines": "No lines changed: the file was moved, or only its mode changed.",
     "code-hunk": "From line { $line }",
-    "code-truncated": "This file's change is long: only its first { $lines } lines are shown."
+    "code-truncated": "This file's change is long: only its first { $lines } lines are shown.",
+    "code-show-run": "Show the code for these { $count }",
+    "code-show-version": "Show the code for this version",
+    "code-show-for-run": "Show the code behind: { $entry }, and { $more ->\n    [one] one more entry the same commit wrote\n   *[other] { $more } more entries the same commit wrote\n  }",
+    "changes-several-commits": "This version was written in { $count } commits; each group below has its own code.",
+    "mods-state-rebuilt": "Only rebuilt",
+    "mods-state-unlogged": "Files differ",
+    "mods-rebuilt": "{ $count ->\n    [one] Its code file was only rebuilt: its own code is unchanged since this copy was installed, but it was built again (at another commit, or against newer code it uses). Installing keeps the two in step.\n   *[other] { $count } code files were only rebuilt: their own code is unchanged since this copy was installed, but they were built again (at another commit, or against newer code they use). Installing keeps them in step.\n  }",
+    "mods-file-rebuilt": "(only rebuilt)",
+    "mods-unlogged-sources": "Files differ, but the changelog lists nothing new. The code was built from sources that changed since this copy was installed: { $names }{ $more ->\n    [0] {\"\"}\n   *[other] {\" \"}and { $more } more\n  }. A change to shared build files changes every mod's code this way."
   }
 }

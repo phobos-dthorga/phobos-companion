@@ -9,6 +9,8 @@ import {
   hasChanges,
   names,
   preflight,
+  changedSources,
+  rebuiltCount,
   shortCommit,
   unlogged,
 } from "./presentation";
@@ -211,11 +213,65 @@ describe("what counts as a change", () => {
     );
   });
 
-  it("flags files that differ with nothing new in the changelog", () => {
-    expect(unlogged(mod({ files: { total: 1, counts: {}, paths: [] } }))).toBe(
-      true,
-    );
+  it("flags files that differ with nothing new in the changelog, but not a rebuild", () => {
+    expect(unlogged(mod({ state: "unlogged" }))).toBe(true);
+    expect(unlogged(mod({ state: "rebuilt" }))).toBe(false);
     expect(unlogged(mod())).toBe(false);
+  });
+
+  it("names the sources that changed under a mod's code, each once", () => {
+    const files = {
+      total: 2,
+      counts: { code: 2 },
+      paths: [
+        {
+          path: "1.7/Assemblies/A.dll",
+          change: "changed" as const,
+          category: "code",
+          sources: ["Directory.Build.props"],
+          sourcesInAll: 1,
+        },
+        {
+          path: "1.7/Assemblies/B.dll",
+          change: "changed" as const,
+          category: "code",
+          sources: [
+            "Directory.Build.props",
+            "src/B/One.cs",
+            "src/B/Two.cs",
+            "src/B/Three.cs",
+          ],
+          sourcesInAll: 6,
+        },
+      ],
+    };
+    expect(changedSources(mod({ files }))).toEqual({
+      names: ["Directory.Build.props", "src/B/One.cs", "src/B/Two.cs"],
+      more: 3,
+    });
+    expect(changedSources(mod())).toEqual({ names: [], more: 0 });
+  });
+
+  it("counts the code files that were only rebuilt", () => {
+    const files = {
+      total: 2,
+      counts: { code: 2 },
+      paths: [
+        {
+          path: "1.7/Assemblies/A.dll",
+          change: "changed" as const,
+          category: "code",
+          rebuilt: true,
+        },
+        {
+          path: "1.7/Assemblies/B.dll",
+          change: "changed" as const,
+          category: "code",
+        },
+      ],
+    };
+    expect(rebuiltCount(mod({ files }))).toBe(1);
+    expect(rebuiltCount(mod())).toBe(0);
   });
 
   it("installs only the changed mods, by repository", () => {

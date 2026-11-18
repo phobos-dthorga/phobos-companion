@@ -16,6 +16,8 @@ export const STATE_WORDS: Record<ModState, { label: string; mark: string }> = {
   behind: { label: "mods-state-behind", mark: "↑" },
   ahead: { label: "mods-state-ahead", mark: "↓" },
   differs: { label: "mods-state-differs", mark: "⇅" },
+  rebuilt: { label: "mods-state-rebuilt", mark: "⚙" },
+  unlogged: { label: "mods-state-unlogged", mark: "◆" },
 };
 
 /** Each move's button, its confirmation, the line while it works, and the line once it is done. */
@@ -133,11 +135,30 @@ export function hasChanges(mod: ModInstall): boolean {
 
 /** Files differ, but the changelogs hold the same entries: a change nobody has written up yet, or one still to be built. */
 export function unlogged(mod: ModInstall): boolean {
-  return (
-    (mod.files?.total ?? 0) > 0 &&
-    mod.update.gain.length === 0 &&
-    mod.update.lose.length === 0
-  );
+  return mod.state === "unlogged";
+}
+
+/** The sources that changed under a mod's changed code files since it was installed, each named once, and how many in all. */
+export function changedSources(mod: ModInstall): {
+  names: string[];
+  more: number;
+} {
+  const found = new Set<string>();
+  let inAll = 0;
+  for (const file of mod.files?.paths ?? []) {
+    for (const source of file.sources ?? []) found.add(source);
+    inAll = Math.max(inAll, file.sourcesInAll ?? 0);
+  }
+  const names = [...found].slice(0, 3);
+  return {
+    names,
+    more: Math.max(0, Math.max(inAll, found.size) - names.length),
+  };
+}
+
+/** How many of a mod's changed files were only rebuilt from unchanged code. */
+export function rebuiltCount(mod: ModInstall): number {
+  return (mod.files?.paths ?? []).filter((file) => file.rebuilt).length;
 }
 
 /** The mods with changes to install, across a game's repositories, by repository. */

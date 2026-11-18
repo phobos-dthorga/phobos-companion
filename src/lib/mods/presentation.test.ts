@@ -1,12 +1,24 @@
 import { describe, expect, it } from "vitest";
 import {
   blockedBy,
+  changedMods,
+  encodeTargets,
   entryParts,
   formatSize,
   groupByVersion,
+  hasChanges,
+  names,
+  preflight,
   shortCommit,
+  unlogged,
 } from "./presentation";
-import type { Entry } from "./types";
+import type {
+  Entry,
+  ModInstall,
+  RepositoryInstalls,
+  TextureMod,
+  TexturesReading,
+} from "./types";
 
 function entry(version: string, text: string, lead = ""): Entry {
   return { version, section: "Fixed", text, lead, aboutSaves: false };
@@ -48,5 +60,184 @@ describe("the Mods page's words", () => {
     expect(formatSize(null)).toBe("");
     expect(shortCommit("4d332ddf0123")).toBe("4d332ddf");
     expect(shortCommit(null)).toBe("");
+  });
+});
+
+const emptyDelta = {
+  gain: [],
+  lose: [],
+  reworded: [],
+  saveNotes: [],
+  summaries: {},
+};
+
+function mod(extra: Partial<ModInstall> = {}): ModInstall {
+  const copy = {
+    kind: "installed" as const,
+    name: "Sample",
+    version: "1.0.0",
+    record: null,
+    backup: null,
+    taken: null,
+    size: null,
+    hasChangelog: true,
+    direction: null,
+  };
+  return {
+    mod: "Sample",
+    name: "Sample",
+    state: "up-to-date",
+    repository: { ...copy, kind: "repository" },
+    installed: copy,
+    update: emptyDelta,
+    uncommittedCount: 0,
+    commitsSince: null,
+    backups: [],
+    installedCommit: null,
+    files: { total: 0, counts: {}, paths: [] },
+    build: { needsBuild: false, projects: [] },
+    settings: null,
+    settingsNote: null,
+    lookOut: [],
+    ...extra,
+  };
+}
+
+function repo(
+  mods: ModInstall[],
+  gameRunning: string[] = [],
+): RepositoryInstalls {
+  return {
+    repository: "sample-mods",
+    command_line: "",
+    status: {
+      repository: "sample-mods",
+      gameRunning,
+      canBuild: true,
+      needsBuild: mods.some((m) => m.build.needsBuild),
+      space: { backups: 0, backupsFree: null, targetFree: null, spare: 0 },
+      mods,
+    },
+  };
+}
+
+function textureMod(name: string, stale: number, missing: number): TextureMod {
+  return {
+    name,
+    packageId: name.toLowerCase(),
+    folderName: name,
+    source: "Workshop",
+    pictures: 10,
+    stale,
+    missing,
+    leftOver: 0,
+    stalePaths: [],
+    missingPaths: [],
+  };
+}
+
+function texturesReady(mods: TextureMod[]): TexturesReading {
+  return {
+    state: "ready",
+    status: {
+      checkedAt: "",
+      gameRunning: [],
+      todds: "todds.exe",
+      totals: {
+        mods: mods.length,
+        pictures: 0,
+        staleMods: mods.filter((m) => m.stale > 0).length,
+        missingMods: mods.filter((m) => m.missing > 0).length,
+        stale: mods.reduce((n, m) => n + m.stale, 0),
+        missing: mods.reduce((n, m) => n + m.missing, 0),
+        leftOver: 0,
+      },
+      mods,
+    },
+  };
+}
+
+describe("before you play", () => {
+  it("is ready when every mod is built, installed and every texture current", () => {
+    const checks = preflight([repo([mod()])], texturesReady([]), "Sample Game");
+    expect(checks.map((c) => [c.kind, c.words])).toEqual([
+      ["ready", "mods-pre-ready"],
+    ]);
+  });
+
+  it("names what to do, with the press that does it", () => {
+    const unbuilt = mod({
+      name: "Code",
+      build: { needsBuild: true, projects: [] },
+    });
+    const behind = mod({ name: "Words", state: "behind" });
+    const checks = preflight(
+      [repo([unbuilt, behind], ["game.exe"])],
+      texturesReady([textureMod("Old", 2, 0), textureMod("New", 0, 5)]),
+      "Sample Game",
+    );
+    expect(checks.map((c) => [c.kind, c.words, c.action])).toEqual([
+      ["info", "mods-pre-running", null],
+      ["todo", "mods-pre-build", "build"],
+      ["todo", "mods-pre-install", "install-all"],
+      ["todo", "mods-pre-textures-stale", "encode"],
+      ["todo", "mods-pre-textures-missing", null],
+    ]);
+    expect(checks[2].args).toMatchObject({ count: 2, names: "Code, Words" });
+  });
+
+  it("says it is still checking textures rather than calling them current", () => {
+    const checks = preflight([repo([mod()])], { state: "reading" }, "G");
+    expect(checks.map((c) => c.words)).toEqual([
+      "mods-pre-textures-reading",
+      "mods-pre-ready-mods",
+    ]);
+  });
+});
+
+describe("what counts as a change", () => {
+  it("counts changelogs, files and builds, never a mod that isn't installed", () => {
+    expect(hasChanges(mod())).toBe(false);
+    expect(hasChanges(mod({ state: "behind" }))).toBe(true);
+    expect(
+      hasChanges(mod({ files: { total: 2, counts: {}, paths: [] } })),
+    ).toBe(true);
+    expect(hasChanges(mod({ build: { needsBuild: true, projects: [] } }))).toBe(
+      true,
+    );
+    expect(hasChanges(mod({ installed: null, state: "not-installed" }))).toBe(
+      false,
+    );
+  });
+
+  it("flags files that differ with nothing new in the changelog", () => {
+    expect(unlogged(mod({ files: { total: 1, counts: {}, paths: [] } }))).toBe(
+      true,
+    );
+    expect(unlogged(mod())).toBe(false);
+  });
+
+  it("installs only the changed mods, by repository", () => {
+    const groups = changedMods([
+      repo([mod({ mod: "A", state: "behind" }), mod({ mod: "B" })]),
+    ]);
+    expect(groups.map((g) => g.mods.map((m) => m.mod))).toEqual([["A"]]);
+  });
+
+  it("encodes stale textures first", () => {
+    const order = encodeTargets([
+      textureMod("New", 0, 3),
+      textureMod("Old", 1, 0),
+      textureMod("Fine", 0, 0),
+    ]);
+    expect(order.map((m) => m.name)).toEqual(["Old", "New"]);
+  });
+
+  it("names a few and counts the rest", () => {
+    expect(names(["A", "B"])).toEqual({ names: "A, B", more: 0 });
+    expect(names(["A", "B", "C", "D", "E"])).toEqual({
+      names: "A, B, C",
+      more: 2,
+    });
   });
 });

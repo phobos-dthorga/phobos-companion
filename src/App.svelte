@@ -167,7 +167,7 @@
 
     <aside class="inspector" aria-label={t("details-label")}>
       <h2>{t("source-title")}</h2>
-      <p>{t("source-body")}</p>
+      <p>{page === "mods" ? t("source-body-mods") : t("source-body")}</p>
 
       <h2>{t("legend-title")}</h2>
       <ul class="legend">

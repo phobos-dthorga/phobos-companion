@@ -53,6 +53,8 @@ function sampleInstalls(running: string[]) {
         status: {
           repository: "first-mods",
           gameRunning: running,
+          canBuild: true,
+          needsBuild: true,
           space: {
             backups: 52_000_000,
             backupsFree: 20_000_000_000,
@@ -84,6 +86,53 @@ function sampleInstalls(running: string[]) {
               },
               uncommittedCount: 2,
               commitsSince: 3,
+              installedCommit: { commit: "4d332ddf0123", exact: true },
+              files: {
+                total: 3,
+                counts: { code: 1, defs: 2 },
+                paths: [
+                  {
+                    path: "1.7/Assemblies/Sample.dll",
+                    change: "changed",
+                    category: "code",
+                  },
+                  {
+                    path: "Common/Defs/Boats.xml",
+                    change: "added",
+                    category: "defs",
+                  },
+                  {
+                    path: "Common/Defs/Old.xml",
+                    change: "removed",
+                    category: "defs",
+                  },
+                ],
+              },
+              build: {
+                needsBuild: true,
+                projects: [
+                  {
+                    project: "Sample",
+                    needsBuild: true,
+                    built: null,
+                    newest: null,
+                    newestFile: "src/Sample/Boat.cs",
+                  },
+                ],
+              },
+              settings: [
+                {
+                  mod: "SampleMod",
+                  class: "Sample.Settings",
+                  key: "Sample_Sails",
+                  label: "Boats have sails",
+                  what: "added",
+                  before: null,
+                  after: "True",
+                },
+              ],
+              settingsNote: null,
+              lookOut: [{ id: "12", title: "Boats float", version: "1.3.0" }],
               backups: [
                 {
                   ...copy("backup", "1.1.0", {
@@ -117,6 +166,12 @@ function sampleInstalls(running: string[]) {
               },
               uncommittedCount: 0,
               commitsSince: null,
+              installedCommit: null,
+              files: { total: 0, counts: {}, paths: [] },
+              build: { needsBuild: false, projects: [] },
+              settings: null,
+              settingsNote: null,
+              lookOut: [],
               backups: [],
             },
           ],
@@ -126,11 +181,45 @@ function sampleInstalls(running: string[]) {
   };
 }
 
+/** Invented texture findings, for the audit only. */
+function sampleTextures(running: string[]) {
+  const found = (name: string, stale: number, missing: number) => ({
+    name,
+    packageId: name.toLowerCase().replace(/ /g, "."),
+    folderName: name.replace(/ /g, ""),
+    source: "Workshop",
+    pictures: 40,
+    stale,
+    missing,
+    leftOver: 0,
+    stalePaths: [],
+    missingPaths: [],
+  });
+  return {
+    result: {
+      checkedAt: "2026-11-18T10:00:00+00:00",
+      gameRunning: running,
+      todds: "todds.exe",
+      totals: {
+        mods: 50,
+        pictures: 4000,
+        staleMods: 1,
+        missingMods: 1,
+        stale: 4,
+        missing: 30,
+        leftOver: 0,
+      },
+      mods: [found("Old Pictures", 4, 0), found("New Pictures", 0, 30)],
+    },
+  };
+}
+
 async function open(page: Page, running: string[] = []) {
   await mockHost(page, {
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
     mod_installs: sampleInstalls(running),
+    texture_status: sampleTextures(running),
     move_install: {
       result: {
         ok: true,
@@ -171,6 +260,13 @@ for (const [name, viewport] of [
       await expect(card.locator(".saves")).toContainText("Not safe to remove");
       await expect(card).toContainText("Show all 11");
       await expect(card).toContainText("3 commits have changed it since");
+      await expect(card).toContainText("Needs a build");
+      await expect(card).toContainText(
+        "New: Boats have sails (starts as True)",
+      );
+      await expect(card).toContainText("One thing to look out for in play");
+      await card.getByRole("button", { name: "Show the files" }).click();
+      await expect(card).toContainText("Common/Defs/Boats.xml");
       await audit(page);
       const overflow = await page.evaluate(
         () =>
@@ -201,9 +297,9 @@ for (const [name, viewport] of [
       page,
     }) => {
       await open(page, ["rimworld.exe"]);
-      await expect(page.locator(".running")).toContainText(
-        "First Sample is running",
-      );
+      await expect(
+        page.getByRole("region", { name: "Before you play" }),
+      ).toContainText("First Sample is running");
       const card = page.getByRole("article", { name: "Sample Mod" });
       await card.locator("details.backups > summary").click();
       await card
@@ -230,6 +326,40 @@ for (const [name, viewport] of [
       );
       expect(small).toBe(0);
       await audit(page);
+    });
+
+    test("before you play names what to do, and asks before encoding", async ({
+      page,
+    }) => {
+      await open(page);
+      const strip = page.getByRole("region", { name: "Before you play" });
+      await expect(strip).toContainText("One mod needs a build");
+      await expect(strip).toContainText("One mod would show old pictures");
+      await strip
+        .getByRole("button", { name: "Encode their textures" })
+        .click();
+      const confirm = strip.getByRole("group", { name: "Confirm" });
+      await expect(confirm).toContainText("Old Pictures, New Pictures");
+      await audit(page);
+      await confirm.getByRole("button", { name: "Cancel" }).click();
+      await expect(confirm).toHaveCount(0);
+    });
+
+    test("installing and encoding wait while the game runs; building doesn't", async ({
+      page,
+    }) => {
+      await open(page, ["rimworld.exe"]);
+      const strip = page.getByRole("region", { name: "Before you play" });
+      await expect(strip).toContainText("First Sample is running");
+      await expect(
+        strip.getByRole("button", { name: "Install everything that changed" }),
+      ).toBeDisabled();
+      await expect(
+        strip.getByRole("button", { name: "Encode their textures" }),
+      ).toBeDisabled();
+      await expect(
+        strip.getByRole("button", { name: "Build now" }),
+      ).toBeEnabled();
     });
   });
 }

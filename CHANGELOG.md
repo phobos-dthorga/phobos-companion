@@ -4,6 +4,24 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-18
+
+The Mods page's second round, from the owner's four asks after seeing the first (18 November 2026): compile as needed, refresh after, see before and after ahead of a compile, and know whether textures need encoding before the next launch, since "it's always a wild guess currently". Their picks: check and fix textures, a Build button and Install everything that changed, all four before-and-after extras, and a Before you play strip. Not yet tested on screen.
+
+### Added
+
+- Before you play, at the top of the Mods page: Ready to play, or the things to do first, each with its button. Mods needing a build (Build now, fine while the game runs), mods with changes not installed (Install everything that changed, one run and one restart), and mods whose textures would show old pictures or were never encoded (Encode their textures). It says when the game is running and which buttons wait for it.
+- Every active mod's textures are checked, ours and other authors': a stale encoded texture makes the game show a mod's old picture, because the game uses the encoded file whatever the dates. Encode their textures writes them with RimSort's own settings, Workshop mods included, after asking, with the game closed. A list under the mods names each mod and how many pictures need it.
+- Each mod that would change shows Installed now beside After installing: the versions, where the install came from, the changelog entries lost and gained, the files that would change (Show the files), settings an install would add, remove or give a new default (by the names the settings window uses), and things to look out for in play from the test list. Needs a build is marked on the card and in its column. Files that differ while the changelog lists nothing new are pointed out.
+- A Build button beside Read again; the page reads again after every build, install and encode.
+
+### Changed
+
+- The pinned phobos-modkit moves from 1.20.0 to 1.21.0, with its texture check and the further installs comparisons.
+- A mod with nothing to install says so in one line instead of listing versions.
+- Backups show the newest two; Show all lists the rest.
+- The side panel's Where this comes from now says what the Mods page reads and changes, instead of saying the program only reads.
+
 ## [0.10.0] - 2026-11-18
 
 The Mods page, asked for by the owner (18 November 2026): a part "dedicated to the updating, reversing changes, making backups, etc. all with regard to our mods", starting with seeing the changelogs "track and update to what I'm either benefitting from or losing as certain changes are made". Not yet tested on screen.

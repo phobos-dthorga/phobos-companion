@@ -108,20 +108,36 @@ async fn mod_installs(game: String) -> Result<Vec<installs_page::RepositoryInsta
         .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
-/// Makes one move the owner confirmed on the Mods page: back up, go back to a backup, or install from the repository.
+/// Makes one move the owner asked for on the Mods page: build, install, back up, or go back to a backup.
 #[tauri::command]
 async fn move_install(
     game: String,
     repository: String,
     action: String,
-    mod_name: String,
+    mods: Vec<String>,
     backup: Option<String>,
 ) -> Result<installs_page::MoveResult, Failure> {
     tauri::async_runtime::spawn_blocking(move || {
-        installs_page::make_move(&game, &repository, &action, &mod_name, backup.as_deref())
+        installs_page::make_move(&game, &repository, &action, &mods, backup.as_deref())
     })
     .await
     .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
+/// Whether any active mod's textures need encoding before the next launch; None for a game with no texture check.
+#[tauri::command]
+async fn texture_status(game: String) -> Result<Option<serde_json::Value>, Failure> {
+    tauri::async_runtime::spawn_blocking(move || installs_page::read_textures(&game))
+        .await
+        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
+/// Encodes the named mods' textures, once the owner has confirmed.
+#[tauri::command]
+async fn encode_textures(game: String, mods: Vec<String>) -> Result<installs_page::MoveResult, Failure> {
+    tauri::async_runtime::spawn_blocking(move || installs_page::encode_textures(&game, &mods))
+        .await
+        .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
 /// Starts the program.
@@ -136,7 +152,9 @@ pub fn run() {
             record_verdict,
             record_key_decision,
             mod_installs,
-            move_install
+            move_install,
+            texture_status,
+            encode_textures
         ])
         .run(tauri::generate_context!())
         .expect("the desktop window could not start");

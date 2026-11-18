@@ -3,17 +3,33 @@
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
-  import { makeMove, readInstalls } from "./desktopClient";
+  import {
+    encodeTextures,
+    makeMove,
+    readInstalls,
+    readTextures,
+  } from "./desktopClient";
   import {
     blockedBy,
+    changedMods,
+    CHECK_ACTION_WORDS,
+    FILE_CHANGE_WORDS,
+    encodeTargets,
     entryParts,
+    FILE_WORDS,
+    FIRST_BACKUPS,
     FIRST_ENTRIES,
     formatSize,
     formatWhen,
     groupByVersion,
+    hasChanges,
     MOVE_WORDS,
+    preflight,
+    SETTING_WORDS,
     shortCommit,
     STATE_WORDS,
+    unlogged,
+    type Check,
   } from "./presentation";
   import type {
     Backup,
@@ -22,21 +38,36 @@
     InstallsReading,
     ModInstall,
     Move,
+    MoveReading,
+    TextureMod,
+    TexturesReading,
   } from "./types";
 
   let { game }: { game: GameHome } = $props();
 
-  type Asking = {
-    repository: string;
-    mod: ModInstall;
-    move: Move;
-    backup: Backup | null;
-  };
+  /** A move waiting for the owner's yes, and where on the page its question is shown. */
+  type Asking =
+    | {
+        kind: "mod";
+        place: string;
+        repository: string;
+        mod: ModInstall;
+        move: Move;
+        backup: Backup | null;
+      }
+    | {
+        kind: "all";
+        place: string;
+        groups: { repository: string; mods: ModInstall[] }[];
+      }
+    | { kind: "encode"; place: string; mods: TextureMod[] };
 
   /** How long the page waits before reading again when the window comes back into focus. */
   const FOCUS_READ_AFTER_MS = 15_000;
+  const STRIP = "strip";
 
   let reading = $state<InstallsReading>({ state: "reading" });
+  let textures = $state<TexturesReading>({ state: "reading" });
   let readAt = 0;
   let asking = $state<Asking | null>(null);
   let busy = $state<string | null>(null);
@@ -44,17 +75,28 @@
   let output = $state<string[]>([]);
   let showAll = $state<Record<string, boolean>>({});
 
-  const running = $derived(
+  const repositories = $derived(
+    reading.state === "ready" ? reading.repositories : [],
+  );
+  const running = $derived(repositories.flatMap((r) => r.status.gameRunning));
+  const checks = $derived(
     reading.state === "ready"
-      ? reading.repositories.flatMap((r) => r.status.gameRunning)
+      ? preflight(repositories, textures, game.name)
       : [],
   );
 
   /** Reads again. A quiet read keeps what is on screen until the answer arrives. */
   async function load(quiet = false) {
-    if (!quiet) reading = { state: "reading" };
-    const next = await readInstalls(game.id);
-    if (!quiet || next.state === "ready") reading = next;
+    if (!quiet) {
+      reading = { state: "reading" };
+      textures = { state: "reading" };
+    }
+    const [nextInstalls, nextTextures] = await Promise.all([
+      readInstalls(game.id),
+      readTextures(game.id),
+    ]);
+    if (!quiet || nextInstalls.state === "ready") reading = nextInstalls;
+    if (!quiet || nextTextures.state === "ready") textures = nextTextures;
     readAt = Date.now();
   }
 
@@ -69,42 +111,16 @@
     }
   }
 
-  function ask(
-    repository: string,
-    mod: ModInstall,
-    move: Move,
-    backup: Backup | null = null,
-  ) {
-    asking = { repository, mod, move, backup };
+  function ask(next: Asking) {
+    asking = next;
     said = "";
     output = [];
   }
 
-  function isAsking(mod: ModInstall, move: Move, backup: Backup | null = null) {
-    return (
-      asking !== null &&
-      asking.mod.mod === mod.mod &&
-      asking.move === move &&
-      (asking.backup?.backup ?? null) === (backup?.backup ?? null)
-    );
-  }
-
-  async function confirm() {
-    if (asking === null) return;
-    const { repository, mod, move, backup } = asking;
-    busy = `${mod.mod}/${move}`;
-    said = t(MOVE_WORDS[move].working, { name: mod.name });
-    const answer = await makeMove(
-      game.id,
-      repository,
-      move,
-      mod.mod,
-      backup?.backup ?? null,
-    );
-    busy = null;
-    asking = null;
+  /** What a move said back, in words at the top of the page, with its output folded away. */
+  function hear(answer: MoveReading, name: string) {
     if (answer.state === "failed") {
-      said = t("mods-move-failed", { name: mod.name });
+      said = t("mods-move-failed", { name });
       reading = { state: "failed", failure: answer.failure };
       return;
     }
@@ -112,10 +128,69 @@
     said = result.ok
       ? result.title
       : t("mods-move-refused", {
-          name: mod.name,
+          name,
           reason: result.refusal ?? result.title,
         });
     output = result.data.output ?? [];
+  }
+
+  /** Builds every project. It writes only inside the repository, so it needs no question and no closed game. */
+  async function build() {
+    busy = "build";
+    said = t(MOVE_WORDS.build.working);
+    output = [];
+    for (const repository of repositories.filter((r) => r.status.canBuild)) {
+      hear(
+        await makeMove(game.id, repository.repository, "build", [], null),
+        repository.repository,
+      );
+    }
+    busy = null;
+    await load(true);
+  }
+
+  async function confirm() {
+    if (asking === null) return;
+    const now = asking;
+    busy = now.place;
+    if (now.kind === "mod") {
+      said = t(MOVE_WORDS[now.move].working, { name: now.mod.name });
+      hear(
+        await makeMove(
+          game.id,
+          now.repository,
+          now.move,
+          [now.mod.mod],
+          now.backup?.backup ?? null,
+        ),
+        now.mod.name,
+      );
+    } else if (now.kind === "all") {
+      said = t("mods-working-install-all");
+      for (const group of now.groups) {
+        hear(
+          await makeMove(
+            game.id,
+            group.repository,
+            "install",
+            group.mods.map((m) => m.mod),
+            null,
+          ),
+          group.repository,
+        );
+      }
+    } else {
+      said = t("mods-working-encode", { count: now.mods.length });
+      hear(
+        await encodeTextures(
+          game.id,
+          now.mods.map((m) => m.folderName),
+        ),
+        t("mods-textures-name"),
+      );
+    }
+    busy = null;
+    asking = null;
     await load(true);
   }
 
@@ -124,8 +199,26 @@
     node.focus();
   }
 
-  function cardKey(repository: string, mod: ModInstall) {
-    return `${repository}/${mod.mod}`;
+  function toggle(key: string) {
+    showAll[key] = !showAll[key];
+  }
+
+  function runCheck(check: Check) {
+    if (check.action === "build") void build();
+    else if (check.action === "install-all")
+      ask({ kind: "all", place: STRIP, groups: changedMods(repositories) });
+    else if (check.action === "encode" && textures.state === "ready")
+      ask({
+        kind: "encode",
+        place: STRIP,
+        mods: encodeTargets(textures.status.mods),
+      });
+  }
+
+  function checkBlocked(check: Check): string | null {
+    if (check.action === "install-all" || check.action === "encode")
+      return running.length > 0 ? "mods-blocked-running" : null;
+    return null;
   }
 
   onMount(() => {
@@ -165,7 +258,7 @@
       type="button"
       class="action"
       aria-expanded={showAll[key] ?? false}
-      onclick={() => (showAll[key] = !showAll[key])}
+      onclick={() => toggle(key)}
     >
       {showAll[key]
         ? t("mods-show-fewer")
@@ -174,7 +267,7 @@
   {/if}
 {/snippet}
 
-{#snippet deltaView(delta: Delta, key: string)}
+{#snippet saveNotes(delta: Delta)}
   {#if delta.saveNotes.length > 0}
     <div class="saves">
       <p class="saves-heading">
@@ -188,6 +281,23 @@
       </ul>
     </div>
   {/if}
+{/snippet}
+
+{#snippet reworded(delta: Delta)}
+  {#if delta.reworded.length > 0}
+    <details class="reworded">
+      <summary>{t("mods-reworded", { count: delta.reworded.length })}</summary>
+      <ul class="entries">
+        {#each delta.reworded as pair, index (index)}
+          <li><strong>{pair.would.version}:</strong> {pair.would.text}</li>
+        {/each}
+      </ul>
+    </details>
+  {/if}
+{/snippet}
+
+{#snippet deltaView(delta: Delta, key: string)}
+  {@render saveNotes(delta)}
   {#if delta.gain.length > 0}
     <h5 class="gain">
       <span aria-hidden="true">+</span>
@@ -202,59 +312,67 @@
     </h5>
     {@render entryList(delta.lose, delta.summaries, `${key}/lose`)}
   {/if}
-  {#if delta.reworded.length > 0}
-    <details class="reworded">
-      <summary>{t("mods-reworded", { count: delta.reworded.length })}</summary>
-      <ul class="entries">
-        {#each delta.reworded as pair, index (index)}
-          <li><strong>{pair.would.version}:</strong> {pair.would.text}</li>
-        {/each}
-      </ul>
-    </details>
-  {/if}
+  {@render reworded(delta)}
   {#if delta.gain.length === 0 && delta.lose.length === 0 && delta.reworded.length === 0}
     <p class="muted">{t("mods-no-difference")}</p>
   {/if}
 {/snippet}
 
-{#snippet confirmation(mod: ModInstall)}
-  {#if asking !== null && asking.mod.mod === mod.mod}
-    {@const move = asking.move}
-    {@const backup = asking.backup}
+{#snippet question()}
+  {#if asking !== null}
+    {@const now = asking}
     <div class="confirm" role="group" aria-label={t("mods-confirm-label")}>
       <p class="confirm-question" tabindex="-1" use:takeFocus>
-        {#if move === "backup"}
+        {#if now.kind === "all"}
+          {@const all = now.groups.flatMap((g) => g.mods)}
+          {t("mods-confirm-install-all", {
+            count: all.length,
+            names: all.map((m) => m.name).join(", "),
+          })}
+        {:else if now.kind === "encode"}
+          {t("mods-confirm-encode", {
+            count: now.mods.length,
+            pictures: now.mods.reduce((sum, m) => sum + m.stale + m.missing, 0),
+            names: now.mods.map((m) => m.name).join(", "),
+          })}
+        {:else if now.move === "backup"}
           {t("mods-confirm-backup", {
-            name: mod.name,
-            version: mod.installed?.version ?? "",
+            name: now.mod.name,
+            version: now.mod.installed?.version ?? "",
             game: game.name,
           })}
-        {:else if move === "restore" && backup}
+        {:else if now.move === "restore" && now.backup}
           {t("mods-confirm-restore", {
-            name: mod.name,
-            when: formatWhen(backup.taken),
-            version: backup.version || "?",
-            installed: mod.installed?.version || "?",
-            lose: backup.delta.lose.length,
-            gain: backup.delta.gain.length,
+            name: now.mod.name,
+            when: formatWhen(now.backup.taken),
+            version: now.backup.version || "?",
+            installed: now.mod.installed?.version || "?",
+            lose: now.backup.delta.lose.length,
+            gain: now.backup.delta.gain.length,
           })}
         {:else}
           {t("mods-confirm-install", {
-            name: mod.name,
-            version: mod.repository.version || "?",
+            name: now.mod.name,
+            version: now.mod.repository.version || "?",
           })}
         {/if}
       </p>
-      {#if move === "restore" && backup && backup.delta.saveNotes.length > 0}
+      {#if now.kind === "mod" && now.move === "restore" && now.backup && now.backup.delta.saveNotes.length > 0}
         <p class="confirm-warning">
           <span aria-hidden="true">⚠</span>
           {t("mods-confirm-saves")}
         </p>
       {/if}
-      {#if move === "install" && mod.uncommittedCount > 0}
+      {#if now.kind === "all" && now.groups.some( (g) => g.mods.some((m) => m.update.saveNotes.length > 0) )}
         <p class="confirm-warning">
           <span aria-hidden="true">⚠</span>
-          {t("mods-confirm-uncommitted", { count: mod.uncommittedCount })}
+          {t("mods-confirm-all-saves")}
+        </p>
+      {/if}
+      {#if now.kind === "mod" && now.move === "install" && now.mod.uncommittedCount > 0}
+        <p class="confirm-warning">
+          <span aria-hidden="true">⚠</span>
+          {t("mods-confirm-uncommitted", { count: now.mod.uncommittedCount })}
         </p>
       {/if}
       <div class="buttons">
@@ -264,7 +382,11 @@
           disabled={busy !== null}
           onclick={confirm}
         >
-          {t(MOVE_WORDS[move].yes)}
+          {now.kind === "all"
+            ? t("mods-yes-install-all")
+            : now.kind === "encode"
+              ? t("mods-yes-encode")
+              : t(MOVE_WORDS[now.move].yes)}
         </button>
         <button
           type="button"
@@ -284,14 +406,15 @@
   mod: ModInstall,
   move: Move,
   backup: Backup | null,
+  place: string,
 )}
   {@const blocked = blockedBy(move, running)}
   <button
     type="button"
     class="move-button"
     disabled={busy !== null || blocked !== null}
-    aria-pressed={isAsking(mod, move, backup)}
-    onclick={() => ask(repository, mod, move, backup)}
+    aria-pressed={asking?.place === place}
+    onclick={() => ask({ kind: "mod", place, repository, mod, move, backup })}
   >
     {t(MOVE_WORDS[move].button)}
   </button>
@@ -300,16 +423,137 @@
   {/if}
 {/snippet}
 
+{#snippet nowColumn(mod: ModInstall, key: string)}
+  {@const record = mod.installed?.record ?? null}
+  <section class="column" aria-label={t("mods-now")}>
+    <h4>{t("mods-now")}</h4>
+    <p class="column-version">{mod.installed?.version || "?"}</p>
+    {#if record}
+      <p class="muted small">
+        {t("mods-record", {
+          when: formatWhen(record.installed),
+          commit: shortCommit(record.commit) || "?",
+        })}
+      </p>
+    {:else if mod.installedCommit}
+      <p class="muted small">
+        {t("mods-record-approximate", {
+          commit: shortCommit(mod.installedCommit.commit),
+        })}
+      </p>
+    {:else}
+      <p class="muted small">{t("mods-no-record")}</p>
+    {/if}
+    {#if mod.commitsSince}
+      <p class="muted small">
+        {t("mods-commits-since", { count: mod.commitsSince })}
+      </p>
+    {/if}
+    {#if mod.update.lose.length > 0}
+      <h5 class="lose">
+        <span aria-hidden="true">−</span>
+        {t("mods-lose", { count: mod.update.lose.length })}
+      </h5>
+      {@render entryList(mod.update.lose, mod.update.summaries, `${key}/lose`)}
+    {:else}
+      <p class="muted small">{t("mods-lose-nothing")}</p>
+    {/if}
+  </section>
+{/snippet}
+
+{#snippet afterColumn(mod: ModInstall, key: string)}
+  <section class="column" aria-label={t("mods-after")}>
+    <h4>{t("mods-after")}</h4>
+    <p class="column-version">{mod.repository.version || "?"}</p>
+    {#if mod.build.needsBuild}
+      <p class="small needs-build">
+        <span aria-hidden="true">⚙</span>
+        {t("mods-needs-build")}
+      </p>
+    {/if}
+    {#if mod.uncommittedCount > 0}
+      <p class="muted small">
+        {t("mods-uncommitted", { count: mod.uncommittedCount })}
+      </p>
+    {/if}
+    {#if mod.update.gain.length > 0}
+      <h5 class="gain">
+        <span aria-hidden="true">+</span>
+        {t("mods-gain", { count: mod.update.gain.length })}
+      </h5>
+      {@render entryList(mod.update.gain, mod.update.summaries, `${key}/gain`)}
+    {/if}
+    {#if unlogged(mod)}
+      <p class="small unlogged">
+        <span aria-hidden="true">⚠</span>
+        {t("mods-unlogged")}
+      </p>
+    {/if}
+    {#if mod.files && mod.files.total > 0}
+      <h5>{t("mods-files", { count: mod.files.total })}</h5>
+      <p class="small">
+        {Object.entries(mod.files.counts)
+          .map(([kind, count]) =>
+            t(FILE_WORDS[kind] ?? "mods-files-other", { count }),
+          )
+          .join(" · ")}
+      </p>
+      <button
+        type="button"
+        class="action"
+        aria-expanded={showAll[`${key}/files`] ?? false}
+        onclick={() => toggle(`${key}/files`)}
+      >
+        {showAll[`${key}/files`] ? t("mods-hide-files") : t("mods-show-files")}
+      </button>
+      {#if showAll[`${key}/files`]}
+        <ul class="entries files">
+          {#each mod.files.paths as file (file.path)}
+            <li>
+              <span class="section-tag"
+                >{t(FILE_CHANGE_WORDS[file.change])}</span
+              >
+              {file.path}
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    {/if}
+    {#if mod.settings && mod.settings.length > 0}
+      <h5>{t("mods-settings", { count: mod.settings.length })}</h5>
+      <ul class="entries">
+        {#each mod.settings as change (change.key)}
+          <li>
+            {t(SETTING_WORDS[change.what], {
+              label: change.label ?? change.key,
+              before: change.before ?? "",
+              after: change.after ?? "",
+            })}
+          </li>
+        {/each}
+      </ul>
+    {:else if mod.settingsNote}
+      <p class="muted small">{t("mods-settings-unknown")}</p>
+    {/if}
+    {#if mod.lookOut.length > 0}
+      <h5>{t("mods-look-out", { count: mod.lookOut.length })}</h5>
+      <ul class="entries">
+        {#each mod.lookOut as row (row.id)}
+          <li>
+            <span class="section-tag">{row.id}</span>
+            {row.title}
+            <span class="muted">({row.version})</span>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+    {@render reworded(mod.update)}
+  </section>
+{/snippet}
+
 <div class="eyebrow accent">{t("mods-kicker")}</div>
 <h1>{t("mods-title", { game: game.name })}</h1>
 <p class="lead">{t("mods-lead")}</p>
-
-{#if running.length > 0}
-  <p class="running">
-    <span aria-hidden="true">●</span>
-    {t("mods-running", { game: game.name })}
-  </p>
-{/if}
 
 <p class="status" role="status" aria-live="polite">{said}</p>
 {#if output.length > 0}
@@ -325,28 +569,80 @@
   <p class="muted">{t("mods-browser")}</p>
 {:else if reading.state === "failed"}
   <FailurePanel failure={reading.failure} onretry={() => load()} />
-{:else if reading.repositories.length === 0}
+{:else if repositories.length === 0}
   <p class="lead">{t("mods-none", { game: game.name })}</p>
 {:else}
-  <div class="buttons top">
-    <button
-      type="button"
-      class="action"
-      disabled={busy !== null}
-      onclick={() => load(true)}
-    >
-      {t("mods-action-read-again")}
-    </button>
-  </div>
-  {#each reading.repositories as repository (repository.repository)}
-    {#if reading.repositories.length > 1}
+  <section class="strip" aria-labelledby="before-you-play">
+    <h2 id="before-you-play">{t("mods-pre-heading")}</h2>
+    <ul class="checks">
+      {#each checks as check (check.words)}
+        {@const blocked = checkBlocked(check)}
+        <li class="check check-{check.kind}">
+          <span class="mark" aria-hidden="true"
+            >{check.kind === "ready"
+              ? "✓"
+              : check.kind === "todo"
+                ? "◆"
+                : "●"}</span
+          >
+          <span class="check-words">{t(check.words, check.args)}</span>
+          {#if check.action}
+            <button
+              type="button"
+              class="move-button"
+              disabled={busy !== null || blocked !== null}
+              aria-pressed={asking?.place === STRIP &&
+                ((check.action === "install-all" && asking.kind === "all") ||
+                  (check.action === "encode" && asking.kind === "encode"))}
+              onclick={() => runCheck(check)}
+            >
+              {t(CHECK_ACTION_WORDS[check.action])}
+            </button>
+            {#if blocked}
+              <span class="muted blocked"
+                >{t(blocked, { game: game.name })}</span
+              >
+            {/if}
+          {/if}
+        </li>
+      {/each}
+    </ul>
+    {#if asking?.place === STRIP}
+      {@render question()}
+    {/if}
+    <div class="buttons">
+      <button
+        type="button"
+        class="action"
+        disabled={busy !== null}
+        onclick={() => load(true)}
+      >
+        {t("mods-action-read-again")}
+      </button>
+      {#if repositories.some((r) => r.status.canBuild)}
+        <button
+          type="button"
+          class="action"
+          disabled={busy !== null}
+          onclick={build}
+        >
+          {busy === "build" ? t("mods-building") : t("mods-action-build")}
+        </button>
+      {/if}
+    </div>
+  </section>
+
+  {#each repositories as repository (repository.repository)}
+    {#if repositories.length > 1}
       <h2 class="repository">{repository.repository}</h2>
     {/if}
     <ol class="mods">
       {#each repository.status.mods as mod (mod.mod)}
-        {@const key = cardKey(repository.repository, mod)}
+        {@const key = `${repository.repository}/${mod.mod}`}
         {@const words = STATE_WORDS[mod.state]}
-        {@const record = mod.installed?.record ?? null}
+        {@const backupsShown = showAll[`${key}/backups`]
+          ? mod.backups
+          : mod.backups.slice(0, FIRST_BACKUPS)}
         <li>
           <article class="mod" aria-label={mod.name}>
             <div class="mod-head">
@@ -355,59 +651,52 @@
                 <span aria-hidden="true">{words.mark}</span>
                 {t(words.label)}
               </p>
+              {#if mod.build.needsBuild}
+                <p class="state needs-build">
+                  <span aria-hidden="true">⚙</span>
+                  {t("mods-needs-build")}
+                </p>
+              {/if}
             </div>
-            <dl>
-              <dt>{t("mods-installed")}</dt>
-              <dd>
-                {#if mod.installed}
-                  <strong>{mod.installed.version || "?"}</strong>
-                  {#if record}
-                    <span class="muted"
-                      >{t("mods-record", {
-                        when: formatWhen(record.installed),
-                        commit: shortCommit(record.commit) || "?",
-                      })}</span
-                    >
-                    {#if mod.commitsSince}
-                      <span class="muted"
-                        >{t("mods-commits-since", {
-                          count: mod.commitsSince,
-                        })}</span
-                      >
-                    {/if}
-                  {:else}
-                    <span class="muted">{t("mods-no-record")}</span>
-                  {/if}
-                {:else}
-                  {t("mods-not-installed")}
-                {/if}
-              </dd>
-              <dt>{t("mods-in-repository")}</dt>
-              <dd>
-                <strong>{mod.repository.version || "?"}</strong>
-                {#if mod.uncommittedCount > 0}
-                  <span class="muted"
-                    >{t("mods-uncommitted", {
-                      count: mod.uncommittedCount,
-                    })}</span
-                  >
-                {/if}
-              </dd>
-            </dl>
 
-            {#if mod.installed && mod.state !== "up-to-date"}
-              <h4>{t("mods-update-heading")}</h4>
-              {@render deltaView(mod.update, `${key}/update`)}
+            {#if !mod.installed}
+              <p class="small">
+                {t("mods-not-installed-line", {
+                  version: mod.repository.version || "?",
+                })}
+              </p>
+            {:else if hasChanges(mod)}
+              {@render saveNotes(mod.update)}
+              <div class="columns">
+                {@render nowColumn(mod, key)}
+                {@render afterColumn(mod, key)}
+              </div>
+            {:else}
+              <p class="muted small">
+                {t("mods-in-step", { version: mod.installed.version || "?" })}
+              </p>
             {/if}
 
             <div class="buttons">
-              {@render moveButton(repository.repository, mod, "install", null)}
+              {@render moveButton(
+                repository.repository,
+                mod,
+                "install",
+                null,
+                `${key}/install`,
+              )}
               {#if mod.installed}
-                {@render moveButton(repository.repository, mod, "backup", null)}
+                {@render moveButton(
+                  repository.repository,
+                  mod,
+                  "backup",
+                  null,
+                  `${key}/backup`,
+                )}
               {/if}
             </div>
-            {#if asking?.backup === null}
-              {@render confirmation(mod)}
+            {#if asking?.place === `${key}/install` || asking?.place === `${key}/backup`}
+              {@render question()}
             {/if}
 
             {#if mod.backups.length > 0}
@@ -421,7 +710,7 @@
                   })}
                 </summary>
                 <ol class="backup-list">
-                  {#each mod.backups as backup (backup.backup)}
+                  {#each backupsShown as backup (backup.backup)}
                     {@const backupKey = `${key}/${backup.backup}`}
                     <li class="backup">
                       <p>
@@ -446,8 +735,7 @@
                           type="button"
                           class="action"
                           aria-expanded={showAll[backupKey] ?? false}
-                          onclick={() =>
-                            (showAll[backupKey] = !showAll[backupKey])}
+                          onclick={() => toggle(backupKey)}
                         >
                           {showAll[backupKey]
                             ? t("mods-hide-changes")
@@ -458,6 +746,7 @@
                           mod,
                           "restore",
                           backup,
+                          backupKey,
                         )}
                       </div>
                       {#if showAll[backupKey]}
@@ -465,12 +754,26 @@
                           {@render deltaView(backup.delta, backupKey)}
                         </div>
                       {/if}
-                      {#if asking?.backup?.backup === backup.backup}
-                        {@render confirmation(mod)}
+                      {#if asking?.place === backupKey}
+                        {@render question()}
                       {/if}
                     </li>
                   {/each}
                 </ol>
+                {#if mod.backups.length > FIRST_BACKUPS}
+                  <button
+                    type="button"
+                    class="action"
+                    aria-expanded={showAll[`${key}/backups`] ?? false}
+                    onclick={() => toggle(`${key}/backups`)}
+                  >
+                    {showAll[`${key}/backups`]
+                      ? t("mods-show-fewer-backups")
+                      : t("mods-show-all-backups", {
+                          count: mod.backups.length,
+                        })}
+                  </button>
+                {/if}
               </details>
             {/if}
           </article>
@@ -484,6 +787,30 @@
       })}
     </p>
   {/each}
+
+  {#if textures.state === "ready" && textures.status.mods.some((m) => m.stale > 0 || m.missing > 0)}
+    <section class="textures" aria-labelledby="textures-heading">
+      <h2 id="textures-heading">{t("mods-textures-heading")}</h2>
+      <p class="small">{t("mods-textures-lead")}</p>
+      <ul class="entries">
+        {#each encodeTargets(textures.status.mods) as found (found.folderName)}
+          <li>
+            <strong>{found.name}</strong>
+            <span class="muted">({found.source})</span>
+            {#if found.stale > 0}
+              <span class="lose"
+                >{t("mods-textures-stale", { count: found.stale })}</span
+              >
+            {/if}
+            {#if found.missing > 0}
+              <span>{t("mods-textures-missing", { count: found.missing })}</span
+              >
+            {/if}
+          </li>
+        {/each}
+      </ul>
+    </section>
+  {/if}
   <p class="muted how">{t("mods-how")}</p>
 {/if}
 
@@ -494,6 +821,12 @@
     font-size: 2.25rem;
     font-weight: 600;
     line-height: 1.2;
+  }
+
+  h2 {
+    margin-block: 0 8px;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
   }
 
   .lead {
@@ -508,18 +841,64 @@
     color: var(--colour-observed);
   }
 
-  .running {
-    margin-block: 12px;
-    padding: 10px 14px;
+  .small {
+    margin-block: 4px;
+    font-size: var(--type-small);
+  }
+
+  .strip,
+  .textures {
+    margin-block: 8px 20px;
+    padding: 14px 18px;
+    background: var(--colour-surface-raised);
+    border: 2px solid var(--colour-accent);
+    border-radius: 4px;
+  }
+
+  .textures {
+    margin-top: 20px;
+    border-width: 1px;
+    border-color: var(--colour-line);
+  }
+
+  .checks {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .check {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+  }
+
+  .check-words {
+    max-width: 80ch;
+  }
+
+  .check-ready .mark {
+    color: var(--colour-success);
+  }
+
+  .check-todo .mark {
+    color: var(--colour-accent);
+  }
+
+  .check-info .mark {
+    color: var(--colour-observed);
+  }
+
+  .check-ready {
     font-weight: 600;
-    border-inline-start: 4px solid var(--colour-accent);
-    background: var(--colour-surface-soft);
   }
 
   .repository {
     margin-block: 20px 8px;
-    font-family: var(--font-display);
-    font-size: 1.25rem;
   }
 
   .mods,
@@ -553,9 +932,12 @@
   }
 
   h4 {
-    margin-block: 14px 6px;
-    font-size: var(--type-body, 1rem);
+    margin-block: 0 4px;
+    font-size: var(--type-small);
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--colour-text-muted);
   }
 
   h5 {
@@ -571,7 +953,8 @@
   }
 
   .state-behind,
-  .state-differs {
+  .state-differs,
+  .needs-build {
     color: var(--colour-accent);
   }
 
@@ -591,24 +974,29 @@
     color: var(--colour-risk);
   }
 
-  dl {
+  .columns {
     display: grid;
-    grid-template-columns: max-content minmax(0, 1fr);
-    gap: 6px 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
     margin-block: 10px;
-    font-size: var(--type-small);
   }
 
-  dt {
-    font-weight: 600;
-    color: var(--colour-text-muted);
+  .column {
+    min-width: 0;
+    padding: 10px 12px;
+    background: var(--colour-surface-soft);
+    border-radius: 4px;
   }
 
-  dd {
+  .column-version {
     margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px 10px;
+    font-size: var(--type-lead);
+    font-weight: 600;
+  }
+
+  .unlogged {
+    padding-inline-start: 8px;
+    border-inline-start: 3px solid var(--colour-accent);
   }
 
   .version {
@@ -625,6 +1013,10 @@
 
   .entries li + li {
     margin-top: 4px;
+  }
+
+  .files li {
+    overflow-wrap: anywhere;
   }
 
   .section-tag {
@@ -681,10 +1073,6 @@
     align-items: center;
     gap: 10px;
     margin-top: 10px;
-  }
-
-  .buttons.top {
-    margin-block: 0 12px;
   }
 
   .move-button {
@@ -754,5 +1142,11 @@
     margin-top: 16px;
     font-size: var(--type-small);
     max-width: 80ch;
+  }
+
+  @media (max-width: 700px) {
+    .columns {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 </style>

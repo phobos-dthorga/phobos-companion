@@ -1,4 +1,13 @@
-import type { Entry, ModState, Move } from "./types";
+import type {
+  Entry,
+  ModInstall,
+  ModState,
+  Move,
+  RepositoryInstalls,
+  SettingChange,
+  TextureMod,
+  TexturesReading,
+} from "./types";
 
 /** What a mod's state says on its card: words and a mark, so colour never carries it alone. */
 export const STATE_WORDS: Record<ModState, { label: string; mark: string }> = {
@@ -31,6 +40,12 @@ export const MOVE_WORDS: Record<
     confirm: "mods-confirm-install",
     working: "mods-working-install",
     yes: "mods-yes-install",
+  },
+  build: {
+    button: "mods-action-build",
+    confirm: "mods-confirm-build",
+    working: "mods-working-build",
+    yes: "mods-yes-build",
   },
 };
 
@@ -105,3 +120,183 @@ export function shortCommit(commit: string | null | undefined): string {
 
 /** How many entries a list shows before "Show all". */
 export const FIRST_ENTRIES = 8;
+
+/** Whether installing from the repository would change anything in an installed mod: its changelog, its files or its build. */
+export function hasChanges(mod: ModInstall): boolean {
+  return (
+    mod.installed !== null &&
+    (mod.state !== "up-to-date" ||
+      (mod.files?.total ?? 0) > 0 ||
+      mod.build.needsBuild)
+  );
+}
+
+/** Files differ, but the changelogs hold the same entries: a change nobody has written up yet, or one still to be built. */
+export function unlogged(mod: ModInstall): boolean {
+  return (
+    (mod.files?.total ?? 0) > 0 &&
+    mod.update.gain.length === 0 &&
+    mod.update.lose.length === 0
+  );
+}
+
+/** The mods with changes to install, across a game's repositories, by repository. */
+export function changedMods(
+  repositories: RepositoryInstalls[],
+): { repository: string; mods: ModInstall[] }[] {
+  return repositories
+    .map((r) => ({
+      repository: r.repository,
+      mods: r.status.mods.filter(hasChanges),
+    }))
+    .filter((r) => r.mods.length > 0);
+}
+
+/** The mods whose textures need encoding: stale first (they would show old pictures), then those never encoded. */
+export function encodeTargets(mods: TextureMod[]): TextureMod[] {
+  return [
+    ...mods.filter((m) => m.stale > 0),
+    ...mods.filter((m) => m.stale === 0 && m.missing > 0),
+  ];
+}
+
+/** One line of "Before you play": done, still to do (with the press that does it), or worth knowing. */
+export type Check = {
+  kind: "ready" | "todo" | "info";
+  words: string;
+  args: Record<string, string | number>;
+  action: "build" | "install-all" | "encode" | null;
+};
+
+/** "Before you play": what stands between now and a launch with everything current, or "Ready to play". */
+export function preflight(
+  repositories: RepositoryInstalls[],
+  textures: TexturesReading,
+  game: string,
+): Check[] {
+  const checks: Check[] = [];
+  const mods = repositories.flatMap((r) => r.status.mods);
+  const running = repositories.some((r) => r.status.gameRunning.length > 0);
+  if (running) {
+    checks.push({
+      kind: "info",
+      words: "mods-pre-running",
+      args: { game },
+      action: null,
+    });
+  }
+  const unbuilt = mods.filter((m) => m.build.needsBuild);
+  if (unbuilt.length > 0) {
+    checks.push({
+      kind: "todo",
+      words: "mods-pre-build",
+      args: { count: unbuilt.length, ...names(unbuilt.map((m) => m.name)) },
+      action: "build",
+    });
+  }
+  const changed = mods.filter(hasChanges);
+  if (changed.length > 0) {
+    checks.push({
+      kind: "todo",
+      words: "mods-pre-install",
+      args: { count: changed.length, ...names(changed.map((m) => m.name)) },
+      action: "install-all",
+    });
+  }
+  if (textures.state === "reading") {
+    checks.push({
+      kind: "info",
+      words: "mods-pre-textures-reading",
+      args: {},
+      action: null,
+    });
+  } else if (textures.state === "failed") {
+    checks.push({
+      kind: "info",
+      words: "mods-pre-textures-failed",
+      args: {},
+      action: null,
+    });
+  } else if (textures.state === "ready") {
+    const { staleMods, missingMods, missing } = textures.status.totals;
+    if (staleMods > 0) {
+      checks.push({
+        kind: "todo",
+        words: "mods-pre-textures-stale",
+        args: { count: staleMods },
+        action: "encode",
+      });
+    }
+    if (missingMods > 0) {
+      checks.push({
+        kind: "todo",
+        words: "mods-pre-textures-missing",
+        args: { count: missingMods, pictures: missing },
+        action: staleMods > 0 ? null : "encode",
+      });
+    }
+  }
+  if (!checks.some((c) => c.kind === "todo")) {
+    checks.push({
+      kind: "ready",
+      words:
+        textures.state === "ready" ? "mods-pre-ready" : "mods-pre-ready-mods",
+      args: {},
+      action: null,
+    });
+  }
+  return checks;
+}
+
+/** The first few names, and how many more there are, for a message to say "A, B, C and 3 more". */
+export function names(
+  list: string[],
+  shown = 3,
+): { names: string; more: number } {
+  return {
+    names: list.slice(0, shown).join(", "),
+    more: Math.max(0, list.length - shown),
+  };
+}
+
+/** Each kind of file, as a message key. */
+export const FILE_WORDS: Record<string, string> = {
+  code: "mods-files-code",
+  defs: "mods-files-defs",
+  patches: "mods-files-patches",
+  textures: "mods-files-textures",
+  text: "mods-files-text",
+  sounds: "mods-files-sounds",
+  about: "mods-files-about",
+  other: "mods-files-other",
+};
+
+/** What a settings change says, as a message key. */
+export const SETTING_WORDS: Record<SettingChange["what"], string> = {
+  added: "mods-setting-added",
+  removed: "mods-setting-removed",
+  default: "mods-setting-default",
+};
+
+/** How many backups a card shows before "Show all". */
+export const FIRST_BACKUPS = 2;
+
+/** What happens to a file, as a message key. */
+export const FILE_CHANGE_WORDS: Record<
+  "added" | "changed" | "removed",
+  string
+> = {
+  added: "mods-file-added",
+  changed: "mods-file-changed",
+  removed: "mods-file-removed",
+};
+
+/** The button beside a "Before you play" line, as a message key. */
+export const CHECK_ACTION_WORDS: Record<
+  NonNullable<Check["action"]>,
+  string
+> = {
+  build: "mods-pre-action-build",
+  "install-all": "mods-pre-action-install-all",
+  encode: "mods-pre-action-encode",
+};

@@ -301,6 +301,19 @@ phobos-modkit 1.20.0's `installs` (its `docs/installs.md`).
 | Moves | Install from the repository, Back up the installed copy, Go back to this. Each opens a confirmation in words on the card, with the keyboard moved to it; the host checks the repository, the move (against the kit's manifest) and the names, then the kit checks again |
 | Safety | Going back and installing wait for the game to close (the button says so); nothing is deleted: the replaced install becomes a backup and the backup stays |
 
+**Round two (built 18 Nov 2026, 0.11.0).** The owner asked, after seeing the page, for a way to compile as needed, a refresh
+after it, before and after shown ahead of a compile, and to know whether textures need encoding before a launch ("it's always a wild
+guess currently"). **Owner's picks:** check and fix textures (Workshop mods included); Build plus Install everything that changed; all
+four before-and-after extras (files, settings, test rows, side by side); a Before you play strip.
+
+| Part | How |
+| --- | --- |
+| Before you play | Built from both readings: needs a build, changes not installed, textures stale or never encoded, the game running; Ready to play when nothing is left. Each line carries the button that does it |
+| Build | `installs build` (the repository's `deploy.py --build-only`); no question asked, since it writes only inside the repository; allowed while the game runs (agent choice) |
+| Install everything that changed | Mods whose changelog, files or build differ, one `installs install` per repository with every mod named: one run, one restart |
+| Side by side | Installed now (version, where it came from, entries lost) beside After installing (version, needs a build, entries gained, files, settings, rows to look out for); save notes above both |
+| Textures | The kit command for this game whose status has the `textures` surface (`rimworld-textures` today), with the settings file a repository names; encode after a question, game closed |
+
 **The second write, and the first outside this program's folder.** Agent choices, for the owner to revise: a confirmation step for every
 move (unlike verdicts, these change the game's files); the backup button stays live while the game runs, since it only reads; lists
 show eight entries before Show all.

@@ -427,6 +427,10 @@ timeline is built on the first five: Change, Version, Product, Install and Event
 
 ## What comes next
 
+**Shared code, on the owner's word.** The [shared code audit](shared-code-audit.md) (19 Nov 2026) found code written 3 to 17
+times across the host and the window, and proposes a `companion-core` library crate for the host and a grown `src/lib/shell/` for
+the window. Nothing is moved until the owner says.
+
 **Step 5, the rest of the report viewer.** Forms built from the manifest for the 19 reports that need an input, then the kit's
 progress stream and the 7 that read online. Three tools get extra paths from phobos-rimworld's wrapper scripts (`query-code`,
 `query-defs patched`, `mod-settings`) and need those paths in the game list first. The reports' opening lines are written for agents

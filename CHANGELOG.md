@@ -4,6 +4,20 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-18
+
+The Tests page shows when the game's notes are weaker than they look, as phobos-rimworld's seen-in-play checks asked (owner, 18 November 2026: "write up the design record, please, and then get it built"). Not yet tested on screen.
+
+### Added
+
+- A shelf, To look into: rows whose notes came but don't count yet, because their figures are off, they came out of order, or they're from before the row last changed. Each row card says which, with the figures seen and the figures expected.
+- A row in parts says which parts were seen and which are still to see, and every row says what kinds of thing its notes came from.
+- A shelf, Notes with no row: each note the game wrote that no test row asks for, with two buttons, Make a row and No row needed, and Take it back once decided. The word is kept beside the verdicts, in this program's own folder.
+
+### Changed
+
+- The pinned phobos-modkit moves from 1.9.0 to 1.19.1, whose test-pass judges the evidence and reads the decisions.
+
 ## [0.8.0] - 2026-11-17
 
 An installer: the owner had trouble finding the program each time they wanted to open it, and asked for an NSIS setup (17 November 2026). Not yet tested on screen.

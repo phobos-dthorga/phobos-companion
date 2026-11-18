@@ -22,9 +22,11 @@ and method follow Republic Observatory and OnAir WyrmGrid, without their code or
   window can only request. Today that is reports marked `reads` with a `question` and nothing required. `reads-online` and typed inputs
   come next; anything else needs a design record and a confirmation step. **`owner-only` is never run**, and the program never holds
   credentials.
-- **Read-only towards games, saves and repositories.** The one thing the program writes is the owner's test verdicts, appended to its
-  own data folder (`test-verdicts/<repository>.jsonl`, `src-tauri/src/tests_page.rs`, owner, 17 Nov 2026); phobos-modkit's
-  `test-pass apply` writes them into a test list, never this program.
+- **Read-only towards games, saves and repositories.** The only things the program writes are the owner's test verdicts and, since
+  0.9.0, their word on notes no row names ("make a row" or "no row needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks),
+  each appended to its own data folder (`test-verdicts/<repository>.jsonl` and `test-key-decisions/<repository>.jsonl`,
+  `src-tauri/src/tests_page.rs`, owner, 17 Nov 2026); phobos-modkit's `test-pass` reads both and `apply` writes verdicts into a test
+  list, never this program.
 - **The core never names a game.** A game reaches it only through the manifest's `game` field and the owner's own list,
   `.local/games.json`, which holds personal paths and is never committed.
 - **Git is read with `--no-optional-locks` and `core.fsmonitor=false`**, through `src-tauri/src/git.rs`: reading takes no lock and

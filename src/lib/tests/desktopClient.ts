@@ -1,7 +1,10 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import type { Failure } from "../shell/types";
 import type {
+  DecisionReading,
+  DecisionWord,
   Recorded,
+  RecordedDecision,
   RecordReading,
   TestList,
   TestsReading,
@@ -33,6 +36,28 @@ export async function recordVerdict(
       repository,
       row,
       verdict,
+      note,
+    });
+    return { state: "ready", recorded };
+  } catch (failure) {
+    return { state: "failed", failure: failure as Failure };
+  }
+}
+
+/** Asks the host to record the owner's decision on a note no row names. The host checks it before writing. */
+export async function recordKeyDecision(
+  game: string,
+  repository: string,
+  key: string,
+  decision: DecisionWord,
+  note: string,
+): Promise<DecisionReading> {
+  try {
+    const recorded = await invoke<RecordedDecision>("record_key_decision", {
+      game,
+      repository,
+      key,
+      decision,
       note,
     });
     return { state: "ready", recorded };

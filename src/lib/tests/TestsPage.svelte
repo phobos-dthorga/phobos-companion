@@ -3,18 +3,33 @@
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
-  import { readTestLists, recordVerdict } from "./desktopClient";
   import {
+    readTestLists,
+    recordKeyDecision,
+    recordVerdict,
+  } from "./desktopClient";
+  import {
+    concerns,
+    DECISION_WORDS,
     formatDay,
     lastSighting,
     onShelf,
+    partsSummary,
+    shelfCount,
     SHELF_WORDS,
     SHELVES,
     steps,
     VERDICT_WORDS,
     type Shelf,
   } from "./presentation";
-  import type { TestList, TestRow, TestsReading, VerdictWord } from "./types";
+  import type {
+    DecisionWord,
+    TestList,
+    TestRow,
+    TestsReading,
+    Unrowed,
+    VerdictWord,
+  } from "./types";
 
   let { game }: { game: GameHome } = $props();
 
@@ -29,16 +44,32 @@
     reading = { state: "reading" };
     reading = await readTestLists(game.id);
     if (reading.state === "ready") {
-      const rows = reading.lists.flatMap((list) => list.rows);
-      shelf = SHELVES.find((s) => onShelf(rows, s).length > 0) ?? "waiting";
+      const lists = reading.lists;
+      shelf =
+        SHELVES.find((s) => s !== "unrowed" && shelfCount(lists, s) > 0) ??
+        "waiting";
     }
   }
 
-  function count(lists: TestList[], which: Shelf): number {
-    return lists.reduce(
-      (sum, list) => sum + onShelf(list.rows, which).length,
-      0,
+  /** Records a decision on a note no row names, then shows it at once; the host's answer decides whether it stands. */
+  async function decide(list: TestList, item: Unrowed, decision: DecisionWord) {
+    const key = `${list.repository}/${item.key}`;
+    busy = key;
+    const answer = await recordKeyDecision(
+      game.id,
+      list.repository,
+      item.key,
+      decision,
+      "",
     );
+    busy = null;
+    if (answer.state === "failed") {
+      said = t("tests-decision-failed", { key: item.key });
+      reading = { state: "failed", failure: answer.failure };
+      return;
+    }
+    item.decision = decision === "cleared" ? null : decision;
+    said = t(DECISION_WORDS[decision], { key: item.key });
   }
 
   /** Records a verdict, then shows it at once; the host's answer decides whether it stands. */
@@ -97,7 +128,7 @@
         aria-pressed={shelf === which}
         onclick={() => (shelf = which)}
       >
-        {t(SHELF_WORDS[which].label, { count: count(lists, which) })}
+        {t(SHELF_WORDS[which].label, { count: shelfCount(lists, which) })}
       </button>
     {/each}
   </div>
@@ -108,7 +139,62 @@
     {#if lists.length > 1}
       <h2 class="repository">{list.repository}</h2>
     {/if}
-    {#if rows.length === 0}
+    {#if shelf === "unrowed"}
+      {#if (list.unrowed ?? []).length === 0}
+        <p class="muted">{t("tests-shelf-empty")}</p>
+      {:else}
+        <ol class="rows">
+          {#each list.unrowed as item (item.key)}
+            <li>
+              <article class="row" aria-label={item.key}>
+                <h3 class="key">{item.key}</h3>
+                <p class="muted section">
+                  {t("tests-unrowed-line", {
+                    count: item.count,
+                    day: formatDay(item.last),
+                    detail: item.detail || "—",
+                  })}
+                </p>
+                {#if item.decision === "make-row"}
+                  <p class="verdict">{t("tests-unrowed-asked")}</p>
+                {:else if item.decision === "no-row"}
+                  <p class="verdict">{t("tests-unrowed-none")}</p>
+                {/if}
+                <div class="buttons">
+                  {#if item.decision}
+                    <button
+                      type="button"
+                      class="action"
+                      disabled={busy !== null}
+                      onclick={() => decide(list, item, "cleared")}
+                    >
+                      {t("tests-action-undo")}
+                    </button>
+                  {:else}
+                    <button
+                      type="button"
+                      class="verdict-button"
+                      disabled={busy !== null}
+                      onclick={() => decide(list, item, "make-row")}
+                    >
+                      {t("tests-action-make-row")}
+                    </button>
+                    <button
+                      type="button"
+                      class="verdict-button"
+                      disabled={busy !== null}
+                      onclick={() => decide(list, item, "no-row")}
+                    >
+                      {t("tests-action-no-row")}
+                    </button>
+                  {/if}
+                </div>
+              </article>
+            </li>
+          {/each}
+        </ol>
+      {/if}
+    {:else if rows.length === 0}
       <p class="muted">{t("tests-shelf-empty")}</p>
     {:else}
       <ol class="rows">
@@ -116,6 +202,8 @@
           {@const key = `${list.repository}/${row.id}`}
           {@const seen = lastSighting(row)}
           {@const what = steps(row)}
+          {@const parts = partsSummary(row)}
+          {@const worries = concerns(row)}
           <li>
             <article class="row" aria-labelledby={`row-${key}`}>
               <h3 id={`row-${key}`}>
@@ -144,6 +232,58 @@
                     made: `${seen.mod} ${seen.version}`.trim(),
                   })}
                 </p>
+              {/if}
+              {#if parts}
+                <p class="parts">
+                  {t("tests-parts-seen", {
+                    count: parts.seen.length,
+                    total: parts.total,
+                    names: parts.seen.join(", ") || t("tests-parts-none"),
+                  })}
+                  {#if parts.missing.length > 0}
+                    {t("tests-parts-missing", {
+                      names: parts.missing.join(", "),
+                    })}
+                  {/if}
+                </p>
+              {/if}
+              {#if (row.kinds ?? []).length > 0}
+                <p class="muted kinds">
+                  {t("tests-kinds", { kinds: (row.kinds ?? []).join(", ") })}
+                </p>
+              {/if}
+              {#if worries.length > 0}
+                <div class="concerns">
+                  <p class="concerns-heading">
+                    <span aria-hidden="true">⚠</span>
+                    {t("tests-concerns-heading")}
+                  </p>
+                  <ul>
+                    {#each worries as worry, index (index)}
+                      <li>
+                        {#if worry.kind === "off"}
+                          {t("tests-concern-off", {
+                            part: worry.part || t("tests-the-row"),
+                            saw: worry.saw || t("tests-no-figures"),
+                            expects: worry.expects,
+                          })}
+                        {:else if worry.kind === "stale"}
+                          {t("tests-concern-stale", {
+                            part: worry.part || t("tests-the-row"),
+                            version: worry.version,
+                          })}
+                        {:else}
+                          {t("tests-concern-order", {
+                            rule: worry.rule,
+                            on: worry.on,
+                            day: formatDay(worry.time),
+                            detail: worry.detail,
+                          })}
+                        {/if}
+                      </li>
+                    {/each}
+                  </ul>
+                </div>
               {/if}
               <dl>
                 <dt>{t("tests-what-to-do")}</dt>
@@ -301,6 +441,35 @@
     color: var(--colour-text);
     border-inline-start: 4px solid var(--colour-observed);
     background: var(--colour-surface-soft);
+  }
+
+  .parts,
+  .kinds {
+    margin-block: 6px;
+    font-size: var(--type-small);
+  }
+
+  .key {
+    font-family: var(--font-mono, monospace);
+    overflow-wrap: anywhere;
+  }
+
+  .concerns {
+    margin-block: 8px;
+    padding: 8px 12px;
+    border-inline-start: 4px solid var(--colour-risk);
+    background: var(--colour-surface-soft);
+  }
+
+  .concerns-heading {
+    margin: 0 0 4px;
+    font-weight: 600;
+  }
+
+  .concerns ul {
+    margin: 0;
+    padding-inline-start: 20px;
+    font-size: var(--type-small);
   }
 
   .verdict {

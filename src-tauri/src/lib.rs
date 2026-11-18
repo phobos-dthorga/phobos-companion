@@ -65,7 +65,7 @@ async fn test_lists(app: tauri::AppHandle, game: String) -> Result<Vec<tests_pag
         .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
-/// Records the owner's verdict on one test row: the one thing this program writes, in its own folder.
+/// Records the owner's verdict on one test row, in this program's own folder.
 #[tauri::command]
 async fn record_verdict(
     app: tauri::AppHandle,
@@ -81,6 +81,24 @@ async fn record_verdict(
         .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
 }
 
+/// Records the owner's decision on a note no row names ("make a row" or "no row needed"), beside the verdicts.
+#[tauri::command]
+async fn record_key_decision(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    key: String,
+    decision: String,
+    note: String,
+) -> Result<tests_page::RecordedDecision, Failure> {
+    let data = data_folder(&app)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        tests_page::record_decision(&game, &repository, &key, &decision, &note, &data)
+    })
+    .await
+    .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
 /// Starts the program.
 pub fn run() {
     tauri::Builder::default()
@@ -90,7 +108,8 @@ pub fn run() {
             report_catalogue,
             run_report,
             test_lists,
-            record_verdict
+            record_verdict,
+            record_key_decision
         ])
         .run(tauri::generate_context!())
         .expect("the desktop window could not start");

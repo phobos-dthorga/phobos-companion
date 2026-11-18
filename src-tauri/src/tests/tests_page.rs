@@ -50,3 +50,36 @@ fn verdicts_are_appended_never_replaced() {
     assert_eq!(fs::read_to_string(&file).unwrap(), "{\"a\":1}\n{\"a\":2}\n");
     fs::remove_dir_all(&folder).unwrap();
 }
+
+#[test]
+fn a_decision_is_one_json_line_the_kit_reads() {
+    let line = decision_line("vehicles.stage.cabTemperature", "no-row", " the dashboard\nshows it ", "t").unwrap();
+    let value: Value = serde_json::from_str(&line).unwrap();
+    assert_eq!(value["key"], "vehicles.stage.cabTemperature");
+    assert_eq!(value["decision"], "no-row");
+    assert_eq!(value["note"], "the dashboard shows it");
+    assert_eq!(value["format"], 1);
+}
+
+#[test]
+fn keys_and_decisions_the_kit_would_not_read_are_refused() {
+    assert!(decision_line("", "no-row", "", "t").is_err());
+    assert!(decision_line("a key with spaces", "no-row", "", "t").is_err());
+    assert!(decision_line("vehicles.tune-done.PhobosTune_EnginePower", "make-row", "", "t").is_ok());
+    assert!(decision_line("k", "maybe", "", "t").is_err());
+    assert!(decision_line("k", "cleared", "", "t").is_ok());
+    assert!(decision_line(&"k".repeat(MAX_KEY + 1), "no-row", "", "t").is_err());
+    assert!(decision_line("k", "no-row", &"x".repeat(MAX_NOTE + 1), "t").is_err());
+}
+
+#[test]
+fn decisions_sit_beside_the_verdicts() {
+    let file = decisions_file(Path::new("data"), "phobos-rimworld");
+    assert_eq!(file, Path::new("data").join("test-key-decisions").join("phobos-rimworld.jsonl"));
+}
+
+#[test]
+fn a_kit_too_old_to_send_a_list_gives_an_empty_one() {
+    assert_eq!(list_or_empty(&Value::Null), Value::Array(Vec::new()));
+    assert_eq!(list_or_empty(&serde_json::json!([1])), serde_json::json!([1]));
+}

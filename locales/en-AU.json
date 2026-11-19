@@ -399,7 +399,7 @@
     "code-reading": "Finding the commit that wrote this entry…",
     "code-refused": "The code behind this entry could not be found. { $reason }",
     "code-commit": "Written by commit { $hash } on { $day }:",
-    "code-uncommitted": "This entry is in no commit yet, so this is every change not yet committed. Files git hasn't been told of are not shown.",
+    "code-uncommitted": "This entry is in no commit yet, so this is every change not yet committed, new files included, whoever made them.",
     "code-written-with": "{ $count ->\n    [one] The same commit wrote one other entry, so some of this code is that entry's.\n   *[other] The same commit wrote { $count } other entries, so some of this code is theirs.\n  } Git can't say which lines belong to which.",
     "code-totals": "{ $files ->\n    [one] One file\n   *[other] { $files } files\n  } · { $additions } lines added · { $deletions } removed.",
     "code-left-out": "{ $count ->\n    [one] One more file is not listed.\n   *[other] { $count } more files are not listed.\n  }",

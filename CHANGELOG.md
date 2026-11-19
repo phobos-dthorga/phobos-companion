@@ -4,6 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.30.1] - 2026-11-20
+
+The owner, on the code viewer (20 November 2026): "It doesn't seem to be showing the full extent of the code that was/is involved? I've had this feeling for sometime now." Not yet tested on screen.
+
+### Fixed
+
+- **The code behind an entry not yet committed now includes new files.** They were left out, and a new feature is mostly new files: D'thorga Farming's first build showed 25 files and 104 lines before its commit, and 112 files and 5,408 lines after. New files now show whole, marked new. Once an entry is committed, the viewer shows its commit as before; one file's change still stops at 600 lines, and says so.
+
+### Dependencies
+
+- phobos-modkit v1.57.0 to v1.57.1: changes shows new files for an entry not yet committed.
+
 ## [0.30.0] - 2026-11-20
 
 Your game runs on Waylith, which unpacks many mods' compressed textures at four times the memory: D'thorga Vehicles showed 2.0 GB in Graphics Settings' memory profiler. You asked (20 November 2026) for the fix to be part of the Companion's own install and encode steps. Installing already runs the repository's deploy, which now carries it, and encoding runs the tool kit, which does; but the texture check looked only at file dates, so those mods counted as up to date and were never offered. Not yet tested on screen.

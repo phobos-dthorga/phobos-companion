@@ -525,6 +525,11 @@ views, lines as the first measure, and "a mix of new page and inside code map, a
 **Agent choices, owner to revise:** the 30-day window for changes, the key M, the page at the end of the bar (it now holds eleven;
 grouping it is still open), and "Size as installed" left out (it needs each game's install records).
 
+## Kept for later
+
+Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the
+game-files views, and the open questions behind them) is in [later.md](later.md), with each item's status.
+
 ## Limits
 
 - The packaged program finds the kit by the path it was built from, or `PHOBOS_COMPANION_KIT`. It cannot be handed to anyone else

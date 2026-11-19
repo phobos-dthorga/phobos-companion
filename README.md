@@ -99,6 +99,7 @@ python scripts/check-all.py
 ```
 
 It prints only what failed. The design is in [docs/design-record.md](docs/design-record.md), the rules in [AGENTS.md](AGENTS.md).
+What is proposed and not yet built is kept in [docs/later.md](docs/later.md), so nothing agreed is lost.
 
 ## Credits
 

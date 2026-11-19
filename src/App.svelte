@@ -35,6 +35,7 @@
   import SettingsPage from "./lib/settings/SettingsPage.svelte";
   import CodeMapPage from "./lib/connections/CodeMapPage.svelte";
   import LogsPage from "./lib/logs/LogsPage.svelte";
+  import ActivityStrip from "./lib/shell/ActivityStrip.svelte";
   import MakeupPage from "./lib/makeup/MakeupPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
@@ -296,6 +297,8 @@
       </div>
     {/if}
   </section>
+
+  <ActivityStrip />
 
   <div class="workspace">
     <nav class="navigator" aria-label={t("games-label")}>

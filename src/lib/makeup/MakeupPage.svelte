@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Placeholder from "../shell/Placeholder.svelte";
+  import { countUp } from "../shell/countUp";
   import { untrack } from "svelte";
   import { LOCALE, t } from "../i18n/runtime";
   import type { GameHome } from "../home/types";
@@ -198,6 +200,40 @@
     return formatAmount(value, measure, LOCALE);
   }
 
+  /** The page's parts, each read on its own: how many have arrived, so the fast ones are usable while a slow one reads. */
+  const partsReady = $derived(
+    [
+      now.state !== "reading",
+      growth.state !== "reading",
+      churn.state !== "reading",
+      census.state !== "reading",
+      lists !== null,
+    ].filter(Boolean).length,
+  );
+  const PARTS = 5;
+
+  /** The summary's figures count up as they arrive (with reduced motion, at once). */
+  let shownFiles = $state(0);
+  let shownLines = $state(0);
+  $effect(() => {
+    const files = totals.files;
+    const lines = totals.lines;
+    const stopFiles = countUp(
+      untrack(() => shownFiles),
+      files,
+      (v) => (shownFiles = v),
+    );
+    const stopLines = countUp(
+      untrack(() => shownLines),
+      lines,
+      (v) => (shownLines = v),
+    );
+    return () => {
+      stopFiles();
+      stopLines();
+    };
+  });
+
   function chartFailed(key: string) {
     failedCharts = { ...failedCharts, [key]: true };
     shown = { ...shown, [key]: true };
@@ -242,6 +278,8 @@
 
   {#if now.state === "reading"}
     <ProgressBar {progress} fallback={t("makeup-reading")} />
+    <Placeholder shape="blocks" height={TREE_PX * 0.7} />
+    <Placeholder shape="rows" rows={4} />
   {:else if now.state === "failed"}
     <FailurePanel
       failure={now.failure}
@@ -250,12 +288,17 @@
   {:else}
     <p class="summary">
       {t("makeup-summary", {
-        files: totals.files,
-        lines: totals.lines.toLocaleString(LOCALE),
+        files: shownFiles.toLocaleString(LOCALE),
+        lines: shownLines.toLocaleString(LOCALE),
         size: formatAmount(totals.bytes, "bytes", LOCALE),
         commit: now.data.commit,
       })}
     </p>
+    {#if partsReady < PARTS}
+      <p class="parts muted small" role="status">
+        {t("makeup-parts-ready", { ready: partsReady, of: PARTS })}
+      </p>
+    {/if}
 
     <section class="panel" aria-labelledby="makeup-made-title">
       <div class="panel-head">
@@ -420,6 +463,7 @@
           progress={started()}
           fallback={t("makeup-growth-reading")}
         />
+        <Placeholder shape="chart" height={GROWTH_PX} />
       {:else if growth.state === "failed"}
         <FailurePanel
           failure={growth.failure}
@@ -506,6 +550,7 @@
           progress={started()}
           fallback={t("makeup-tested-reading")}
         />
+        <Placeholder shape="rows" rows={3} />
       {:else if testedProducts.length === 0}
         <p class="small">{t("makeup-tested-none", { game: game.name })}</p>
       {:else}
@@ -578,6 +623,7 @@
           progress={started()}
           fallback={t("makeup-census-reading")}
         />
+        <Placeholder shape="rows" rows={4} />
       {:else if census.state === "failed"}
         <FailurePanel
           failure={census.failure}
@@ -664,6 +710,30 @@
     flex-wrap: wrap;
     gap: 8px 16px;
     margin-block-end: 12px;
+  }
+
+  .parts {
+    margin: 0 0 12px;
+  }
+
+  /* A part settles into place as it arrives; with reduced motion it simply appears. */
+  .panel :global(.chart),
+  .panel table {
+    animation: arrive 450ms ease-out;
+  }
+
+  @keyframes arrive {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .panel :global(.chart),
+    .panel table {
+      animation: none;
+    }
   }
 
   .summary {

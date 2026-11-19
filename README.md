@@ -47,7 +47,8 @@ what you did, and what your saves and logs say, without typing a command.
   you type in a box. **Change any of them, or turn them off, under Settings, Change keyboard shortcuts.**
 - **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central
   settings file**, for every repository and game; a repository's own settings still win where they set something.
-- **Anything that takes a while shows a progress bar** with what it is doing, and a count where the work can be counted.
+- **Anything that takes a while shows a progress bar** with what it is doing, the steps already done, and a count where the work
+  can be counted (else about how long is left, from last time). A strip under the page bar follows any work, on any page.
 - **The Mods page starts with "Before you play"**: ready to play, or what needs building, installing or encoding first, each
   with its button. Each mod shows what it has now beside what installing would bring (changelog entries, files, settings, things
   to look out for in play), and what going back to each backup would take away. **Its buttons change your installed mods and

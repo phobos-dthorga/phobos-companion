@@ -1,6 +1,7 @@
 import { Channel, invoke, isTauri } from "@tauri-apps/api/core";
 import type { OnProgress, ProgressMessage } from "./progress";
 import type { Failed, Failure, KitReading, KitStatus } from "./types";
+import { begin, end, hear } from "./activity.svelte";
 
 /** What a page shows outside the desktop program, where there is no host to ask. */
 export const BROWSER = { state: "browser" } as const;
@@ -19,10 +20,22 @@ export async function ask<T, R>(
   args: Record<string, unknown>,
   ready: (answer: T) => R,
 ): Promise<R | Failed> {
+  // Every request is a job on the activity strip while it runs (0.21.0), hearing the same progress its page hears.
+  const job = begin(command);
+  const channel = args.onProgress;
+  if (channel instanceof Channel) {
+    const before = channel.onmessage;
+    channel.onmessage = (message: ProgressMessage) => {
+      before?.(message);
+      hear(job, message);
+    };
+  }
   try {
     return ready(await invoke<T>(command, args));
   } catch (failure) {
     return { state: "failed", failure: failure as Failure };
+  } finally {
+    end(job);
   }
 }
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Placeholder from "../shell/Placeholder.svelte";
   import { untrack } from "svelte";
   import Pager from "../shell/Pager.svelte";
   import { pageHolding, pageOf } from "../shell/paging";
@@ -184,6 +185,7 @@
 
 {#if reading.state === "reading"}
   <ProgressBar {progress} fallback={t("logs-reading")} />
+  <Placeholder shape="rows" rows={6} />
 {:else if reading.state === "failed"}
   <FailurePanel failure={reading.failure} onretry={read} />
 {:else if !reading.reading.available}

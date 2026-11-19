@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Placeholder from "../shell/Placeholder.svelte";
   import SettingsToLook from "./SettingsToLook.svelte";
   import Pager from "../shell/Pager.svelte";
   import { pageHolding, pageOf } from "../shell/paging";
@@ -777,6 +778,7 @@
 
 {#if reading.state === "reading"}
   <ProgressBar progress={readProgress} fallback={t("mods-reading")} />
+  <Placeholder shape="rows" rows={5} />
 {:else if reading.state === "browser"}
   <p class="muted">{t("mods-browser")}</p>
 {:else if reading.state === "failed"}

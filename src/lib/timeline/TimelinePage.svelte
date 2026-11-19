@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Placeholder from "../shell/Placeholder.svelte";
   import { COMMIT_ONLY_CHANGELOG } from "../code/presentation";
   import Pager from "../shell/Pager.svelte";
   import { pageHolding, pageOf } from "../shell/paging";
@@ -261,6 +262,8 @@
 
 {#if reading.state === "reading"}
   <ProgressBar {progress} fallback={t("timeline-reading")} />
+  <Placeholder shape="chart" height={160} />
+  <Placeholder shape="rows" rows={5} />
 {:else if reading.state === "browser"}
   <p class="muted">{t("timeline-browser")}</p>
 {:else if reading.state === "failed"}

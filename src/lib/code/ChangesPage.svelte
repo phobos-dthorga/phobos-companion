@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Placeholder from "../shell/Placeholder.svelte";
   import { go, here, setFocus } from "../navigation/navigation.svelte";
   import { readTestLists } from "../tests/desktopClient";
   import { waitingOn } from "../tests/links";
@@ -144,6 +145,7 @@
 
 {#if reading.state === "reading"}
   <ProgressBar {progress} fallback={t("changes-reading")} />
+  <Placeholder shape="rows" rows={6} />
 {:else if reading.state === "browser"}
   <p class="muted">{t("changes-browser")}</p>
 {:else if reading.state === "failed"}

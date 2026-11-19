@@ -10,6 +10,7 @@ mod home;
 mod installs_page;
 mod kit_pins;
 mod logs_page;
+mod makeup_page;
 mod open_work;
 mod patch_targets;
 mod pending;
@@ -275,6 +276,22 @@ async fn kit_pins(game: String) -> Result<serde_json::Value, Failure> {
     blocking(move || kit_pins::read(&game)).await
 }
 
+/// One question about what a repository is made of: now, growth, churn (with how many days back) or census.
+#[tauri::command]
+async fn makeup(
+    game: String,
+    repository: String,
+    kind: String,
+    days: Option<u32>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<serde_json::Value, Failure> {
+    blocking(move || {
+        let question = makeup_page::question(&kind, days)?;
+        makeup_page::ask(&game, &repository, &question, Some(&hearing(on_progress)))
+    })
+    .await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -315,6 +332,7 @@ pub fn run() {
             test_code,
             patch_targets,
             kit_pins,
+            makeup,
             read_shortcuts,
             save_shortcuts
         ])

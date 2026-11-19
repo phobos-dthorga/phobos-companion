@@ -8,6 +8,7 @@
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
   import ConnectionsView from "./ConnectionsView.svelte";
+  import BusiestCode from "./BusiestCode.svelte";
   import { askConnections } from "./desktopClient";
   import { kindMark, whereWords } from "./presentation";
   import type { Found, Summary, Thing } from "./types";
@@ -199,6 +200,16 @@
             {/each}
           </ul>
         {/if}
+      {/if}
+
+      {#if !chosenId && found.state !== "ready" && current}
+        {#key current}
+          <BusiestCode
+            game={game.id}
+            repository={current}
+            onopen={(id) => setFocus({ node: id })}
+          />
+        {/key}
       {/if}
 
       {#if chosenId && current}

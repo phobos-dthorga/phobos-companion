@@ -505,6 +505,26 @@ tiles to the atlas (the owner's cross-links idea, 10 Nov 2026).
 One holds what can be rebuilt, the other the owner's own pins and history, with an export because Synology does not back up
 that folder.
 
+## Make-up (built 19 Nov 2026, 0.20.0)
+
+**The owner asked to show "how the contents of our mods, code, etc. is consisted of in a graphical manner"**, and chose all six
+views, lines as the first measure, and "a mix of new page and inside code map, as appropriate".
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See at a glance what each mod is made of, how it grew, where the work goes, how much is tested in game and what players get |
+| What does it stop them doing? | Guessing sizes and balance from a file browser, or counting Defs and test rows by hand |
+| How does it change the way they work? | Where effort and risk sit is visible: a big, busy, untested part stands out before it bites |
+
+| Part | How |
+| --- | --- |
+| The facts | phobos-modkit 1.39.0's `makeup` (now, growth, churn, census): committed files only, products from changelog folders and each C# project's `<ModFolder>`, kinds by extension and folder |
+| The pictures | ECharts treemap, stacked bars and stacked area through `OptionChart.svelte`, now the one component that talks to ECharts (the report chart draws through it). Colours: one fixed colour a kind, the reference categorical order validated on the theme's chart surface (worst adjacent CVD ΔE 8.4, normal vision 19.3, every colour 3:1); heat is one blue ramp |
+| Where | A new page, Make-up (key M, agent's choice), for the content views; the Code map's busiest code for where the work goes |
+
+**Agent choices, owner to revise:** the 30-day window for changes, the key M, the page at the end of the bar (it now holds eleven;
+grouping it is still open), and "Size as installed" left out (it needs each game's install records).
+
 ## Limits
 
 - The packaged program finds the kit by the path it was built from, or `PHOBOS_COMPANION_KIT`. It cannot be handed to anyone else

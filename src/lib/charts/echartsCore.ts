@@ -3,7 +3,7 @@
  * a report without charts never loads it and a failed load leaves the numbers on screen.
  */
 import { init, use } from "echarts/core";
-import { BarChart, LineChart } from "echarts/charts";
+import { BarChart, LineChart, TreemapChart } from "echarts/charts";
 import {
   GridComponent,
   MarkLineComponent,
@@ -14,6 +14,7 @@ import { SVGRenderer } from "echarts/renderers";
 use([
   BarChart,
   LineChart,
+  TreemapChart,
   GridComponent,
   MarkLineComponent,
   TooltipComponent,
@@ -21,4 +22,4 @@ use([
 ]);
 
 export { init };
-export type { EChartsType } from "echarts/core";
+export type { EChartsCoreOption, EChartsType } from "echarts/core";

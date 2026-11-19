@@ -14,6 +14,14 @@
     "observed": "#4FD1C5",
     "risk": "#FF8A7A",
     "success": "#8BD17C",
-    "comparison": "#B79CFF"
+    "comparison": "#B79CFF",
+    "series_1": "#3987E5",
+    "series_2": "#D95926",
+    "series_3": "#199E70",
+    "series_4": "#C98500",
+    "series_5": "#D55181",
+    "series_6": "#0CA30C",
+    "series_7": "#9085E9",
+    "series_8": "#E66767"
   }
 }

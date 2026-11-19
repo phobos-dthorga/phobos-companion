@@ -4,6 +4,25 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-11-19
+
+The owner asked (19 November 2026) to show "how the contents of our mods, code, etc. is consisted of in a graphical manner", choosing all six views, lines as the first measure, and a new page with the code parts on the Code map. Not yet tested on screen.
+
+### Added
+
+- **A Make-up page** (the M key, or its button at the end of the bar), for any game's repositories. Measure everything in lines, size on disk or files:
+  - **What it's made of**: blocks for each mod or part, then its folders, then its files, coloured by kind (code, tests, data and Defs, words and docs, pictures, sounds, build files, other) or by how often each changed in the last 30 days. Press a block to look inside. Show the biggest files lists them with their changes.
+  - **Each part's mix**: one bar a mod or part, split by kind.
+  - **How it grew**: one stacked band a kind, day by day since the first commit.
+  - **Tested in game**: each mod's test rows passed, seen working and awaiting your word, waiting, or failed.
+  - **What players get**: each mod's Defs by type, pictures, sounds and text keys.
+  - Every picture has its numbers a press away, and its colours are one fixed colour a kind, checked for colour-blind readers.
+- **Busiest code on the Code map**, before you search: the code files changed most often in the last 30 days. Press one to put what it holds in the middle.
+
+### Dependencies
+
+- Tool kit 1.39.0 (makeup), now pinned.
+
 ## [0.19.0] - 2026-11-19
 
 The owner asked for the whole proposed order of docs/cross-links.md to be built overnight (19 November 2026): "Proceed with your entire proposed order, step-wise if necessary". Each step is its own commit under this version. Not yet tested on screen.

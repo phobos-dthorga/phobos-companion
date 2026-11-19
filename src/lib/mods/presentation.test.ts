@@ -124,7 +124,12 @@ function repo(
   };
 }
 
-function textureMod(name: string, stale: number, missing: number): TextureMod {
+function textureMod(
+  name: string,
+  stale: number,
+  missing: number,
+  unpacked = 0,
+): TextureMod {
   return {
     name,
     packageId: name.toLowerCase(),
@@ -134,8 +139,10 @@ function textureMod(name: string, stale: number, missing: number): TextureMod {
     stale,
     missing,
     leftOver: 0,
+    unpacked,
     stalePaths: [],
     missingPaths: [],
+    unpackedPaths: [],
   };
 }
 
@@ -151,8 +158,12 @@ function texturesReady(mods: TextureMod[]): TexturesReading {
         pictures: 0,
         staleMods: mods.filter((m) => m.stale > 0).length,
         missingMods: mods.filter((m) => m.missing > 0).length,
+        unpackedMods: mods.filter(
+          (m) => m.unpacked > 0 && m.stale === 0 && m.missing === 0,
+        ).length,
         stale: mods.reduce((n, m) => n + m.stale, 0),
         missing: mods.reduce((n, m) => n + m.missing, 0),
+        unpacked: mods.reduce((n, m) => n + m.unpacked, 0),
         leftOver: 0,
       },
       mods,
@@ -187,6 +198,24 @@ describe("before you play", () => {
       ["todo", "mods-pre-textures-missing", null],
     ]);
     expect(checks[2].args).toMatchObject({ count: 2, names: "Code, Words" });
+  });
+
+  it("offers encoding for textures Waylith unpacks, once nothing older needs it", () => {
+    const alone = preflight(
+      [repo([mod()])],
+      texturesReady([textureMod("Big", 0, 0, 40)]),
+      "G",
+    );
+    expect(alone.map((c) => [c.kind, c.words, c.action])).toEqual([
+      ["todo", "mods-pre-textures-unpacked", "encode"],
+    ]);
+    expect(alone[0].args).toMatchObject({ count: 1, textures: 40 });
+    const behind = preflight(
+      [repo([mod()])],
+      texturesReady([textureMod("Old", 1, 0), textureMod("Big", 0, 0, 40)]),
+      "G",
+    );
+    expect(behind.map((c) => c.action)).toEqual(["encode", null]);
   });
 
   it("says it is still checking textures rather than calling them current", () => {
@@ -281,13 +310,14 @@ describe("what counts as a change", () => {
     expect(groups.map((g) => g.mods.map((m) => m.mod))).toEqual([["A"]]);
   });
 
-  it("encodes stale textures first", () => {
+  it("encodes stale textures first, then new ones, then those Waylith unpacks", () => {
     const order = encodeTargets([
+      textureMod("Big", 0, 0, 12),
       textureMod("New", 0, 3),
-      textureMod("Old", 1, 0),
+      textureMod("Old", 1, 0, 5),
       textureMod("Fine", 0, 0),
     ]);
-    expect(order.map((m) => m.name)).toEqual(["Old", "New"]);
+    expect(order.map((m) => m.name)).toEqual(["Old", "New", "Big"]);
   });
 
   it("names a few and counts the rest", () => {

@@ -4,6 +4,22 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-11-20
+
+Your game runs on Waylith, which unpacks many mods' compressed textures at four times the memory: D'thorga Vehicles showed 2.0 GB in Graphics Settings' memory profiler. You asked (20 November 2026) for the fix to be part of the Companion's own install and encode steps. Installing already runs the repository's deploy, which now carries it, and encoding runs the tool kit, which does; but the texture check looked only at file dates, so those mods counted as up to date and were never offered. Not yet tested on screen.
+
+### Added
+
+- **The Mods page offers encoding for textures Waylith unpacks.** Before you play says how many mods have them and how many textures in all, with Encode their textures when nothing older needs encoding first; Textures to encode lists each such mod. Encoding trims only their smallest copies, used when zoomed far out, so they stay compressed; the pictures themselves don't change. A first check of your 358 active mods found 4,770 such textures in 116 mods, about 7.75 GB of what the profiler counts.
+
+### Changed
+
+- The encode confirmation names the first three mods and counts the rest, instead of listing every one, and says how many textures get trimmed.
+
+### Dependencies
+
+- phobos-modkit v1.55.0 to v1.57.0: rimworld-textures status counts the textures Waylith unpacks, remembering each file's verdict so only new or changed ones are read again (1.57.0); a shared rule for designing a new behaviour (1.56.0). It also corrects 0.29.0's note: encoding here did use 1.54.0's trimming from then on.
+
 ## [0.29.0] - 2026-11-20
 
 The owner found backups still not working (20 November 2026): no folder had ever been saved for the records backup, and nothing ran by itself. They chose copies every few hours while the program is open, a missed one made at the soonest next chance, and Windows' own pickers wherever a folder is chosen, keeping the type-in box. Not yet tested on screen.

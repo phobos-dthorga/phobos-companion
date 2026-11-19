@@ -175,11 +175,13 @@ export function changedMods(
     .filter((r) => r.mods.length > 0);
 }
 
-/** The mods whose textures need encoding: stale first (they would show old pictures), then those never encoded. */
+/** The mods whose textures need encoding: stale first (they would show old pictures), then those never encoded, then those whose
+ * textures Waylith unpacks at four times the memory. */
 export function encodeTargets(mods: TextureMod[]): TextureMod[] {
   return [
     ...mods.filter((m) => m.stale > 0),
     ...mods.filter((m) => m.stale === 0 && m.missing > 0),
+    ...mods.filter((m) => m.stale === 0 && m.missing === 0 && m.unpacked > 0),
   ];
 }
 
@@ -241,7 +243,8 @@ export function preflight(
       action: null,
     });
   } else if (textures.state === "ready") {
-    const { staleMods, missingMods, missing } = textures.status.totals;
+    const { staleMods, missingMods, missing, unpackedMods, unpacked } =
+      textures.status.totals;
     if (staleMods > 0) {
       checks.push({
         kind: "todo",
@@ -256,6 +259,14 @@ export function preflight(
         words: "mods-pre-textures-missing",
         args: { count: missingMods, pictures: missing },
         action: staleMods > 0 ? null : "encode",
+      });
+    }
+    if (unpackedMods > 0) {
+      checks.push({
+        kind: "todo",
+        words: "mods-pre-textures-unpacked",
+        args: { count: unpackedMods, textures: unpacked },
+        action: staleMods > 0 || missingMods > 0 ? null : "encode",
       });
     }
   }

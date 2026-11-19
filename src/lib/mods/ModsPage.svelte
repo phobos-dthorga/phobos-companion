@@ -41,6 +41,7 @@
     groupByVersion,
     hasChanges,
     MOVE_WORDS,
+    names,
     SAME_WORDS,
     preflight,
     SETTING_WORDS,
@@ -515,7 +516,8 @@
           {t("mods-confirm-encode", {
             count: now.mods.length,
             pictures: now.mods.reduce((sum, m) => sum + m.stale + m.missing, 0),
-            names: now.mods.map((m) => m.name).join(", "),
+            textures: now.mods.reduce((sum, m) => sum + m.unpacked, 0),
+            ...names(now.mods.map((m) => m.name)),
           })}
         {:else if now.move === "backup"}
           {t("mods-confirm-backup", {
@@ -1124,7 +1126,7 @@
     {/if}
   {/each}
 
-  {#if textures.state === "ready" && textures.status.mods.some((m) => m.stale > 0 || m.missing > 0)}
+  {#if textures.state === "ready" && encodeTargets(textures.status.mods).length > 0}
     <section class="textures" aria-labelledby="textures-heading">
       <h2 id="textures-heading">{t("mods-textures-heading")}</h2>
       <p class="small">{t("mods-textures-lead")}</p>
@@ -1140,6 +1142,11 @@
             {/if}
             {#if found.missing > 0}
               <span>{t("mods-textures-missing", { count: found.missing })}</span
+              >
+            {/if}
+            {#if found.unpacked > 0}
+              <span
+                >{t("mods-textures-unpacked", { count: found.unpacked })}</span
               >
             {/if}
           </li>

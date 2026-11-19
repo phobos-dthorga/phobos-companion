@@ -204,7 +204,12 @@ function sampleInstalls(running: string[]) {
 
 /** Invented texture findings, for the audit only. */
 function sampleTextures(running: string[]) {
-  const found = (name: string, stale: number, missing: number) => ({
+  const found = (
+    name: string,
+    stale: number,
+    missing: number,
+    unpacked = 0,
+  ) => ({
     name,
     packageId: name.toLowerCase().replace(/ /g, "."),
     folderName: name.replace(/ /g, ""),
@@ -213,8 +218,10 @@ function sampleTextures(running: string[]) {
     stale,
     missing,
     leftOver: 0,
+    unpacked,
     stalePaths: [],
     missingPaths: [],
+    unpackedPaths: [],
   });
   return {
     result: {
@@ -226,11 +233,17 @@ function sampleTextures(running: string[]) {
         pictures: 4000,
         staleMods: 1,
         missingMods: 1,
+        unpackedMods: 1,
         stale: 4,
         missing: 30,
+        unpacked: 12,
         leftOver: 0,
       },
-      mods: [found("Old Pictures", 4, 0), found("New Pictures", 0, 30)],
+      mods: [
+        found("Old Pictures", 4, 0),
+        found("New Pictures", 0, 30),
+        found("Big Pictures", 0, 0, 12),
+      ],
     },
   };
 }
@@ -507,6 +520,9 @@ for (const [name, viewport] of [
       const strip = page.getByRole("region", { name: "Before you play" });
       await expect(strip).toContainText("One mod needs a build");
       await expect(strip).toContainText("One mod would show old pictures");
+      await expect(strip).toContainText(
+        "One mod has textures Waylith unpacks at four times the memory (12 in all)",
+      );
       await strip
         .getByRole("button", { name: "Encode their textures" })
         .click();

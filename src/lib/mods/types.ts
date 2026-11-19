@@ -161,7 +161,7 @@ export type RepositoryInstalls = {
 
 export type Move = "backup" | "restore" | "install" | "build" | "dedupe";
 
-/** One active mod's encoded textures against its pictures (kit 1.21.0 rimworld-textures). */
+/** One active mod's encoded textures against its pictures (kit 1.21.0 rimworld-textures; unpacked from kit 1.57.0). */
 export type TextureMod = {
   name: string;
   packageId: string;
@@ -171,8 +171,11 @@ export type TextureMod = {
   stale: number;
   missing: number;
   leftOver: number;
+  /** Encoded textures Waylith unpacks at four times the memory, which encoding keeps compressed. */
+  unpacked: number;
   stalePaths: string[];
   missingPaths: string[];
+  unpackedPaths: string[];
 };
 
 export type TexturesStatus = {
@@ -184,8 +187,10 @@ export type TexturesStatus = {
     pictures: number;
     staleMods: number;
     missingMods: number;
+    unpackedMods: number;
     stale: number;
     missing: number;
+    unpacked: number;
     leftOver: number;
   };
   mods: TextureMod[];

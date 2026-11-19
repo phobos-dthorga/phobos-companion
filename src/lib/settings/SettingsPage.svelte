@@ -19,6 +19,7 @@
   } from "./presentation";
   import ShortcutsDialog from "../shortcuts/ShortcutsDialog.svelte";
   import RecordsPanel from "../records/RecordsPanel.svelte";
+  import CleanupPanel from "../cleanup/CleanupPanel.svelte";
   import type { Setting, SettingsReading } from "./types";
 
   /**
@@ -122,6 +123,8 @@
   $effect(() => {
     if (focusPanel === "records")
       untrack(() => void reveal("settings-records"));
+    if (focusPanel === "cleanup")
+      untrack(() => void reveal("settings-cleanup"));
   });
   $effect(() => {
     if (focusKey && reading.state === "ready")
@@ -141,6 +144,7 @@
   >
 </section>
 <RecordsPanel {saved} onchoose={(key) => void editKey(key)} />
+<CleanupPanel />
 {#if editingShortcuts}
   <ShortcutsDialog editable={true} onclose={() => (editingShortcuts = false)} />
 {/if}

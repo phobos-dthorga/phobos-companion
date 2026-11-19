@@ -742,6 +742,36 @@ is tested on screen.**
 **Agent choices, owner to revise:** Decompile asks no second question (it writes only into the tools' cache, like Build); the
 panels' places on the Code map; files kept only once are left out of the updates list; the first lines shown (400).
 
+## Clean up, and the settings list at once (built 20 Nov 2026, 0.27.0)
+
+**The owner asked (20 Nov 2026)** for the Mods page's settings list not to sit on its bar after a start, for the tools' cache to
+move off Windows' Temp folder to K:, and for "some kind of ongoing cleanup process", with their yes before anything goes.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See what the tools, builds and tests left behind, by group, and clear the groups they choose; see their settings list the moment the page opens |
+| What does it stop them doing? | Deleting a way back by accident (install backups start unchosen), or deleting anything without a confirmation; waiting on a bar that looks stuck |
+| How does it change the way they work? | Room is reclaimed from the window when Home says it is worth it, with no command line |
+
+| Part | How |
+| --- | --- |
+| Listing | phobos-modkit 1.50.0 `cleanup` for every repository with `config/cleanup.json` (else the first on the list, for the kit's own leftovers), items merged by path, groups summed, largest first (`src-tauri/src/cleanup_page.rs`) |
+| Deleting | `cleanup --group … --apply` per repository, after the press and an in-panel confirmation, checked by `allowed_by_manifest` (which now names a command's one unnamed report by an empty name) |
+| Home | `CleanupNote` from 5 GB, from the latest listing shared with the panel (`latest.svelte.ts`), read at most every half hour |
+| Settings list at once | The last list read for a game is kept in the window's own storage (`ledgerMemory.ts`) and shown at once while the read checks it; storage missing or refused means waiting, as before |
+| Sizes | `formatSize` gives GB from 1 GB |
+
+**Why the list looked stuck (found 20 Nov 2026):** the read itself takes about 4 s with its cache warm and logged as finished; just
+after the program starts, Home's git reads and the Mods page's three Python reads start together, beside the game, and the bar
+compared against the warm 4 s. With an empty cache the history takes about 3 minutes and speaks no progress; the cache now lives on
+K: (`modkitCachePath`), where Windows' clean-ups do not reach.
+
+**Checked on:** the owner's real listing (33.7 GB) through the kit, and the panel, the note and the list in the browser checks;
+**nothing here is tested on screen.**
+
+**Agent choices, owner to revise (both on the Decisions page):** Home's 5 GB threshold; install backups starting unchosen. Also:
+the half-hour between Home's looks; the panel's place under Back up your records.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

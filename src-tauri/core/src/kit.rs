@@ -152,14 +152,15 @@ impl Outcome {
 const ALLOWED_EFFECTS: [&str; 2] = ["writes", "runs"];
 
 /// The kit's manifest still says this report writes or runs (never owner-only, never one it does not have): checked before every
-/// change the program makes for the owner.
+/// change the program makes for the owner. An empty `report` names a command's one unnamed report, as `cleanup` has (0.27.0).
 pub fn allowed_by_manifest(manifest: &Value, command: &str, report: &str) -> Result<(), String> {
     let commands = manifest["data"]["commands"].as_array().map_or(&[][..], Vec::as_slice);
+    let named = |r: &Value| if report.is_empty() { r["name"].is_null() } else { r["name"].as_str() == Some(report) };
     let found = commands
         .iter()
         .find(|c| c["name"].as_str() == Some(command))
         .and_then(|c| c["reports"].as_array())
-        .and_then(|reports| reports.iter().find(|r| r["name"].as_str() == Some(report)))
+        .and_then(|reports| reports.iter().find(|r| named(r)))
         .ok_or_else(|| format!("the tool kit has no {command} {report}"))?;
     let effect = found["effect"].as_str().unwrap_or_default();
     if ALLOWED_EFFECTS.contains(&effect) {

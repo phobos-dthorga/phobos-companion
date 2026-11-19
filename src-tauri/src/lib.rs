@@ -6,6 +6,7 @@
 mod about_page;
 mod changes_page;
 mod claims_board;
+mod cleanup_page;
 mod connections_page;
 mod decisions_page;
 mod game_files_page;
@@ -555,11 +556,28 @@ async fn updates(
     .await
 }
 
+/// What the tools, builds and tests left behind, by group. Only reads.
+#[tauri::command]
+async fn cleanup_list(on_progress: Channel<kit::Progress>) -> Result<cleanup_page::Listing, Failure> {
+    blocking(move || cleanup_page::list(Some(&hearing(on_progress)))).await
+}
+
+/// Deletes the groups the owner chose, after their press and confirmation.
+#[tauri::command]
+async fn cleanup_apply(
+    groups: Vec<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<cleanup_page::Listing, Failure> {
+    blocking(move || cleanup_page::apply(&groups, Some(&hearing(on_progress)))).await
+}
+
 /// Starts the program.
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             about,
+            cleanup_list,
+            cleanup_apply,
             their_code,
             decompile_assembly,
             updates,

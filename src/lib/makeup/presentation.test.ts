@@ -192,5 +192,6 @@ describe("tested in game and where the work goes", () => {
     expect(formatSize(512, "en-AU")).toBe("512 B");
     expect(formatSize(2048, "en-AU")).toBe("2 KB");
     expect(formatSize(5 * 1024 * 1024, "en-AU")).toBe("5 MB");
+    expect(formatSize(29.2 * 1024 ** 3, "en-AU")).toBe("29.2 GB");
   });
 });

@@ -11,6 +11,7 @@
   import { formatDay } from "../shell/dates";
   import type { Failure } from "../shell/types";
   import { markSettings, readLedger } from "./desktopClient";
+  import { remember, remembered } from "./ledgerMemory";
   import {
     idsByRepository,
     split,
@@ -40,13 +41,34 @@
   let lookedPage = $state(1);
   let busy = $state(false);
   let said = $state("");
+  /** True while the list kept from last time is shown and the read checks it for changes (0.27.0). */
+  let checking = $state(false);
 
+  /**
+   * Shows the list kept from last time at once, when there is one, and reads for changes behind it; with none, waits for the read
+   * with its bar, as before. A read that fails behind a kept list says so and keeps the list.
+   */
   async function read() {
-    reading = { state: "reading" };
+    const kept = remembered(game);
     progress = started();
-    reading = await readLedger(game, (message) => {
+    if (kept) {
+      reading = { state: "ready", ledgers: kept };
+      checking = true;
+    } else {
+      reading = { state: "reading" };
+    }
+    const answer = await readLedger(game, (message) => {
       progress = heard(progress, message);
     });
+    checking = false;
+    if (answer.state === "ready") {
+      reading = answer;
+      remember(game, answer.ledgers);
+    } else if (kept && answer.state === "failed") {
+      said = t("ledger-check-failed", { reason: answer.failure.detail });
+    } else {
+      reading = answer;
+    }
   }
 
   onMount(read);
@@ -74,6 +96,7 @@
           : ledger.seen.filter((id) => !ids.includes(id));
     }
     reading = { state: "ready", ledgers: [...ledgers] };
+    remember(game, ledgers);
     busy = false;
     said = seen
       ? t("ledger-marked", { count: items.length })
@@ -130,7 +153,11 @@
     {/if}
   </div>
   <p class="muted small">{t("ledger-how")}</p>
-  <p class="ledger-status" role="status" aria-live="polite">{said}</p>
+  <p class="ledger-status" role="status" aria-live="polite">
+    {said}{#if checking}<span class="muted small checking"
+        >{t("ledger-checking")}</span
+      >{/if}
+  </p>
 
   {#if reading.state === "reading"}
     <ProgressBar {progress} fallback={t("ledger-reading")} />

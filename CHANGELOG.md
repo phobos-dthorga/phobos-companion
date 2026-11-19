@@ -4,6 +4,29 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-11-20
+
+The owner saw the Mods page's settings list sit on its bar for about a minute just after starting the Companion, and asked (20 November 2026) for the list to show at once, for the tools' cache to leave Windows' Temp folder for K:, and for "some kind of ongoing cleanup process", with their yes before anything goes. Not yet tested on screen.
+
+### Added
+
+- **Clean up**, on the Settings page: what the tools, builds and tests have left behind, by group, with how much each holds and why it may go (on your PC today: 33.7 GB, 29 GB of it the tools' development build). Choose the groups, press Clean up the chosen, and confirm; nothing goes before that, and nothing the list does not name. **Install backups start unchosen**: they are the Mods page's way back to an earlier version. Git's file-watcher daemons are a group too.
+- **Home says when the tools could clear 5 GB or more**, with a button to Clean up. It looks quietly, at most every half hour.
+- Two questions on the Decisions page: when Home should mention it, and whether install backups should start unchosen.
+
+### Changed
+
+- **Settings to look at shows its list at once**: the list from last time appears when the page opens, saying it is being checked for changes, and the fresh read replaces it when it comes. Right after the Companion starts, that read can take a minute while everything else starts too. A failed check keeps the list and says so.
+- Sizes from 1 GB up read in GB (32.2 GB, not 32,972.8 MB), everywhere the Companion shows a size.
+
+### Dependencies
+
+- phobos-modkit 1.50.0 (cleanup by group).
+
+### Compatibility and limits
+
+- The tools' cache moved to K:\phobos-modkit\cache on 20 November 2026 (the setting modkitCachePath on the Settings page, set for you), copied across so nothing had to be rebuilt. The old copy in Windows' Temp folder (1.8 GB) is left where it was until you choose; Clean up does not list it, since it is no longer the tools' cache.
+
 ## [0.26.2] - 2026-11-20
 
 The owner saw the Mods page for D'thorga Tools speak as if the tools were a game, and said yes to telling a set of tools it has no mods (20 November 2026). Not yet tested on screen.

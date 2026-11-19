@@ -18,6 +18,7 @@
   import { readScreenNotes, showScreenNote } from "../notes/desktopClient";
   import { noteSaves } from "../notes/saves.svelte";
   import RecordsNote from "../records/RecordsNote.svelte";
+  import CleanupNote from "../cleanup/CleanupNote.svelte";
   import ClaimsPanel from "../claims/ClaimsPanel.svelte";
   import DecisionsNote from "../decisions/DecisionsNote.svelte";
 
@@ -212,6 +213,7 @@
 <DecisionsNote game={game.id} />
 
 <RecordsNote game={game.id} />
+<CleanupNote game={game.id} />
 
 {#if notes && (notes.open.length > 0 || notes.dealt_count > 0)}
   <section

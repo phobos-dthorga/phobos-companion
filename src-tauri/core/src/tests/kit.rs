@@ -112,3 +112,13 @@ fn finds_a_report_by_what_it_does_and_checks_its_effect() {
     assert_eq!(offered(&manifest, "kenshi", "other-code", "show", "reads"), Offered::Missing);
     assert!(matches!(offered(&manifest, "rimworld", "other-code", "show", "runs"), Offered::Changed(_)));
 }
+
+#[test]
+fn an_unnamed_report_is_checked_by_an_empty_name() {
+    let manifest = serde_json::json!({"data": {"commands": [
+        {"name": "cleanup", "game": null, "reports": [{"name": null, "effect": "writes"}]},
+        {"name": "reader", "game": null, "reports": [{"name": null, "effect": "reads"}]}]}});
+    assert!(allowed_by_manifest(&manifest, "cleanup", "").is_ok());
+    assert!(allowed_by_manifest(&manifest, "cleanup", "apply").is_err());
+    assert!(allowed_by_manifest(&manifest, "reader", "").is_err());
+}

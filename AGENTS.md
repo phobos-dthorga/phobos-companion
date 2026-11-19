@@ -83,6 +83,11 @@ reads them.
   **Decompile runs only on the owner's press, only for an assembly the kit's `holder` named in this run of the program, and only
   while the manifest calls it `runs`**; it writes only into the kit's cache. Names go to the kit after `--`, checked to have the
   shape of a type or member name; a kept file is a plain `.dll` name. Other authors' code is shown, never copied into a repository.
+- **Clean up deletes only what the owner chose and confirmed** (owner, 20 Nov 2026: "some kind of ongoing cleanup process", with
+  their yes first; `src-tauri/src/cleanup_page.rs`): the kit's `cleanup`, listing by default; deleting runs only after the owner
+  chooses the groups, presses Clean up the chosen and confirms, only the groups chosen (`--group`, each one argument), and only while
+  the manifest calls it `writes`. The kit deletes nothing its listing did not name and never touches saves, game or mod folders or
+  settings. **Never start a clean-up by itself**, and install backups start unchosen. Home's note only reads, at most every half hour.
 - **The code viewer's How it connects and the Code map page only read**: the kit's `connections`, through
   `src-tauri/src/connections_page.rs`, which checks the repository is one of the game's, a thing's id has the tools' shape, a commit
   is a commit and a search is one line, before the kit sees any of them. Pictures are drawn by `src/lib/connections/`, with the

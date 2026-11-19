@@ -418,6 +418,58 @@
       "why": "The join that matters most is a window request to the host command that answers it, and that needs both sides read",
       "from": "CHANGELOG.md, 0.24.0",
       "asked": "2026-11-19"
+    },
+    {
+      "id": "cleanup-nudge",
+      "question": "From how much should Home mention that the tools could clear room?",
+      "context": "Home looks at most every half hour and shows a note with a button to Clean up on the Settings page. On 20 Nov 2026 the tools could clear 33.7 GB, 29 GB of it their development build, which grows back as agents build and test.",
+      "options": [
+        {
+          "id": "5gb",
+          "label": "5 GB (as now)",
+          "detail": "Rare enough not to nag, early enough to matter on a short drive"
+        },
+        {
+          "id": "2gb",
+          "label": "2 GB",
+          "detail": "Sooner, more often"
+        },
+        {
+          "id": "20gb",
+          "label": "20 GB",
+          "detail": "Only when it is a lot"
+        },
+        {
+          "id": "never",
+          "label": "Never on Home",
+          "detail": "Look on the Settings page yourself"
+        }
+      ],
+      "lean": "5gb",
+      "why": "Your D: drive has run short before; 5 GB is noticeable there without the note showing every day",
+      "from": "docs/design-record.md, Clean up",
+      "asked": "2026-11-20"
+    },
+    {
+      "id": "cleanup-backups",
+      "question": "Should install backups start unchosen in Clean up?",
+      "context": "Install backups are the Mods page's way back to an earlier version of a mod. Clean up lists the older ones the repository's rules allow to go. Today they start unchosen, so a clean-up keeps them unless you press them.",
+      "options": [
+        {
+          "id": "unchosen",
+          "label": "Unchosen (as now)",
+          "detail": "Kept unless you choose them"
+        },
+        {
+          "id": "chosen",
+          "label": "Chosen like the rest",
+          "detail": "Cleared with everything else unless you unpress them"
+        }
+      ],
+      "lean": "unchosen",
+      "why": "A way back is worth more than the room it takes, until you say otherwise",
+      "from": "docs/design-record.md, Clean up",
+      "asked": "2026-11-20"
     }
   ]
 }

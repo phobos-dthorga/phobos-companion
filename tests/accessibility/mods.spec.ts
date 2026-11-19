@@ -612,3 +612,55 @@ for (const [name, viewport] of [
     });
   });
 }
+
+test.describe("Settings to look at, shown at once (0.27.0)", () => {
+  test("shows the list kept from last time while the read checks it, then the read's", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      mod_installs: sampleInstalls([]),
+      texture_status: sampleTextures([]),
+      // The read speaks once, then takes three seconds to answer.
+      mod_settings: {
+        result: sampleLedger,
+        pauseMs: 3000,
+        progress: [{ label: "Reading the history of the mods' settings" }],
+      },
+    });
+    // Last time's list held one setting the read no longer has.
+    await page.addInitScript(
+      (kept) => {
+        localStorage.setItem("companion.ledger.first", JSON.stringify(kept));
+      },
+      [
+        {
+          repository: "first-mods",
+          seen: [],
+          settings: [
+            {
+              time: "2026-11-10T07:00:00+11:00",
+              commit: "cccccccc0123456789",
+              subject: "Sample Mod 0.9.0",
+              mod: "SampleMod",
+              product: "Sample Mod",
+              key: "SampleBoats_Kept",
+              label: "Kept from last time",
+              what: "added",
+              before: null,
+              after: "True",
+            },
+          ],
+        },
+      ],
+    );
+    await page.goto("/");
+    await page.getByRole("button", { name: "Mods", exact: true }).click();
+    const panel = page.locator("#settings-to-look");
+    await expect(panel).toContainText("Kept from last time");
+    await expect(panel).toContainText("checking for changes");
+    await expect(panel).toContainText("Boats float", { timeout: 10_000 });
+    await expect(panel).not.toContainText("checking for changes");
+  });
+});

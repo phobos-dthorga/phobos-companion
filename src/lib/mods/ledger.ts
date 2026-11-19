@@ -32,7 +32,11 @@ export function settingId(change: SettingChange): string {
   return `${change.key}|${change.what}|${change.commit ?? "now"}`;
 }
 
-/** Every repository's changes split into those still to look at and those looked at, newest first in each. */
+/**
+ * Every repository's changes split into those still to look at and those looked at, newest first in each. A change listed twice
+ * under one id, the same key added or changed in one commit by two settings classes (D'thorga Medical's and the Burns and Smoke
+ * part it took in), shows once (0.28.1): to the owner it is one setting, and a mark was always kept for both.
+ */
 export function split(ledgers: Ledger[]): {
   toLook: LedgerItem[];
   looked: LedgerItem[];
@@ -41,8 +45,11 @@ export function split(ledgers: Ledger[]): {
   const looked: LedgerItem[] = [];
   for (const ledger of ledgers) {
     const seen = new Set(ledger.seen);
+    const shown = new Set<string>();
     for (const change of ledger.settings) {
       const id = settingId(change);
+      if (shown.has(id)) continue;
+      shown.add(id);
       (seen.has(id) ? looked : toLook).push({
         repository: ledger.repository,
         change,

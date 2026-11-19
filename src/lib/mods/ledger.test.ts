@@ -31,6 +31,18 @@ describe("settings to look at", () => {
     expect(settingId(change("A", "t", null))).toBe("A|added|now");
   });
 
+  it("shows a setting two settings classes added in one commit once (0.28.1)", () => {
+    const twin = change("PhobosBurns_CoughSounds", "2026-11-10");
+    const { toLook } = split([
+      {
+        repository: "r",
+        seen: [],
+        settings: [twin, { ...twin, mod: "Other" }],
+      },
+    ]);
+    expect(toLook).toHaveLength(1);
+  });
+
   it("splits what is marked from what is not, newest first across repositories", () => {
     const { toLook, looked } = split([
       {

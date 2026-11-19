@@ -4,6 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.28.1] - 2026-11-20
+
+Loose ends the owner said yes to (20 November 2026). Not yet tested on screen.
+
+### Fixed
+
+- **A setting listed twice in Settings to look at shows once**: 18 settings of D'thorga Medical's Burns and Smoke part were each added in one commit by two settings classes (Medical's own and the part's), so each showed twice and marking one marked its twin. Marks already made are kept.
+
+### Changed
+
+- **The Decisions page holds six questions, down from 20**: the owner took the agent's lean on the 14 that kept things as they are (page sizes, the crowded-patch threshold, the activity strip's delay, Make-up's 30 days, sizes only for old game files, running elsewhere later, the ! key, the records reminder at 7 days, old claims after a day, memory watches only on a press, 15 minutes first, the Memory page's keys, Clean up's note from 5 GB, and install backups starting unchosen). Their answers are kept in the Companion's own folder. Left: renumbering the page keys, decisions from every repository, Size as installed, the last two cross-links, marking a memory watch from inside the game, and the Code map's readers for TypeScript, Svelte and Rust.
+
 ## [0.28.0] - 2026-11-20
 
 The owner chose (20 November 2026) "Since you last played" as the next build: the question they have before launching, answered from parts the tools already had. Built on phobos-modkit 1.51.0. Checked on RimWorld, against the owner's real update of Vanilla Furniture Expanded - Factory, which changed methods D'thorga Factory Additions patches; not yet tested on screen.

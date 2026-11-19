@@ -4,6 +4,17 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.26.1] - 2026-11-20
+
+The owner could not make a backup of the Companion's records or choose the folder for it (20 November 2026). Not yet tested on screen.
+
+### Fixed
+
+- **A folder pasted from Explorer's Copy as path is accepted**: Ctrl+Shift+C puts quotes round the path, and the tools refused the quoted path as "not a full path". The quotes are now taken off before it is saved, for every folder on the Settings page.
+- **Back up now turns on as soon as the folder is saved**: the backup panel read its folder only when the page opened, so the button stayed off until you left the page and came back.
+- **Choose a folder opens the box to type it in**, already focused, instead of only scrolling to the setting.
+- The note shown before a folder is chosen gives examples of a folder, says Explorer's Ctrl+Shift+C copies one, and that the folder is made at the first backup if it is not there yet.
+
 ## [0.26.0] - 2026-11-19
 
 The owner chose (19 November 2026) "Read and compare, on your press" for how much of decompiling the Companion takes on: follow one of our patches into the method it patches, read other authors' code, and see what an update changed. Built on phobos-modkit 1.49.0. Checked on RimWorld, the only game whose tools can do it yet; not yet tested on screen.

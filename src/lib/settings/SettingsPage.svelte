@@ -11,7 +11,12 @@
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
   import { readSettings, saveSetting } from "./desktopClient";
-  import { byGame, otherRepositories, sendable } from "./presentation";
+  import {
+    byGame,
+    cleanPath,
+    otherRepositories,
+    sendable,
+  } from "./presentation";
   import ShortcutsDialog from "../shortcuts/ShortcutsDialog.svelte";
   import RecordsPanel from "../records/RecordsPanel.svelte";
   import type { Setting, SettingsReading } from "./types";
@@ -30,6 +35,8 @@
   let told = $state<{ ok: boolean; words: string } | null>(null);
   let failure = $state<Failure | null>(null);
   let editingShortcuts = $state(false);
+  /** Counts the settings saved, so the records panel reads its folder again after each (0.26.1). */
+  let saved = $state(0);
 
   const groups = $derived(
     reading.state === "ready" ? byGame(reading.list.settings) : [],
@@ -92,7 +99,18 @@
           : t("settings-saved", { key }),
     };
     editing = null;
+    saved += 1;
     await load();
+  }
+
+  /** Opens one setting's box to type in, from elsewhere on the page (the records panel's Choose a folder, 0.26.1). */
+  async function editKey(key: string) {
+    if (reading.state !== "ready") return;
+    const setting = reading.list.settings.find((s) => s.key === key);
+    if (!setting) return;
+    await edit(setting);
+    await reveal(`setting-${key}`);
+    document.getElementById(`setting-input-${key}`)?.focus();
   }
 
   onMount(load);
@@ -122,7 +140,7 @@
     >{t("settings-keyboard-open")}</button
   >
 </section>
-<RecordsPanel />
+<RecordsPanel {saved} onchoose={(key) => void editKey(key)} />
 {#if editingShortcuts}
   <ShortcutsDialog editable={true} onclose={() => (editingShortcuts = false)} />
 {/if}
@@ -202,7 +220,7 @@
                 class="edit"
                 onsubmit={(event) => {
                   event.preventDefault();
-                  if (sendable(draft)) void save(setting.key, draft.trim());
+                  if (sendable(draft)) void save(setting.key, cleanPath(draft));
                 }}
               >
                 <label for={`setting-input-${setting.key}`}

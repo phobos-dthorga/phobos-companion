@@ -577,7 +577,7 @@
     "records-never": "Never copied yet.",
     "records-what": "{ $count ->\n    [one] One record\n   *[other] { $count } records\n  }, { $files } files, { $size } in all.",
     "records-folder": "Copies go to { $path }",
-    "records-no-folder": "No folder chosen yet: choose one your NAS or other backup keeps.",
+    "records-no-folder": "No folder chosen yet. Choose one your NAS or other backup keeps, such as D:\\SynologyDrive\\Companion backups or \\\\NAS\\home\\Companion backups: type it, or paste it from Explorer (Ctrl+Shift+C copies a folder's path). It is made at the first backup if it is not there yet.",
     "records-back-up": "Back up now",
     "records-copying": "Copying…",
     "records-choose-folder": "Choose the folder",

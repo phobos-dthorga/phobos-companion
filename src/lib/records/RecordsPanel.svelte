@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { untrack } from "svelte";
   import { LOCALE, t } from "../i18n/runtime";
-  import { setFocus } from "../navigation/navigation.svelte";
   import { formatWhen } from "../shell/dates";
   import { formatSize } from "../shell/sizes";
   import type { RecordsStatus } from "./types";
@@ -12,6 +11,13 @@
    * is, and Back up now. The folder is the setting recordsBackupPath, in the list below; nothing is ever deleted.
    */
   const SETTING = "recordsBackupPath";
+
+  /**
+   * `saved` counts the settings saved on the page, so the folder is read again after each (0.26.1: it was read once, so Back up
+   * now stayed off after the folder was chosen). `onchoose` opens the folder setting's box to type in.
+   */
+  let { saved, onchoose }: { saved: number; onchoose: (key: string) => void } =
+    $props();
 
   let status = $state<RecordsStatus | null>(null);
   let unread = $state<string | null>(null);
@@ -63,7 +69,10 @@
     status ? status.records.reduce((sum, r) => sum + r.bytes, 0) : 0,
   );
 
-  onMount(load);
+  $effect(() => {
+    void saved;
+    untrack(() => void load());
+  });
 </script>
 
 <section
@@ -106,10 +115,7 @@
         onclick={backUp}
         >{busy ? t("records-copying") : t("records-back-up")}</button
       >
-      <button
-        type="button"
-        class="action"
-        onclick={() => setFocus({ key: SETTING })}
+      <button type="button" class="action" onclick={() => onchoose(SETTING)}
         >{status.folder
           ? t("records-change-folder")
           : t("records-choose-folder")}</button

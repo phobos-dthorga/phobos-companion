@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { byGame, otherRepositories, sendable } from "./presentation";
+import { byGame, cleanPath, otherRepositories, sendable } from "./presentation";
 import type { Setting } from "./types";
 
 function setting(
@@ -59,5 +59,23 @@ describe("the settings page", () => {
     expect(otherRepositories(found)).toEqual([
       { repository: "two", value: "L:/art" },
     ]);
+  });
+});
+
+describe("a folder typed or pasted (0.26.1)", () => {
+  it("takes off the quotes Explorer's Copy as path puts round it", () => {
+    expect(cleanPath('"D:\\Backups\\Companion"')).toBe(
+      "D:\\Backups\\Companion",
+    );
+    expect(cleanPath("  'K:\\Copies'  ")).toBe("K:\\Copies");
+    expect(cleanPath("\\\\NAS\\home\\Companion")).toBe(
+      "\\\\NAS\\home\\Companion",
+    );
+    expect(cleanPath('D:\\Odd"Name')).toBe('D:\\Odd"Name');
+  });
+
+  it("never sends empty quotes", () => {
+    expect(sendable('""')).toBe(false);
+    expect(sendable('"D:\\Backups"')).toBe(true);
   });
 });

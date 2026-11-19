@@ -18,9 +18,19 @@ export function byGame(
   );
 }
 
+/**
+ * A path as it will be saved (0.26.1): spaces at either end and one pair of quotes around it taken off, since Explorer's "Copy as
+ * path" (Ctrl+Shift+C) puts quotes round what it copies, and the tools refused a quoted path as not a full path.
+ */
+export function cleanPath(value: string): string {
+  const trimmed = value.trim();
+  const quoted = /^(["'])(.*)\1$/.exec(trimmed);
+  return (quoted ? quoted[2] : trimmed).trim();
+}
+
 /** A value worth sending: one line, not empty. The host and the kit check the rest (a full path, a sane length). */
 export function sendable(value: string): boolean {
-  const trimmed = value.trim();
+  const trimmed = cleanPath(value);
   return trimmed.length > 0 && !/[\r\n]/.test(trimmed);
 }
 

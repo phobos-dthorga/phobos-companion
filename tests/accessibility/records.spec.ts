@@ -129,6 +129,60 @@ test.describe("Records backup", () => {
       panel.getByRole("button", { name: "Back up now" }),
     ).toBeDisabled();
     await panel.getByRole("button", { name: "Choose the folder" }).click();
-    await expect(page.locator("#setting-recordsBackupPath")).toBeFocused();
+    await expect(
+      page.locator("#setting-input-recordsBackupPath"),
+    ).toBeFocused();
+  });
+
+  test("A folder pasted from Explorer, in quotes, is saved without them, and Back up now turns on at once (0.26.1)", async ({
+    page,
+  }) => {
+    await open(page, status({ folder: null, folderExists: false }));
+    // After a save, the host's records status names the folder; the value sent is kept to check.
+    await page.addInitScript(
+      (chosen) => {
+        const scope = window as unknown as {
+          __TAURI_INTERNALS__: {
+            invoke: (c: string, a: unknown, o: unknown) => Promise<unknown>;
+          };
+          sentValues: string[];
+        };
+        scope.sentValues = [];
+        const invoke = scope.__TAURI_INTERNALS__.invoke;
+        scope.__TAURI_INTERNALS__.invoke = async (command, args, options) => {
+          if (command === "set_setting") {
+            scope.sentValues.push((args as { value: string }).value);
+            return {
+              ok: true,
+              refusal: null,
+              central_file: "C:\\Sample\\settings.json",
+            };
+          }
+          if (command === "records_status" && scope.sentValues.length > 0)
+            return chosen;
+          return invoke(command, args, options);
+        };
+      },
+      status({ folder: "N:\\Backups\\Companion", folderExists: false }),
+    );
+    await page.reload();
+    await page.getByRole("button", { name: "Settings", exact: true }).click();
+    const panel = page.getByRole("region", { name: "Back up your records" });
+    await panel.getByRole("button", { name: "Choose the folder" }).click();
+    const box = page.locator("#setting-input-recordsBackupPath");
+    await box.fill('"N:\\Backups\\Companion"');
+    await box.press("Enter");
+    const sent = await page.evaluate(
+      () => (window as unknown as { sentValues: string[] }).sentValues,
+    );
+    expect(sent).toEqual(["N:\\Backups\\Companion"]);
+    await expect(
+      panel.getByRole("button", { name: "Back up now" }),
+    ).toBeEnabled();
+    await panel.getByRole("button", { name: "Back up now" }).click();
+    await expect(panel).toContainText(
+      "N:\\Backups\\Companion\\20261119-101500",
+    );
+    await audit(page);
   });
 });

@@ -63,6 +63,13 @@ reads them.
   manifest still calls it `writes` or `runs` (`src-tauri/src/installs_page.rs`). The host checks the repository, the move and every
   name; the kit refuses installing, going back and encoding while the game runs, and never deletes: the install it replaces becomes
   a backup.
+- **The Memory page starts a watch of the running game only on the owner's press and confirmation** (owner, 19 Nov 2026: memory
+  profiling "will be done from the Companion"; `src-tauri/src/memory_page.rs`, design record "Memory"): the kit's watch, found by
+  the manifest's `memory-watch` surface, attaches Microsoft's dotnet-counters to the game once unless the owner chose Windows' figures
+  only, and runs only while the manifest calls it `runs`. **Never start one by itself** unless the owner chooses that on the
+  Decisions page. Reading a watch only reads; stopping and marking write only into the watch's own folder in the kit's cache, while
+  the manifest calls them `writes`. The host checks the length is one offered, every text is one line of a sane length and a
+  watch's name has the kit's shape, and puts a mark's words after `--`.
 - **The Changes page and the code viewer only read**: the kit's `changes`, through `src-tauri/src/changes_page.rs`, which checks
   the repository is one of the game's and the changelog a plain path inside it before the kit sees either.
 - **The Timeline page only reads**: the kit's `history`, through `src-tauri/src/history_page.rs`, which checks the repository is one

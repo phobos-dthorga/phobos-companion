@@ -86,7 +86,9 @@ reads them.
   **Back up now** (0.22.0, `src-tauri/src/records_backup.rs`) runs the kit's `records backup`, which copies this program's records
   into a new dated folder in the folder the owner chose (`recordsBackupPath`), only on the owner's press and while the manifest
   calls it `writes`; it never deletes a copy. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
-  answer`, which appends the owner's answer to `decisions/<repository>.jsonl` in this program's folder.
+  answer`, which appends the owner's answer to `decisions/<repository>.jsonl` in this program's folder. **The Game files page only
+  reads** (the kit's `game-files report`, `src-tauri/src/game_files_page.rs`); Show in folder opens the file manager on a file
+  inside a folder the last report named, and nothing else.
 - **The core never names a game.** A game reaches it only through the manifest's `game` field and the owner's own list,
   `.local/games.json`, which holds personal paths and is never committed.
 - **Git is read with `--no-optional-locks` and `core.fsmonitor=false`**, through `src-tauri/src/git.rs`: reading takes no lock and

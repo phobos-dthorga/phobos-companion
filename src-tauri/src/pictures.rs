@@ -90,6 +90,12 @@ pub fn show(folder: &Path, path: &Path) -> Result<(), Failure> {
     if !inside {
         return Err(Failure::refused("only a picture this program saved can be shown"));
     }
+    select_in_file_manager(path)
+}
+
+/// Opens the file manager with the file selected (on Linux, its folder). The caller checks the path is one it may show.
+pub fn select_in_file_manager(path: &Path) -> Result<(), Failure> {
+    let folder = path.parent().unwrap_or(path);
     let started = if cfg!(target_os = "windows") {
         Command::new("explorer").arg(format!("/select,{}", path.display())).spawn()
     } else if cfg!(target_os = "macos") {

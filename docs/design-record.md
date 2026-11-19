@@ -606,6 +606,29 @@ page bar grouped in the same change.
 **Agent choices, owner to revise:** the lean chosen to begin with (one press to agree, at the cost of agreeing too easily); the D
 key; the groups' names and order; keys left as they were until the owner answers `page-keys` on the page itself.
 
+## Game files (built 19 Nov 2026, 0.22.0)
+
+**The owner asked what the games themselves write that the Companion could show**, made general so a new game needs little setting
+up (19 Nov 2026), and said yes to the views proposed.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See before playing what updated since last time, find a save or a screenshot, and see where a game's space goes, for any Steam game |
+| What does it stop them doing? | Digging through AppData and Steam's folders, or guessing which mods updated overnight |
+| How does it change the way they work? | A start-of-session look tells them what to expect; a new game shows something before it is set up at all |
+
+| Part | How |
+| --- | --- |
+| The facts | phobos-modkit 1.46.0's `game-files report`: Steam's app manifest and Workshop records, the game's saves and screenshots folders and Steam's, sizes by folder |
+| Places | Guessed by the game's name; the games list may name `data`, `saves` and `screenshots`, and `steam_app_id` (`companion-core`'s `games::places_of`) |
+| The page | Under Play (key W): what changed (since the last launch, a day or a week), saves (ten a page), screenshots (the newest twelve), space as bars. A part it cannot fill says what to set |
+| Showing a file | Only one inside a folder the last report named, at most two levels down (a group of saves) |
+
+**Checked on three games:** RimWorld (everything), Farming Simulator 25 (Steam's records; its data folder was not guessed) and
+Project Zomboid (saves and space with its data folder named; not installed through Steam now). **Agent choices, owner to revise:**
+the W key; twelve screenshots and ten saves a page; space as plain bars rather than a chart; a list of screenshots, not pictures,
+until the gallery is built (`later.md`).
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

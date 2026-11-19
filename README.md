@@ -6,7 +6,8 @@ what you did, and what your saves and logs say, without typing a command.
 ## Read this first (gotchas)
 
 - **You need a list of your games first**: `.local/games.json` in this folder, naming each game and its repositories.
-  `config/games.example.json` shows how. Without one, the program says so and shows nothing else.
+  `config/games.example.json` shows how. Without one, the program says so and shows nothing else. A game may also name its
+  folders (`places`: `data`, `saves`, `screenshots`) and its Steam app ID (`steam_app_id`) for the Game files page.
 - **A game's `id` in that list must match the tools' name for it** (`rimworld`) for its reports to appear.
 - **It shows where you left each game, and the reports that need nothing typed**, with charts where a report has them, such as
   RimWorld's colony mood report. Reports that need an input, read online or change anything aren't offered yet.
@@ -54,6 +55,8 @@ what you did, and what your saves and logs say, without typing a command.
 - **Who is working on what** (Home): what each agent session holds on the claims board, and for how long.
 - **Decisions** (D): every choice an agent made for you to revise, with its options and the agent's lean chosen to begin
   with; **Decide** takes it in one press. Home says how many wait. The page bar is grouped into Play, Code and Tools.
+- **Game files** (W): what changed since you last played (the game and its Workshop items), your saves, your screenshots and
+  where the space goes, for any Steam game. Read only.
 - **Keyboard shortcuts, one key each**: 1 to 9 for the first nine pages and G for Logs, [ and ] for the games, ? for the full list. They never act while
   you type in a box. **Change any of them, or turn them off, under Settings, Change keyboard shortcuts.**
 - **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central

@@ -19,9 +19,16 @@ The owner said yes (19 November 2026) to four new tools for working with agent s
 - **A Decisions page** (the D key, or its button under Tools): every choice an agent made for you to revise, and every question it needs your word on, gathered from each repository. Each shows its options as plain choices, with the agent's lean marked and chosen to begin with, so **taking the lean is one press of Decide**; Something else takes your own words. Answered ones wait below, with Change my answer, until an agent acts on them. **Home says how many wait.** Thirteen are waiting to begin with, from the choices made in this program so far.
 - **The page bar is grouped**: Play (Home, Mods, Tests, Logs, Atlas), Code (Changes, Timeline, Code map, Make-up) and Tools (Reports, Settings, Decisions). No key changed: whether the number keys should follow the new order is the first question on the Decisions page.
 
+- **A Game files page** (the W key, or its button under Play), for any Steam game:
+  - **What changed**: whether Steam updated the game after you last played, and every Workshop item updated since, by name where its files give one. Look back to your last launch, the last day or the last week.
+  - **Saves**, newest first, ten a page, autosaves marked, with Show in folder.
+  - **Screenshots**, the game's own and Steam's, the newest listed with Show in folder.
+  - **Where the space goes**: the game itself, its Workshop items and each folder of its data folder, largest first.
+  - Folders are found from the game's name. **A game whose folders are named otherwise can name them** in its entry in the games list (places: data, saves, screenshots), and its Steam app ID (steam_app_id) when Steam knows it by another name; the page says which is missing, in words. Checked on RimWorld (all four parts), Farming Simulator 25 (Steam's records; its data folder was not found) and Project Zomboid (its saves and space, with its data folder named; it is not installed through Steam at the moment). Nothing is changed or deleted.
+
 ### Dependencies
 
-- Tool kit 1.45.0, now pinned (1.41.0 brought screen-notes, which agent sessions use to read and resolve the notes; 1.43.0 the records backup and its setting; 1.44.0 the claims board and its rule; 1.45.0 decisions).
+- Tool kit 1.46.0, now pinned (1.41.0 brought screen-notes, which agent sessions use to read and resolve the notes; 1.43.0 the records backup and its setting; 1.44.0 the claims board and its rule; 1.45.0 decisions; 1.46.0 game-files).
 
 ## [0.21.0] - 2026-11-19
 

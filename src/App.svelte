@@ -40,6 +40,7 @@
   import ScreenNoteButton from "./lib/notes/ScreenNoteButton.svelte";
   import MakeupPage from "./lib/makeup/MakeupPage.svelte";
   import DecisionsPage from "./lib/decisions/DecisionsPage.svelte";
+  import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
   import ProgressBar from "./lib/shell/ProgressBar.svelte";
@@ -97,6 +98,7 @@
     ["page.logs", "logs"],
     ["page.makeup", "makeup"],
     ["page.decisions", "decisions"],
+    ["page.gamefiles", "gamefiles"],
   ];
 
   /** The page bar's groups (0.22.0): what you play with, the code behind it, and the tools' own pages. */
@@ -113,6 +115,7 @@
         { page: "mods", key: "page-mods" },
         { page: "tests", key: "page-tests" },
         { page: "logs", key: "page-logs" },
+        { page: "gamefiles", key: "page-gamefiles" },
         { page: "atlas", key: "page-atlas" },
       ],
     },
@@ -334,6 +337,10 @@
         {#key selected.id}
           <MakeupPage game={selected} />
         {/key}
+      {:else if selected && page === "gamefiles"}
+        {#key selected.id}
+          <GameFilesPage game={selected} />
+        {/key}
       {:else if selected && page === "logs"}
         {#key selected.id}
           <LogsPage game={selected} />
@@ -385,7 +392,9 @@
                       ? t("source-body-makeup")
                       : page === "decisions"
                         ? t("source-body-decisions")
-                        : t("source-body")}
+                        : page === "gamefiles"
+                          ? t("source-body-gamefiles")
+                          : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

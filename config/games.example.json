@@ -10,7 +10,11 @@
     {
       "id": "second-game",
       "name": "Second Game",
-      "repositories": ["second-game-library", "second-game-content"]
+      "repositories": ["second-game-library", "second-game-content"],
+      "steam_app_id": 4242,
+      "places": {
+        "data": "/path/to/second-game/data"
+      }
     }
   ]
 }

@@ -43,3 +43,19 @@ fn the_example_list_is_valid() {
     let text = include_str!("../../../../config/games.example.json");
     assert_eq!(parse(text).unwrap().len(), 2);
 }
+
+#[test]
+fn a_game_may_name_its_places_and_steam_id() {
+    let text = r#"{"schema_version": 1, "games": [
+        {"id": "z", "name": "Zed", "repositories": [], "steam_app_id": 108600, "places": {"data": "C:/Users/me/Zomboid"}},
+        {"id": "r", "name": "Ar", "repositories": []}]}"#;
+    let zed = places_in(text, "z").unwrap().unwrap();
+    assert_eq!(zed.steam_app_id, Some(108600));
+    assert_eq!(zed.places["data"], PathBuf::from("C:/Users/me/Zomboid"));
+    assert!(places_in(text, "r").unwrap().unwrap().places.is_empty());
+    assert!(places_in(text, "nobody").unwrap().is_none());
+    assert_eq!(parse(text).unwrap().len(), 2);
+    let odd =
+        r#"{"schema_version": 1, "games": [{"id": "z", "name": "Zed", "repositories": [], "places": {"music": "x"}}]}"#;
+    assert!(places_in(odd, "z").is_err());
+}

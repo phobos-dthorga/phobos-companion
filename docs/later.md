@@ -1,7 +1,7 @@
 # Kept for later: everything proposed and not yet built
 
-**Status (19 Nov 2026):** items 1 to 4 (screen notes, the records backup, the claims board, the Decisions page and the grouped
-bar) are built in Companion 0.22.0, untested on screen; item 5, game files, is not built yet. The owner said yes to all of it ("Absolutely with all of these and
+**Status (19 Nov 2026):** items 1 to 5 are built in Companion 0.22.0, untested on screen; part of item 5 is still to come (below:
+the screenshot gallery, adding a game from Steam, and the RimWorld extras). The owner said yes to all of it ("Absolutely with all of these and
 for what we are not implementing just yet, make sure to document and record those for later so that they are not lost"), in the
 order of the build list below. Each item's status changes here in the change that builds it; once built, its design moves to
 `design-record.md` and this record keeps one line pointing there.
@@ -26,7 +26,7 @@ order of the build list below. Each item's status changes here in the change tha
 | 2 | **Records backup** | Copy the Companion's own records (test verdicts, key decisions, "looked at" marks, the history log, shortcuts, the central settings file) to a folder of the owner's choosing on the NAS, with a note on Home when the last copy is old. Synology does not back up the app data folder | **Built**, 0.22.0 (see `design-record.md`) |
 | 3 | **Claims board** | See which agent session holds which version number, test row or file, from a tiny shared claims file the sessions write and read; ends the cross-session "is 0.174.0 yours?" messages | **Built**, 0.22.0 (see `design-record.md`) |
 | 4 | **Decisions page, and the page bar grouped** | Answer open decisions with a button, each showing its options and the agent's lean, instead of hunting through design records; the bar grouped into Play (Home, Mods, Tests, Logs, Atlas), Code (Changes, Timeline, Code map, Make-up) and Tools (Reports, Settings, Decisions) | **Built**, 0.22.0 (see `design-record.md`) |
-| 5 | **Game files** | See what the game itself writes: what changed since you last played, saves, screenshots, disk use; add a game from Steam without hand-editing `games.json` | Not built |
+| 5 | **Game files** | See what the game itself writes: what changed since you last played, saves, screenshots, disk use; add a game from Steam without hand-editing `games.json` | **Built in part**, 0.22.0: what changed, saves, screenshots as a list, space; the rest below |
 
 ### 1. Screen notes
 
@@ -88,6 +88,17 @@ order of the build list below. Each item's status changes here in the change tha
   and guessed data folders (LocalLow, Documents\My Games, AppData), each guess shown for the owner to confirm.
 - **Say plainly what works for each game**: a game with no saves folder set says so, never shows a blank.
 - **RimWorld extras**: the start-up chart, crashes on the Timeline, the creations shelf.
+
+**Built in 0.22.0** (kit 1.46.0, `design-record.md`): the Game files page with what changed since you last played, the saves, the
+screenshots as a list, and where the space goes; places and the Steam app ID in the games list. **Still to come, in this order:**
+
+| Next | What it needs |
+| --- | --- |
+| **Screenshot gallery**, each picture placed on the Timeline on its day | Thumbnails: Tauri's asset protocol allowed only for the folders a report named, or small previews made by the host; then a Timeline lane |
+| **Add a game from Steam** | `game-files steam-games` lists them already; a dialog on the Settings page that writes a new entry into `.local/games.json` (the program's first write to that list, so it shows the entry before saving) |
+| **Better guesses for the data folder** | Farming Simulator 25's `FarmingSimulator2025` and Project Zomboid's `Zomboid` were missed; a game's known folder names, or a search for its save files' extension |
+| **The launch before last** | Steam keeps only the last launch; the kit could remember each one it sees, so "since the launch before" works while the game runs |
+| **RimWorld extras**: the start-up chart over launches, crashes on the Timeline, the creations shelf | The kit's `startup-impact` and `crash-dump` readings as Timeline facts; the creations folders listed |
 
 ## Not on the build list yet
 

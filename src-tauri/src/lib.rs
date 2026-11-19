@@ -7,6 +7,7 @@ mod changes_page;
 mod claims_board;
 mod connections_page;
 mod decisions_page;
+mod game_files_page;
 mod history_page;
 mod home;
 mod installs_page;
@@ -426,6 +427,18 @@ async fn answer_decision(
     blocking(move || decisions_page::answer(&repository, &id, &option, &words)).await
 }
 
+/// What a game writes and what Steam records about it: what changed since the last launch, saves, screenshots and space.
+#[tauri::command]
+async fn game_files(game: String, since: Option<String>) -> Result<serde_json::Value, Failure> {
+    blocking(move || game_files_page::read(&game, since)).await
+}
+
+/// Shows a save or a screenshot the Game files page listed, in the file manager.
+#[tauri::command]
+async fn show_game_file(path: String) -> Result<(), Failure> {
+    blocking(move || game_files_page::show(&path)).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -479,6 +492,8 @@ pub fn run() {
             claims_list,
             decisions_list,
             answer_decision,
+            game_files,
+            show_game_file,
             read_shortcuts,
             save_shortcuts
         ])

@@ -87,6 +87,12 @@ export const ACTIONS: Action[] = [
     words: "shortcut-page-decisions",
   },
   {
+    id: "page.gamefiles",
+    scope: "everywhere",
+    defaultKey: "w",
+    words: "shortcut-page-gamefiles",
+  },
+  {
     id: "game.previous",
     scope: "everywhere",
     defaultKey: "[",

@@ -2,7 +2,7 @@
 
 use crate::failure::{Failure, FailureCode};
 use serde::Deserialize;
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use std::env;
 use std::fs;
 use std::io::ErrorKind;
@@ -25,6 +25,23 @@ struct ListedGame {
     id: String,
     name: String,
     repositories: Vec<PathBuf>,
+    /// The game's Steam app ID, when its name is not enough to find it (0.22.0).
+    #[serde(default)]
+    steam_app_id: Option<u32>,
+    /// Where the game keeps its files, by kind, when a guess from its name would miss them (0.22.0).
+    #[serde(default)]
+    places: BTreeMap<String, PathBuf>,
+}
+
+/// The kinds of place a game's entry may name (0.22.0; `docs/later.md`, item 5).
+pub const PLACE_KINDS: [&str; 3] = ["data", "saves", "screenshots"];
+
+/// Where a game keeps its files and how Steam knows it, as the owner's list gives them; empty when the list says nothing.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct GamePlaces {
+    pub name: String,
+    pub steam_app_id: Option<u32>,
+    pub places: BTreeMap<String, PathBuf>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -60,6 +77,30 @@ pub fn load() -> Result<Option<Vec<Game>>, Failure> {
 }
 
 /// One game on the owner's list, or None when it is not there (or there is no list).
+/// A listed game's places and Steam app ID; None when the game is not on the list. A place of a kind no page reads is refused.
+pub fn places_of(id: &str) -> Result<Option<GamePlaces>, Failure> {
+    let path = list_path();
+    let unreadable =
+        |detail: String| Failure::new(FailureCode::ListUnreadable, format!("{}: {detail}", path.display()));
+    let text = match fs::read_to_string(&path) {
+        Ok(text) => text,
+        Err(problem) if problem.kind() == ErrorKind::NotFound => return Ok(None),
+        Err(problem) => return Err(unreadable(problem.to_string())),
+    };
+    places_in(&text, id).map_err(unreadable)
+}
+
+/// `places_of`, from the list's text.
+fn places_in(text: &str, id: &str) -> Result<Option<GamePlaces>, String> {
+    let list: ListFile =
+        serde_json::from_str(text.trim_start_matches('\u{feff}')).map_err(|problem| problem.to_string())?;
+    let Some(game) = list.games.into_iter().find(|game| game.id == id) else { return Ok(None) };
+    if let Some(kind) = game.places.keys().find(|kind| !PLACE_KINDS.contains(&kind.as_str())) {
+        return Err(format!("{id} names a place of kind {kind:?}; the kinds are {}", PLACE_KINDS.join(", ")));
+    }
+    Ok(Some(GamePlaces { name: game.name, steam_app_id: game.steam_app_id, places: game.places }))
+}
+
 pub fn find(id: &str) -> Result<Option<Game>, Failure> {
     Ok(load()?.unwrap_or_default().into_iter().find(|game| game.id == id))
 }

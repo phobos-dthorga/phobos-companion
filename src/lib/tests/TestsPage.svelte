@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Pager from "../shell/Pager.svelte";
+  import { pageHolding, pageOf, type Paged } from "../shell/paging";
   import { go, here, setFocus } from "../navigation/navigation.svelte";
   import { reveal } from "../shell/reveal";
   import { untrack } from "svelte";
@@ -43,6 +45,9 @@
 
   let reading = $state<TestsReading>({ state: "reading" });
   let shelf = $state<Shelf>("seen");
+  /** Rows a page, on each repository's list; back to the first page when the shelf changes. */
+  const ROWS_PER_PAGE = 25;
+  let rowPages = $state<Record<string, number>>({});
   let noting = $state<string | null>(null);
   let notes = $state<Record<string, string>>({});
   let busy = $state<string | null>(null);
@@ -135,7 +140,18 @@
                 .find((l) => l.repository === repository)
                 ?.rows.find((r) => r.id === row)
             : undefined;
-        if (found) shelf = shelfOf(found);
+        if (found && reading.state === "ready") {
+          shelf = shelfOf(found);
+          const list = reading.lists.find((l) => l.repository === repository);
+          const index = list
+            ? onShelf(list.rows, shelf).findIndex((r) => r.id === row)
+            : -1;
+          if (list && index >= 0)
+            rowPages = {
+              ...rowPages,
+              [list.repository]: pageHolding(index, ROWS_PER_PAGE),
+            };
+        }
         void reveal(focusRow);
       });
   });
@@ -173,7 +189,10 @@
         type="button"
         class="toggle"
         aria-pressed={shelf === which}
-        onclick={() => (shelf = which)}
+        onclick={() => {
+          shelf = which;
+          rowPages = {};
+        }}
       >
         {t(SHELF_WORDS[which].label, { count: shelfCount(lists, which) })}
       </button>
@@ -183,6 +202,11 @@
 
   {#each lists as list (list.repository)}
     {@const rows = onShelf(list.rows, shelf)}
+    {@const pagedRows = pageOf(
+      rows,
+      rowPages[list.repository] ?? 1,
+      ROWS_PER_PAGE,
+    )}
     {#if lists.length > 1}
       <h2 class="repository">{list.repository}</h2>
     {/if}
@@ -244,8 +268,9 @@
     {:else if rows.length === 0}
       <p class="muted">{t("tests-shelf-empty")}</p>
     {:else}
+      {@render rowPager(list.repository, pagedRows)}
       <ol class="rows">
-        {#each rows as row (row.id)}
+        {#each pagedRows.items as row (row.id)}
           {@const key = `${list.repository}/${row.id}`}
           {@const seen = lastSighting(row)}
           {@const what = steps(row)}
@@ -405,10 +430,23 @@
           </li>
         {/each}
       </ol>
+      {@render rowPager(list.repository, pagedRows)}
     {/if}
   {/each}
   <p class="muted how">{t("tests-how-written")}</p>
 {/if}
+
+{#snippet rowPager(repository: string, paged: Paged<TestRow>)}
+  <Pager
+    page={paged.page}
+    pages={paged.pages}
+    first={paged.first}
+    last={paged.last}
+    total={paged.total}
+    label={t("tests-pages", { repository })}
+    onchange={(page) => (rowPages = { ...rowPages, [repository]: page })}
+  />
+{/snippet}
 
 <style>
   .status {

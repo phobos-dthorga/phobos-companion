@@ -65,7 +65,7 @@ build differs from its proposal.
 
 | Page | Keys |
 | --- | --- |
-| Changes | `repository`, and `changelog` or `product` |
+| Changes | `repository`, and `changelog` or `product`; `page` (0.21.0) |
 | Code map | `repository`, `node` (a thing's id, `cs:...`, `def:...`, `lua:...`, `py:...`) |
 | Timeline | `day` (YYYY-MM-DD) |
 | Tests | `repository`, `row` |

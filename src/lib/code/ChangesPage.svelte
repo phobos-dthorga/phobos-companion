@@ -17,6 +17,8 @@
     versionWords,
   } from "../changelog/presentation";
   import RichText from "../shell/RichText.svelte";
+  import Pager from "../shell/Pager.svelte";
+  import { pageFrom, pageOf } from "../shell/paging";
   import { commitRuns, plainText } from "../shell/inline";
   import type {
     ChangelogEntry,
@@ -65,6 +67,21 @@
       choices[0] ??
       null,
   );
+
+  /** Versions a page: the newest six first; the page is part of the place, so Back returns to it. */
+  const VERSIONS_PER_PAGE = 6;
+  const paged = $derived(
+    pageOf(
+      chosen?.log.versions ?? [],
+      pageFrom(here().focus.page),
+      VERSIONS_PER_PAGE,
+    ),
+  );
+
+  /** A page turn is a step, so Back turns back. */
+  function turn(page: number) {
+    go({ ...here(), focus: { ...here().focus, page: String(page) } });
+  }
 
   function keyOf(choice: Choice) {
     return `${choice.repository}/${choice.log.changelog}`;
@@ -144,6 +161,7 @@
           setFocus({
             repository: choice.repository,
             changelog: choice.log.changelog,
+            page: "",
           })}
       >
         {choice.log.product}
@@ -160,7 +178,8 @@
     </button>
   </p>
 
-  {#each chosen.log.versions as version (version.version)}
+  {@render pager()}
+  {#each paged.items as version (version.version)}
     {@const runs = commitRuns(version.entries)}
     {@const waiting = waitingOn(testLists, chosen.log.product, version.version)}
     <section class="version" aria-label={version.version}>
@@ -245,6 +264,7 @@
       {/if}
     </section>
   {/each}
+  {@render pager()}
   {#if chosen.log.versionsInAll > releasedCount(chosen.log.versions)}
     <p class="muted how">
       {t("changes-older", {
@@ -255,6 +275,18 @@
   {/if}
   <p class="muted how">{t("changes-how")}</p>
 {/if}
+
+{#snippet pager()}
+  <Pager
+    page={paged.page}
+    pages={paged.pages}
+    first={paged.first}
+    last={paged.last}
+    total={paged.total}
+    label={t("changes-pages", { product: chosen?.log.product ?? "" })}
+    onchange={turn}
+  />
+{/snippet}
 
 <style>
   .where {

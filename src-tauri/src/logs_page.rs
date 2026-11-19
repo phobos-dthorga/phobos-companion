@@ -12,8 +12,8 @@ use serde_json::Value;
 
 const LOG_SURFACE: &str = "log";
 const BRIEF_OPTION: &str = "--brief";
-/// How many signatures the page lists: enough for every error of a bad session, few enough to read.
-const SIGNATURES_SHOWN: u32 = 60;
+/// How many signatures the page can page through: every error and warning of a bad session, about 1 MB of answer.
+const SIGNATURES_SHOWN: u32 = 500;
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct LogReading {

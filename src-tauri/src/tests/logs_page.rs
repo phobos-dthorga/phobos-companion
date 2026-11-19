@@ -26,8 +26,8 @@ fn full_options() -> Value {
 #[test]
 fn the_log_reader_runs_brief_with_a_pages_worth() {
     let (arguments, command_line) = plan(&manifest(full_options()), "g").unwrap().unwrap();
-    assert_eq!(arguments, ["game-log", "--json", "-", "--top", "60", "--brief"]);
-    assert_eq!(command_line, "python -m phobos_modkit game-log --top 60");
+    assert_eq!(arguments, ["game-log", "--json", "-", "--top", "500", "--brief"]);
+    assert_eq!(command_line, "python -m phobos_modkit game-log --top 500");
 }
 
 #[test]

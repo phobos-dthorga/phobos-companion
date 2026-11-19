@@ -9,6 +9,8 @@
   import { go, openDialog } from "../navigation/navigation.svelte";
   import { commitRequest } from "../code/presentation";
   import { askConnections } from "./desktopClient";
+  import Pager from "../shell/Pager.svelte";
+  import { pageOf } from "../shell/paging";
   import type { History } from "./types";
 
   /**
@@ -32,11 +34,22 @@
     | { state: "failed"; failure: Failure };
 
   let reading = $state<Reading>({ state: "idle" });
+  /** Commits a page, newest first. */
+  const PER_PAGE = 10;
+  let historyPage = $state(1);
+  const paged = $derived(
+    pageOf(
+      reading.state === "ready" ? reading.data.commits : [],
+      historyPage,
+      PER_PAGE,
+    ),
+  );
 
   // A new thing in the middle starts unread again.
   $effect(() => {
     void node;
     reading = { state: "idle" };
+    historyPage = 1;
   });
 
   async function read() {
@@ -123,8 +136,17 @@
         last: reading.data.lines[1],
       })}
     </p>
+    <Pager
+      page={paged.page}
+      pages={paged.pages}
+      first={paged.first}
+      last={paged.last}
+      total={paged.total}
+      label={t("connections-history-pages", { name })}
+      onchange={(page) => (historyPage = page)}
+    />
     <ol class="commits">
-      {#each reading.data.commits as commit (commit.hash)}
+      {#each paged.items as commit (commit.hash)}
         <li>
           <p class="when small">
             {formatWhen(commit.time)} · <code>{commit.hash.slice(0, 8)}</code>
@@ -168,6 +190,15 @@
         </li>
       {/each}
     </ol>
+    <Pager
+      page={paged.page}
+      pages={paged.pages}
+      first={paged.first}
+      last={paged.last}
+      total={paged.total}
+      label={t("connections-history-pages", { name })}
+      onchange={(page) => (historyPage = page)}
+    />
     {#if reading.data.more}
       <p class="muted small">{t("connections-history-more")}</p>
     {/if}

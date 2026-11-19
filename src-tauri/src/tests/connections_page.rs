@@ -30,7 +30,7 @@ fn a_malformed_question_never_runs() {
     assert!(arguments(root, &Question::History("--all".to_owned())).is_err());
     assert_eq!(
         arguments(root, &Question::History("lua:Lamps.shine".to_owned())).unwrap(),
-        ["connections", "history", "--root", "repo", "--node=lua:Lamps.shine", "--json"]
+        ["connections", "history", "--root", "repo", "--node=lua:Lamps.shine", "--limit", "200", "--json"]
     );
     assert!(arguments(root, &Question::Flow("cs:A".to_owned(), 9)).is_err());
     assert!(arguments(root, &Question::Find("a\nb".to_owned())).is_err());

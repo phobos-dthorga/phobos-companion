@@ -15,6 +15,8 @@ use serde_json::Value;
 use std::path::Path;
 
 const TOOL: &str = "connections";
+/// How many commits of a thing's history the window can page through (kit 1.40.0's --limit).
+const HISTORY_LIMIT: &str = "200";
 
 /// What the kit answered, or why it refused.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -46,7 +48,9 @@ pub fn arguments(root: &Path, question: &Question) -> Result<Vec<String>, String
         Question::Flow(node, depth) if checks::node_id(node) && (1..=3).contains(depth) => {
             Args::new(TOOL, "flow").root(root).given("--node", node).pair("--depth", &depth.to_string())
         }
-        Question::History(node) if checks::node_id(node) => Args::new(TOOL, "history").root(root).given("--node", node),
+        Question::History(node) if checks::node_id(node) => {
+            Args::new(TOOL, "history").root(root).given("--node", node).pair("--limit", HISTORY_LIMIT)
+        }
         Question::Around(_) | Question::Flow(..) | Question::History(_) => {
             return Err("that is not a thing the tools can show".to_owned());
         }

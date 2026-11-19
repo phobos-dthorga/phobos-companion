@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Pager from "../shell/Pager.svelte";
+  import { pageHolding, pageOf } from "../shell/paging";
   import { here, openDialog, setFocus } from "../navigation/navigation.svelte";
   import { onMount, tick, untrack } from "svelte";
   import type { EntryRequest } from "../code/types";
@@ -47,7 +49,8 @@
   let only = $state<string | null>(null);
   /** The lane names' column: fixed, so a long name ("merged into ...") wraps instead of widening the column over the marks. */
   const LANE_NAME_PX = 160;
-  let shownDays = $state(DAYS_AT_ONCE);
+  /** Which page of days the list shows, newest days first. */
+  let dayPage = $state(1);
   let focusedDay = $state<string | null>(null);
   /** The day whose "what was I running then?" is open. */
   let runningDay = $state<string | null>(null);
@@ -66,6 +69,7 @@
   const days = $derived(
     byDay(only ? facts.filter((fact) => laneOf(fact) === only) : facts),
   );
+  const pagedDays = $derived(pageOf(days, dayPage, DAYS_AT_ONCE));
 
   /** The words for each kind, with the key written out so the catalogue check can find it. */
   function kindWords(fact: Fact): string {
@@ -147,7 +151,7 @@
   async function jump(day: string) {
     if (here().focus.day !== day) setFocus({ day });
     const index = days.findIndex((d) => d.day === day);
-    if (index >= shownDays) shownDays = index + 1;
+    if (index >= 0) dayPage = pageHolding(index, DAYS_AT_ONCE);
     focusedDay = day;
     await tick();
     const heading = document.getElementById(`timeline-day-${day}`);
@@ -371,7 +375,8 @@
         {/each}
       {/if}
     </div>
-    {#each days.slice(0, shownDays) as group (group.day)}
+    {@render dayPager()}
+    {#each pagedDays.items as group (group.day)}
       <section
         class="day"
         class:focused={focusedDay === group.day}
@@ -584,20 +589,22 @@
         </ol>
       </section>
     {/each}
-    {#if days.length > shownDays}
-      <button
-        type="button"
-        class="action more"
-        onclick={() => (shownDays += DAYS_AT_ONCE)}
-      >
-        {t("timeline-more-days", {
-          count: Math.min(DAYS_AT_ONCE, days.length - shownDays),
-        })}
-      </button>
-    {/if}
+    {@render dayPager()}
   </section>
   <p class="muted how">{t("timeline-how")}</p>
 {/if}
+
+{#snippet dayPager()}
+  <Pager
+    page={pagedDays.page}
+    pages={pagedDays.pages}
+    first={pagedDays.first}
+    last={pagedDays.last}
+    total={pagedDays.total}
+    label={t("timeline-pages")}
+    onchange={(page) => (dayPage = page)}
+  />
+{/snippet}
 
 <style>
   h2 {

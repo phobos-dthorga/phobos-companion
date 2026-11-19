@@ -17,7 +17,8 @@ use std::path::Path;
 const TOOL: &str = "changes";
 const LIST: &str = "list";
 const ENTRY: &str = "entry";
-const VERSIONS: &str = "5";
+/// Every version of each changelog (kit 1.40.0): the window pages through them.
+const VERSIONS: &str = "0";
 const MAX_TEXT: usize = 4000;
 
 /// One repository's changelogs, as the kit reads them.

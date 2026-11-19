@@ -1,5 +1,7 @@
 <script lang="ts">
   import { untrack } from "svelte";
+  import Pager from "../shell/Pager.svelte";
+  import { pageHolding, pageOf } from "../shell/paging";
   import { t } from "../i18n/runtime";
   import type { GameHome } from "../home/types";
   import FailurePanel from "../shell/FailurePanel.svelte";
@@ -71,6 +73,17 @@
   );
   const listed = $derived(new Set((data?.groups ?? []).map((g) => g.id)));
 
+  /** Kinds of message a page, most serious first. */
+  const PER_PAGE = 20;
+  let listPage = $state(1);
+  const paged = $derived(pageOf(shown, listPage, PER_PAGE));
+
+  /** Turns to the page that holds a signature, so a link or a jump to it lands. */
+  function turnTo(id: string) {
+    const index = shown.findIndex((s) => s.id === id);
+    if (index >= 0) listPage = pageHolding(index, PER_PAGE);
+  }
+
   function toggleLevel(level: string) {
     const next = new Set(hidden);
     if (next.has(level)) next.delete(level);
@@ -87,6 +100,7 @@
   }
 
   function jump(id: string) {
+    turnTo(id);
     toggleSignature(id, true);
     void reveal(`log-${id}`);
   }
@@ -96,6 +110,7 @@
     const id = here().focus.signature;
     if (id && data)
       untrack(() => {
+        turnTo(id);
         if (!opened.has(id)) opened = new Set([...opened, id]);
         void reveal(`log-${id}`);
       });
@@ -260,8 +275,9 @@
     </p>
   {/if}
 
+  {@render listPager()}
   <ol class="signatures">
-    {#each shown as signature (signature.id)}
+    {#each paged.items as signature (signature.id)}
       <li>
         <details
           id={`log-${signature.id}`}
@@ -346,10 +362,23 @@
       </li>
     {/each}
   </ol>
+  {@render listPager()}
   <p class="small muted">
     {t("logs-command", { command: reading.reading.command_line })}
   </p>
 {/if}
+
+{#snippet listPager()}
+  <Pager
+    page={paged.page}
+    pages={paged.pages}
+    first={paged.first}
+    last={paged.last}
+    total={paged.total}
+    label={t("logs-pages")}
+    onchange={(page) => (listPage = page)}
+  />
+{/snippet}
 
 <style>
   .summary {

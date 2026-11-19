@@ -4,6 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-11-19
+
+The owner asked (19 November 2026) for new mod settings to be tracked alongside the timeline, for paging further back, for repeated backups to be removable, for livelier progress, and for pictures of pages to share with friends; each is its own commit under this version. Not yet tested on screen.
+
+### Added
+
+- **Paging further back**, the same Newer, Older, Newest and Oldest buttons everywhere a list was cut short. Changes now reaches every version of a changelog, six a page, and a page turn is a step Back returns from. The Timeline pages its days ten at a time (it used to add ten more), Logs its kinds of message twenty at a time (up to 500, where it used to stop at 60), a thing's history ten commits at a time (up to 200, where it stopped at 25), the Tests page 25 rows at a time, and a mod's backups eight at a time once you show them all. A link to a day, a message, a row or a backup turns to its page.
+
+### Dependencies
+
+- Tool kit 1.40.0, now pinned.
+
 ## [0.20.0] - 2026-11-19
 
 The owner asked (19 November 2026) to show "how the contents of our mods, code, etc. is consisted of in a graphical manner", choosing all six views, lines as the first measure, and a new page with the code parts on the Code map. Not yet tested on screen.

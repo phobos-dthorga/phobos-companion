@@ -46,6 +46,6 @@ fn a_commits_code_is_asked_for_by_its_hash_alone() {
 }
 
 #[test]
-fn the_list_asks_for_the_newest_versions_of_one_repository() {
-    assert_eq!(list_arguments(Path::new("repo")), ["changes", "list", "--root", "repo", "--versions", "5", "--json"]);
+fn the_list_asks_for_every_version_of_one_repository_to_page_through() {
+    assert_eq!(list_arguments(Path::new("repo")), ["changes", "list", "--root", "repo", "--versions", "0", "--json"]);
 }

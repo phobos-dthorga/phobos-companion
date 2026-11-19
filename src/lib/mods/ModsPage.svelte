@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Pager from "../shell/Pager.svelte";
+  import { pageHolding, pageOf } from "../shell/paging";
   import { here, setFocus } from "../navigation/navigation.svelte";
   import { reveal } from "../shell/reveal";
   import { openDialog } from "../navigation/navigation.svelte";
@@ -88,6 +90,9 @@
   let said = $state("");
   let output = $state<string[]>([]);
   let showAll = $state<Record<string, boolean>>({});
+  /** With every backup shown, a mod's backups page this many at a time, newest first. */
+  const BACKUPS_PER_PAGE = 8;
+  let backupPages = $state<Record<string, number>>({});
   /** How far along the first read, the texture check and the move in hand are; a move's is null when none is being made. */
   let readProgress = $state(started());
   /** A read again that keeps the page on screen: its own bar at the top, so the work never looks stalled. */
@@ -324,7 +329,23 @@
     if (focusKey && reading.state === "ready") {
       const target = before ? `${focusKey}/before` : focusKey;
       untrack(async () => {
-        if (before) showAll[`${focusKey}/backups`] = true;
+        if (before && reading.state === "ready") {
+          showAll[`${focusKey}/backups`] = true;
+          const mod = reading.repositories
+            .flatMap((r) =>
+              r.status.mods.map(
+                (m) => [`${r.repository}/${m.mod}`, m] as const,
+              ),
+            )
+            .find(([key]) => key === focusKey)?.[1];
+          const marked = mod ? backupBefore(focusKey, mod) : null;
+          const index = mod && marked ? mod.backups.indexOf(marked) : -1;
+          if (index >= 0)
+            backupPages = {
+              ...backupPages,
+              [focusKey]: pageHolding(index, BACKUPS_PER_PAGE),
+            };
+        }
         if (!(await reveal(`mod-${target}`))) await reveal(`mod-${focusKey}`);
       });
     }
@@ -815,8 +836,13 @@
         {@const key = `${repository.repository}/${mod.mod}`}
         {@const fromBefore = backupBefore(key, mod)}
         {@const words = STATE_WORDS[mod.state]}
+        {@const pagedBackups = pageOf(
+          mod.backups,
+          backupPages[key] ?? 1,
+          BACKUPS_PER_PAGE,
+        )}
         {@const backupsShown = showAll[`${key}/backups`]
-          ? mod.backups
+          ? pagedBackups.items
           : mod.backups.slice(0, FIRST_BACKUPS)}
         <li>
           <article class="mod" aria-label={mod.name} id={`mod-${key}`}>
@@ -960,6 +986,18 @@
                     </li>
                   {/each}
                 </ol>
+                {#if showAll[`${key}/backups`]}
+                  <Pager
+                    page={pagedBackups.page}
+                    pages={pagedBackups.pages}
+                    first={pagedBackups.first}
+                    last={pagedBackups.last}
+                    total={pagedBackups.total}
+                    label={t("mods-backup-pages", { mod: mod.name })}
+                    onchange={(page) =>
+                      (backupPages = { ...backupPages, [key]: page })}
+                  />
+                {/if}
                 {#if mod.backups.length > FIRST_BACKUPS}
                   <button
                     type="button"

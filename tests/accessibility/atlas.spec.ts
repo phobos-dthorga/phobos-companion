@@ -207,3 +207,28 @@ test.describe("a set of tools on the list", () => {
     await audit(page);
   });
 });
+
+test.describe("a set of tools on the Mods page (0.26.2)", () => {
+  test("says there are no mods to install, and leads to About", async ({
+    page,
+  }) => {
+    const home = sampleHome();
+    const games = home.games.map((game, index) =>
+      index === 0 ? { ...game, kind: "tools" } : game,
+    );
+    await mockHost(page, {
+      home_status: { result: { ...home, games } },
+      kit_status: healthyKit,
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Mods", exact: true }).click();
+    await expect(page.getByRole("main")).toContainText(
+      "there are no mods to install",
+    );
+    await audit(page);
+    await page.getByRole("button", { name: "Open About", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "About", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+  });
+});

@@ -5,8 +5,12 @@
  */
 export type GameKind = "game" | "tools";
 
-/** The pages about a game being played. A tools entry has none of what they read, so they say so instead of looking. */
+/**
+ * The pages about a game being played. A tools entry has none of what they read, so they say so instead of looking. Mods joined
+ * them in 0.26.2: its words are a game's ("before you play", "your installed mods"), and a tool's installed version is About's.
+ */
 export const GAME_ONLY_PAGES: readonly string[] = [
+  "mods",
   "atlas",
   "logs",
   "memory",

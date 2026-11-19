@@ -339,7 +339,7 @@ change and removal starts from that sentence (the rule is in `AGENTS.md`):
 | Mods (install, back up, go back) | Where the kit has an install adapter: RimWorld today | `config/installs.json`, and `games/<game>/installs.py` in the kit |
 | Mods (textures) | RimWorld only | A kit command with the `textures` surface; most games have no such step |
 | Reports, Atlas | RimWorld only | Kit commands for that game's saves and logs |
-| Atlas, Logs, Memory, Game files, for a set of tools (0.24.0) | Never: a set of tools has none of what they read | Nothing: the page says so in words |
+| Mods (0.26.2), Atlas, Logs, Memory, Game files, for a set of tools (0.24.0) | Never: a set of tools has none of what they read | Nothing: the page says so in words; Mods points to About |
 
 **What stands between this and another person** (not built; listed so later work does not add to it): the program finds the kit
 and the games list by the folder it was built in; it needs Python; and each repository's install is that repository's own script.
@@ -677,7 +677,7 @@ request: pages that showed only a progress bar and empty space (all Save a pictu
 
 | Part | How |
 | --- | --- |
-| Kind | An entry on the list may carry `"kind": "tools"`; without it an entry is a game (`GameKind` in `companion-core`'s `games.rs`, carried to the window on Home's answer). Pages about a game being played (`GAME_ONLY_PAGES` in `src/lib/home/kinds.ts`: Atlas, Logs, Memory, Game files) show `NotForTools` for a tools entry instead of asking the host anything, and their buttons have a dashed edge. Mods, Tests and Reports stay: each already says when a repository has nothing for it, and a tool may one day have installs or a test list |
+| Kind | An entry on the list may carry `"kind": "tools"`; without it an entry is a game (`GameKind` in `companion-core`'s `games.rs`, carried to the window on Home's answer). Pages about a game being played (`GAME_ONLY_PAGES` in `src/lib/home/kinds.ts`: Atlas, Logs, Memory, Game files; Mods from 0.26.2, on the owner's yes, since its words are a game's and a tool's installed version is About's) show `NotForTools` for a tools entry instead of asking the host anything, and their buttons have a dashed edge. Tests and Reports stay: each already says when a repository has nothing for it, and a tool may one day have a test list |
 | Loading | Every `ProgressBar` and `Placeholder` carries `data-picture-wait`, and so does the globe while it draws. Save a picture waits while any is on the page, looking every 250 ms, and takes the picture after two looks in a row find none, so a page that reads in stages is not caught between two. Take it now skips the wait; changing page lets it go. The Memory page's bar for a running watch passes `holdsPicture={false}`: it stays up for minutes while the page is there to see |
 | Placeholders | Under each page's first reading: rows for the Code map, Reports, Settings and Tests; a new `globe` shape (a disc in a panel the globe's height) for the Atlas |
 | Facts | phobos-modkit 1.48.0 gives a report `facts` (label and value). `ReportView` draws them as a strip of small cards above the opening lines, for every report. Save reports give Save, Read and, when built just now, Index; the atlas adds World seed and Surface tiles |

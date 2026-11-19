@@ -4,6 +4,14 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.26.2] - 2026-11-20
+
+The owner saw the Mods page for D'thorga Tools speak as if the tools were a game, and said yes to telling a set of tools it has no mods (20 November 2026). Not yet tested on screen.
+
+### Fixed
+
+- **The Mods page tells a set of tools it has no mods to install**, as the Atlas, Logs, Memory and Game files pages do, instead of "before you play" and "your installed mods". It points to About, with a button, for which version of the Companion you are running and whether a newer one is waiting. Its button in the page bar has a dashed edge while the tools are chosen. Games are unchanged.
+
 ## [0.26.1] - 2026-11-20
 
 The owner could not make a backup of the Companion's records or choose the folder for it (20 November 2026). Not yet tested on screen.

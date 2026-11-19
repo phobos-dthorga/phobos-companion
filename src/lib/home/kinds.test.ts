@@ -9,7 +9,7 @@ describe("what each kind of entry is shown", () => {
     }
   });
 
-  it("tells a set of tools it has no saves, log, running game or game files, and shows it the rest", () => {
+  it("tells a set of tools it has no mods to install, saves, log, running game or game files, and shows it the rest", () => {
     for (const page of GAME_ONLY_PAGES)
       expect(pageServes("tools", page)).toBe(false);
     for (const page of [
@@ -19,7 +19,6 @@ describe("what each kind of entry is shown", () => {
       "codemap",
       "makeup",
       "tests",
-      "mods",
       "reports",
     ])
       expect(pageServes("tools", page)).toBe(true);

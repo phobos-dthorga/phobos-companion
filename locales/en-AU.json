@@ -619,6 +619,8 @@
     "picture-failed": "The picture could not be made: { $reason }",
     "picture-dismiss": "Close this note",
     "tools-page-title": "Nothing to show here for { $name }",
+    "tools-page-mods": "{ $name } is a set of tools, not a game: there are no mods to install or go back from. Which version of the Companion you are running, and whether a newer one is waiting with its installer, is on the About page.",
+    "tools-page-about": "Open About",
     "tools-page-atlas": "{ $name } is a set of tools, not a game: there are no saves, so there is no world to draw.",
     "tools-page-logs": "{ $name } is a set of tools, not a game: there is no game log to read.",
     "tools-page-memory": "{ $name } is a set of tools, not a game: there is no running game to watch.",

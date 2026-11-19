@@ -16,6 +16,7 @@
     title,
     closeLabel,
     width = 1500,
+    height = "92vh",
     copyable = false,
     onclose,
     below,
@@ -26,6 +27,8 @@
     closeLabel: string;
     /** Its widest, in pixels; never wider than the window. */
     width?: number;
+    /** Its height: the whole window by default; "auto" for a small dialog that fits what it holds. */
+    height?: string;
     /** Offers "Copy address" for the place it shows (docs/cross-links.md, N3). */
     copyable?: boolean;
     onclose: () => void;
@@ -50,6 +53,7 @@
   bind:this={dialog}
   class="window"
   style:--window-width={`${width}px`}
+  style:--window-height={height}
   aria-labelledby={titleId}
   {onclose}
 >
@@ -83,7 +87,7 @@
 <style>
   .window {
     width: min(var(--window-width), 96vw);
-    height: 92vh;
+    height: var(--window-height, 92vh);
     max-width: none;
     max-height: none;
     padding: 20px 24px;

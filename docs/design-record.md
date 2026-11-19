@@ -525,6 +525,25 @@ views, lines as the first measure, and "a mix of new page and inside code map, a
 **Agent choices, owner to revise:** the 30-day window for changes, the key M, the page at the end of the bar (it now holds eleven;
 grouping it is still open), and "Size as installed" left out (it needs each game's install records).
 
+## Screen notes (built 19 Nov 2026, 0.22.0)
+
+**The owner said yes to a "something's off" key** (19 Nov 2026), the first of four tools proposed for working with agent sessions.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Flag a page that looks wrong in one key press, with the picture and the page's address kept for them, and a few words if they like |
+| What does it stop them doing? | Describing in a conversation where on which page something looked off, and losing the moment when no session is open |
+| How does it change the way they work? | Oddities get noted as they are seen, and every session starts by reading them; Home shows what was done about each |
+
+| Part | How |
+| --- | --- |
+| Taking it | The picture is drawn before the dialog opens (the same drawing as Save a picture), so it shows the page, not the dialog |
+| Keeping it | The host writes `screen-notes/<id>/picture.png` and `note.json` whole, into a folder made beside its place and then moved; the id is the owner's local time (`20261119-101500`), the time inside is UTC, and the version is the host's own |
+| Reading it | Agent sessions: phobos-modkit 1.41.0's `screen-notes list`, and `resolve` writes `resolved.json` beside the note. Home: open notes, and the newest five dealt with |
+
+**Agent choices, owner to revise:** the ! key (Shift+1); the button's words "Something's off"; five dealt-with notes on Home; the
+folder fixed in the Companion's own folder, not a setting, because the Companion and the kit must agree on it.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

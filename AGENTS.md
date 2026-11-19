@@ -34,6 +34,11 @@ reads them.
   invent hour estimates.
 - **Nothing counts as tested on screen until the owner says so.** A build, a test or a browser audit is not that.
 - **Never control the owner's mouse or keyboard.** Never edit, replace or delete saves.
+- **Read the owner's screen notes at the start of every session** (owner's go-ahead, 19 Nov 2026: the "something's off" key,
+  `docs/later.md` item 1): `python -m phobos_modkit screen-notes list`, run from `external/phobos-modkit/python`. Each is a page the
+  owner flagged, with its picture (`picture.png` in the note's folder: read it), its address and their words. Raise them with the
+  owner before other work, and when one is dealt with, `screen-notes resolve ID --how "what was done, and in which version"`.
+  **Never delete a note.**
 - Every new behaviour says, in the design record, what it lets the person do, what it stops them doing and how it changes the
   way they work. Owner choices, agent defaults and agent choices are labelled as such.
 - Write plainly: answer first, short sentences, **bold** for must-dos, tables for comparisons. Diagrams are Mermaid. Never use
@@ -71,7 +76,8 @@ reads them.
   0.9.0, their word on notes no row names ("make a row" or "no row needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks),
   each appended to its own data folder (`test-verdicts/<repository>.jsonl` and `test-key-decisions/<repository>.jsonl`,
   `src-tauri/src/tests_page.rs`, owner, 17 Nov 2026); phobos-modkit's `test-pass` reads both and `apply` writes verdicts into a test
-  list, never this program.
+  list, never this program. **Screen notes** (0.22.0) are written whole into `screen-notes/<id>/` in its own data folder
+  (`src-tauri/src/screen_notes.rs`): the page's picture and `note.json`; only the kit's `screen-notes resolve` writes beside them.
 - **The core never names a game.** A game reaches it only through the manifest's `game` field and the owner's own list,
   `.local/games.json`, which holds personal paths and is never committed.
 - **Git is read with `--no-optional-locks` and `core.fsmonitor=false`**, through `src-tauri/src/git.rs`: reading takes no lock and

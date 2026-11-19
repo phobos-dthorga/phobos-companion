@@ -12,6 +12,11 @@
   import { split } from "../mods/ledger";
   import { go, openDialog } from "../navigation/navigation.svelte";
   import { commitRequest } from "../code/presentation";
+  import { placeOf } from "../navigation/place";
+  import { formatWhen } from "../shell/dates";
+  import type { Notes } from "../notes/notes";
+  import { readScreenNotes, showScreenNote } from "../notes/desktopClient";
+  import { noteSaves } from "../notes/saves.svelte";
 
   const PENDING_SHOWN = 6;
   const OPEN_SHOWN = 6;
@@ -54,6 +59,21 @@
       if (answer.state === "ready" && id === game.id) pins = answer.pins;
     });
   });
+
+  /** The screen notes (0.22.0): read again whenever one is saved; null until read, or when the read fails. */
+  let notes = $state<Notes | null>(null);
+  $effect(() => {
+    void noteSaves.count;
+    void readScreenNotes().then((answer) => {
+      if (answer.state === "ready") notes = answer.notes;
+    });
+  });
+
+  /** A note's address takes the owner back to the page it was taken on. */
+  function openNotePage(address: string) {
+    const where = placeOf(address);
+    if (where) go(where);
+  }
 
   /** A latest commit opens its code (cross-links S4). */
   function openCommit(repository: string, hash: string, subject: string) {
@@ -186,6 +206,77 @@
   </section>
 {/if}
 
+{#if notes && (notes.open.length > 0 || notes.dealt_count > 0)}
+  <section
+    class="panel"
+    class:attention={notes.open.length > 0}
+    aria-labelledby="notes-title"
+  >
+    <h2 id="notes-title">
+      {#if notes.open.length > 0}<span aria-hidden="true">◆</span>{/if}
+      {t("notes-title")}
+    </h2>
+    <p class="count">
+      {notes.open.length > 0
+        ? t("notes-open", { count: notes.open.length })
+        : t("notes-none-open")}
+    </p>
+    <ul>
+      {#each notes.open as note (note.id)}
+        <li class="dated">
+          <span class="read">{formatWhen(note.time)}</span>
+          <div class="body">
+            <div>{note.words || t("notes-no-words")}</div>
+            <div class="muted small">{note.page} · {note.game}</div>
+            <div class="note-actions">
+              {#if note.has_picture}
+                <button
+                  type="button"
+                  class="action"
+                  onclick={() => void showScreenNote(note.id)}
+                  >{t("notes-show")}</button
+                >
+              {/if}
+              {#if placeOf(note.address)}
+                <button
+                  type="button"
+                  class="action"
+                  onclick={() => openNotePage(note.address)}
+                  >{t("notes-go")}</button
+                >
+              {/if}
+            </div>
+          </div>
+        </li>
+      {/each}
+    </ul>
+    {#if notes.dealt.length > 0}
+      <details class="pin-versions">
+        <summary
+          >{t("notes-dealt", {
+            count: notes.dealt_count,
+            shown: notes.dealt.length,
+          })}</summary
+        >
+        <ul>
+          {#each notes.dealt as note (note.id)}
+            <li class="dated">
+              <span class="read">{formatWhen(note.time)}</span>
+              <div class="body">
+                <div>{note.words || t("notes-no-words")}</div>
+                <div class="muted small">
+                  {note.page} · {note.resolved?.how}
+                </div>
+              </div>
+            </li>
+          {/each}
+        </ul>
+      </details>
+    {/if}
+    <p class="muted small more">{t("notes-how")}</p>
+  </section>
+{/if}
+
 {#if pins && pins.pins.length > 0}
   <section class="panel" aria-labelledby="pins-title">
     <h2 id="pins-title">{t("pins-title")}</h2>
@@ -275,6 +366,13 @@
 
   .attention h2 span {
     color: var(--colour-accent);
+  }
+
+  .note-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: 4px;
   }
 
   .problem {

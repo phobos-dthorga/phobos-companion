@@ -37,6 +37,7 @@
   import LogsPage from "./lib/logs/LogsPage.svelte";
   import ActivityStrip from "./lib/shell/ActivityStrip.svelte";
   import PictureButton from "./lib/pictures/PictureButton.svelte";
+  import ScreenNoteButton from "./lib/notes/ScreenNoteButton.svelte";
   import MakeupPage from "./lib/makeup/MakeupPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
@@ -284,6 +285,7 @@
     </span>
     {#if selected}
       <PictureButton game={selected.name} page={t(`page-${page}`)} />
+      <ScreenNoteButton game={selected.name} page={t(`page-${page}`)} />
     {/if}
     <span class="look-again">
       {#if !looking && home.state === "ready"}

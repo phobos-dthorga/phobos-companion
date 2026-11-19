@@ -16,6 +16,7 @@ mod patch_targets;
 mod pending;
 mod pictures;
 mod reports;
+mod screen_notes;
 mod settings_ledger;
 mod settings_page;
 mod shortcuts;
@@ -353,6 +354,40 @@ async fn show_picture(app: tauri::AppHandle, path: String) -> Result<(), Failure
     blocking(move || pictures::show(&folder, std::path::Path::new(&path))).await
 }
 
+/// Saves a screen note ("something's off"): the page's PNG bytes as the request's body, what the window knows of the page as JSON
+/// (percent-encoded) in the `x-screen-note` header. The host adds the time and its own version. Returns the note's name.
+#[tauri::command]
+async fn save_screen_note(app: tauri::AppHandle, request: tauri::ipc::Request<'_>) -> Result<String, Failure> {
+    let tauri::ipc::InvokeBody::Raw(bytes) = request.body() else {
+        return Err(Failure::refused("a note's picture is sent as its bytes"));
+    };
+    let note: screen_notes::NoteRequest = request
+        .headers()
+        .get("x-screen-note")
+        .and_then(|value| value.to_str().ok())
+        .map(pictures::decode_name)
+        .and_then(|text| serde_json::from_str(&text).ok())
+        .ok_or_else(|| Failure::refused("the note's details did not come with it"))?;
+    let bytes = bytes.clone();
+    let data = data_folder(&app)?;
+    let version = app.package_info().version.to_string();
+    blocking(move || screen_notes::save(&data, &note, &version, &bytes, &companion_core::time::now_utc())).await
+}
+
+/// The screen notes: open ones newest first, and the newest dealt with.
+#[tauri::command]
+async fn screen_notes_list(app: tauri::AppHandle) -> Result<screen_notes::Notes, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || Ok(screen_notes::list(&data))).await
+}
+
+/// Shows a screen note's picture in the file manager.
+#[tauri::command]
+async fn show_screen_note(app: tauri::AppHandle, id: String) -> Result<(), Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || screen_notes::show(&data, &id)).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -398,6 +433,9 @@ pub fn run() {
             mark_settings,
             save_picture,
             show_picture,
+            save_screen_note,
+            screen_notes_list,
+            show_screen_note,
             read_shortcuts,
             save_shortcuts
         ])

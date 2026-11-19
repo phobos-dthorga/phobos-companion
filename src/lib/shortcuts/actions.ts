@@ -110,6 +110,12 @@ export const ACTIONS: Action[] = [
     defaultKey: "p",
     words: "shortcut-picture",
   },
+  {
+    id: "screen-note",
+    scope: "everywhere",
+    defaultKey: "!",
+    words: "shortcut-screen-note",
+  },
   { id: "help", scope: "everywhere", defaultKey: "?", words: "shortcut-help" },
   {
     id: "nav.back",

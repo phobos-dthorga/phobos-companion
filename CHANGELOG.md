@@ -4,6 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-11-19
+
+The owner said yes (19 November 2026) to four new tools for working with agent sessions and to the game-files work; each is its own commit under this version, and anything not yet built is kept in docs/later.md. Not yet tested on screen.
+
+### Added
+
+- **Something's off** (the ! key, or the button beside Save a picture): when a page looks wrong, press it. It draws the page as it is, then asks what looks wrong (the words are optional; Ctrl+Enter saves). The picture, the page's address and your words are kept in the Companion's own folder, and the next agent session reads every open note when it starts, then says what it did. **Home lists the notes still waiting**, with Show the picture and Go to the page, and the newest ones dealt with, saying how.
+
+### Dependencies
+
+- Tool kit 1.42.0, now pinned (1.41.0 brought screen-notes, which agent sessions use to read and resolve the notes).
+
 ## [0.21.0] - 2026-11-19
 
 The owner asked (19 November 2026) for new mod settings to be tracked alongside the timeline, for paging further back, for repeated backups to be removable, for livelier progress, and for pictures of pages to share with friends; each is its own commit under this version. Not yet tested on screen.

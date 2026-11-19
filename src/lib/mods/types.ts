@@ -18,7 +18,16 @@ export type Delta = {
   reworded: { now: Entry; would: Entry }[];
   saveNotes: Entry[];
   summaries: Record<string, string>;
+  /**
+   * Installing from the repository only (kit 1.53.0): entries the repository's changelog does not hold now, which a changelog
+   * cannot call lost. They are not in `lose`.
+   */
+  unlisted?: Entry[];
+  /** Why, by version: a number used twice, or installed from uncommitted work the repository's changelog no longer lists. */
+  unlistedWhy?: Record<string, UnlistedWhy>;
 };
+
+export type UnlistedWhy = "reused" | "uncommitted";
 
 /** Where an installed copy came from, written by the repository's install. */
 export type InstallRecord = {
@@ -57,6 +66,8 @@ export type ModState =
   | "behind"
   | "ahead"
   | "differs"
+  /** The only difference is entries the repository's changelog does not hold now, set aside from `lose` (kit 1.53.0). */
+  | "unlisted"
   /** The changelogs agree, and every changed file was only rebuilt from unchanged code (kit 1.26.0). */
   | "rebuilt"
   /** The changelogs agree, but files differ that no entry describes. */

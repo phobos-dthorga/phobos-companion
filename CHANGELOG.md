@@ -4,6 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.28.2] - 2026-11-20
+
+The owner's screen note on the Mods page (20 November 2026): "Why is it showing me as taking away nine entries?" Not yet tested on screen.
+
+### Fixed
+
+- **Entries the repository's changelog does not hold now are no longer called a loss.** Two sessions had both numbered their work D'thorga Framework 0.184.0, and the installed one was renumbered, so its nine entries read as "take away 9 entries" though their code was still in the repository. They now show under their own heading in Installed now, with why for each version: a number used twice, or installed from changes not committed then and not in the repository's changelog now. Either way the changelog cannot say whether the code went, and the page says so. A card whose only difference is these says "Installed copy has entries the repository's changelog does not hold now". An entry dropped from a version both copies share, and going back to a backup, still read as taking it away.
+
+### Dependencies
+
+- phobos-modkit v1.51.0 to v1.53.0: installs status sets those entries aside (unlisted, with unlistedWhy); 1.52.0 brought rimworld-save thing, which this program does not use yet.
+
 ## [0.28.1] - 2026-11-20
 
 Loose ends the owner said yes to (20 November 2026). Not yet tested on screen.

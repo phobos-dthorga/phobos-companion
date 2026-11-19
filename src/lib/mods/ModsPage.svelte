@@ -647,7 +647,27 @@
     {:else}
       <p class="muted small">{t("mods-lose-nothing")}</p>
     {/if}
+    {@render unlisted(mod.update, key, source)}
   </section>
+{/snippet}
+
+<!-- Entries the repository's changelog does not hold now, which it cannot call lost: a number used twice, or uncommitted work. -->
+{#snippet unlisted(delta: Delta, key: string, source: Source)}
+  {@const entries = delta.unlisted ?? []}
+  {#if entries.length > 0}
+    <h5 class="unlisted">
+      <span aria-hidden="true">#</span>
+      {t("mods-unlisted", { count: entries.length })}
+    </h5>
+    {#each Object.entries(delta.unlistedWhy ?? {}) as [version, why] (version)}
+      <p class="small">
+        {why === "reused"
+          ? t("mods-unlisted-reused", { version })
+          : t("mods-unlisted-uncommitted", { version })}
+      </p>
+    {/each}
+    {@render entryList(entries, delta.summaries, `${key}/unlisted`, source)}
+  {/if}
 {/snippet}
 
 {#snippet afterColumn(mod: ModInstall, key: string, source: Source)}
@@ -1275,6 +1295,10 @@
 
   .lose {
     color: var(--colour-risk);
+  }
+
+  .unlisted {
+    color: var(--colour-comparison);
   }
 
   .columns {

@@ -18,6 +18,7 @@ export const STATE_WORDS: Record<ModState, { label: string; mark: string }> = {
   behind: { label: "mods-state-behind", mark: "↑" },
   ahead: { label: "mods-state-ahead", mark: "↓" },
   differs: { label: "mods-state-differs", mark: "⇅" },
+  unlisted: { label: "mods-state-unlisted", mark: "#" },
   rebuilt: { label: "mods-state-rebuilt", mark: "⚙" },
   unlogged: { label: "mods-state-unlogged", mark: "◆" },
 };

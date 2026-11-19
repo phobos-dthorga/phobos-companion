@@ -280,8 +280,15 @@ const sampleLedger = [
   },
 ];
 
-async function open(page: Page, running: string[] = [], slowRead = false) {
+async function open(
+  page: Page,
+  running: string[] = [],
+  slowRead = false,
+  // Changes the sample before the page reads it, for a case one test needs.
+  edit: (installs: ReturnType<typeof sampleInstalls>) => void = () => {},
+) {
   const installs = sampleInstalls(running);
+  edit(installs);
   await mockHost(page, {
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
@@ -407,6 +414,37 @@ for (const [name, viewport] of [
           document.documentElement.clientWidth,
       );
       expect(overflow).toBeLessThanOrEqual(0);
+    });
+
+    test("entries the repository's changelog does not hold now are not called a loss, and say why", async ({
+      page,
+    }) => {
+      // The owner's screen note of 20 Nov 2026: an install of uncommitted work, later renumbered, read as "take away 9 entries".
+      await open(page, [], false, (installs) => {
+        const other = installs.result[0].status.mods[1];
+        other.state = "unlisted";
+        other.installed = { ...other.installed, version: "0.5.0" };
+        Object.assign(other.update, {
+          unlisted: [
+            entry("0.5.0", "Changed", "Sample engines cut."),
+            entry("0.5.0", "Added", "Sample logbook."),
+          ],
+          unlistedWhy: { "0.5.0": "uncommitted" },
+        });
+      });
+      const card = page.getByRole("article", { name: "Other Sample" });
+      await expect(card).toContainText(
+        "Installed copy has entries the repository's changelog does not hold now",
+      );
+      await expect(card).toContainText(
+        "2 entries not in the repository's changelog now",
+      );
+      await expect(card).toContainText(
+        "0.5.0 was installed from changes not committed then",
+      );
+      await expect(card).toContainText("Sample engines cut.");
+      await expect(card).not.toContainText("take away");
+      await audit(page);
     });
 
     test("asks before a move, and says what it did", async ({ page }) => {

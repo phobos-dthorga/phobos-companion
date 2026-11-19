@@ -1,7 +1,7 @@
 //! The owner's list of games and their repositories. It holds personal paths, so it lives outside version control.
 
 use crate::failure::{Failure, FailureCode};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashSet};
 use std::env;
 use std::fs;
@@ -31,6 +31,19 @@ struct ListedGame {
     /// Where the game keeps its files, by kind, when a guess from its name would miss them (0.22.0).
     #[serde(default)]
     places: BTreeMap<String, PathBuf>,
+    /// A game, or a set of tools listed beside the games so their own work shows too (0.24.0); a game when the list says nothing.
+    #[serde(default)]
+    kind: GameKind,
+}
+
+/// What an entry on the list is (0.24.0, the owner: the Companion "as its own game"). Tools have repositories, changelogs and
+/// history like any game, but no saves, log, running game or game files, so the pages for those say so instead of looking.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum GameKind {
+    #[default]
+    Game,
+    Tools,
 }
 
 /// The kinds of place a game's entry may name (0.22.0; `docs/later.md`, item 5).
@@ -55,6 +68,7 @@ pub struct Game {
     pub id: String,
     pub name: String,
     pub repositories: Vec<Repository>,
+    pub kind: GameKind,
 }
 
 /// The list's place: the variable if set, else `.local/games.json` in the folder the program was built from.
@@ -145,7 +159,7 @@ fn parse(text: &str) -> Result<Vec<Game>, String> {
             return Err(format!("the id {} is listed twice", game.id));
         }
         let repositories = game.repositories.iter().map(|path| repository(&root, path)).collect();
-        games.push(Game { id: game.id, name: game.name, repositories });
+        games.push(Game { id: game.id, name: game.name, repositories, kind: game.kind });
     }
     Ok(games)
 }

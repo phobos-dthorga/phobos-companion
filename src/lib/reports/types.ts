@@ -41,9 +41,13 @@ export type Block =
 
 export type Section = { heading: string; level: number; blocks: Block[] };
 
+/** A short labelled value saying where a report came from ("Save", "PG16.rws"); kit 1.48.0 on, absent before. */
+export type Fact = { label: string; value: string };
+
 export type Report = {
   format: number;
   title: string;
+  facts?: Fact[];
   lines: string[];
   blocks: Block[];
   sections: Section[];

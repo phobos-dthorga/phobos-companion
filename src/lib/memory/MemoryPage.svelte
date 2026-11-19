@@ -273,7 +273,11 @@
         {#if liveData?.label}<span class="muted small">“{liveData.label}”</span
           >{/if}
       </h2>
-      <ProgressBar progress={bar} fallback={t("memory-bar-starting")} />
+      <ProgressBar
+        progress={bar}
+        fallback={t("memory-bar-starting")}
+        holdsPicture={false}
+      />
       {#if liveData && liveData.state === "running"}
         <p class="small muted">
           {t("memory-live-left", {

@@ -4,6 +4,35 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-11-19
+
+The owner asked (19 November 2026) for three things: no more pages that are only a progress bar and empty space, which is also all Save a picture caught while a page loaded; a neater top to the Atlas page; and the Companion listed as its own game. They chose one entry holding all three tools (the Companion, the tool kit and the logger), with pages that say plainly when they have nothing for it. Not yet tested on screen.
+
+### Added
+
+- **Your tools beside your games**: an entry on your games list may say it is a set of tools ("kind": "tools"). It gets Home, Changes, Timeline, the Code map, Make-up, Tests and Reports like any game. **The Atlas, Logs, Memory and Game files pages say in words that a set of tools has no saves, log, running game or game files**, and their buttons have a dashed edge while one is chosen. An entry that says nothing is a game, as before. Checked on RimWorld (a game) and the tools entry.
+- Two questions on the Decisions page: teaching the Code map to read TypeScript, Svelte and Rust, so the Companion's own code can be followed (today it reads the kit's Python only), and how much of decompiling the Companion should take on.
+
+### Changed
+
+- **Save a picture waits for the page to finish loading**: pressed while a page shows its progress bar, it says it is waiting and takes the picture once the page has loaded and stayed loaded for half a second. **Take it now** takes it at once; the close button lets it go, and so does changing page. The Memory page's bar for a running watch does not hold it up.
+- **Pages show the shape of what is coming while they read**, beneath the bar, instead of empty space: the Code map, Reports, Settings and Tests now, as Changes, Logs, Make-up, Memory, Mods and Timeline already did. The Atlas page shows a globe.
+- **A tidier top to the Atlas page**: the title and Read the newest save again on one line (the button says Reading the save while it works); what the map shows as the page's opening line; where it came from (save, when it was read, world seed, tiles) as a strip of small cards instead of a long sentence; the view and show choices in one panel with their labels lined up; and, where the window is wide, the tile you picked and the colour key beside the globe instead of below it, with Go to your colony above them.
+- **Every report shows where it came from as a strip of facts** when the tools give them (save reports do from phobos-modkit 1.48.0).
+
+### Fixed
+
+- **No more empty band under the top bars while a page loads.** Since 0.21.0 the activity strip had no row of its own in the window's layout, so whenever a page was shorter than the window (always while it loaded) the strip stretched into a tall empty band and pushed the page down.
+
+### Dependencies
+
+- phobos-modkit 1.48.0 (report facts).
+
+### Compatibility and limits
+
+- **Install 0.24.0 before opening the Companion once your list has a tools entry**: 0.23.0 and older refuse a list with a field they do not know, and say the list could not be read.
+- The Code map reads C#, XML Defs, Lua and Python, so for the Companion's own repository it says nothing was read; it follows the kit's Python. Readers for TypeScript, Svelte and Rust are a question on the Decisions page.
+
 ## [0.23.0] - 2026-11-19
 
 The owner decided (19 November 2026) that memory profiling is done from the Companion rather than by asking agent sessions to run watches; the tool kit gained what a program needs to follow, stop and mark a watch (phobos-modkit 1.47.0). Not yet tested on screen, and no watch has been started from the window yet.

@@ -250,7 +250,7 @@
   </div>
   <div class="crosshair" aria-hidden="true"></div>
   {#if !ready}
-    <p class="drawing" role="status">{t("atlas-drawing")}</p>
+    <p class="drawing" role="status" data-picture-wait>{t("atlas-drawing")}</p>
   {/if}
   <div class="controls" role="group" aria-label={t("atlas-controls")}>
     <button

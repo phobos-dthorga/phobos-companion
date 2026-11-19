@@ -3,7 +3,7 @@ use companion_core::git::Commit;
 use std::path::PathBuf;
 
 fn game() -> Game {
-    Game { id: "g".to_owned(), name: "Game".to_owned(), repositories: Vec::<Repository>::new() }
+    Game { id: "g".to_owned(), name: "Game".to_owned(), repositories: Vec::<Repository>::new(), kind: GameKind::Game }
 }
 
 fn repository(name: &str, commits: &[(i64, &str)], uncommitted: usize) -> RepositoryReading {
@@ -67,6 +67,7 @@ fn games_sort_by_most_recent_and_undated_last() {
         id: name.to_owned(),
         name: name.to_owned(),
         repositories: Vec::new(),
+        kind: GameKind::Game,
         last_worked,
         latest: Vec::new(),
         unfinished: Vec::new(),
@@ -85,6 +86,7 @@ fn a_real_game_reads_end_to_end() {
         name: "phobos-companion".to_owned(),
         path: PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(".."),
     }];
-    let home = read_game(&Game { id: "self".to_owned(), name: "Self".to_owned(), repositories });
+    let home = read_game(&Game { id: "self".to_owned(), name: "Self".to_owned(), repositories, kind: GameKind::Tools });
+    assert_eq!(home.kind, GameKind::Tools);
     assert!(home.problems.is_empty(), "{:?}", home.problems);
 }

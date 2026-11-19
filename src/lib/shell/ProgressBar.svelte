@@ -9,9 +9,19 @@
    * long the same work took last time and says about how long is left (0.21.0), and only moves when it has never been timed.
    * Always with words saying what is being done; the stages already finished show as a trail above (0.21.0), and the work's latest
    * line of output beneath. `fallback` is said until the work names itself, and is the name its timing is kept by.
+   *
+   * While a bar is on screen, Save a picture waits for it to go (0.24.0), so a picture shows the page and not its loading.
+   * `holdsPicture` is false for a bar that stays up for minutes while the page is already there to see (a memory watch).
    */
-  let { progress, fallback }: { progress: ProgressState; fallback: string } =
-    $props();
+  let {
+    progress,
+    fallback,
+    holdsPicture = true,
+  }: {
+    progress: ProgressState;
+    fallback: string;
+    holdsPicture?: boolean;
+  } = $props();
 
   const TICK_MS = 250;
 
@@ -38,7 +48,7 @@
   });
 </script>
 
-<div class="progress">
+<div class="progress" data-picture-wait={holdsPicture ? "" : undefined}>
   {#if finished.stages.length > 0}
     <ol class="trail" aria-label={t("progress-trail")}>
       {#if finished.earlier > 0}

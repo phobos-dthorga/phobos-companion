@@ -1,8 +1,15 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { t } from "../i18n/runtime";
   import { register } from "../shortcuts/registry";
-  import { capture, copyPicture, pictureName } from "./capture";
+  import {
+    capture,
+    copyPicture,
+    pictureName,
+    SETTLED_LOOKS,
+    settledLooks,
+    stillLoading,
+  } from "./capture";
   import { savePicture, showPicture } from "./desktopClient";
 
   /**
@@ -14,16 +21,68 @@
 
   type Result =
     | { state: "idle" }
+    | { state: "waiting" }
     | { state: "drawing" }
     | { state: "saved"; path: string; copied: boolean }
     | { state: "failed"; reason: string };
 
   let result = $state<Result>({ state: "idle" });
 
-  async function take() {
-    if (result.state === "drawing") return;
+  /** How often a waiting picture looks again whether the page has finished loading. */
+  const LOOK_MS = 250;
+  let looking: ReturnType<typeof setInterval> | null = null;
+
+  function pageElement(): HTMLElement | null {
     const main = document.querySelector("main");
-    if (!(main instanceof HTMLElement)) return;
+    return main instanceof HTMLElement ? main : null;
+  }
+
+  function stopLooking() {
+    if (looking) clearInterval(looking);
+    looking = null;
+  }
+
+  /**
+   * A picture asked for while the page is still loading waits until it has loaded (0.24.0: one taken mid-read showed only the
+   * progress bar), unless the owner takes it now. Changing page while it waits lets it go.
+   */
+  function take() {
+    if (result.state === "drawing" || result.state === "waiting") return;
+    const main = pageElement();
+    if (!main) return;
+    if (!stillLoading(main)) return void draw(main);
+    result = { state: "waiting" };
+    const askedOn = page;
+    let looks = 0;
+    looking = setInterval(() => {
+      const now = pageElement();
+      if (page !== askedOn || !now) {
+        stopLooking();
+        result = { state: "idle" };
+        return;
+      }
+      looks = settledLooks(looks, stillLoading(now));
+      if (looks >= SETTLED_LOOKS) {
+        stopLooking();
+        void draw(now);
+      }
+    }, LOOK_MS);
+  }
+
+  function takeNow() {
+    stopLooking();
+    const main = pageElement();
+    if (main) void draw(main);
+  }
+
+  function dismiss() {
+    stopLooking();
+    result = { state: "idle" };
+  }
+
+  onDestroy(stopLooking);
+
+  async function draw(main: HTMLElement) {
     result = { state: "drawing" };
     try {
       const bytes = await capture(main);
@@ -54,15 +113,26 @@
   <button
     type="button"
     class="action"
-    disabled={result.state === "drawing"}
+    disabled={result.state === "drawing" || result.state === "waiting"}
     onclick={take}
     >{result.state === "drawing"
       ? t("picture-drawing")
-      : t("picture-take")}</button
+      : result.state === "waiting"
+        ? t("picture-waiting-button")
+        : t("picture-take")}</button
   >
-  {#if result.state === "saved" || result.state === "failed"}
-    <span class="notice" role="status">
-      {#if result.state === "saved"}
+  {#if result.state === "saved" || result.state === "failed" || result.state === "waiting"}
+    <span
+      class="notice"
+      class:waiting={result.state === "waiting"}
+      role="status"
+    >
+      {#if result.state === "waiting"}
+        <span>{t("picture-waiting")}</span>
+        <button type="button" class="action" onclick={takeNow}
+          >{t("picture-now")}</button
+        >
+      {:else if result.state === "saved"}
         <span
           >{result.copied
             ? t("picture-saved-copied", { path: result.path })
@@ -81,8 +151,10 @@
       <button
         type="button"
         class="action"
-        aria-label={t("picture-dismiss")}
-        onclick={() => (result = { state: "idle" })}>✕</button
+        aria-label={result.state === "waiting"
+          ? t("picture-cancel")
+          : t("picture-dismiss")}
+        onclick={dismiss}>✕</button
       >
     </span>
   {/if}
@@ -107,5 +179,9 @@
     border: 1px solid var(--colour-success);
     border-radius: 4px;
     overflow-wrap: anywhere;
+  }
+
+  .notice.waiting {
+    border-color: var(--colour-accent);
   }
 </style>

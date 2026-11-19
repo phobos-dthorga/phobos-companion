@@ -22,6 +22,8 @@
   import { loadShortcuts, shortcuts } from "./lib/shortcuts/state.svelte";
   import GamesNavigator from "./lib/home/GamesNavigator.svelte";
   import WherePage from "./lib/home/WherePage.svelte";
+  import NotForTools from "./lib/home/NotForTools.svelte";
+  import { pageServes } from "./lib/home/kinds";
   import { readHome } from "./lib/home/desktopClient";
   import { formatTime, formatUnixDate } from "./lib/home/presentation";
   import type { HomeReading } from "./lib/home/types";
@@ -226,6 +228,7 @@
               type="button"
               class="page"
               class:current={page === next.page}
+              class:elsewhere={!pageServes(selected?.kind, next.page)}
               aria-current={page === next.page ? "page" : undefined}
               onclick={() => goPage(next.page)}>{t(next.key)}</button
             >
@@ -312,7 +315,9 @@
     </nav>
 
     <main class="canvas">
-      {#if page === "settings" && home.state !== "reading"}
+      {#if selected && !pageServes(selected.kind, page)}
+        <NotForTools game={selected} {page} />
+      {:else if page === "settings" && home.state !== "reading"}
         <SettingsPage {games} />
       {:else if page === "decisions" && home.state !== "reading"}
         <DecisionsPage />
@@ -473,10 +478,13 @@
 </div>
 
 <style>
+  /* Header, what is looked at, the activity strip, the workspace (the one row that stretches) and the status bar. The strip had
+     no row of its own from 0.21.0 to 0.23.0, so it took the stretching row: a short page, such as one still loading, had an empty
+     band above it as tall as the space left over. */
   .shell {
     min-height: 100vh;
     display: grid;
-    grid-template-rows: auto auto 1fr auto;
+    grid-template-rows: auto auto auto 1fr auto;
   }
 
   .command-bar,
@@ -552,6 +560,12 @@
     border: 1px solid var(--colour-line);
     border-radius: 4px;
     cursor: pointer;
+  }
+
+  /* A page with nothing for the entry looked at (a set of tools has no saves or log, 0.24.0): a dashed edge, and the page says
+     why when opened. */
+  .page.elsewhere {
+    border-style: dashed;
   }
 
   .page.current {

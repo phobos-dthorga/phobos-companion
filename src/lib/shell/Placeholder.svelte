@@ -9,20 +9,27 @@
     rows = 5,
     height = 320,
   }: {
-    /** A picture of blocks (treemap, globe), a chart with a band, or a list of rows. */
-    shape: "blocks" | "chart" | "rows";
+    /** A picture of blocks (treemap), a globe (0.24.0), a chart with a band, or a list of rows. */
+    shape: "blocks" | "globe" | "chart" | "rows";
     rows?: number;
     height?: number;
   } = $props();
 </script>
 
-<div class="placeholder {shape}" aria-hidden="true" style:--height="{height}px">
+<div
+  class="placeholder {shape}"
+  aria-hidden="true"
+  data-picture-wait
+  style:--height="{height}px"
+>
   {#if shape === "blocks"}
     <div class="block big"></div>
     <div class="block"></div>
     <div class="block"></div>
     <div class="block"></div>
     <div class="block"></div>
+  {:else if shape === "globe"}
+    <div class="block sphere"></div>
   {:else if shape === "chart"}
     <div class="block band"></div>
   {:else}
@@ -47,6 +54,21 @@
 
   .blocks .big {
     grid-row: span 2;
+  }
+
+  .globe {
+    display: grid;
+    place-items: center;
+    height: var(--height);
+    background: var(--colour-surface);
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
+  }
+
+  .globe .sphere {
+    height: 78%;
+    aspect-ratio: 1;
+    border-radius: 50%;
   }
 
   .chart .band {

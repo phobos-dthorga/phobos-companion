@@ -339,6 +339,7 @@ change and removal starts from that sentence (the rule is in `AGENTS.md`):
 | Mods (install, back up, go back) | Where the kit has an install adapter: RimWorld today | `config/installs.json`, and `games/<game>/installs.py` in the kit |
 | Mods (textures) | RimWorld only | A kit command with the `textures` surface; most games have no such step |
 | Reports, Atlas | RimWorld only | Kit commands for that game's saves and logs |
+| Atlas, Logs, Memory, Game files, for a set of tools (0.24.0) | Never: a set of tools has none of what they read | Nothing: the page says so in words |
 
 **What stands between this and another person** (not built; listed so later work does not add to it): the program finds the kit
 and the games list by the folder it was built in; it needs Python; and each repository's install is that repository's own script.
@@ -661,6 +662,34 @@ Decisions page: marking from inside the game, starting a watch by itself when th
 restart or starting one when the game starts (on the Decisions page), editing or removing a mark, and the heap snapshot and its
 comparison (`heap`, which pauses the game 20 to 30 seconds and holds only part of a large heap; a page for it waits for the kit's
 reader of what holds what).
+
+## Tools beside the games, loading pages, the atlas's top (built 19 Nov 2026, 0.24.0)
+
+**The owner asked (19 Nov 2026) for the Companion "as its own game"**, knowing it would need exceptions, and chose one entry
+holding all three tools (the Companion, phobos-modkit and phobos-log), with the pages that cannot serve it saying so. In the same
+request: pages that showed only a progress bar and empty space (all Save a picture caught while one loaded), and a tidier atlas.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Follow the tools' own work where they follow a game's: where was I, what changed, the timeline, the make-up, the decisions waiting. Take a picture of a page that is still loading and get the page, not its bar |
+| What does it stop them doing? | Opening a game-only page for the tools and meeting a failed reading or a blank: the page says why there is nothing. Sharing a picture of a loading bar by accident |
+| How does it change the way they work? | No switching to a terminal or GitHub to see what the tools did; P can be pressed as soon as a page is opened |
+
+| Part | How |
+| --- | --- |
+| Kind | An entry on the list may carry `"kind": "tools"`; without it an entry is a game (`GameKind` in `companion-core`'s `games.rs`, carried to the window on Home's answer). Pages about a game being played (`GAME_ONLY_PAGES` in `src/lib/home/kinds.ts`: Atlas, Logs, Memory, Game files) show `NotForTools` for a tools entry instead of asking the host anything, and their buttons have a dashed edge. Mods, Tests and Reports stay: each already says when a repository has nothing for it, and a tool may one day have installs or a test list |
+| Loading | Every `ProgressBar` and `Placeholder` carries `data-picture-wait`, and so does the globe while it draws. Save a picture waits while any is on the page, looking every 250 ms, and takes the picture after two looks in a row find none, so a page that reads in stages is not caught between two. Take it now skips the wait; changing page lets it go. The Memory page's bar for a running watch passes `holdsPicture={false}`: it stays up for minutes while the page is there to see |
+| Placeholders | Under each page's first reading: rows for the Code map, Reports, Settings and Tests; a new `globe` shape (a disc in a panel the globe's height) for the Atlas |
+| Facts | phobos-modkit 1.48.0 gives a report `facts` (label and value). `ReportView` draws them as a strip of small cards above the opening lines, for every report. Save reports give Save, Read and, when built just now, Index; the atlas adds World seed and Surface tiles |
+| The atlas's top | The page's own header holds the title and Read again on one line, and the globe's description as the lead (`globeCaption={false}`, so the globe block does not repeat it). The views and the show choices share one panel. The globe block is a container: at 960 px wide or more the tile panel and the key stand in a column beside the globe, with Go to your colony above them; narrower, they stack beneath it as before |
+
+**Checked on:** RimWorld (a game) and the owner's tools entry, by the host's and the window's tests and a browser build; **nothing
+here is tested on screen.**
+
+**Agent choices, owner to revise:** the entry's name (D'thorga Tools) and id (`tools`); which pages count as game-only; the dashed
+edge; half a second of staying loaded before the picture; the side column's width (300 to 380 px) and the 960 px point where it
+appears. Two questions are on the Decisions page: Code map readers for TypeScript, Svelte and Rust, and how much of decompiling to
+take on.
 
 ## Kept for later
 

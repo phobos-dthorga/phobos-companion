@@ -19,6 +19,25 @@ export function pictureScale(devicePixelRatio: number): number {
   return Math.min(2, Math.max(1, devicePixelRatio || 1));
 }
 
+/** The mark a progress bar, a placeholder or a globe still drawing carries while it is on the page (0.24.0). */
+export const LOADING_MARK = "[data-picture-wait]";
+
+/** How many looks in a row must find the page loaded before the picture is taken, so a page reading in stages is not caught
+ * between two of them. */
+export const SETTLED_LOOKS = 2;
+
+/** Whether the page is still loading, so a picture taken now would show its loading and not the page. */
+export function stillLoading(page: {
+  querySelector(selector: string): unknown;
+}): boolean {
+  return page.querySelector(LOADING_MARK) !== null;
+}
+
+/** Counts looks that found the page loaded; one that finds it loading starts the count again. */
+export function settledLooks(previous: number, loading: boolean): number {
+  return loading ? 0 : previous + 1;
+}
+
 /** Leaves out of the picture anything marked as not belonging in it (a picture's own notice, say). */
 export function belongsInPicture(node: Node): boolean {
   return !(node instanceof HTMLElement && node.dataset.noPicture !== undefined);

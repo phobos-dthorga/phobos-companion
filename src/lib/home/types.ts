@@ -1,4 +1,5 @@
 import type { Failure, Waiting } from "../shell/types";
+import type { GameKind } from "./kinds";
 
 export type WorkItem = {
   repository: string;
@@ -33,6 +34,8 @@ export type GameHome = {
   name: string;
   /** The repositories on the owner's list for this game, by name. */
   repositories: string[];
+  /** A game or a set of tools (0.24.0); absent from an older host, meaning a game. */
+  kind?: GameKind;
   last_worked: number | null;
   latest: WorkItem[];
   unfinished: Unfinished[];

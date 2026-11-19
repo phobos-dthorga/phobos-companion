@@ -4,6 +4,7 @@
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
+  import Placeholder from "../shell/Placeholder.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
   import ReportView from "./ReportView.svelte";
@@ -124,6 +125,7 @@
   {#if running}
     <ProgressBar {progress} fallback={t("reports-running")} />
     <p class="muted">{t("reports-running-note")}</p>
+    <Placeholder shape="rows" rows={5} />
   {/if}
 
   {#if run?.state === "failed"}

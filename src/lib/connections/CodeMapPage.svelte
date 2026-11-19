@@ -4,6 +4,7 @@
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
+  import Placeholder from "../shell/Placeholder.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
@@ -110,6 +111,7 @@
 
   {#if summary.state === "reading"}
     <ProgressBar {progress} fallback={t("codemap-reading")} />
+    <Placeholder shape="rows" rows={6} />
   {:else if summary.state === "failed"}
     <FailurePanel failure={summary.failure} onretry={read} />
   {:else if summary.state === "refused"}

@@ -8,6 +8,7 @@
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
+  import Placeholder from "../shell/Placeholder.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { started } from "../shell/progress";
   import {
@@ -175,6 +176,7 @@
 
 {#if reading.state === "reading"}
   <ProgressBar progress={started()} fallback={t("tests-reading")} />
+  <Placeholder shape="rows" rows={6} />
 {:else if reading.state === "browser"}
   <p class="muted">{t("tests-browser")}</p>
 {:else if reading.state === "failed"}

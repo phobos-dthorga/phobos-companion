@@ -15,6 +15,12 @@
       "places": {
         "data": "/path/to/second-game/data"
       }
+    },
+    {
+      "id": "tools",
+      "name": "Your tools",
+      "kind": "tools",
+      "repositories": ["your-tool-kit", "your-companion"]
     }
   ]
 }

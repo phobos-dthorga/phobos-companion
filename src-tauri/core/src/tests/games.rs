@@ -41,7 +41,18 @@ fn refuses_the_same_game_twice() {
 #[test]
 fn the_example_list_is_valid() {
     let text = include_str!("../../../../config/games.example.json");
-    assert_eq!(parse(text).unwrap().len(), 2);
+    assert_eq!(parse(text).unwrap().len(), 3);
+}
+
+#[test]
+fn an_entry_is_a_game_unless_it_says_it_is_tools() {
+    let text = r#"{"schema_version": 1, "games": [
+        {"id": "g", "name": "G", "repositories": []},
+        {"id": "t", "name": "T", "repositories": [], "kind": "tools"}]}"#;
+    let kinds: Vec<GameKind> = parse(text).unwrap().iter().map(|game| game.kind).collect();
+    assert_eq!(kinds, [GameKind::Game, GameKind::Tools]);
+    let odd = r#"{"schema_version": 1, "games": [{"id": "x", "name": "X", "repositories": [], "kind": "toy"}]}"#;
+    assert!(parse(odd).is_err());
 }
 
 #[test]

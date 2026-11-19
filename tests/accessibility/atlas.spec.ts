@@ -88,6 +88,19 @@ for (const [name, viewport] of [
       await page.screenshot({ path: `artifacts/atlas-${name}.png` });
     });
 
+    test("opens with what the map shows and where it came from, not a long sentence", async ({
+      page,
+    }) => {
+      await expect(page.locator("header.head .lead")).toContainText(
+        "Every tile",
+      );
+      const facts = page.getByRole("group", { name: "Where this came from" });
+      await expect(facts).toContainText("World seed");
+      await expect(facts).toContainText("example seed");
+      await expect(facts).toContainText("272 (3 subdivisions)");
+      await expect(page.getByText("Index of Example.rws")).toHaveCount(0);
+    });
+
     test("goes to a place from the list and tells about its tile", async ({
       page,
     }) => {
@@ -128,3 +141,69 @@ for (const [name, viewport] of [
     });
   });
 }
+
+test.describe("a picture of a page still loading", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("waits for the atlas to load, then takes it", async ({ page }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      report_catalogue: catalogue,
+      run_report: {
+        progress: [
+          { label: "Reading the save", step: 1, of: 2 },
+          { label: "Drawing the world", step: 2, of: 2 },
+        ],
+        pauseMs: 1500,
+        result: {
+          report,
+          command_line: "python -m phobos_modkit sample-save atlas",
+        },
+      },
+      save_picture: { result: "C:\Pictures\First Sample Atlas.png" },
+      show_picture: { result: null },
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Atlas", exact: true }).click();
+    await expect(
+      page.locator("main [data-picture-wait]").first(),
+    ).toBeVisible();
+    // A short page starts right under the bars: no empty band where the activity strip once took the spare height.
+    const bars = await page.locator(".observation-bar").boundingBox();
+    const work = await page.locator(".workspace").boundingBox();
+    expect(
+      (work?.y ?? 0) - ((bars?.y ?? 0) + (bars?.height ?? 0)),
+    ).toBeLessThan(80);
+    await page.getByRole("button", { name: "Save a picture" }).click();
+    await expect(
+      page.getByRole("status").filter({ hasText: "still loading" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Saved to" }),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator(".globe canvas")).toBeVisible();
+  });
+});
+
+test.describe("a set of tools on the list", () => {
+  test("says the atlas has nothing for it, and asks the host nothing", async ({
+    page,
+  }) => {
+    const home = sampleHome();
+    const games = home.games.map((game, index) =>
+      index === 0 ? { ...game, kind: "tools" } : game,
+    );
+    await mockHost(page, {
+      home_status: { result: { ...home, games } },
+      kit_status: healthyKit,
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Atlas", exact: true }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "Nothing to show here for First Sample",
+    );
+    await expect(page.locator("main")).toContainText("a set of tools");
+    await audit(page);
+  });
+});

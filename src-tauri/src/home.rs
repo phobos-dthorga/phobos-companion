@@ -3,7 +3,7 @@
 use crate::open_work;
 use crate::pending::{self, PendingRelease};
 use companion_core::failure::Failure;
-use companion_core::games::{self, Game, Repository};
+use companion_core::games::{self, Game, GameKind, Repository};
 use companion_core::git::{self, ReadFailure, Reading, RepositoryProblem};
 use serde::Serialize;
 use std::cmp::Reverse;
@@ -42,6 +42,8 @@ pub struct GameHome {
     pub name: String,
     /// The repositories on the owner's list for this game, by name, for pages that let the owner choose one.
     pub repositories: Vec<String>,
+    /// A game or a set of tools (0.24.0).
+    pub kind: GameKind,
     pub last_worked: Option<i64>,
     pub latest: Vec<WorkItem>,
     pub unfinished: Vec<Unfinished>,
@@ -125,6 +127,7 @@ fn assemble(game: &Game, readings: Vec<RepositoryReading>) -> GameHome {
         id: game.id.clone(),
         name: game.name.clone(),
         repositories: game.repositories.iter().map(|r| r.name.clone()).collect(),
+        kind: game.kind,
         last_worked: None,
         latest: Vec::new(),
         unfinished: Vec::new(),

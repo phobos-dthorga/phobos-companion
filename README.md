@@ -7,7 +7,10 @@ what you did, and what your saves and logs say, without typing a command.
 
 - **You need a list of your games first**: `.local/games.json` in this folder, naming each game and its repositories.
   `config/games.example.json` shows how. Without one, the program says so and shows nothing else. A game may also name its
-  folders (`places`: `data`, `saves`, `screenshots`) and its Steam app ID (`steam_app_id`) for the Game files page.
+  folders (`places`: `data`, `saves`, `screenshots`) and its Steam app ID (`steam_app_id`) for the Game files page. **An entry
+  may be a set of tools instead of a game** (`"kind": "tools"`, 0.24.0): it gets the code and history pages, and the pages about
+  saves, logs, a running game and game files say they have nothing for it. **The Companion 0.23.0 and older refuse a list with
+  `kind` in it**: install 0.24.0 first.
 - **A game's `id` in that list must match the tools' name for it** (`rimworld`) for its reports to appear.
 - **It shows where you left each game, and the reports that need nothing typed**, with charts where a report has them, such as
   RimWorld's colony mood report. Reports that need an input, read online or change anything aren't offered yet.

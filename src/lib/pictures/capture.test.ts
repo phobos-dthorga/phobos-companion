@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { pictureName, pictureScale } from "./capture";
+import {
+  LOADING_MARK,
+  pictureName,
+  pictureScale,
+  SETTLED_LOOKS,
+  settledLooks,
+  stillLoading,
+} from "./capture";
 
 describe("pictures of a page", () => {
   it("names a picture by game, page and when, so pictures sort by when they were taken", () => {
@@ -16,5 +23,20 @@ describe("pictures of a page", () => {
     expect(pictureScale(1.5)).toBe(1.5);
     expect(pictureScale(3)).toBe(2);
     expect(pictureScale(0)).toBe(1);
+  });
+
+  it("waits while the page shows a bar or a placeholder, and until it has stayed loaded for two looks", () => {
+    const loading = {
+      querySelector: (s: string) => (s === LOADING_MARK ? {} : null),
+    };
+    const loaded = { querySelector: () => null };
+    expect(stillLoading(loading)).toBe(true);
+    expect(stillLoading(loaded)).toBe(false);
+    let looks = settledLooks(0, false);
+    expect(looks).toBeLessThan(SETTLED_LOOKS);
+    looks = settledLooks(looks, true);
+    expect(looks).toBe(0);
+    looks = settledLooks(settledLooks(looks, false), false);
+    expect(looks).toBe(SETTLED_LOOKS);
   });
 });

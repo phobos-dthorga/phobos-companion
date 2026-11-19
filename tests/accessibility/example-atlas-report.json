@@ -1,9 +1,30 @@
 {
   "format": 1,
   "title": "Atlas: the world map",
+  "facts": [
+    {
+      "label": "Save",
+      "value": "Example.rws"
+    },
+    {
+      "label": "Read",
+      "value": "now, from a frozen copy, in 0.0 s"
+    },
+    {
+      "label": "Index",
+      "value": "325 elements"
+    },
+    {
+      "label": "World seed",
+      "value": "example seed"
+    },
+    {
+      "label": "Surface tiles",
+      "value": "272 (3 subdivisions)"
+    }
+  ],
   "lines": [
-    "Index of Example.rws, built now from a frozen copy in 0.0 s (325 elements; 1 game, 3 faction, 1 map, 10 thing, 4 pawn, 3 need, 5 memory, 3 hediff, 2 trait, 1 skill, 8 map_grid, 16 planet_grid, 2 world_feature, 4 faction_relation, 3 world_object, 14 world_object_value, 2 component, 6 component_value).",
-    "World seed example seed: 272 surface tiles (3 subdivisions). Tile positions are rebuilt from a model of the planet that follows the game's own construction; the save holds none.",
+    "Tile positions are rebuilt from a model of the planet that follows the game's own construction; the save holds none.",
     "The installed mods' Defs were not read, so only the game's own biomes, roads and rivers are named."
   ],
   "blocks": [

@@ -17,7 +17,9 @@
   } from "./presentation";
   import type { GlobeBlockData, GlobePlaceData } from "./types";
 
-  let { globe }: { globe: GlobeBlockData } = $props();
+  /** `caption` is false where the page already says what the globe shows under its title (the Atlas page, 0.24.0). */
+  let { globe, caption = true }: { globe: GlobeBlockData; caption?: boolean } =
+    $props();
 
   const atlas = $derived(readAtlas(globe));
   const views = $derived(viewsOf(globe));
@@ -69,153 +71,164 @@
   }
 </script>
 
-<figure class="atlas">
-  <figcaption>
-    <strong>{globe.title}</strong>
-    <span class="muted">{globe.description}</span>
-  </figcaption>
-
-  <div class="bar" role="group" aria-label={t("atlas-views")}>
-    <span class="bar-label muted">{t("atlas-views")}</span>
-    {#each views as layer (layer.key)}
-      <button
-        type="button"
-        class="chip"
-        aria-pressed={layer.key === view}
-        title={layer.description}
-        onclick={() => (chosenView = layer.key)}>{layer.label}</button
-      >
-    {/each}
-  </div>
-
-  <div class="bar" role="group" aria-label={t("atlas-show")}>
-    <span class="bar-label muted">{t("atlas-show")}</span>
-    {#each overlays as layer (layer.key)}
-      <button
-        type="button"
-        class="chip"
-        aria-pressed={overlayOn}
-        title={layer.description}
-        onclick={() => (overlayOn = !overlayOn)}>{layer.label}</button
-      >
-    {/each}
-    {#each globe.lines as lines (lines.key)}
-      <button
-        type="button"
-        class="chip"
-        aria-pressed={shown[lines.key] ?? true}
-        title={lines.description}
-        onclick={() => toggle(lines.key)}>{lines.label}</button
-      >
-    {/each}
-    <button
-      type="button"
-      class="chip"
-      aria-pressed={shown.places}
-      onclick={() => toggle("places")}>{t("atlas-show-places")}</button
-    >
-    <button
-      type="button"
-      class="chip"
-      aria-pressed={shown.regions}
-      onclick={() => toggle("regions")}>{t("atlas-show-regions")}</button
-    >
-    <button
-      type="button"
-      class="chip"
-      aria-pressed={shown.edges}
-      onclick={() => toggle("edges")}>{t("atlas-show-edges")}</button
-    >
-    {#if home}
-      <button type="button" class="chip go" onclick={() => goTo(home!)}
-        >{t("atlas-go-home", { place: home.label })}</button
-      >
-    {/if}
-  </div>
-
-  {#if failed}
-    <p class="failed" role="alert">{t("atlas-failed")}</p>
-  {:else}
-    <GlobeView
-      {atlas}
-      {view}
-      {overlay}
-      {shown}
-      {selected}
-      {focus}
-      onselect={(tile) => (selected = tile)}
-      onfailed={() => (failed = true)}
-    />
-    <p class="hint muted">{t("atlas-hint")}</p>
+<figure class="atlas" aria-label={globe.title}>
+  {#if caption}
+    <figcaption>
+      <strong>{globe.title}</strong>
+      <span class="muted">{globe.description}</span>
+    </figcaption>
   {/if}
 
-  <div class="panels">
-    <section class="panel" aria-labelledby="atlas-key-heading">
-      <h3 id="atlas-key-heading">
-        {t("atlas-key", { view: viewLayer?.label ?? "" })}
-      </h3>
-      {#if viewLayer?.kind === "measure"}
-        <div
-          class="gradient"
-          style:background={gradient}
-          aria-hidden="true"
-        ></div>
+  <div class="choices">
+    <div class="bar" role="group" aria-label={t("atlas-views")}>
+      <span class="bar-label muted">{t("atlas-views")}</span>
+      {#each views as layer (layer.key)}
+        <button
+          type="button"
+          class="chip"
+          aria-pressed={layer.key === view}
+          title={layer.description}
+          onclick={() => (chosenView = layer.key)}>{layer.label}</button
+        >
+      {/each}
+    </div>
+
+    <div class="bar" role="group" aria-label={t("atlas-show")}>
+      <span class="bar-label muted">{t("atlas-show")}</span>
+      {#each overlays as layer (layer.key)}
+        <button
+          type="button"
+          class="chip"
+          aria-pressed={overlayOn}
+          title={layer.description}
+          onclick={() => (overlayOn = !overlayOn)}>{layer.label}</button
+        >
+      {/each}
+      {#each globe.lines as lines (lines.key)}
+        <button
+          type="button"
+          class="chip"
+          aria-pressed={shown[lines.key] ?? true}
+          title={lines.description}
+          onclick={() => toggle(lines.key)}>{lines.label}</button
+        >
+      {/each}
+      <button
+        type="button"
+        class="chip"
+        aria-pressed={shown.places}
+        onclick={() => toggle("places")}>{t("atlas-show-places")}</button
+      >
+      <button
+        type="button"
+        class="chip"
+        aria-pressed={shown.regions}
+        onclick={() => toggle("regions")}>{t("atlas-show-regions")}</button
+      >
+      <button
+        type="button"
+        class="chip"
+        aria-pressed={shown.edges}
+        onclick={() => toggle("edges")}>{t("atlas-show-edges")}</button
+      >
+    </div>
+  </div>
+
+  <!-- The globe, with what is picked and what the colours mean beside it where the page is wide enough (0.24.0), under it
+       where it is not. -->
+  <div class="stage">
+    <div class="globe-column">
+      {#if failed}
+        <p class="failed" role="alert">{t("atlas-failed")}</p>
+      {:else}
+        <GlobeView
+          {atlas}
+          {view}
+          {overlay}
+          {shown}
+          {selected}
+          {focus}
+          onselect={(tile) => (selected = tile)}
+          onfailed={() => (failed = true)}
+        />
+        <p class="hint muted">{t("atlas-hint")}</p>
       {/if}
-      <ul class="key">
-        {#each key as entry (entry.label)}
-          <li>
-            <span class="swatch" style:background={entry.colour}
-            ></span>{entry.label}
-          </li>
-        {/each}
-      </ul>
-      {#if overlay && overlays[0]}
-        <h4>{overlays[0].label}</h4>
+    </div>
+
+    <div class="side">
+      {#if home}
+        <button type="button" class="chip go" onclick={() => goTo(home!)}
+          >{t("atlas-go-home", { place: home.label })}</button
+        >
+      {/if}
+
+      <section
+        class="panel"
+        aria-labelledby="atlas-tile-heading"
+        aria-live="polite"
+      >
+        <h3 id="atlas-tile-heading">{t("atlas-tile")}</h3>
+        {#if selected === null}
+          <p class="muted">{t("atlas-tile-none")}</p>
+        {:else}
+          {#each placesHere as place, index (index)}
+            <p class="place-here">
+              <strong>{place.label}</strong>
+              <span class="muted"
+                >{place.kind}{place.detail ? `, ${place.detail}` : ""}</span
+              >
+            </p>
+          {/each}
+          <dl>
+            {#each details as detail (detail.label)}
+              <dt>{detail.label}</dt>
+              <dd>{detail.value}</dd>
+            {/each}
+          </dl>
+        {/if}
+      </section>
+
+      <section class="panel" aria-labelledby="atlas-key-heading">
+        <h3 id="atlas-key-heading">
+          {t("atlas-key", { view: viewLayer?.label ?? "" })}
+        </h3>
+        {#if viewLayer?.kind === "measure"}
+          <div
+            class="gradient"
+            style:background={gradient}
+            aria-hidden="true"
+          ></div>
+        {/if}
         <ul class="key">
-          {#each overlayKey as entry (entry.label)}
+          {#each key as entry (entry.label)}
             <li>
               <span class="swatch" style:background={entry.colour}
               ></span>{entry.label}
-              {#if entry.note}<span class="muted">{entry.note}</span>{/if}
             </li>
           {/each}
         </ul>
-      {/if}
-      {#if globe.lines.length}
-        <h4>{t("atlas-lines")}</h4>
-        <ul class="key">
-          {#each globe.lines as lines (lines.key)}
-            <li><span class="stroke {lines.style}"></span>{lines.label}</li>
-          {/each}
-        </ul>
-      {/if}
-    </section>
-
-    <section
-      class="panel"
-      aria-labelledby="atlas-tile-heading"
-      aria-live="polite"
-    >
-      <h3 id="atlas-tile-heading">{t("atlas-tile")}</h3>
-      {#if selected === null}
-        <p class="muted">{t("atlas-tile-none")}</p>
-      {:else}
-        {#each placesHere as place, index (index)}
-          <p class="place-here">
-            <strong>{place.label}</strong>
-            <span class="muted"
-              >{place.kind}{place.detail ? `, ${place.detail}` : ""}</span
-            >
-          </p>
-        {/each}
-        <dl>
-          {#each details as detail (detail.label)}
-            <dt>{detail.label}</dt>
-            <dd>{detail.value}</dd>
-          {/each}
-        </dl>
-      {/if}
-    </section>
+        {#if overlay && overlays[0]}
+          <h4>{overlays[0].label}</h4>
+          <ul class="key">
+            {#each overlayKey as entry (entry.label)}
+              <li>
+                <span class="swatch" style:background={entry.colour}
+                ></span>{entry.label}
+                {#if entry.note}<span class="muted">{entry.note}</span>{/if}
+              </li>
+            {/each}
+          </ul>
+        {/if}
+        {#if globe.lines.length}
+          <h4>{t("atlas-lines")}</h4>
+          <ul class="key">
+            {#each globe.lines as lines (lines.key)}
+              <li><span class="stroke {lines.style}"></span>{lines.label}</li>
+            {/each}
+          </ul>
+        {/if}
+      </section>
+    </div>
   </div>
 
   <section class="panel places" aria-labelledby="atlas-places-heading">
@@ -255,6 +268,7 @@
 <style>
   .atlas {
     margin: 0;
+    container-type: inline-size;
   }
 
   figcaption {
@@ -264,17 +278,53 @@
     margin-bottom: 10px;
   }
 
+  /* The two rows of choices, in one panel, their labels in a column of their own so the chips line up. */
+  .choices {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background: var(--colour-surface);
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
+  }
+
   .bar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
-    margin-bottom: 8px;
   }
 
   .bar-label {
-    min-width: 4.5em;
+    min-width: 5.5em;
     font-size: var(--type-small);
+  }
+
+  .stage {
+    display: grid;
+    gap: 12px;
+  }
+
+  @container (min-width: 960px) {
+    .stage {
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+      align-items: start;
+    }
+  }
+
+  .globe-column {
+    min-width: 0;
+  }
+
+  .side {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .side .go {
+    justify-self: start;
   }
 
   .chip {
@@ -316,13 +366,6 @@
     border-radius: 4px;
   }
 
-  .panels {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-    gap: 12px;
-    margin-top: 12px;
-  }
-
   .panel {
     padding: 12px 16px;
     background: var(--colour-surface);
@@ -353,7 +396,7 @@
     padding: 0;
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 4px 12px;
     font-size: var(--type-small);
   }

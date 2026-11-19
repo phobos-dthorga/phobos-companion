@@ -43,6 +43,10 @@ export type Copy = {
   size: number | null;
   hasChangelog: boolean;
   direction: Direction | null;
+  /** For a backup that repeats the one before it (kit 1.40.0): the oldest backup of its run, kept. */
+  sameAs?: string | null;
+  /** How it repeats it: the same file for file, or only rebuilt from unchanged sources. */
+  sameKind?: "identical" | "rebuilt" | null;
 };
 
 export type Backup = Copy & { delta: Delta };
@@ -131,6 +135,9 @@ export type InstallsStatus = {
     backupsFree: number | null;
     targetFree: number | null;
     spare: number;
+    /** Backups that repeat the one before them, and their size (kit 1.40.0). */
+    duplicates?: number;
+    duplicatesSize?: number;
   };
   mods: ModInstall[];
 };
@@ -141,7 +148,7 @@ export type RepositoryInstalls = {
   command_line: string;
 };
 
-export type Move = "backup" | "restore" | "install" | "build";
+export type Move = "backup" | "restore" | "install" | "build" | "dedupe";
 
 /** One active mod's encoded textures against its pictures (kit 1.21.0 rimworld-textures). */
 export type TextureMod = {

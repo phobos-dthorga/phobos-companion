@@ -60,6 +60,8 @@ function sampleInstalls(running: string[]) {
             backupsFree: 20_000_000_000,
             targetFree: 100_000_000_000,
             spare: 1_073_741_824,
+            duplicates: 1,
+            duplicatesSize: 26_000_000,
           },
           mods: [
             {
@@ -135,6 +137,23 @@ function sampleInstalls(running: string[]) {
               settingsNote: null,
               lookOut: [{ id: "12", title: "Boats float", version: "1.3.0" }],
               backups: [
+                {
+                  ...copy("backup", "1.1.0", {
+                    backup: "SampleMod-20261117-130000",
+                    taken: "2026-11-17T13:00:00",
+                    size: 26_000_000,
+                    direction: "older",
+                    sameAs: "SampleMod-20261117-120000",
+                    sameKind: "rebuilt",
+                  }),
+                  delta: {
+                    gain: [],
+                    lose: [entry("1.2.0", "Added", "Sample lamps glow.")],
+                    reworded: [],
+                    saveNotes: [],
+                    summaries: {},
+                  },
+                },
                 {
                   ...copy("backup", "1.1.0", {
                     backup: "SampleMod-20261117-120000",
@@ -418,12 +437,13 @@ for (const [name, viewport] of [
       await card.locator("details.backups > summary").click();
       await card
         .getByRole("button", { name: "What going back changes" })
+        .first()
         .click();
       await expect(card.locator(".backup-delta")).toContainText(
         "Sample lamps glow.",
       );
       await expect(
-        card.getByRole("button", { name: "Go back to this" }),
+        card.getByRole("button", { name: "Go back to this" }).first(),
       ).toBeDisabled();
       await expect(
         card.getByRole("button", { name: "Install from the repository" }),
@@ -549,6 +569,31 @@ for (const [name, viewport] of [
         "Nothing new: every setting has been looked at.",
       );
       await audit(page);
+    });
+
+    test("a repeated backup says what it repeats, and removing them asks first", async ({
+      page,
+    }) => {
+      await open(page);
+      const repeats = page.locator(".repeats");
+      await expect(repeats).toContainText(
+        "One backup repeats the one before it",
+      );
+      await repeats
+        .getByRole("button", { name: "Remove repeated backups" })
+        .click();
+      const question = page.getByRole("group", { name: /Confirm/ });
+      await expect(question).toContainText(
+        "Remove the one repeated backup (25 MB)?",
+      );
+      await audit(page);
+      await question.getByRole("button", { name: "Yes, remove them" }).click();
+      await expect(page.locator("main p.status").first()).not.toBeEmpty();
+      const card = page.getByRole("article", { name: "Sample Mod" });
+      await card.locator("details.backups > summary").click();
+      await expect(card).toContainText(
+        "only rebuilt, from source code that had not changed",
+      );
     });
 
     test("an entry opens the code behind it", async ({ page }) => {

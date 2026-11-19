@@ -39,6 +39,7 @@
     groupByVersion,
     hasChanges,
     MOVE_WORDS,
+    SAME_WORDS,
     preflight,
     SETTING_WORDS,
     shortCommit,
@@ -77,7 +78,14 @@
         place: string;
         groups: { repository: string; mods: ModInstall[] }[];
       }
-    | { kind: "encode"; place: string; mods: TextureMod[] };
+    | { kind: "encode"; place: string; mods: TextureMod[] }
+    | {
+        kind: "dedupe";
+        place: string;
+        repository: string;
+        count: number;
+        size: number;
+      };
 
   /** How long the page waits before reading again when the window comes back into focus. */
   const FOCUS_READ_AFTER_MS = 15_000;
@@ -250,6 +258,12 @@
           group.repository,
         );
       }
+    } else if (now.kind === "dedupe") {
+      working = started(t(MOVE_WORDS.dedupe.working, { count: now.count }));
+      hear(
+        await makeMove(game.id, now.repository, "dedupe", [], null, hearWork),
+        now.repository,
+      );
     } else {
       working = started(t("mods-working-encode", { count: now.mods.length }));
       hear(
@@ -490,6 +504,11 @@
             count: all.length,
             names: all.map((m) => m.name).join(", "),
           })}
+        {:else if now.kind === "dedupe"}
+          {t(MOVE_WORDS.dedupe.confirm, {
+            count: now.count,
+            size: formatSize(now.size),
+          })}
         {:else if now.kind === "encode"}
           {t("mods-confirm-encode", {
             count: now.mods.length,
@@ -547,7 +566,9 @@
             ? t("mods-yes-install-all")
             : now.kind === "encode"
               ? t("mods-yes-encode")
-              : t(MOVE_WORDS[now.move].yes)}
+              : now.kind === "dedupe"
+                ? t(MOVE_WORDS.dedupe.yes)
+                : t(MOVE_WORDS[now.move].yes)}
         </button>
         <button
           type="button"
@@ -950,6 +971,17 @@
                         <span>· {backup.version || "?"}</span>
                         <span class="muted">· {formatSize(backup.size)}</span>
                       </p>
+                      {#if backup.sameAs && backup.sameKind}
+                        {@const twin = mod.backups.find(
+                          (b) => b.backup === backup.sameAs,
+                        )}
+                        <p class="repeat">
+                          <span aria-hidden="true">≡</span>
+                          {t(SAME_WORDS[backup.sameKind], {
+                            when: twin ? formatWhen(twin.taken) : backup.sameAs,
+                          })}
+                        </p>
+                      {/if}
                       <p class="muted">
                         {t("mods-backup-change", {
                           lose: backup.delta.lose.length,
@@ -1033,6 +1065,35 @@
         free: formatSize(repository.status.space.backupsFree) || "?",
       })}
     </p>
+    {#if (repository.status.space.duplicates ?? 0) > 0}
+      {@const place = `${repository.repository}/dedupe`}
+      <div class="repeats">
+        <p>
+          <span aria-hidden="true">≡</span>
+          {t("mods-repeats", {
+            count: repository.status.space.duplicates ?? 0,
+            size: formatSize(repository.status.space.duplicatesSize ?? 0),
+          })}
+        </p>
+        <button
+          type="button"
+          class="move-button"
+          disabled={busy !== null}
+          aria-pressed={asking?.place === place}
+          onclick={() =>
+            ask({
+              kind: "dedupe",
+              place,
+              repository: repository.repository,
+              count: repository.status.space.duplicates ?? 0,
+              size: repository.status.space.duplicatesSize ?? 0,
+            })}>{t(MOVE_WORDS.dedupe.button)}</button
+        >
+        {#if asking?.place === place}
+          {@render question()}
+        {/if}
+      </div>
+    {/if}
   {/each}
 
   {#if textures.state === "ready" && textures.status.mods.some((m) => m.stale > 0 || m.missing > 0)}
@@ -1369,6 +1430,28 @@
   .backups {
     margin-top: 12px;
     border-top: 1px solid var(--colour-line);
+  }
+
+  .repeat {
+    color: var(--colour-comparison);
+    font-size: var(--type-small);
+  }
+
+  .repeats {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-block: 4px 16px;
+    padding: 12px 14px;
+    background: var(--colour-surface-raised);
+    border: 1px solid var(--colour-line);
+    border-inline-start: 3px solid var(--colour-comparison);
+    border-radius: 4px;
+  }
+
+  .repeats p {
+    margin: 0;
   }
 
   .backup {

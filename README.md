@@ -52,7 +52,8 @@ what you did, and what your saves and logs say, without typing a command.
   with its button. Each mod shows what it has now beside what installing would bring (changelog entries, files, settings, things
   to look out for in play), and what going back to each backup would take away. **Its buttons change your installed mods and
   encode textures** (Workshop mods' too), asking first; installing, going back and encoding wait until the game is closed, and
-  building doesn't. A repository opts in with `config/installs.json`; see the
+  building doesn't. **Remove repeated backups** deletes backups that repeat the one before them, keeping the oldest of each run.
+  A repository opts in with `config/installs.json`; see the
   [design record](docs/design-record.md#the-mods-page-built-18-nov-2026).
 - **What it changes, and only when you ask:** your test verdicts, in its own folder; your installed mods and their textures, from
   the Mods page; the repository's build output when you press Build; and the central settings file, from the Settings page. It never changes a save, and never deletes anything.

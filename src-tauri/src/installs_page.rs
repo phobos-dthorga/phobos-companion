@@ -5,7 +5,8 @@
 //! read. The moves are the one place this program changes files outside its own folder (owner, 18 Nov 2026; docs/design-record.md,
 //! "The Mods page"): `installs build`, `install`, `backup` and `restore`, and the texture command's `encode`. The host checks every
 //! request before the kit sees it: the repository must be one of the game's and opt in with `config/installs.json`; the move must be
-//! one this program makes, and the kit's manifest must still call it `writes` or `runs`, never `owner-only`; every name is a plain
+//! one this program makes (since 0.21.0 also `dedupe`, which deletes only backups that repeat the one before them), and the kit's
+//! manifest must still call it `writes` or `runs`, never `owner-only`; every name is a plain
 //! folder name or package ID. The kit then checks again (a known mod, a real backup, the game closed) and refuses in words.
 
 use companion_core::args::Args;
@@ -23,7 +24,7 @@ const STATUS: &str = "status";
 const ENCODE: &str = "encode";
 const TEXTURES_SURFACE: &str = "textures";
 const CONFIG: [&str; 2] = ["config", "installs.json"];
-const MOVES: [&str; 4] = ["build", "install", "backup", "restore"];
+const MOVES: [&str; 5] = ["build", "install", "backup", "restore", "dedupe"];
 const MAX_MODS: usize = 400;
 
 /// One repository's mods, as the kit reads them.
@@ -121,6 +122,8 @@ pub fn move_arguments(root: &Path, action: &str, mods: &[String], backup: Option
         ("backup", 1, None) => arguments.extend(mod_arguments(mods)?),
         ("restore", 1, Some(name)) if plain_name(name) => arguments.extend(mod_arguments(mods)?).pair("--backup", name),
         ("restore", 1, _) => return Err("going back needs one of the mod's backups".to_owned()),
+        ("dedupe", 0, None) => arguments,
+        ("dedupe", 1, None) => arguments.extend(mod_arguments(mods)?),
         _ => return Err(format!("{action} was asked with the wrong mods or backup")),
     };
     Ok(arguments.json())

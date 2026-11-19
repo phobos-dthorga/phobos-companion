@@ -46,6 +46,12 @@ fn each_move_takes_the_mods_it_needs_and_no_others() {
     assert_eq!(move_arguments(root, "build", &[], None).unwrap(), ["installs", "build", "--root", "repo", "--json"]);
     assert!(move_arguments(root, "build", &names(&["Thing"]), None).is_err());
     assert!(move_arguments(root, "install", &[], None).is_err());
+    assert_eq!(move_arguments(root, "dedupe", &[], None).unwrap(), ["installs", "dedupe", "--root", "repo", "--json"]);
+    assert_eq!(
+        move_arguments(root, "dedupe", &names(&["Thing"]), None).unwrap(),
+        ["installs", "dedupe", "--root", "repo", "--mod", "Thing", "--json"]
+    );
+    assert!(move_arguments(root, "dedupe", &[], Some("Thing-20261118-200751")).is_err());
     assert!(move_arguments(root, "backup", &names(&["Thing", "Other"]), None).is_err());
     assert!(move_arguments(root, "restore", &names(&["Thing"]), None).is_err());
     assert!(move_arguments(root, "restore", &names(&["Thing"]), Some("../Thing")).is_err());

@@ -51,11 +51,24 @@ export const MOVE_WORDS: Record<
     working: "mods-working-build",
     yes: "mods-yes-build",
   },
+  dedupe: {
+    button: "mods-action-dedupe",
+    confirm: "mods-confirm-dedupe",
+    working: "mods-working-dedupe",
+    yes: "mods-yes-dedupe",
+  },
 };
 
-/** Why a move can't be made now, as a message key, or null when it can. A backup only reads, so it may run beside the game. */
+/** How a backup repeats the one before it, in words. */
+export const SAME_WORDS: Record<"identical" | "rebuilt", string> = {
+  identical: "mods-same-identical",
+  rebuilt: "mods-same-rebuilt",
+};
+
+/** Why a move can't be made now, as a message key, or null when it can. A backup only reads, and removing repeated backups
+ * touches only the backups folder, so both may run beside the game. */
 export function blockedBy(move: Move, gameRunning: string[]): string | null {
-  return move !== "backup" && gameRunning.length > 0
+  return move !== "backup" && move !== "dedupe" && gameRunning.length > 0
     ? "mods-blocked-running"
     : null;
 }

@@ -322,7 +322,7 @@
       {#if selected && !pageServes(selected.kind, page)}
         <NotForTools game={selected} {page} />
       {:else if page === "settings" && home.state !== "reading"}
-        <SettingsPage {games} />
+        <SettingsPage {games} ongameadded={() => void refresh()} />
       {:else if page === "about"}
         <AboutPage {games} {kit} />
       {:else if page === "decisions" && home.state !== "reading"}

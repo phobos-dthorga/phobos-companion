@@ -10,6 +10,7 @@ mod cleanup_page;
 mod connections_page;
 mod decisions_page;
 mod game_files_page;
+mod games_page;
 mod history_page;
 mod home;
 mod installs_page;
@@ -415,6 +416,18 @@ async fn backup_records() -> Result<records_backup::BackupResult, Failure> {
     blocking(records_backup::backup).await
 }
 
+/// Every game Steam has installed, with guesses at each one's data folder and whether the list holds it (0.31.0). Only reads.
+#[tauri::command]
+async fn steam_games(on_progress: Channel<kit::Progress>) -> Result<games_page::SteamGames, Failure> {
+    blocking(move || games_page::steam_games(Some(&hearing(on_progress)))).await
+}
+
+/// Adds a game to the owner's list, once they press Add; the list as it was is kept beside it (0.31.0).
+#[tauri::command]
+async fn add_game(game: companion_core::games::NewGame) -> Result<games_page::Added, Failure> {
+    blocking(move || games_page::add(&game)).await
+}
+
 /// The last copy the timer made or tried in this run, for Home and the Settings page (0.29.0).
 #[tauri::command]
 async fn records_automatic() -> Result<Option<records_backup::Automatic>, Failure> {
@@ -656,7 +669,9 @@ pub fn run() {
             read_shortcuts,
             save_shortcuts,
             records_automatic,
-            pick_path
+            pick_path,
+            steam_games,
+            add_game
         ])
         .plugin(tauri_plugin_dialog::init())
         .setup(|_| {

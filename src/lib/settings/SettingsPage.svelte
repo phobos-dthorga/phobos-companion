@@ -20,13 +20,18 @@
   import ShortcutsDialog from "../shortcuts/ShortcutsDialog.svelte";
   import RecordsPanel from "../records/RecordsPanel.svelte";
   import CleanupPanel from "../cleanup/CleanupPanel.svelte";
+  import AddGamePanel from "../games/AddGamePanel.svelte";
   import type { Setting, SettingsReading } from "./types";
 
   /**
    * Every folder and file the tools read, for every game, with where each value comes from; and a way to change one for every
-   * repository at once, in the central settings file. Nothing else is written: a repository's own settings stay as they are.
+   * repository at once, in the central settings file. Nothing else is written: a repository's own settings stay as they are,
+   * and the games list only gains an entry through Add a game from Steam (0.31.0), which `ongameadded` tells the window about.
    */
-  let { games }: { games: GameHome[] } = $props();
+  let {
+    games,
+    ongameadded = () => {},
+  }: { games: GameHome[]; ongameadded?: () => void } = $props();
 
   let reading = $state<SettingsReading>({ state: "reading" });
   let progress = $state(started());
@@ -182,6 +187,13 @@
   {saved}
   onbrowse={(key) => void browseKey(key)}
   onchoose={(key) => void editKey(key)}
+/>
+<AddGamePanel
+  taken={games.map((game) => game.id)}
+  onchanged={() => {
+    ongameadded();
+    void load();
+  }}
 />
 <CleanupPanel />
 {#if editingShortcuts}

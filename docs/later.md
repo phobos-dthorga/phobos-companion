@@ -1,7 +1,8 @@
 # Kept for later: everything proposed and not yet built
 
-**Status (19 Nov 2026):** items 1 to 5 are built in Companion 0.22.0, untested on screen; part of item 5 is still to come (below:
-the screenshot gallery, adding a game from Steam, and the RimWorld extras). The owner said yes to all of it ("Absolutely with all of these and
+**Status (20 Nov 2026):** items 1 to 5 are built in Companion 0.22.0, untested on screen; of item 5's rest, adding a game from
+Steam and better data-folder guesses are built in 0.31.0, and the launch before last in 0.28.0; the screenshot gallery and the
+RimWorld extras are still to come (below). The records backup copies itself from 0.29.0. The owner said yes to all of it ("Absolutely with all of these and
 for what we are not implementing just yet, make sure to document and record those for later so that they are not lost"), in the
 order of the build list below. Each item's status changes here in the change that builds it; once built, its design moves to
 `design-record.md` and this record keeps one line pointing there.
@@ -23,10 +24,10 @@ order of the build list below. Each item's status changes here in the change tha
 | # | Item | What it lets the owner do | Status |
 | --- | --- | --- | --- |
 | 1 | **Screen notes ("something's off")** | Press one key on any page, add a few words or none, and the picture, the address, the version and the time land in a folder agent sessions read at the start: "this looks wrong" without having to describe where | **Built**, 0.22.0 (see `design-record.md`) |
-| 2 | **Records backup** | Copy the Companion's own records (test verdicts, key decisions, "looked at" marks, the history log, shortcuts, the central settings file) to a folder of the owner's choosing on the NAS, with a note on Home when the last copy is old. Synology does not back up the app data folder | **Built**, 0.22.0 (see `design-record.md`) |
+| 2 | **Records backup** | Copy the Companion's own records (test verdicts, key decisions, "looked at" marks, the history log, shortcuts, the central settings file) to a folder of the owner's choosing on the NAS, with a note on Home when the last copy is old. Synology does not back up the app data folder | **Built**, 0.22.0; copies itself every 6 hours from 0.29.0 (see `design-record.md`) |
 | 3 | **Claims board** | See which agent session holds which version number, test row or file, from a tiny shared claims file the sessions write and read; ends the cross-session "is 0.174.0 yours?" messages | **Built**, 0.22.0 (see `design-record.md`) |
 | 4 | **Decisions page, and the page bar grouped** | Answer open decisions with a button, each showing its options and the agent's lean, instead of hunting through design records; the bar grouped into Play (Home, Mods, Tests, Logs, Atlas), Code (Changes, Timeline, Code map, Make-up) and Tools (Reports, Settings, Decisions) | **Built**, 0.22.0 (see `design-record.md`) |
-| 5 | **Game files** | See what the game itself writes: what changed since you last played, saves, screenshots, disk use; add a game from Steam without hand-editing `games.json` | **Built in part**, 0.22.0: what changed, saves, screenshots as a list, space; the rest below |
+| 5 | **Game files** | See what the game itself writes: what changed since you last played, saves, screenshots, disk use; add a game from Steam without hand-editing `games.json` | **Built in part**: 0.22.0 what changed, saves, screenshots as a list, space; 0.28.0 the launch before last; 0.31.0 adding a game from Steam and better guesses; the rest below |
 
 ### 1. Screen notes
 
@@ -95,9 +96,9 @@ screenshots as a list, and where the space goes; places and the Steam app ID in 
 | Next | What it needs |
 | --- | --- |
 | **Screenshot gallery**, each picture placed on the Timeline on its day | Thumbnails: Tauri's asset protocol allowed only for the folders a report named, or small previews made by the host; then a Timeline lane |
-| **Add a game from Steam** | `game-files steam-games` lists them already; a dialog on the Settings page that writes a new entry into `.local/games.json` (the program's first write to that list, so it shows the entry before saving) |
-| **Better guesses for the data folder** | Farming Simulator 25's `FarmingSimulator2025` and Project Zomboid's `Zomboid` were missed; a game's known folder names, or a search for its save files' extension |
-| **The launch before last** | Steam keeps only the last launch; the kit could remember each one it sees, so "since the launch before" works while the game runs |
+| **Add a game from Steam** | **Built**, 0.31.0 (see `design-record.md`) |
+| **Better guesses for the data folder** | **Built**, phobos-modkit 1.58.0: Documents where Windows keeps it, names that differ the way games' folders do; both now found |
+| **The launch before last** | **Built**, 0.28.0 (phobos-modkit 1.51.0) |
 | **RimWorld extras**: the start-up chart over launches, crashes on the Timeline, the creations shelf | The kit's `startup-impact` and `crash-dump` readings as Timeline facts; the creations folders listed |
 
 ## Not on the build list yet

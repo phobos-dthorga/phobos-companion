@@ -80,7 +80,11 @@ reads them.
   picker (0.29.0; owner, 20 Nov 2026: "file dialog window pickers ... where ever a directory needs to be chosen"; `src-tauri/src/
   pick.rs` only answers with the path, and the save is the same), only while the manifest still calls it `writes`, and only a
   setting the tools list, as one line. It never writes a repository's own settings. **Every folder or file a page asks for gets
-  the picker beside its type-in box** (owner's choice: keep both).
+  the picker beside its type-in box** (owner's choice: keep both). **It adds to the games list on one press too** (0.31.0, Add a
+  game from Steam; `docs/later.md` item 5, the owner's yes of 19 Nov 2026): `companion_core::games::add` writes one new entry
+  into `.local/games.json`, after the window showed it whole; the host checks the id, the name, the Steam game, the data folder
+  and every repository again, keeps the list's own order, keeps the list as it was in `games.json.before-add`, and writes nothing
+  when a check fails. It never changes or removes an entry already there.
 - **Their code and What did an update change? read, except one press** (owner's choice of 19 Nov 2026, "Read and compare, on
   your press"; `src-tauri/src/other_code_page.rs`): the kit's reports carrying the manifest's `other-code` and `updates` surfaces.
   **Decompile runs only on the owner's press, only for an assembly the kit's `holder` named in this run of the program, and only

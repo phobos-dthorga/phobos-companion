@@ -798,6 +798,49 @@ is tested on screen.**
 **Agent choices, owner to revise:** matching updated items to kept files by name (a mod renamed between builds would be missed);
 the line's place in Before you play; Keep the new builds without a second question (it writes only into the tools' archive).
 
+## Records copy themselves, and Windows' pickers (built 20 Nov 2026, 0.29.0)
+
+**The owner found backups not working** (20 Nov 2026): no folder had ever been saved for the records backup, and nothing ran by
+itself. They chose copies "every few hours when it's open, and if the schedule is missed, the soonest next opportunity", records
+only (saves stay a separate question), and pickers wherever a folder is chosen, keeping the type-in box.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Keep their records copied without remembering to; choose any folder or file with Windows' own picker |
+| What does it stop them doing? | Losing weeks of verdicts and notes to a forgotten backup; typing long paths by hand, which their hands make hard |
+| How does it change the way they work? | Choose the folder once; Home speaks only when a copy failed |
+
+| Part | How |
+| --- | --- |
+| The timer | `records_backup::start`: a host thread looks every 10 minutes (20 s after start), runs `records status --every-hours 6` and, when `due`, `records backup --automatic` (phobos-modkit 1.55.0), under the manifest's check |
+| What the window sees | `records_automatic`, the last attempt this run; the Settings panel asks each minute while it is on screen; Home's note shows a failure with the kit's reason |
+| Pickers | `pick.rs` (Tauri's dialog plugin, host only): opens at the setting's value or the nearest folder above it, answers with a path; the save is the same `set_setting` |
+
+**Agent choices, owner to revise:** 6 hours, the 10-minute look and the 20-second first look; no event channel (the window asks).
+
+## Add a game from Steam (built 20 Nov 2026, 0.31.0)
+
+**Item 5 of `later.md`, agreed by the owner on 19 Nov 2026**, built overnight on their go-ahead of 20 Nov 2026 ("proceed at your
+leisure and even agency").
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Put a game Steam has installed on the list in a few presses, its data folder chosen from guesses or with the picker, its repositories ticked |
+| What does it stop them doing? | Hand-editing `games.json`, where one misplaced comma stops the program reading every game |
+| How does it change the way they work? | A new game is one press away from the Game files page; the list is no longer a file to maintain |
+
+| Part | How |
+| --- | --- |
+| Steam's games | `game-files steam-games` (phobos-modkit 1.58.0): each game with up to three `dataGuesses`, surest first, from where Windows keeps Documents and names that differ the way games' folders do |
+| Already listed | `games_page::listed_as`: by Steam app ID, else by name (the list's older entries have none); listed games show but cannot be chosen |
+| Repositories | `games::unlisted_repositories`: folders under the list's root holding `.git` that no game names |
+| The write | `games::with_game` checks everything and builds the new text with serde_json's `preserve_order`, so the list keeps its order (checked: the owner's list round-trips byte for byte); `games::add` keeps `games.json.before-add`, writes `games.json.new` and moves it into place |
+| After | The window reads Home again, so the game is in the game menu at once |
+
+**Not built:** changing or removing an entry (still by hand), giving an older entry its Steam app ID, and a game Steam does not
+install. **Agent choices, owner to revise:** the id from the name, one copy of the list as it was (replaced at each add), the
+scoring of guesses (phobos-modkit's `docs/game-files.md`). **Nothing here is tested on screen.**
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

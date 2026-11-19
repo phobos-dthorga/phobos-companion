@@ -4,6 +4,24 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-11-20
+
+Item 5 of docs/later.md, which the owner said yes to on 19 November 2026: adding a game from Steam, and better guesses at where a game keeps its files. Built overnight on the owner's go-ahead of 20 November ("proceed at your leisure and even agency"). Not yet tested on screen.
+
+### Added
+
+- **Add a game from Steam**, on the Settings page (Games on the list): every game Steam has installed, those not on your list first. Choose one, and its name, a short id, where it keeps its files and its repositories are filled in for you to check: the folder from the tools' guesses (each saying why it was guessed), Choose a folder… for Windows' picker, or none for now; the repositories are the folders under your root that no game names yet. **The entry is shown exactly as it will be written** before Add to the list writes it, and the game is in the game menu at once. A game already on the list shows which id it has and cannot be added twice.
+- The list as it was is kept beside it (games.json.before-add) at each add, and the list keeps its own order and layout. Nothing already on the list is changed or removed.
+
+### Fixed
+
+- Where a game keeps its files is now found for Farming Simulator 25 and Project Zomboid too, and from where Windows keeps your Documents folder (yours is in SynologyDrive, so Documents\My Games was never looked in). From the tool kit.
+
+### Dependencies
+
+- phobos-modkit v1.57.1 to v1.58.0: game-files guesses a game's data folder where it really is, with up to three candidates for each Steam game.
+- serde_json's preserve_order feature, so the games list keeps its order when a game is added.
+
 ## [0.30.1] - 2026-11-20
 
 The owner, on the code viewer (20 November 2026): "It doesn't seem to be showing the full extent of the code that was/is involved? I've had this feeling for sometime now." Not yet tested on screen.

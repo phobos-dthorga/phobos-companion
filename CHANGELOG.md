@@ -4,6 +4,29 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-11-19
+
+The owner decided (19 November 2026) that memory profiling is done from the Companion rather than by asking agent sessions to run watches; the tool kit gained what a program needs to follow, stop and mark a watch (phobos-modkit 1.47.0). Not yet tested on screen, and no watch has been started from the window yet.
+
+### Added
+
+- **A Memory page** (the U key, or its button under Play): watch your game's memory for a few minutes while you play, without pausing it, and see whether it climbs steadily or in jumps, and whether it is .NET's (the game's and mods' code objects) or everything else (the engine, textures, drivers).
+  - **Start a watch** (T, or the button): choose how long (5 to 60 minutes, 15 to begin with), whether to read .NET's figures too (it attaches to the game once, which can make it stutter for a moment) or Windows' figures only (attaches nothing), and a label. **It always asks first**, and says to save.
+  - **While it runs**: a bar of how far along it is, the latest figures, the timeline so far, and **Stop the watch now** (X), which loses nothing. It carries on when you change page.
+  - **Mark the moment** (B): type what you are doing, such as reloading now, and press Enter. The time is taken when you press B. Five quick marks mark at once: Reloading now, Loaded a save, Opened the world map, Back to playing, Paused the game.
+  - **Every kept watch's report**, newest first. **The report now says what happened before any figure**: the saves the log shows loaded, or in bold that none was; your marks; and in bold, a marked reload that never reached the log.
+  - A game whose tools have no memory watch is told so in words. Today that is every game but RimWorld.
+- Kept memory watches join **Go to anything** (/).
+- Four questions on the Decisions page: marking from inside the game with a two-key press, starting a watch by itself when the game starts, the first length, and the page's keys.
+
+### Changed
+
+- **Reports show bold text as bold** (on the Reports page and wherever a report is drawn), not with asterisks around it.
+
+### Dependencies
+
+- phobos-modkit 1.47.0 (watch-status, watch-stop, watch-mark and the memory-watch surface).
+
 ## [0.22.0] - 2026-11-19
 
 The owner said yes (19 November 2026) to four new tools for working with agent sessions and to the game-files work; each is its own commit under this version, and anything not yet built is kept in docs/later.md. Not yet tested on screen.

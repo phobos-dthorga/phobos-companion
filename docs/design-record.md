@@ -629,6 +629,39 @@ Project Zomboid (saves and space with its data folder named; not installed throu
 the W key; twelve screenshots and ten saves a page; space as plain bars rather than a chart; a list of screenshots, not pictures,
 until the gallery is built (`later.md`).
 
+## Memory (built 19 Nov 2026, 0.23.0)
+
+**The owner decided (19 Nov 2026) that memory profiling is done from the Companion**, not by asking agent sessions to run watches.
+The tool kit already had the watch (phobos-modkit 1.42.0, fixed in 1.45.1); 1.47.0 added what a program needs to follow and steer it.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Watch the game's memory for a few minutes at a press, see it as it goes, mark what they do ("reloading now") at the moment they do it, stop early, and read any kept watch's report |
+| What does it stop them doing? | Starting a watch by accident or without a warning: a watch that attaches to the game asks first, every time. Reading figures before knowing what happened: the report opens with the saves the log shows loaded, the marks, and a bold line when a marked reload never reached the log |
+| How does it change the way they work? | No agent session and no console: the owner runs short watches between restarts themselves, and the marks put their intentions beside the figures |
+
+| Part | How |
+| --- | --- |
+| Finding the watch | The manifest's `memory-watch` surface (phobos-modkit 1.47.0) on `watch`, `watch-report`, `watch-status`, `watch-stop` and `watch-mark`; the host names no game, and a game without it is told so in words (`src-tauri/src/memory_page.rs`) |
+| What may run | Reading only reads. **Starting runs only on a press and a confirmation**, never by itself, and only while the manifest calls it `runs`; stopping and marking write only into the watch's own folder in the kit's cache, while the manifest calls them `writes`. The host checks the length is one offered, the label and a mark are one line of a sane length, a watch's name has the kit's shape, and a mark's words come after `--`, so no text becomes an option |
+| Following it | The window reads `watch-status` (about 0.2 s) every 5 seconds while a watch runs. The request that started it lasts as long as the watch and carries its progress; it is kept outside the page (`watching.svelte.ts`), so changing page loses nothing. A watch started elsewhere, or before the window was reopened, is followed the same way, its bar counted from its own clock |
+| Marks | B puts the keyboard in the mark box and takes the moment then, not when Enter is pressed. Five quick marks mark at once. The kit stores them beside the samples (`watch-mark`), and the report names them beside the jumps |
+| Kept watches | The twenty newest, with their length, state and what they read; choosing one shows its whole report (the kit's `watch-report`, drawn by `ReportView`). They also join Go to anything |
+
+**Checked on:** RimWorld, the one game whose tools have a memory watch; for every other game the page says so in words (the host's
+test covers a game without one). The kit's `watch-status` was read against the owner's two kept watches of 19 Nov 2026; **no watch
+has been started from the window yet, and nothing here is tested on screen.**
+
+**Agent choices, owner to revise:** the lengths offered (5, 10, 15, 20, 30 and 60 minutes, 15 first, from the owner's word that 60 was
+"a bit generous" and 15 to 20 workable); .NET's figures on by default; the keys U (page), T (start), B (mark) and X (stop); the five
+quick marks' words; stopping without a confirmation, since nothing is lost; the page under Play, after Logs. Four questions are on the
+Decisions page: marking from inside the game, starting a watch by itself when the game starts, the first length, and the keys.
+
+**Not built:** marking without switching from the game (a global key; on the Decisions page), carrying a watch across a game
+restart or starting one when the game starts (on the Decisions page), editing or removing a mark, and the heap snapshot and its
+comparison (`heap`, which pauses the game 20 to 30 seconds and holds only part of a large heap; a page for it waits for the kit's
+reader of what holds what).
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

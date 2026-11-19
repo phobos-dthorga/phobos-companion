@@ -4,7 +4,7 @@
     {
       "id": "page-keys",
       "question": "Renumber the page keys to follow the grouped page bar?",
-      "context": "The page bar is now grouped into Play (Home, Mods, Tests, Logs, Atlas), Code (Changes, Timeline, Code map, Make-up) and Tools (Reports, Settings, Decisions). The keys still follow the old order: 1 Home, 2 Reports, 3 Atlas, 4 Tests, 5 Mods, 6 Changes, 7 Timeline, 8 Code map, 9 Settings, G Logs, M Make-up, D Decisions.",
+      "context": "The page bar is now grouped into Play (Home, Mods, Tests, Logs, Memory, Game files, Atlas), Code (Changes, Timeline, Code map, Make-up) and Tools (Reports, Settings, Decisions). The keys still follow the old order: 1 Home, 2 Reports, 3 Atlas, 4 Tests, 5 Mods, 6 Changes, 7 Timeline, 8 Code map, 9 Settings, G Logs, M Make-up, D Decisions. Memory (U) and Game files (W) keep their letters either way.",
       "options": [
         {
           "id": "renumber",
@@ -297,6 +297,100 @@
       "lean": "day",
       "why": "Batches run over an evening; a claim older than a day is almost always forgotten",
       "from": "docs/design-record.md, Claims board",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "memory-mark-in-game",
+      "question": "Mark a moment in a memory watch without leaving the game?",
+      "context": "Today a mark needs the Companion in front: Alt+Tab, B, a few words, Enter, then back to the game. The page's own keys are one key each, but a key that works while the game is in front has to be two held together, or the game would lose that key. It needs a new library (Tauri's global shortcut plugin).",
+      "options": [
+        {
+          "id": "global-key",
+          "label": "Add a key that works in the game",
+          "detail": "Ctrl+Alt+M (changeable) marks the moment at once as 'marked from the game', without leaving the game; add words on the Memory page afterwards"
+        },
+        {
+          "id": "window-only",
+          "label": "Keep marks in the Companion's window",
+          "detail": "Alt+Tab, B, words, Enter, as now"
+        }
+      ],
+      "lean": "global-key",
+      "why": "Switching windows mid-reload is the moment marks matter most and the moment you are least free to type; one press keeps the time exact and spares the mouse",
+      "from": "docs/design-record.md, Memory",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "memory-auto-start",
+      "question": "Start a memory watch by itself when the game starts?",
+      "context": "You restart the game often, and a watch ends when the game closes. The Companion could notice the game starting and begin a watch for you. With .NET's figures that attaches to the game each time without asking; Windows' figures only attaches nothing.",
+      "options": [
+        {
+          "id": "press-only",
+          "label": "Only when I press Start",
+          "detail": "As now: every watch asks first"
+        },
+        {
+          "id": "auto-windows",
+          "label": "By itself, Windows' figures only",
+          "detail": "Attaches nothing; every session gets a watch, without .NET's split"
+        },
+        {
+          "id": "auto-dotnet",
+          "label": "By itself, with .NET's figures",
+          "detail": "Attaches once each time the game starts, without asking"
+        }
+      ],
+      "lean": "press-only",
+      "why": "Every watch so far was read against a plan (what to do, when to reload); a watch nobody planned is hard to read. Change it if you find yourself forgetting to start one",
+      "from": "docs/design-record.md, Memory",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "memory-first-length",
+      "question": "Is 15 minutes the right first choice for a memory watch?",
+      "context": "The page offers 5, 10, 15, 20, 30 and 60 minutes, with 15 chosen to begin with. You found 60 a bit generous and 15 to 20 workable, and you reload every 10 to 15 minutes.",
+      "options": [
+        {
+          "id": "15",
+          "label": "15 minutes (as now)",
+          "detail": "About one reload's worth"
+        },
+        {
+          "id": "20",
+          "label": "20 minutes",
+          "detail": "Room for a reload and a few minutes after it"
+        },
+        {
+          "id": "10",
+          "label": "10 minutes",
+          "detail": "Shorter, for quick checks"
+        }
+      ],
+      "lean": "15",
+      "why": "It fits between your reloads; the other lengths are one press away",
+      "from": "docs/design-record.md, Memory",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "memory-keys",
+      "question": "Are U, T, B and X the right keys for the Memory page?",
+      "context": "U opens the page from anywhere; on the page, T starts a watch (it asks first), B starts a mark and X stops the running watch. S was left free because the page-keys question would give it to Settings.",
+      "options": [
+        {
+          "id": "keep",
+          "label": "Keep them",
+          "detail": "Any key can still be changed in Settings, Keyboard shortcuts"
+        },
+        {
+          "id": "change",
+          "label": "Change them",
+          "detail": "Say which in your words"
+        }
+      ],
+      "lean": "keep",
+      "why": "B (bookmark) and X (stop) are easy to find without looking; the rest were what was free",
+      "from": "docs/design-record.md, Memory",
       "asked": "2026-11-19"
     }
   ]

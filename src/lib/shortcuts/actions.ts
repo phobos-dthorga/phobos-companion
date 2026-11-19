@@ -3,7 +3,7 @@
  * needs two keys held at once). A scope is where it works: everywhere outside a dialog, in the code viewer, or in the connections
  * view (on the Code map page or inside the code viewer).
  */
-export type Scope = "everywhere" | "code" | "connections";
+export type Scope = "everywhere" | "code" | "connections" | "memory";
 
 export type Action = {
   id: string;
@@ -91,6 +91,12 @@ export const ACTIONS: Action[] = [
     scope: "everywhere",
     defaultKey: "w",
     words: "shortcut-page-gamefiles",
+  },
+  {
+    id: "page.memory",
+    scope: "everywhere",
+    defaultKey: "u",
+    words: "shortcut-page-memory",
   },
   {
     id: "game.previous",
@@ -213,12 +219,31 @@ export const ACTIONS: Action[] = [
     defaultKey: "Backspace",
     words: "shortcut-connections-back",
   },
+  {
+    id: "memory.start",
+    scope: "memory",
+    defaultKey: "t",
+    words: "shortcut-memory-start",
+  },
+  {
+    id: "memory.mark",
+    scope: "memory",
+    defaultKey: "b",
+    words: "shortcut-memory-mark",
+  },
+  {
+    id: "memory.stop",
+    scope: "memory",
+    defaultKey: "x",
+    words: "shortcut-memory-stop",
+  },
 ];
 
 export const SCOPES: { scope: Scope; words: string }[] = [
   { scope: "everywhere", words: "shortcut-scope-everywhere" },
   { scope: "code", words: "shortcut-scope-code" },
   { scope: "connections", words: "shortcut-scope-connections" },
+  { scope: "memory", words: "shortcut-scope-memory" },
 ];
 
 export function action(id: string): Action | undefined {

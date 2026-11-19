@@ -12,12 +12,16 @@
   import { started } from "../shell/progress";
   import { readTestLists } from "../tests/desktopClient";
   import { readTimeline } from "../timeline/desktopClient";
+  import { readStatus } from "../memory/desktopClient";
+  import { formatStarted } from "../memory/presentation";
+  import type { StatusData } from "../memory/types";
   import {
     fromAddress,
     fromChanges,
     fromCode,
     fromPages,
     fromReports,
+    fromWatches,
     fromSettings,
     fromTests,
     fromTimeline,
@@ -42,7 +46,7 @@
     onchoose: (where: Place) => void;
   } = $props();
 
-  type Source = "version" | "test" | "fact" | "setting" | "report";
+  type Source = "version" | "test" | "fact" | "setting" | "report" | "watch";
   const CODE_WAIT_MS = 350;
 
   let query = $state("");
@@ -52,6 +56,7 @@
     fact: "reading",
     setting: "reading",
     report: "reading",
+    watch: "reading",
   });
   let code = $state<Candidate[]>([]);
   let searchingCode = $state(false);
@@ -67,6 +72,7 @@
     fact: "goto-kind-fact",
     setting: "goto-kind-setting",
     report: "goto-kind-report",
+    watch: "goto-kind-watch",
   };
 
   const reading = $derived(Object.values(loaded).some((v) => v === "reading"));
@@ -112,7 +118,13 @@
       (v) => fromSettings(v.list.settings),
     );
     if (!game) {
-      for (const source of ["version", "test", "fact", "report"] as Source[])
+      for (const source of [
+        "version",
+        "test",
+        "fact",
+        "report",
+        "watch",
+      ] as Source[])
         loaded[source] = [];
       return;
     }
@@ -136,6 +148,9 @@
       "report",
       readCatalogue(id),
       (v) => fromReports(id, v.entries),
+    );
+    settle<{ status: StatusData | null }>("watch", readStatus(id, null), (v) =>
+      fromWatches(id, v.status?.kept ?? [], formatStarted),
     );
   });
 

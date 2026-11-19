@@ -21,7 +21,8 @@ export type Kind =
   | "test"
   | "fact"
   | "setting"
-  | "report";
+  | "report"
+  | "watch";
 
 /** The order kinds are listed in. */
 export const KINDS: Kind[] = [
@@ -34,6 +35,7 @@ export const KINDS: Kind[] = [
   "fact",
   "setting",
   "report",
+  "watch",
 ];
 
 export type Candidate = {
@@ -156,6 +158,20 @@ export function fromReports(game: string, entries: ReportEntry[]): Candidate[] {
       command: e.command,
       report: e.report ?? "",
     }),
+  }));
+}
+
+/** Memory watches kept for the game, by their start and label (0.23.0). */
+export function fromWatches(
+  game: string,
+  kept: { watch: string; label: string; started: number }[],
+  when: (unix: number) => string,
+): Candidate[] {
+  return kept.map((k) => ({
+    kind: "watch" as const,
+    label: [when(k.started), k.label].filter(Boolean).join(" · "),
+    detail: k.watch,
+    place: place("memory", game, { watch: k.watch }),
   }));
 }
 

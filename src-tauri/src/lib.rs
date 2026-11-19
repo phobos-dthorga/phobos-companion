@@ -14,6 +14,7 @@ mod installs_page;
 mod kit_pins;
 mod logs_page;
 mod makeup_page;
+mod memory_page;
 mod open_work;
 mod patch_targets;
 mod pending;
@@ -453,6 +454,55 @@ async fn save_shortcuts(app: tauri::AppHandle, shortcuts: serde_json::Value) -> 
     blocking(move || shortcuts::save(&data, &shortcuts)).await
 }
 
+/// The game's memory watch as it stands: the running one, else the newest or the one named; says when the game has none.
+#[tauri::command]
+async fn memory_status(
+    game: String,
+    watch: Option<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<memory_page::MemoryReading, Failure> {
+    blocking(move || memory_page::status(&game, watch.as_deref(), Some(&hearing(on_progress)))).await
+}
+
+/// A kept memory watch's whole report.
+#[tauri::command]
+async fn memory_report(
+    game: String,
+    watch: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<memory_page::MemoryReading, Failure> {
+    blocking(move || memory_page::report(&game, &watch, Some(&hearing(on_progress)))).await
+}
+
+/// Starts a memory watch on the owner's press and confirmation; answers with its report when it ends.
+#[tauri::command]
+async fn memory_start(
+    game: String,
+    minutes: u32,
+    counters: bool,
+    label: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<memory_page::MemoryReading, Failure> {
+    blocking(move || memory_page::start(&game, minutes, counters, &label, Some(&hearing(on_progress)))).await
+}
+
+/// Asks the running memory watch to end early.
+#[tauri::command]
+async fn memory_stop(game: String, watch: Option<String>) -> Result<memory_page::StepResult, Failure> {
+    blocking(move || memory_page::stop(&game, watch.as_deref())).await
+}
+
+/// Puts the owner's words beside a memory watch's figures.
+#[tauri::command]
+async fn memory_mark(
+    game: String,
+    watch: Option<String>,
+    text: String,
+    at: Option<f64>,
+) -> Result<memory_page::StepResult, Failure> {
+    blocking(move || memory_page::mark(&game, watch.as_deref(), &text, at)).await
+}
+
 /// Starts the program.
 pub fn run() {
     tauri::Builder::default()
@@ -494,6 +544,11 @@ pub fn run() {
             answer_decision,
             game_files,
             show_game_file,
+            memory_status,
+            memory_report,
+            memory_start,
+            memory_stop,
+            memory_mark,
             read_shortcuts,
             save_shortcuts
         ])

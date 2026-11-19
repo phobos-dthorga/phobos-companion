@@ -7,6 +7,7 @@ export const PAGE_NAMES = [
   "mods",
   "tests",
   "logs",
+  "memory",
   "gamefiles",
   "atlas",
   "changes",

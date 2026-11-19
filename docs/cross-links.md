@@ -72,6 +72,7 @@ build differs from its proposal.
 | Settings | `key` |
 | Mods | `repository`, and `mod` or `changelog`; `before` (a moment) marks the newest backup from before it; `panel=settings` brings the settings to look at into view (0.21.0) |
 | Logs | `signature` |
+| Memory | `watch` (a kept watch's name, such as `20261119-205419-reload-test-2`; 0.23.0) |
 | Reports | `command`, `report` |
 
 ## Proposed order

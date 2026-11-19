@@ -2,6 +2,7 @@
   import GlobeBlock from "../atlas/GlobeBlock.svelte";
   import ChartBlock from "../charts/ChartBlock.svelte";
   import { t } from "../i18n/runtime";
+  import RichText from "../shell/RichText.svelte";
   import TableBlock from "./TableBlock.svelte";
   import { headingTag } from "./presentation";
   import type { Block, Report } from "./types";
@@ -11,7 +12,7 @@
 
 {#snippet content(block: Block)}
   {#if block.type === "text"}
-    <p class="text">{block.text}</p>
+    <p class="text"><RichText text={block.text} /></p>
   {:else if block.type === "bullets"}
     <ul>
       {#each block.items as item, index (index)}
@@ -34,7 +35,7 @@
 {/snippet}
 
 {#each report.lines as line, index (index)}
-  <p class="line">{line}</p>
+  <p class="line"><RichText text={line} /></p>
 {/each}
 
 {#each report.blocks as block, index (index)}

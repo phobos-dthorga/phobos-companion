@@ -36,6 +36,11 @@
     makeup: "activity-makeup",
     mod_settings: "activity-mod-settings",
     save_picture: "activity-save-picture",
+    memory_status: "activity-memory-status",
+    memory_report: "activity-memory-report",
+    memory_start: "activity-memory-start",
+    memory_stop: "activity-memory-stop",
+    memory_mark: "activity-memory-mark",
   };
 
   let now = $state(Date.now());

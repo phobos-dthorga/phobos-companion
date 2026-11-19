@@ -15,7 +15,11 @@ export type FactKind =
   | "went-back"
   | "backed-up"
   | "built"
-  | "encoded";
+  | "encoded"
+  | "setting-added"
+  | "setting-removed"
+  | "setting-default"
+  | "duplicates-removed";
 
 /** An entry a fact names: its opening words and section; a reworded one with its words before and after. */
 export type FactEntry = {
@@ -51,6 +55,13 @@ export type Fact = {
   fromVersion?: string;
   ok?: boolean;
   mods?: string[];
+  /** For a setting (kit 1.40.0): its saved key, the settings window's label where known, and its default before and after. */
+  key?: string;
+  label?: string | null;
+  before?: string | null;
+  after?: string | null;
+  /** For repeated backups removed: how much room it freed. */
+  size?: number;
 };
 
 export type Timeline = {

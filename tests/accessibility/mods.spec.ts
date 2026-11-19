@@ -216,6 +216,51 @@ function sampleTextures(running: string[]) {
   };
 }
 
+const sampleLedger = [
+  {
+    repository: "first-mods",
+    seen: ["SampleBoats_Old|added|aaaaaaaa0123456789"],
+    settings: [
+      {
+        time: "2026-11-19T07:00:00+11:00",
+        commit: "4d332ddf0123456789",
+        subject: "Sample Mod 1.3.0: boats",
+        mod: "SampleMod",
+        product: "Sample Mod",
+        key: "SampleBoats_Float",
+        label: "Boats float",
+        what: "added",
+        before: null,
+        after: "True",
+      },
+      {
+        time: "2026-11-18T07:00:00+11:00",
+        commit: "bbbbbbbb0123456789",
+        subject: "Sample Mod 1.2.0: sails",
+        mod: "SampleMod",
+        product: "Sample Mod",
+        key: "SampleBoats_SailSize",
+        label: null,
+        what: "default",
+        before: "3",
+        after: "5",
+      },
+      {
+        time: "2026-11-01T07:00:00+11:00",
+        commit: "aaaaaaaa0123456789",
+        subject: "Sample Mod 1.0.0",
+        mod: "SampleMod",
+        product: "Sample Mod",
+        key: "SampleBoats_Old",
+        label: "Old boats",
+        what: "added",
+        before: null,
+        after: "False",
+      },
+    ],
+  },
+];
+
 async function open(page: Page, running: string[] = [], slowRead = false) {
   const installs = sampleInstalls(running);
   await mockHost(page, {
@@ -252,6 +297,8 @@ async function open(page: Page, running: string[] = [], slowRead = false) {
         data: { backup: "SampleMod-20261118-210000" },
       },
     },
+    mod_settings: { result: sampleLedger },
+    mark_settings: { result: "2026-11-19T08:00:00Z" },
     entry_code: {
       result: {
         found: true,
@@ -476,6 +523,32 @@ for (const [name, viewport] of [
       await expect(card).toContainText(
         "No backup of this mod is older than the change you came from",
       );
+    });
+
+    test("settings to look at list the new ones, and a mark moves one to those looked at", async ({
+      page,
+    }) => {
+      await open(page);
+      const panel = page.getByRole("region", { name: /^Settings to look at/ });
+      await expect(panel).toContainText("Boats float");
+      await expect(panel).toContainText("Now starts at 5 (was 3)");
+      await expect(panel).not.toContainText("Old boats");
+      await audit(page);
+      await panel
+        .getByRole("button", { name: "Mark Boats float as looked at" })
+        .click();
+      await expect(panel.getByRole("status")).toContainText(
+        "Marked one setting as looked at.",
+      );
+      await panel.getByRole("button", { name: "Show the 2 looked at" }).click();
+      await expect(
+        panel.getByRole("list", { name: "Settings looked at" }),
+      ).toContainText("Old boats");
+      await panel.getByRole("button", { name: "Mark it as looked at" }).click();
+      await expect(panel).toContainText(
+        "Nothing new: every setting has been looked at.",
+      );
+      await audit(page);
     });
 
     test("an entry opens the code behind it", async ({ page }) => {

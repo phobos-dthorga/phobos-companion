@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsToLook from "./SettingsToLook.svelte";
   import Pager from "../shell/Pager.svelte";
   import { pageHolding, pageOf } from "../shell/paging";
   import { here, setFocus } from "../navigation/navigation.svelte";
@@ -324,6 +325,12 @@
         )[0] ?? null
     );
   }
+
+  // A link to the settings to look at (Home's count) brings them into view.
+  $effect(() => {
+    if (here().focus.panel === "settings")
+      untrack(() => void reveal("settings-to-look"));
+  });
 
   $effect(() => {
     if (focusKey && reading.state === "ready") {
@@ -826,6 +833,8 @@
       {/if}
     </div>
   </section>
+
+  <SettingsToLook game={game.id} />
 
   {#each repositories as repository (repository.repository)}
     {#if repositories.length > 1}

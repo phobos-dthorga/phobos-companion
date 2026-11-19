@@ -99,6 +99,28 @@ async function open(page: Page) {
     changes_list: { result: changes },
     entry_code: { result: code },
     test_lists: { result: [] },
+    mod_settings: {
+      result: [
+        {
+          repository: "first-mods",
+          seen: [],
+          settings: [
+            {
+              time: "2026-11-19T07:00:00+11:00",
+              commit: "4d332ddf0123456789",
+              subject: "Sample Boats 1.3.0",
+              mod: "Boats",
+              product: "Sample Boats",
+              key: "SampleBoats_Float",
+              label: "Boats float",
+              what: "added",
+              before: null,
+              after: "True",
+            },
+          ],
+        },
+      ],
+    },
     kit_pins: {
       result: {
         kit: "1.38.0",
@@ -283,5 +305,23 @@ test.describe("The way back, the search and addresses", () => {
       .click();
     await expect(panel).toContainText("rimworld-patches targets");
     await audit(page);
+  });
+
+  test("Home counts the mod settings to look at, and leads to them on the Mods page", async ({
+    page,
+  }) => {
+    await open(page);
+    const panel = page.getByRole("region", { name: "Settings to look at" });
+    await expect(panel).toContainText(
+      "One mod setting is new since you last looked.",
+    );
+    await audit(page);
+    await panel
+      .getByRole("button", { name: "Look at them on the Mods page" })
+      .click();
+    await page.getByRole("button", { name: "Copy address" }).click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(
+      /^dthorga:\/\/mods\/first\?panel=settings$/,
+    );
   });
 });

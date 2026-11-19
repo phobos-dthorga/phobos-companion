@@ -202,9 +202,40 @@ describe("a day's rows", () => {
     ]);
     expect(
       found.map((r) =>
-        r.kind === "batch" ? r.facts.map((f) => f.product) : r.fact.kind,
+        r.kind === "single" ? r.fact.kind : r.facts.map((f) => f.product),
       ),
     ).toEqual(["version-written", ["A", "B", "C"], "installed", "built"]);
+  });
+
+  it("makes one commit's settings one row, and a new commit a new row", () => {
+    const setting = (
+      key: string,
+      commit: string,
+      kind: Fact["kind"] = "setting-added",
+    ) =>
+      fact(kind, "2026-11-18T10:00:00+00:00", {
+        key,
+        commit,
+        product: "Boats",
+      });
+    const found = rows([
+      setting("A", "c1"),
+      setting("B", "c1", "setting-default"),
+      setting("C", "c2"),
+      fact("version-written", "2026-11-18T09:00:00+00:00"),
+    ]);
+    expect(
+      found.map((r) =>
+        r.kind === "settings" ? [r.commit, r.facts.map((f) => f.key)] : r.kind,
+      ),
+    ).toEqual([["c1", ["A", "B"]], ["c2", ["C"]], "single"]);
+    expect(
+      canShowCode({
+        ...setting("A", "c1"),
+        repository: "boats",
+        source: "git",
+      }),
+    ).toBe(true);
   });
 
   it("never joins two repositories' installs, or facts from git", () => {

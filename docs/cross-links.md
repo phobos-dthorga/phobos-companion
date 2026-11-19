@@ -70,7 +70,7 @@ build differs from its proposal.
 | Timeline | `day` (YYYY-MM-DD) |
 | Tests | `repository`, `row` |
 | Settings | `key` |
-| Mods | `repository`, and `mod` or `changelog`; `before` (a moment) marks the newest backup from before it |
+| Mods | `repository`, and `mod` or `changelog`; `before` (a moment) marks the newest backup from before it; `panel=settings` brings the settings to look at into view (0.21.0) |
 | Logs | `signature` |
 | Reports | `command`, `report` |
 

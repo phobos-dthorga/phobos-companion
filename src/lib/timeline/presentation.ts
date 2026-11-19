@@ -22,7 +22,11 @@ export const KIND_LOOKS: Record<FactKind, KindLook> = {
   "entries-removed": { mark: "−", tone: "risk", weight: 50 },
   "entries-reworded": { mark: "✎", tone: "observed", weight: 40 },
   "entries-added": { mark: "+", tone: "observed", weight: 35 },
+  "setting-added": { mark: "⚑", tone: "accent", weight: 58 },
+  "setting-default": { mark: "⇄", tone: "observed", weight: 56 },
+  "setting-removed": { mark: "⚐", tone: "risk", weight: 54 },
   "backed-up": { mark: "▣", tone: "comparison", weight: 30 },
+  "duplicates-removed": { mark: "≡", tone: "comparison", weight: 25 },
   built: { mark: "⚙", tone: "comparison", weight: 20 },
   encoded: { mark: "▦", tone: "comparison", weight: 10 },
 };
@@ -136,11 +140,17 @@ export function canReadAsItStood(fact: Fact): boolean {
   );
 }
 
-/** Whether a fact has code to show: it came from git, with its commit and changelog. */
+/** Whether a fact is about a setting (kit 1.40.0). */
+export function isSetting(fact: Fact): boolean {
+  return fact.kind.startsWith("setting-");
+}
+
+/** Whether a fact has code to show: it came from git, with its commit, and names a changelog or is about a setting. */
 export function canShowCode(fact: Fact): boolean {
   return (
     fact.source === "git" &&
-    Boolean(fact.commit && fact.changelog && fact.repository)
+    Boolean(fact.commit && fact.repository) &&
+    (Boolean(fact.changelog) || isSetting(fact))
   );
 }
 
@@ -165,7 +175,8 @@ const BATCHED: FactKind[] = ["installed", "backed-up", "went-back"];
 /** One row of a day: a fact on its own, or several of one kind done together on this PC (one install of many mods). */
 export type Row =
   | { kind: "single"; fact: Fact }
-  | { kind: "batch"; factKind: FactKind; time: string; facts: Fact[] };
+  | { kind: "batch"; factKind: FactKind; time: string; facts: Fact[] }
+  | { kind: "settings"; commit: string; facts: Fact[] };
 
 /**
  * A day's facts as rows: facts from this PC of one batched kind, in the same repository and the same minute, next to each other,
@@ -182,6 +193,13 @@ export function rows(facts: Fact[]): Row[] {
     a.time.slice(0, 16) === b.time.slice(0, 16);
   for (const fact of facts) {
     const last = found[found.length - 1];
+    // One commit's settings changes are one row: a commit can add dozens.
+    if (isSetting(fact) && fact.commit) {
+      if (last?.kind === "settings" && last.commit === fact.commit)
+        last.facts.push(fact);
+      else found.push({ kind: "settings", commit: fact.commit, facts: [fact] });
+      continue;
+    }
     if (last?.kind === "batch" && together(last.facts[0], fact)) {
       last.facts.push(fact);
     } else if (last?.kind === "single" && together(last.fact, fact)) {

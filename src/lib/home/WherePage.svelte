@@ -8,6 +8,8 @@
   } from "./presentation";
   import type { GameHome, KitPins } from "./types";
   import { readKitPins } from "./desktopClient";
+  import { readLedger } from "../mods/desktopClient";
+  import { split } from "../mods/ledger";
   import { go, openDialog } from "../navigation/navigation.svelte";
   import { commitRequest } from "../code/presentation";
 
@@ -18,6 +20,30 @@
 
   const headline = $derived(headlineWords(game, now));
   const last = $derived(game.latest[0]);
+
+  /** How many mod settings wait to be looked at (0.21.0); null until read, or when the game keeps none. */
+  let settingsToLook = $state<number | null>(null);
+  $effect(() => {
+    const id = game.id;
+    settingsToLook = null;
+    void readLedger(id).then((answer) => {
+      if (
+        answer.state === "ready" &&
+        id === game.id &&
+        answer.ledgers.length > 0
+      )
+        settingsToLook = split(answer.ledgers).toLook.length;
+    });
+  });
+
+  function openSettings() {
+    go({
+      page: "mods",
+      game: game.id,
+      focus: { panel: "settings" },
+      dialog: null,
+    });
+  }
 
   /** Each repository's pin of the tool kit (cross-links S2); empty until read, or when the read fails. */
   let pins = $state<KitPins | null>(null);
@@ -147,6 +173,16 @@
         {t("list-more", { count: game.open_work.length - shown.length })}
       </p>
     {/if}
+  </section>
+{/if}
+
+{#if settingsToLook !== null && settingsToLook > 0}
+  <section class="panel" aria-labelledby="home-settings-title">
+    <h2 id="home-settings-title">{t("home-settings-title")}</h2>
+    <p>{t("home-settings-count", { count: settingsToLook })}</p>
+    <button type="button" class="action" onclick={openSettings}
+      >{t("home-settings-open")}</button
+    >
   </section>
 {/if}
 

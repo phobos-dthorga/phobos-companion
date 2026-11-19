@@ -73,6 +73,31 @@ const sampleTimeline = {
       ],
     },
     {
+      kind: "setting-added",
+      time: noon("2026-11-02"),
+      source: "git",
+      product: "Sample Mod",
+      repository: "first-mods",
+      commit: "dddddddd0123",
+      subject: "Sample Mod 1.2.0: sails",
+      key: "SampleBoats_SailSize",
+      label: "Sail size",
+      after: "3",
+    },
+    {
+      kind: "setting-default",
+      time: noon("2026-11-02"),
+      source: "git",
+      product: "Sample Mod",
+      repository: "first-mods",
+      commit: "dddddddd0123",
+      subject: "Sample Mod 1.2.0: sails",
+      key: "SampleBoats_Oars",
+      label: null,
+      before: "2",
+      after: "4",
+    },
+    {
       kind: "product-ended",
       time: noon("2026-11-02"),
       source: "git",
@@ -310,6 +335,23 @@ for (const [name, viewport] of [
         page.getByRole("button", {
           name: "Showing only Old Sample: show every mod",
         }),
+      ).toBeVisible();
+      await audit(page);
+    });
+
+    test("one commit's settings changes are one row, each setting listed", async ({
+      page,
+    }) => {
+      await open(page);
+      const row = page.locator("li.fact", {
+        hasText: "Settings: 1 added, 1 given a new default, 0 removed",
+      });
+      await expect(row).toContainText("Sail size, starting at 3");
+      await expect(row).toContainText(
+        "SampleBoats_Oars now starts at 4 (was 2)",
+      );
+      await expect(
+        row.getByRole("button", { name: /Show the code/ }),
       ).toBeVisible();
       await audit(page);
     });

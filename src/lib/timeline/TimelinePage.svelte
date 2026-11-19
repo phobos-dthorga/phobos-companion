@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { COMMIT_ONLY_CHANGELOG } from "../code/presentation";
   import Pager from "../shell/Pager.svelte";
   import { pageHolding, pageOf } from "../shell/paging";
   import { here, openDialog, setFocus } from "../navigation/navigation.svelte";
@@ -100,6 +101,11 @@
           : t("timeline-kind-built"),
       encoded: () =>
         t("timeline-kind-encoded", { count: fact.mods?.length ?? count }),
+      "setting-added": () => t("timeline-kind-setting-added"),
+      "setting-removed": () => t("timeline-kind-setting-removed"),
+      "setting-default": () => t("timeline-kind-setting-default"),
+      "duplicates-removed": () =>
+        t("timeline-kind-duplicates-removed", { count }),
     };
     return words[fact.kind]();
   }
@@ -120,7 +126,36 @@
     "backed-up": "timeline-mark-backed-up",
     built: "timeline-mark-built",
     encoded: "timeline-mark-encoded",
+    "setting-added": "timeline-mark-setting-added",
+    "setting-removed": "timeline-mark-setting-removed",
+    "setting-default": "timeline-mark-setting-default",
+    "duplicates-removed": "timeline-mark-duplicates-removed",
   };
+
+  /** One setting's words: its label, or its key where the settings window's label is not known, and what happened to it. */
+  function settingWords(fact: Fact): string {
+    const name = fact.label || fact.key || "";
+    return fact.kind === "setting-default"
+      ? t("timeline-setting-default", {
+          name,
+          before: fact.before ?? "",
+          after: fact.after ?? "",
+        })
+      : fact.kind === "setting-removed"
+        ? t("timeline-setting-removed", { name, before: fact.before ?? "" })
+        : t("timeline-setting-added", { name, after: fact.after ?? "" });
+  }
+
+  /** How many of each kind a commit's settings row holds, in words. */
+  function settingsHead(facts: Fact[]): string {
+    const count = (kind: FactKind) =>
+      facts.filter((f) => f.kind === kind).length;
+    return t("timeline-settings-row", {
+      added: count("setting-added"),
+      changed: count("setting-default"),
+      removed: count("setting-removed"),
+    });
+  }
 
   /** When a fact happened, where, and in which repository when the game has several. */
   function whenWords(fact: Fact): string {
@@ -182,7 +217,7 @@
     const lead = first?.lead ?? fact.subject ?? "";
     viewCode({
       repository: fact.repository ?? "",
-      changelog: fact.changelog ?? "",
+      changelog: fact.changelog || COMMIT_ONLY_CHANGELOG,
       product: laneOf(fact) ?? "",
       entry: {
         version: fact.version ?? "",
@@ -444,7 +479,55 @@
         {/if}
         <ol class="facts">
           {#each rows(group.facts) as row, index (index)}
-            {#if row.kind === "batch"}
+            {#if row.kind === "settings"}
+              {@const first = row.facts[0]}
+              <li class="fact">
+                <span
+                  class="mark tone-{KIND_LOOKS[first.kind].tone}"
+                  aria-hidden="true">{KIND_LOOKS[first.kind].mark}</span
+                >
+                <div class="fact-body">
+                  <div class="fact-top">
+                    <p class="fact-head">
+                      {#if laneOf(first)}<strong>{laneOf(first)}</strong>{/if}
+                      <span>{settingsHead(row.facts)}</span>
+                      <span class="muted small">{whenWords(first)}</span>
+                    </p>
+                    {#if canShowCode(first)}
+                      <div class="fact-actions">
+                        <button
+                          type="button"
+                          class="action"
+                          aria-label={t("timeline-show-code-for", {
+                            subject: first.subject ?? "",
+                          })}
+                          title={first.subject}
+                          onclick={() => showCode(first)}
+                          >{t("code-show")}</button
+                        >
+                      </div>
+                    {/if}
+                  </div>
+                  {#if first.subject}
+                    <p class="small about-line">{first.subject}</p>
+                  {/if}
+                  <ul class="entries settings">
+                    {#each row.facts as fact, settingIndex (settingIndex)}
+                      <li>
+                        <span
+                          class="mark-inline tone-{KIND_LOOKS[fact.kind].tone}"
+                          aria-hidden="true">{KIND_LOOKS[fact.kind].mark}</span
+                        >
+                        {settingWords(fact)}
+                        {#if fact.label && fact.key}<code class="key"
+                            >{fact.key}</code
+                          >{/if}
+                      </li>
+                    {/each}
+                  </ul>
+                </div>
+              </li>
+            {:else if row.kind === "batch"}
               <li class="fact">
                 <span
                   class="mark tone-{KIND_LOOKS[row.factKind].tone}"
@@ -931,6 +1014,23 @@
     font-size: var(--type-small);
     border: 1px solid var(--colour-line);
     border-radius: 999px;
+  }
+
+  .settings li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+  }
+
+  .mark-inline {
+    font-weight: 600;
+  }
+
+  .key {
+    font-size: var(--type-small);
+    color: var(--colour-text-muted);
+    overflow-wrap: anywhere;
   }
 
   .entries {

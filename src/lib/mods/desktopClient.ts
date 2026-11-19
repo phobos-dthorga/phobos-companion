@@ -5,6 +5,8 @@ import {
   progressChannel,
 } from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
+import type { Failed } from "../shell/types";
+import type { Ledger } from "./ledger";
 import type {
   InstallsReading,
   Move,
@@ -74,5 +76,31 @@ export async function encodeTextures(
     "encode_textures",
     { game, mods, onProgress: progressChannel(onProgress) },
     (result) => ({ state: "ready", result }),
+  );
+}
+
+/** Every setting a game's mods ever added, removed or gave a new default, with the owner's marks; a failure in words. */
+export async function readLedger(
+  game: string,
+  onProgress?: OnProgress,
+): Promise<{ state: "ready"; ledgers: Ledger[] } | Failed> {
+  return ask<Ledger[], { state: "ready"; ledgers: Ledger[] }>(
+    "mod_settings",
+    { game, onProgress: progressChannel(onProgress) },
+    (ledgers) => ({ state: "ready", ledgers }),
+  );
+}
+
+/** Marks settings of one repository as looked at, or not; the host checks the ids before it writes. */
+export async function markSettings(
+  game: string,
+  repository: string,
+  ids: string[],
+  seen: boolean,
+): Promise<{ state: "ready"; time: string } | Failed> {
+  return ask<string, { state: "ready"; time: string }>(
+    "mark_settings",
+    { game, repository, ids, seen },
+    (time) => ({ state: "ready", time }),
   );
 }

@@ -15,6 +15,7 @@ mod open_work;
 mod patch_targets;
 mod pending;
 mod reports;
+mod settings_ledger;
 mod settings_page;
 mod shortcuts;
 mod tests_page;
@@ -292,6 +293,30 @@ async fn makeup(
     .await
 }
 
+/// Every setting a game's mods ever added, removed or gave a new default, with the owner's "Looked at" marks.
+#[tauri::command]
+async fn mod_settings(
+    app: tauri::AppHandle,
+    game: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<Vec<settings_ledger::Ledger>, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || settings_ledger::read(&game, &data, Some(&hearing(on_progress)))).await
+}
+
+/// Marks settings as looked at, or not, for one repository; the time it was written.
+#[tauri::command]
+async fn mark_settings(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    ids: Vec<String>,
+    seen: bool,
+) -> Result<String, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || settings_ledger::mark(&game, &repository, &ids, seen, &data)).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -333,6 +358,8 @@ pub fn run() {
             patch_targets,
             kit_pins,
             makeup,
+            mod_settings,
+            mark_settings,
             read_shortcuts,
             save_shortcuts
         ])

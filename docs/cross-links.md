@@ -59,7 +59,7 @@ build differs from its proposal.
 | S4 | A latest commit opens its code (the host now sends each commit's hash); a mod not yet released opens the Changes page at its changelog (the Changes page takes `product` in an address) |
 | S2 | **On the Home page**, a panel per game: each repository's pin, how many versions newer the kit is, and what a move would bring, from phobos-modkit 1.38.0's `pins status` (the pin HEAD records, read against the kit's own changelog). Not on the Mods page, since a pin is not an installed mod |
 | S1, S5 | **Not built tonight** (agent's call). S1 matches names in prose to code by name, which is noisy enough to want the owner's view of what counts first. S5 needs rules given IDs, an open question in phobos-modkit's `rules/first-class.md` that is the owner's to settle |
-| N3 | Written as `dthorga://page/game?key=value`, with `dialog=code` or `dialog=stood` and `dialog.`-prefixed fields for an open dialog. The keys each page reads are in the table below |
+| N3 | Written as `dthorga://page/game?key=value`, with `dialog=code`, `dialog=stood` or (0.32.0) `dialog=picture` and `dialog.`-prefixed fields for an open dialog (a picture's `path`, `name` and `taken`, in Unix seconds). The keys each page reads are in the table below |
 
 **What each page takes from an address:**
 

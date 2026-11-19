@@ -25,7 +25,9 @@ export type PageName = (typeof PAGE_NAMES)[number];
 /** A dialog over the window that the trail keeps, so Back closes it and Forward opens it again. */
 export type Dialog =
   | { kind: "code"; request: EntryRequest }
-  | { kind: "stood"; request: StoodRequest };
+  | { kind: "stood"; request: StoodRequest }
+  /** One screenshot whole (0.32.0): its file, name and when it was taken, in Unix seconds. */
+  | { kind: "picture"; path: string; name: string; taken: number };
 
 /**
  * Where the owner is: a page, a game, what is chosen on the page (its focus: a changelog, a method, a test row...) and any dialog
@@ -92,6 +94,11 @@ export function addressOf(where: Place): string {
     query.set("dialog.product", r.product);
     if (r.commit) query.set("dialog.commit", r.commit);
     if (r.when) query.set("dialog.when", r.when);
+  } else if (where.dialog?.kind === "picture") {
+    query.set("dialog", "picture");
+    query.set("dialog.path", where.dialog.path);
+    query.set("dialog.name", where.dialog.name);
+    query.set("dialog.taken", String(where.dialog.taken));
   }
   const text = query.toString();
   return `${SCHEME}${where.page}/${where.game ?? ""}${text ? `?${text}` : ""}`;
@@ -149,6 +156,17 @@ export function placeOf(address: string): Place | null {
         commit: dialogParts.commit ?? null,
         when: dialogParts.when ?? null,
       },
+    };
+  } else if (
+    dialogKind === "picture" &&
+    need("path", "name", "taken") &&
+    /^\d{1,12}$/.test(dialogParts.taken)
+  ) {
+    dialog = {
+      kind: "picture",
+      path: dialogParts.path,
+      name: dialogParts.name,
+      taken: Number(dialogParts.taken),
     };
   } else if (dialogKind !== null) {
     return null;

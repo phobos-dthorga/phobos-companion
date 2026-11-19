@@ -481,6 +481,18 @@ async fn show_game_file(path: String) -> Result<(), Failure> {
     blocking(move || game_files_page::show(&path)).await
 }
 
+/// One game's screenshots alone, for the Timeline's gallery (0.32.0). Only reads.
+#[tauri::command]
+async fn game_screenshots(game: String) -> Result<serde_json::Value, Failure> {
+    blocking(move || game_files_page::screenshots(&game)).await
+}
+
+/// One listed screenshot's bytes, raw, for the window to draw small or whole (0.32.0).
+#[tauri::command]
+async fn screenshot(path: String) -> Result<tauri::ipc::Response, Failure> {
+    blocking(move || game_files_page::shot(&path).map(tauri::ipc::Response::new)).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -671,7 +683,9 @@ pub fn run() {
             records_automatic,
             pick_path,
             steam_games,
-            add_game
+            add_game,
+            game_screenshots,
+            screenshot
         ])
         .plugin(tauri_plugin_dialog::init())
         .setup(|_| {

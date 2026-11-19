@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import CodeViewer from "./lib/code/CodeViewer.svelte";
   import AsItStood from "./lib/timeline/AsItStood.svelte";
+  import PictureViewer from "./lib/gamefiles/PictureViewer.svelte";
   import { addressOf, type PageName } from "./lib/navigation/place";
   import {
     back,
@@ -459,6 +460,16 @@
       <AsItStood
         game={selected.id}
         request={place.dialog.request}
+        onclose={closeDialog}
+      />
+    {/key}
+  {:else if place.dialog?.kind === "picture" && selected}
+    {#key addressOf(place)}
+      <PictureViewer
+        game={selected.id}
+        path={place.dialog.path}
+        name={place.dialog.name}
+        taken={place.dialog.taken}
         onclose={closeDialog}
       />
     {/key}

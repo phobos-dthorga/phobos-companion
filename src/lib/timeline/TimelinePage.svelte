@@ -31,8 +31,11 @@
     showingFilter,
     timeWords,
     unlisted,
+    withShotDays,
     type Showing,
   } from "./presentation";
+  import ShotStrip from "../gamefiles/ShotStrip.svelte";
+  import { readScreenshots, shotsByDay, type Shot } from "../gamefiles/shots";
   import type { Fact, FactKind, StoodRequest, TimelineReading } from "./types";
 
   /**
@@ -63,13 +66,24 @@
       ? reading.timeline.facts.filter(showingFilter(showing))
       : [],
   );
+  /** The game's screenshots by the day they were taken (0.32.0); read beside the facts, never holding them up. */
+  let shots = $state<Map<string, Shot[]>>(new Map());
+  const shotDays = $derived([...shots.keys()]);
+
   const overview = $derived(lanes(facts));
+  /** The overview's days: those something happened on, and those screenshots were taken on. */
+  const overviewDays = $derived(
+    [...new Set([...overview.days, ...shotDays])].sort(),
+  );
   const manyRepositories = $derived(
     reading.state === "ready" && reading.timeline.repositories.length > 1,
   );
-  const months = $derived(monthStarts(overview.days));
+  const months = $derived(monthStarts(overviewDays));
   const days = $derived(
-    byDay(only ? facts.filter((fact) => laneOf(fact) === only) : facts),
+    withShotDays(
+      byDay(only ? facts.filter((fact) => laneOf(fact) === only) : facts),
+      only ? [] : shotDays,
+    ),
   );
   const pagedDays = $derived(pageOf(days, dayPage, DAYS_AT_ONCE));
 
@@ -173,7 +187,16 @@
     return t("timeline-batch-installed", { count });
   }
 
+  /** A set of tools has no screenshots; a game whose pictures cannot be read simply shows none, as before. */
+  async function loadShots() {
+    if (game.kind === "tools") return;
+    const answer = await readScreenshots(game.id);
+    shots =
+      answer.state === "ready" ? shotsByDay(answer.shots.list) : new Map();
+  }
+
   async function load() {
+    void loadShots();
     reading = { state: "reading" };
     progress = started();
     reading = await readTimeline(game.id, (message) => {
@@ -306,7 +329,7 @@
     <p class="muted small note">{t("timeline-no-log", { game: game.name })}</p>
   {/if}
 
-  {#if overview.lanes.length > 0}
+  {#if overview.lanes.length > 0 || shots.size > 0}
     <section class="overview" aria-labelledby="timeline-overview-title">
       <h2 id="timeline-overview-title">{t("timeline-overview-title")}</h2>
       <p class="muted small">{t("timeline-overview-about")}</p>
@@ -318,16 +341,16 @@
       >
         <div
           class="grid"
-          style:grid-template-columns={`${LANE_NAME_PX}px repeat(${overview.days.length}, 44px)`}
+          style:grid-template-columns={`${LANE_NAME_PX}px repeat(${overviewDays.length}, 44px)`}
         >
           <span class="corner"></span>
-          {#each overview.days as day (day)}
+          {#each overviewDays as day (day)}
             <span class="month muted" aria-hidden="true"
               >{months.has(day) ? shortDay(day).month : ""}</span
             >
           {/each}
           <span class="corner"></span>
-          {#each overview.days as day (day)}
+          {#each overviewDays as day (day)}
             <span class="date muted" aria-hidden="true"
               >{shortDay(day).date}</span
             >
@@ -347,7 +370,7 @@
                     : t("timeline-lane-ended")}</span
                 >{/if}
             </button>
-            {#each overview.days as day (day)}
+            {#each overviewDays as day (day)}
               {@const cell = lane.cells.get(day)}
               {#if cell}
                 <button
@@ -375,6 +398,34 @@
               {/if}
             {/each}
           {/each}
+          {#if shots.size > 0}
+            <span class="lane-name shots-lane">{t("timeline-shots-lane")}</span>
+            {#each overviewDays as day (day)}
+              {@const taken = shots.get(day)?.length ?? 0}
+              {#if taken > 0}
+                <button
+                  type="button"
+                  class="cell tone-observed"
+                  aria-label={t("timeline-shots-cell", {
+                    day: dayWords(day),
+                    count: taken,
+                  })}
+                  title={t("timeline-shots-cell", {
+                    day: dayWords(day),
+                    count: taken,
+                  })}
+                  onclick={() => jump(day)}
+                >
+                  <span aria-hidden="true">▣</span>
+                  {#if taken > 1}<span class="count" aria-hidden="true"
+                      >{taken}</span
+                    >{/if}
+                </button>
+              {:else}
+                <span class="empty" aria-hidden="true"></span>
+              {/if}
+            {/each}
+          {/if}
         </div>
       </div>
       <details class="legend">
@@ -480,7 +531,20 @@
             {/if}
           </section>
         {/if}
-        <ol class="facts">
+        {#if shots.get(group.day)}
+          {@const dayShots = shots.get(group.day) ?? []}
+          <h4 class="shots-head">
+            {t("timeline-shots-day", { count: dayShots.length })}
+          </h4>
+          <ShotStrip
+            shots={dayShots}
+            label={t("timeline-shots-label", { day: dayWords(group.day) })}
+          />
+        {/if}
+        {#if group.facts.length === 0}
+          <p class="muted small">{t("timeline-shots-only")}</p>
+        {/if}
+        <ol class="facts" hidden={group.facts.length === 0}>
           {#each rows(group.facts) as row, index (index)}
             {#if row.kind === "settings"}
               {@const first = row.facts[0]}
@@ -744,6 +808,18 @@
     left: 0;
     z-index: 1;
     background: var(--colour-surface-raised);
+  }
+
+  .shots-lane {
+    padding-inline-start: 8px;
+    font-style: italic;
+    color: var(--colour-observed);
+  }
+
+  .shots-head {
+    margin: 8px 0 2px;
+    font-size: var(--type-small);
+    font-weight: 600;
   }
 
   .lane-name {

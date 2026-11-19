@@ -13,6 +13,7 @@ import {
   showingFilter,
   stoodEntries,
   unlisted,
+  withShotDays,
 } from "./presentation";
 import type { Fact, FactKind, StoodEntry } from "./types";
 
@@ -292,5 +293,26 @@ describe("what was running", () => {
       ["Carts", "0.4.0"],
     ]);
     expect(runningOn(facts, "2026-11-17")).toEqual([]);
+  });
+});
+
+describe("screenshots on the Timeline (0.32.0)", () => {
+  it("gives a day with screenshots and nothing else its place, newest first", () => {
+    const fact = {
+      kind: "installed",
+      time: "2026-11-18T10:00:00Z",
+      source: "log",
+    } as Fact;
+    const days = withShotDays(
+      [{ day: "2026-11-18", facts: [fact] }],
+      ["2026-11-20", "2026-11-18", "2026-11-01"],
+    );
+    expect(days.map((d) => d.day)).toEqual([
+      "2026-11-20",
+      "2026-11-18",
+      "2026-11-01",
+    ]);
+    expect(days[0].facts).toEqual([]);
+    expect(days[1].facts).toEqual([fact]);
   });
 });

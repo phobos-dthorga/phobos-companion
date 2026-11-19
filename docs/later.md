@@ -1,8 +1,8 @@
 # Kept for later: everything proposed and not yet built
 
 **Status (20 Nov 2026):** items 1 to 5 are built in Companion 0.22.0, untested on screen; of item 5's rest, adding a game from
-Steam and better data-folder guesses are built in 0.31.0, and the launch before last in 0.28.0; the screenshot gallery and the
-RimWorld extras are still to come (below). The records backup copies itself from 0.29.0. The owner said yes to all of it ("Absolutely with all of these and
+Steam and better data-folder guesses are built in 0.31.0, the screenshot gallery on the Timeline in 0.32.0, and the launch
+before last in 0.28.0; the RimWorld extras are still to come (below). The records backup copies itself from 0.29.0. The owner said yes to all of it ("Absolutely with all of these and
 for what we are not implementing just yet, make sure to document and record those for later so that they are not lost"), in the
 order of the build list below. Each item's status changes here in the change that builds it; once built, its design moves to
 `design-record.md` and this record keeps one line pointing there.
@@ -95,7 +95,7 @@ screenshots as a list, and where the space goes; places and the Steam app ID in 
 
 | Next | What it needs |
 | --- | --- |
-| **Screenshot gallery**, each picture placed on the Timeline on its day | Thumbnails: Tauri's asset protocol allowed only for the folders a report named, or small previews made by the host; then a Timeline lane |
+| **Screenshot gallery**, each picture placed on the Timeline on its day | **Built**, 0.32.0 (see `design-record.md`): small pictures drawn in the window from bytes the host hands over for listed files only |
 | **Add a game from Steam** | **Built**, 0.31.0 (see `design-record.md`) |
 | **Better guesses for the data folder** | **Built**, phobos-modkit 1.58.0: Documents where Windows keeps it, names that differ the way games' folders do; both now found |
 | **The launch before last** | **Built**, 0.28.0 (phobos-modkit 1.51.0) |

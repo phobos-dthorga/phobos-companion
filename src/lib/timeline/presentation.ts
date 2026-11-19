@@ -251,3 +251,18 @@ export function runningOn(facts: Fact[], day: string): Running[] {
 export function mergedFrom(all: Lane[], name: string): string[] {
   return all.filter((lane) => lane.mergedInto === name).map((l) => l.name);
 }
+
+/**
+ * The day list with the days screenshots were taken added (0.32.0): a day with screenshots and nothing else still gets its place,
+ * so the pictures sit on their day. Newest first, as `byDay` gives them.
+ */
+export function withShotDays(
+  groups: { day: string; facts: Fact[] }[],
+  shotDays: string[],
+): { day: string; facts: Fact[] }[] {
+  const known = new Set(groups.map((group) => group.day));
+  const added = shotDays
+    .filter((day) => !known.has(day))
+    .map((day) => ({ day, facts: [] as Fact[] }));
+  return [...groups, ...added].sort((a, b) => (a.day < b.day ? 1 : -1));
+}

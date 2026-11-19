@@ -117,6 +117,15 @@ describe("addresses", () => {
       }),
       { ...place("timeline", "rimworld"), dialog: code },
       place("settings"),
+      {
+        ...place("timeline", "rimworld", { day: "2026-11-20" }),
+        dialog: {
+          kind: "picture",
+          path: "C:\\Steam\\userdata\\9\\760\\remote\\294100\\screenshots\\20261120055158_1.jpg",
+          name: "20261120055158_1.jpg",
+          taken: 1795117918,
+        },
+      },
     ];
     for (const where of places)
       expect(placeOf(addressOf(where))).toEqual(where);
@@ -132,6 +141,11 @@ describe("addresses", () => {
     expect(placeOf("dthorga://tests/rimworld?BAD=1")).toBeNull();
     expect(placeOf("dthorga://tests/rimworld?dialog=delete")).toBeNull();
     expect(placeOf("dthorga://tests/rimworld?dialog=code")).toBeNull();
+    expect(
+      placeOf(
+        "dthorga://timeline/rimworld?dialog=picture&dialog.path=a.png&dialog.name=a.png&dialog.taken=soon",
+      ),
+    ).toBeNull();
     expect(placeOf("dthorga://tests/rimworld?row=a%0Ab")).toBeNull();
   });
 });

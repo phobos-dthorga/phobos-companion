@@ -4,6 +4,21 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-11-20
+
+Item 5 of docs/later.md, which the owner said yes to on 19 November 2026: a screenshot gallery, each picture placed on the Timeline on its day. Built overnight on the owner's go-ahead of 20 November. Not yet tested on screen.
+
+### Added
+
+- **Screenshots on the Timeline**: a Screenshots row in the overview marks each day you took pictures, and each day in the list shows its pictures, small (six, then Show all). A day when you only played and took pictures now has its place too. The game's own screenshots and Steam's are both read.
+- **Press a picture to see it whole**, over the window, with when it was taken, where it is, and Show in folder. Back closes it, and Copy address keeps a link to it.
+- The Game files page's screenshots are now the same small pictures, instead of a list of file names.
+- Pictures are drawn small only when they scroll into view, two at a time, and kept until the program closes, so the page stays quick with hundreds of them. A picture that cannot be read says so instead of showing a broken image.
+
+### Dependencies
+
+- phobos-modkit v1.58.0 to v1.59.0: game-files screenshots, one game's pictures alone, quickly.
+
 ## [0.31.0] - 2026-11-20
 
 Item 5 of docs/later.md, which the owner said yes to on 19 November 2026: adding a game from Steam, and better guesses at where a game keeps its files. Built overnight on the owner's go-ahead of 20 November ("proceed at your leisure and even agency"). Not yet tested on screen.

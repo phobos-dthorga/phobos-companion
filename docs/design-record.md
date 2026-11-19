@@ -841,6 +841,30 @@ leisure and even agency").
 install. **Agent choices, owner to revise:** the id from the name, one copy of the list as it was (replaced at each add), the
 scoring of guesses (phobos-modkit's `docs/game-files.md`). **Nothing here is tested on screen.**
 
+## Screenshots on the Timeline (built 20 Nov 2026, 0.32.0)
+
+**Item 5 of `later.md`, agreed by the owner on 19 Nov 2026** ("a gallery, each picture placed on the Timeline on its day"), built
+overnight on their go-ahead of 20 Nov 2026.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See the pictures they took beside what changed that day, and open any one whole |
+| What does it stop them doing? | Hunting through Steam's numbered screenshot folders to remember what a day in the game looked like |
+| How does it change the way they work? | The Timeline holds play as well as work: a day of only screenshots gets its place, and a fault's day shows what was on screen |
+
+| Part | How |
+| --- | --- |
+| The list | `game-files screenshots` (phobos-modkit 1.59.0): the game's own folder and Steam's, without sizing the data folder (0.3 s for 330 pictures, where the full report walks gigabytes) |
+| The bytes | `screenshot` hands one picture's bytes over raw, only for a file a list named in this run, a picture by its extension, under 64 MB (`game_files_page::shot`) |
+| Small pictures | Drawn in the window: decoded, shrunk to 360 pixels wide as a JPEG, kept for the run, the whole picture let go at once; two at a time; only once a picture scrolls into view (`src/lib/gamefiles/shots.ts`). No image library was needed |
+| On the Timeline | A Screenshots row in the overview, a mark on each day with pictures; the day list gains days with only pictures; each day shows its pictures (six, then Show all) |
+| Whole | A `picture` dialog the App draws from the trail (Back closes it; its address reopens it, asking for the game's list first in a new run), with Show in folder |
+| Game files page | Its list of names became the same small pictures |
+
+**Agent choices, owner to revise:** 360 pixels, two at a time, six a day before Show all, twelve on the Game files page, 64 MB at most.
+**Not built:** the RimWorld extras (start-up chart, crashes on the Timeline, the creations shelf). **Nothing here is tested on
+screen.**
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

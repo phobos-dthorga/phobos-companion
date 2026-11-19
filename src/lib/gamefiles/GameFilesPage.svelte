@@ -11,6 +11,7 @@
   import { savePath, sinceMoment, spaceRows } from "./presentation";
   import type { GameFiles, Since } from "./types";
   import { readGameFiles, showGameFile } from "./desktopClient";
+  import ShotStrip from "./ShotStrip.svelte";
 
   /**
    * Game files (0.22.0; docs/later.md, item 5), for any Steam game: what changed since you last played, the saves, the
@@ -198,20 +199,12 @@
           size: size(files.screenshots.bytes),
         })}
       </p>
-      <ul class="rows">
-        {#each files.screenshots.list.slice(0, SHOTS_SHOWN) as shot (shot.path)}
-          <li>
-            <span>{shot.name}</span>
-            <span class="muted small">{formatUnixDate(shot.taken)}</span>
-            <button
-              type="button"
-              class="action"
-              aria-label={t("gamefiles-show-named", { name: shot.name })}
-              onclick={() => show(shot.path)}>{t("gamefiles-show")}</button
-            >
-          </li>
-        {/each}
-      </ul>
+      <!-- Drawn small from 0.32.0; pressing one opens it whole, with Show in folder there. -->
+      <ShotStrip
+        shots={files.screenshots.list}
+        label={t("gamefiles-shots-title")}
+        first={SHOTS_SHOWN}
+      />
     {/if}
   </section>
 

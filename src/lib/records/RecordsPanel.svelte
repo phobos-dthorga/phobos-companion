@@ -1,28 +1,59 @@
 <script lang="ts">
-  import { untrack } from "svelte";
+  import { onMount, untrack } from "svelte";
   import { LOCALE, t } from "../i18n/runtime";
   import { formatWhen } from "../shell/dates";
   import { formatSize } from "../shell/sizes";
-  import type { RecordsStatus } from "./types";
-  import { backupRecords, readRecordsStatus } from "./desktopClient";
+  import type { Automatic, RecordsStatus } from "./types";
+  import {
+    backupRecords,
+    readAutomatic,
+    readRecordsStatus,
+  } from "./desktopClient";
 
   /**
    * Back up your records (0.22.0; docs/later.md, item 2), on the Settings page: what a copy holds, where it goes, how old the newest
-   * is, and Back up now. The folder is the setting recordsBackupPath, in the list below; nothing is ever deleted.
+   * is, and Back up now. The folder is the setting recordsBackupPath, in the list below; nothing is ever deleted. From 0.29.0 the
+   * program also copies by itself every few hours while it is open, and this panel says how the last of those went.
    */
   const SETTING = "recordsBackupPath";
+  /** How often the panel asks after the timer while it is on screen (agent default). */
+  const LOOK_MS = 60_000;
 
   /**
    * `saved` counts the settings saved on the page, so the folder is read again after each (0.26.1: it was read once, so Back up
-   * now stayed off after the folder was chosen). `onchoose` opens the folder setting's box to type in.
+   * now stayed off after the folder was chosen). `onbrowse` opens Windows' folder picker for the setting (0.29.0); `onchoose` opens
+   * its box to type in.
    */
-  let { saved, onchoose }: { saved: number; onchoose: (key: string) => void } =
-    $props();
+  let {
+    saved,
+    onbrowse,
+    onchoose,
+  }: {
+    saved: number;
+    onbrowse: (key: string) => void;
+    onchoose: (key: string) => void;
+  } = $props();
 
   let status = $state<RecordsStatus | null>(null);
   let unread = $state<string | null>(null);
   let busy = $state(false);
   let told = $state<{ ok: boolean; words: string } | null>(null);
+  let automatic = $state<Automatic | null>(null);
+
+  /** The timer's last attempt; a new one reads the copies again, so the panel shows it. */
+  async function lookAtTimer() {
+    const answer = await readAutomatic();
+    if (answer.state !== "ready" || !answer.automatic) return;
+    const fresh = answer.automatic.time !== automatic?.time;
+    automatic = answer.automatic;
+    if (fresh) await load();
+  }
+
+  onMount(() => {
+    void lookAtTimer();
+    const timer = setInterval(() => void lookAtTimer(), LOOK_MS);
+    return () => clearInterval(timer);
+  });
 
   async function load() {
     const answer = await readRecordsStatus();
@@ -107,6 +138,25 @@
         ? t("records-folder", { path: status.folder })
         : t("records-no-folder")}
     </p>
+    {#if status.everyHours}
+      <p class="small">
+        {status.folder
+          ? t("records-automatic-on", { hours: status.everyHours })
+          : t("records-automatic-waiting", { hours: status.everyHours })}
+      </p>
+    {/if}
+    {#if automatic && !automatic.ok}
+      <p class="small refused-line" role="status">
+        {t("records-automatic-failed", {
+          when: formatWhen(automatic.time),
+          reason: automatic.refusal ?? "",
+        })}
+      </p>
+    {:else if automatic?.copy}
+      <p class="muted small">
+        {t("records-automatic-made", { when: formatWhen(automatic.time) })}
+      </p>
+    {/if}
     <div class="buttons">
       <button
         type="button"
@@ -115,10 +165,13 @@
         onclick={backUp}
         >{busy ? t("records-copying") : t("records-back-up")}</button
       >
-      <button type="button" class="action" onclick={() => onchoose(SETTING)}
+      <button type="button" class="action" onclick={() => onbrowse(SETTING)}
         >{status.folder
           ? t("records-change-folder")
           : t("records-choose-folder")}</button
+      >
+      <button type="button" class="action" onclick={() => onchoose(SETTING)}
+        >{t("records-type-folder")}</button
       >
     </div>
   {/if}
@@ -172,5 +225,10 @@
 
   .told.refused {
     border-color: var(--colour-risk);
+  }
+
+  .refused-line {
+    padding-inline-start: 8px;
+    border-inline-start: 3px solid var(--colour-risk);
   }
 </style>

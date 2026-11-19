@@ -21,6 +21,7 @@ mod open_work;
 mod other_code_page;
 mod patch_targets;
 mod pending;
+mod pick;
 mod pictures;
 mod records_backup;
 mod reports;
@@ -414,6 +415,24 @@ async fn backup_records() -> Result<records_backup::BackupResult, Failure> {
     blocking(records_backup::backup).await
 }
 
+/// The last copy the timer made or tried in this run, for Home and the Settings page (0.29.0).
+#[tauri::command]
+async fn records_automatic() -> Result<Option<records_backup::Automatic>, Failure> {
+    Ok(records_backup::last_automatic())
+}
+
+/// Windows' own folder or file picker, opened where the current value is. Only answers with the path chosen (0.29.0).
+#[tauri::command]
+async fn pick_path(
+    app: tauri::AppHandle,
+    kind: String,
+    title: String,
+    current: Option<String>,
+) -> Result<Option<String>, Failure> {
+    let kind = pick::Kind::named(&kind)?;
+    blocking(move || pick::pick(&app, kind, &title, current.as_deref())).await
+}
+
 /// Who is working on what: the agent sessions' claims board.
 #[tauri::command]
 async fn claims_list() -> Result<serde_json::Value, Failure> {
@@ -635,8 +654,16 @@ pub fn run() {
             memory_stop,
             memory_mark,
             read_shortcuts,
-            save_shortcuts
+            save_shortcuts,
+            records_automatic,
+            pick_path
         ])
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|_| {
+            // The records copy themselves every few hours while the program is open (0.29.0).
+            records_backup::start();
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("the desktop window could not start");
 }

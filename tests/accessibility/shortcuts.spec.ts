@@ -75,7 +75,9 @@ test.describe("Keyboard shortcuts", () => {
   test("never acts while typing in a box", async ({ page }) => {
     await open(page);
     await page.keyboard.press("9");
-    await page.getByRole("button", { name: "Change historyPath" }).click();
+    await page
+      .getByRole("button", { name: "Type a path for historyPath" })
+      .click();
     await page
       .getByLabel("New value for historyPath (a full path)")
       .pressSequentially("D:\\7");

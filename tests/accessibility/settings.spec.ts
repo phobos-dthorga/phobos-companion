@@ -135,7 +135,9 @@ for (const [name, viewport] of [
       page,
     }) => {
       await open(page);
-      await page.getByRole("button", { name: "Change historyPath" }).click();
+      await page
+        .getByRole("button", { name: "Type a path for historyPath" })
+        .click();
       const field = page.getByLabel("New value for historyPath (a full path)");
       await expect(field).toBeFocused();
       await field.fill("K:\\elsewhere\\history");

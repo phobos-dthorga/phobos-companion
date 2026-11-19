@@ -10,7 +10,7 @@
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
-  import { readSettings, saveSetting } from "./desktopClient";
+  import { pickPath, readSettings, saveSetting } from "./desktopClient";
   import {
     byGame,
     cleanPath,
@@ -104,7 +104,42 @@
     await load();
   }
 
-  /** Opens one setting's box to type in, from elsewhere on the page (the records panel's Choose a folder, 0.26.1). */
+  /**
+   * Windows' own picker for a folder or file setting (0.29.0), opened where its value is. What is chosen is saved at once, through
+   * the same save as a typed path, so the kit still checks it; closing the picker changes nothing, and says so.
+   */
+  async function browse(setting: Setting) {
+    told = null;
+    failure = null;
+    const picked = await pickPath(
+      setting.kind,
+      setting.kind === "folder"
+        ? t("settings-pick-folder-title", { what: setting.description })
+        : t("settings-pick-file-title", { what: setting.description }),
+      setting.value,
+    );
+    if (picked.state === "failed") {
+      failure = picked.failure;
+      return;
+    }
+    if (picked.state === "closed") {
+      told = {
+        ok: true,
+        words: t("settings-pick-closed", { key: setting.key }),
+      };
+      return;
+    }
+    await save(setting.key, cleanPath(picked.path));
+  }
+
+  /** Opens the picker for one setting from elsewhere on the page (the records panel's Choose the folder, 0.29.0). */
+  async function browseKey(key: string) {
+    if (reading.state !== "ready") return;
+    const setting = reading.list.settings.find((s) => s.key === key);
+    if (setting) await browse(setting);
+  }
+
+  /** Opens one setting's box to type in, from elsewhere on the page (the records panel's Type a folder, 0.26.1). */
   async function editKey(key: string) {
     if (reading.state !== "ready") return;
     const setting = reading.list.settings.find((s) => s.key === key);
@@ -143,7 +178,11 @@
     >{t("settings-keyboard-open")}</button
   >
 </section>
-<RecordsPanel {saved} onchoose={(key) => void editKey(key)} />
+<RecordsPanel
+  {saved}
+  onbrowse={(key) => void browseKey(key)}
+  onchoose={(key) => void editKey(key)}
+/>
 <CleanupPanel />
 {#if editingShortcuts}
   <ShortcutsDialog editable={true} onclose={() => (editingShortcuts = false)} />
@@ -257,6 +296,16 @@
               </form>
             {:else}
               <div class="buttons">
+                <button
+                  type="button"
+                  class="action"
+                  aria-label={t("settings-browse-for", { key: setting.key })}
+                  disabled={saving}
+                  onclick={() => browse(setting)}
+                  >{setting.kind === "folder"
+                    ? t("settings-browse-folder")
+                    : t("settings-browse-file")}</button
+                >
                 <button
                   type="button"
                   class="action"

@@ -4,6 +4,28 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-11-20
+
+The owner found backups still not working (20 November 2026): no folder had ever been saved for the records backup, and nothing ran by itself. They chose copies every few hours while the program is open, a missed one made at the soonest next chance, and Windows' own pickers wherever a folder is chosen, keeping the type-in box. Not yet tested on screen.
+
+### Added
+
+- **Your records now copy themselves**: every 6 hours while the Companion is open, into the folder you chose. A copy missed while the program was closed, or while the PC slept, is made within minutes of it opening or waking. The Settings page says how often, and when the last one was made; **Home says when one failed and why** (a drive not there, a NAS asleep), and it tries again within a few minutes. Back up now still works as before, and old copies are never deleted.
+- **Choose a folder… and Choose a file…** beside every setting on the Settings page open Windows' own picker, where the setting's value is; what you choose is saved at once, the same way a typed path is. Closing the picker without choosing changes nothing, and says so. **Choose the folder** in Back up your records opens the picker too; **Type a folder instead** opens the box as before.
+
+### Changed
+
+- The Change button on each setting is now **Type a path**, beside the picker.
+
+### Fixed
+
+- A backup folder that cannot be reached is now refused in words (from the tool kit), instead of failing with the tools' own error.
+
+### Dependencies
+
+- Tauri's dialog plugin 2.8.4 (with its file-system plugin 2.7.1), for the pickers, used only from the host.
+- phobos-modkit v1.53.0 to v1.55.0: records says when a copy is due and marks the copies made automatically, and an unreachable folder is refused in words (1.55.0); rimworld-textures shortens mip chains another mod would unpack (1.54.0, not used here).
+
 ## [0.28.2] - 2026-11-20
 
 The owner's screen note on the Mods page (20 November 2026): "Why is it showing me as taking away nine entries?" Not yet tested on screen.

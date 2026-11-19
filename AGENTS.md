@@ -76,8 +76,11 @@ reads them.
   of the game's, the changelog a plain path inside it, and the commit or moment plain text of the right shape. The history log it
   shows is written by the tools as they work, never by this program.
 - **The Settings page writes one file, the central settings file**, through the kit's `settings set`
-  (`src-tauri/src/settings_page.rs`): only when the owner presses Save or Use the default, only while the manifest still calls it
-  `writes`, and only a setting the tools list, as one line. It never writes a repository's own settings.
+  (`src-tauri/src/settings_page.rs`): only when the owner presses Save or Use the default, or chooses a path in Windows' own
+  picker (0.29.0; owner, 20 Nov 2026: "file dialog window pickers ... where ever a directory needs to be chosen"; `src-tauri/src/
+  pick.rs` only answers with the path, and the save is the same), only while the manifest still calls it `writes`, and only a
+  setting the tools list, as one line. It never writes a repository's own settings. **Every folder or file a page asks for gets
+  the picker beside its type-in box** (owner's choice: keep both).
 - **Their code and What did an update change? read, except one press** (owner's choice of 19 Nov 2026, "Read and compare, on
   your press"; `src-tauri/src/other_code_page.rs`): the kit's reports carrying the manifest's `other-code` and `updates` surfaces.
   **Decompile runs only on the owner's press, only for an assembly the kit's `holder` named in this run of the program, and only
@@ -104,8 +107,11 @@ reads them.
   list, never this program. **Screen notes** (0.22.0) are written whole into `screen-notes/<id>/` in its own data folder
   (`src-tauri/src/screen_notes.rs`): the page's picture and `note.json`; only the kit's `screen-notes resolve` writes beside them.
   **Back up now** (0.22.0, `src-tauri/src/records_backup.rs`) runs the kit's `records backup`, which copies this program's records
-  into a new dated folder in the folder the owner chose (`recordsBackupPath`), only on the owner's press and while the manifest
-  calls it `writes`; it never deletes a copy. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
+  into a new dated folder in the folder the owner chose (`recordsBackupPath`), on the owner's press and while the manifest
+  calls it `writes`; it never deletes a copy. **It also runs by itself** (0.29.0; owner, 20 Nov 2026: "every few hours when it's
+  open, and if the schedule is missed, the soonest next opportunity"): a timer in the host makes a copy when the kit's `records
+  status --every-hours` says one is due, as `records backup --automatic`, under the same manifest check, and Home says when one
+  failed and why. It is the one write this program makes without a press. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
   answer`, which appends the owner's answer to `decisions/<repository>.jsonl` in this program's folder. **The Game files page only
   reads** (the kit's `game-files report`, `src-tauri/src/game_files_page.rs`); Show in folder opens the file manager on a file
   inside a folder the last report named, and nothing else.

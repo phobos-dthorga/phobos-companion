@@ -584,6 +584,28 @@ number was free.
 
 **Agent choices, owner to revise:** a day before a claim is called old; nothing expires by itself.
 
+## Decisions page and the grouped bar (built 19 Nov 2026, 0.22.0)
+
+**The owner said yes to a Decisions page** (19 Nov 2026), the "Decisions waiting for you" idea of 10 Nov grown into a page, with the
+page bar grouped in the same change.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Answer every open choice in one place, with the options and the agent's reasoning beside it, in one press when the lean is right |
+| What does it stop them doing? | Hunting through design records for "agent choice, owner to revise" lines, and choices going unrevised because nobody asked |
+| How does it change the way they work? | Agents leave questions on a page instead of in prose; sessions start by acting on the answers |
+
+| Part | How |
+| --- | --- |
+| The questions | Each repository's `config/decisions.json`, read by phobos-modkit 1.45.0's `decisions list` over every repository on the list and this program's own |
+| The answers | `decisions answer` appends a line to `decisions/<repository>.jsonl` in this program's folder; the last line decides, so an answer can be changed until an agent acts on it and removes the question |
+| The page | One card a question: plain radio buttons (the lean marked and chosen first), Something else with words, Decide. Answered ones wait below with Change my answer |
+| Home | How many decisions wait, with a button to the page |
+| The bar | Three labelled groups, Play, Code and Tools, built from one list; every page keeps its key |
+
+**Agent choices, owner to revise:** the lean chosen to begin with (one press to agree, at the cost of agreeing too easily); the D
+key; the groups' names and order; keys left as they were until the owner answers `page-keys` on the page itself.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

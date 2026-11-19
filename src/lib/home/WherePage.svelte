@@ -19,6 +19,7 @@
   import { noteSaves } from "../notes/saves.svelte";
   import RecordsNote from "../records/RecordsNote.svelte";
   import ClaimsPanel from "../claims/ClaimsPanel.svelte";
+  import DecisionsNote from "../decisions/DecisionsNote.svelte";
 
   const PENDING_SHOWN = 6;
   const OPEN_SHOWN = 6;
@@ -207,6 +208,8 @@
     >
   </section>
 {/if}
+
+<DecisionsNote game={game.id} />
 
 <RecordsNote game={game.id} />
 

@@ -39,6 +39,7 @@
   import PictureButton from "./lib/pictures/PictureButton.svelte";
   import ScreenNoteButton from "./lib/notes/ScreenNoteButton.svelte";
   import MakeupPage from "./lib/makeup/MakeupPage.svelte";
+  import DecisionsPage from "./lib/decisions/DecisionsPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
   import ProgressBar from "./lib/shell/ProgressBar.svelte";
@@ -95,6 +96,45 @@
     ["page.settings", "settings"],
     ["page.logs", "logs"],
     ["page.makeup", "makeup"],
+    ["page.decisions", "decisions"],
+  ];
+
+  /** The page bar's groups (0.22.0): what you play with, the code behind it, and the tools' own pages. */
+  const PAGE_GROUPS: {
+    id: string;
+    key: string;
+    pages: { page: Page; key: string }[];
+  }[] = [
+    {
+      id: "play",
+      key: "pages-group-play",
+      pages: [
+        { page: "home", key: "page-home" },
+        { page: "mods", key: "page-mods" },
+        { page: "tests", key: "page-tests" },
+        { page: "logs", key: "page-logs" },
+        { page: "atlas", key: "page-atlas" },
+      ],
+    },
+    {
+      id: "code",
+      key: "pages-group-code",
+      pages: [
+        { page: "changes", key: "page-changes" },
+        { page: "timeline", key: "page-timeline" },
+        { page: "codemap", key: "page-codemap" },
+        { page: "makeup", key: "page-makeup" },
+      ],
+    },
+    {
+      id: "tools",
+      key: "pages-group-tools",
+      pages: [
+        { page: "reports", key: "page-reports" },
+        { page: "settings", key: "page-settings" },
+        { page: "decisions", key: "page-decisions" },
+      ],
+    },
   ];
 
   /** Moves to the game before or after the one shown, in the list's order. */
@@ -167,83 +207,25 @@
       </div>
     </div>
     <nav class="pages" aria-label={t("pages-label")}>
-      <button
-        type="button"
-        class="page"
-        class:current={page === "home"}
-        aria-current={page === "home" ? "page" : undefined}
-        onclick={() => goPage("home")}>{t("page-home")}</button
-      >
-      <button
-        type="button"
-        class="page"
-        class:current={page === "reports"}
-        aria-current={page === "reports" ? "page" : undefined}
-        onclick={() => goPage("reports")}>{t("page-reports")}</button
-      >
-      <button
-        type="button"
-        class="page"
-        class:current={page === "atlas"}
-        aria-current={page === "atlas" ? "page" : undefined}
-        onclick={() => goPage("atlas")}>{t("page-atlas")}</button
-      >
-      <button
-        type="button"
-        class="page"
-        class:current={page === "tests"}
-        aria-current={page === "tests" ? "page" : undefined}
-        onclick={() => goPage("tests")}>{t("page-tests")}</button
-      >
-      <button
-        type="button"
-        class="page"
-        class:current={page === "mods"}
-        aria-current={page === "mods" ? "page" : undefined}
-        onclick={() => goPage("mods")}>{t("page-mods")}</button
-      >
-      <button
-        type="button"
-        class="page"
-        class:current={page === "changes"}
-        aria-current={page === "changes" ? "page" : undefined}
-        onclick={() => goPage("changes")}>{t("page-changes")}</button
-      >
-      <button
-        type="button"
-        class="page"
-        class:current={page === "timeline"}
-        aria-current={page === "timeline" ? "page" : undefined}
-        onclick={() => goPage("timeline")}>{t("page-timeline")}</button
-      >
-      <button
-        type="button"
-        class="page"
-        class:current={page === "codemap"}
-        aria-current={page === "codemap" ? "page" : undefined}
-        onclick={() => goPage("codemap")}>{t("page-codemap")}</button
-      >
-      <button
-        type="button"
-        class="page"
-        class:current={page === "settings"}
-        aria-current={page === "settings" ? "page" : undefined}
-        onclick={() => goPage("settings")}>{t("page-settings")}</button
-      >
-      <button
-        type="button"
-        class="page"
-        class:current={page === "logs"}
-        aria-current={page === "logs" ? "page" : undefined}
-        onclick={() => goPage("logs")}>{t("page-logs")}</button
-      >
-      <button
-        type="button"
-        class="page"
-        class:current={page === "makeup"}
-        aria-current={page === "makeup" ? "page" : undefined}
-        onclick={() => goPage("makeup")}>{t("page-makeup")}</button
-      >
+      {#each PAGE_GROUPS as group (group.id)}
+        <div
+          class="page-group"
+          role="group"
+          aria-labelledby={`pages-${group.id}`}
+        >
+          <span class="group-name" id={`pages-${group.id}`}>{t(group.key)}</span
+          >
+          {#each group.pages as next (next.page)}
+            <button
+              type="button"
+              class="page"
+              class:current={page === next.page}
+              aria-current={page === next.page ? "page" : undefined}
+              onclick={() => goPage(next.page)}>{t(next.key)}</button
+            >
+          {/each}
+        </div>
+      {/each}
     </nav>
   </header>
 
@@ -326,6 +308,8 @@
     <main class="canvas">
       {#if page === "settings" && home.state !== "reading"}
         <SettingsPage {games} />
+      {:else if page === "decisions" && home.state !== "reading"}
+        <DecisionsPage />
       {:else if selected && page === "reports"}
         {#key selected.id}
           <ReportsPage game={selected} />
@@ -399,7 +383,9 @@
                     ? t("source-body-logs")
                     : page === "makeup"
                       ? t("source-body-makeup")
-                      : t("source-body")}
+                      : page === "decisions"
+                        ? t("source-body-decisions")
+                        : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>
@@ -516,6 +502,27 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .page-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding-inline-end: 12px;
+    border-inline-end: 1px solid var(--colour-line);
+  }
+
+  .page-group:last-child {
+    border-inline-end: none;
+  }
+
+  .group-name {
+    font-size: var(--type-small);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--colour-text-muted);
   }
 
   .page {

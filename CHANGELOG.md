@@ -16,9 +16,12 @@ The owner said yes (19 November 2026) to four new tools for working with agent s
 
 - **Who is working on what**, on Home: what each agent session holds on the claims board (a version number, a test row, a file being reworked), for how long and what for. A claim a day old or more is marked old: perhaps a session that ended without letting go. Sessions take and release claims themselves, under a new shared rule, so two never take the same version number again.
 
+- **A Decisions page** (the D key, or its button under Tools): every choice an agent made for you to revise, and every question it needs your word on, gathered from each repository. Each shows its options as plain choices, with the agent's lean marked and chosen to begin with, so **taking the lean is one press of Decide**; Something else takes your own words. Answered ones wait below, with Change my answer, until an agent acts on them. **Home says how many wait.** Thirteen are waiting to begin with, from the choices made in this program so far.
+- **The page bar is grouped**: Play (Home, Mods, Tests, Logs, Atlas), Code (Changes, Timeline, Code map, Make-up) and Tools (Reports, Settings, Decisions). No key changed: whether the number keys should follow the new order is the first question on the Decisions page.
+
 ### Dependencies
 
-- Tool kit 1.44.0, now pinned (1.41.0 brought screen-notes, which agent sessions use to read and resolve the notes; 1.43.0 the records backup and its setting; 1.44.0 the claims board and its rule).
+- Tool kit 1.45.0, now pinned (1.41.0 brought screen-notes, which agent sessions use to read and resolve the notes; 1.43.0 the records backup and its setting; 1.44.0 the claims board and its rule; 1.45.0 decisions).
 
 ## [0.21.0] - 2026-11-19
 

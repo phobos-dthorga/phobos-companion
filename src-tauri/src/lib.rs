@@ -6,6 +6,7 @@
 mod changes_page;
 mod claims_board;
 mod connections_page;
+mod decisions_page;
 mod history_page;
 mod home;
 mod installs_page;
@@ -408,6 +409,23 @@ async fn claims_list() -> Result<serde_json::Value, Failure> {
     blocking(claims_board::read).await
 }
 
+/// The decisions waiting for the owner, in every repository on the list and this program's own.
+#[tauri::command]
+async fn decisions_list() -> Result<serde_json::Value, Failure> {
+    blocking(decisions_page::read).await
+}
+
+/// Records the owner's answer to one decision, once they press Decide.
+#[tauri::command]
+async fn answer_decision(
+    repository: String,
+    id: String,
+    option: String,
+    words: String,
+) -> Result<decisions_page::AnswerResult, Failure> {
+    blocking(move || decisions_page::answer(&repository, &id, &option, &words)).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -459,6 +477,8 @@ pub fn run() {
             records_status,
             backup_records,
             claims_list,
+            decisions_list,
+            answer_decision,
             read_shortcuts,
             save_shortcuts
         ])

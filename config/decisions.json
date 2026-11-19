@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 1,
+  "decisions": [
+    {
+      "id": "page-keys",
+      "question": "Renumber the page keys to follow the grouped page bar?",
+      "context": "The page bar is now grouped into Play (Home, Mods, Tests, Logs, Atlas), Code (Changes, Timeline, Code map, Make-up) and Tools (Reports, Settings, Decisions). The keys still follow the old order: 1 Home, 2 Reports, 3 Atlas, 4 Tests, 5 Mods, 6 Changes, 7 Timeline, 8 Code map, 9 Settings, G Logs, M Make-up, D Decisions.",
+      "options": [
+        {
+          "id": "renumber",
+          "label": "Renumber them",
+          "detail": "1 Home, 2 Mods, 3 Tests, 4 Logs, 5 Atlas, 6 Changes, 7 Timeline, 8 Code map, 9 Make-up; E Reports, S Settings, D Decisions. G and M are freed. Keys you changed yourself stay as you set them"
+        },
+        {
+          "id": "keep",
+          "label": "Keep them as they are",
+          "detail": "No key changes; the numbers no longer match the bar's order"
+        }
+      ],
+      "lean": "renumber",
+      "why": "The number keys would count along the bar you see; they are a day old, so little is lost in learning them again",
+      "from": "docs/design-record.md, Decisions page",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "decisions-everywhere",
+      "question": "Should agents in every repository put the choices they make for you on this page?",
+      "context": "Today only the Companion's own agent choices are here. As a shared rule, every repository (phobos-rimworld and the rest) would list its agent choices and open questions in its own config/decisions.json, and this page would gather them all.",
+      "options": [
+        {
+          "id": "everywhere",
+          "label": "Yes, every repository",
+          "detail": "A shared rule in phobos-modkit's rules; design records still label choices as now"
+        },
+        {
+          "id": "companion-only",
+          "label": "Only the Companion's",
+          "detail": "Other repositories keep their choices in their design records"
+        }
+      ],
+      "lean": "everywhere",
+      "why": "Choices scattered across design records are easy to miss; one page with buttons is the point of this page",
+      "from": "docs/design-record.md, Decisions page",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "page-sizes",
+      "question": "Are the page sizes right for how far back you read?",
+      "context": "Ten days a page on the Timeline, six versions a page on Changes, 25 test rows on Tests, 20 kinds of message on Logs, eight backups a page on Mods, ten commits a page in a thing's history.",
+      "options": [
+        {
+          "id": "keep",
+          "label": "Keep them"
+        },
+        {
+          "id": "larger",
+          "label": "Show more on each page",
+          "detail": "About twice as many: fewer page turns, longer pages"
+        },
+        {
+          "id": "smaller",
+          "label": "Show fewer on each page",
+          "detail": "About half: shorter pages, more turns"
+        }
+      ],
+      "lean": "keep",
+      "why": "Each was chosen to fit one screen on your monitor; change them if a page feels cut short",
+      "from": "CHANGELOG.md, 0.21.0",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "patch-crowded",
+      "question": "When should the Code map ring a patched method in red?",
+      "context": "A method our code patches gets a red dotted ring when three or more other mods patch it too, or the last update changed it.",
+      "options": [
+        {
+          "id": "three",
+          "label": "Three or more other mods (as now)"
+        },
+        {
+          "id": "two",
+          "label": "Two or more",
+          "detail": "More rings: earlier warning, more noise"
+        },
+        {
+          "id": "five",
+          "label": "Five or more",
+          "detail": "Fewer rings: only the busiest methods"
+        }
+      ],
+      "lean": "three",
+      "why": "On your mod list, three marked the methods where clashes have actually happened",
+      "from": "docs/cross-links.md, L5",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "activity-delay",
+      "question": "How quickly should the activity strip appear under the page bar?",
+      "context": "The strip shows anything the window is waiting on. Work that finishes within 0.6 seconds never shows it.",
+      "options": [
+        {
+          "id": "short",
+          "label": "After 0.6 seconds (as now)"
+        },
+        {
+          "id": "longer",
+          "label": "After 1.5 seconds",
+          "detail": "Only work you would notice waiting for"
+        },
+        {
+          "id": "always",
+          "label": "Always",
+          "detail": "Every request flickers it, however quick"
+        }
+      ],
+      "lean": "short",
+      "why": "Quick reads stay quiet, and anything you would wait on says so",
+      "from": "CHANGELOG.md, 0.21.0",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "makeup-window",
+      "question": "How far back should Make-up count recent changes?",
+      "context": "Make-up's 'how often it changed' colouring and the Code map's busiest code count the last 30 days.",
+      "options": [
+        {
+          "id": "thirty",
+          "label": "30 days (as now)"
+        },
+        {
+          "id": "seven",
+          "label": "7 days",
+          "detail": "What this week's work touched"
+        },
+        {
+          "id": "ninety",
+          "label": "90 days",
+          "detail": "Where the work has gone this season"
+        }
+      ],
+      "lean": "thirty",
+      "why": "Long enough to see where work keeps returning, short enough that last month's rework fades",
+      "from": "docs/design-record.md, Make-up",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "s1-s5",
+      "question": "Build the last two cross-links: design records joined to code (S1) and rules joined to the checks that enforce them (S5)?",
+      "context": "Both are in docs/cross-links.md and docs/later.md. S1 would show, beside a design record's section, the code that builds it; S5, beside each rule, the check that holds it.",
+      "options": [
+        {
+          "id": "both",
+          "label": "Build both next"
+        },
+        {
+          "id": "after-games",
+          "label": "After the game-files work",
+          "detail": "Saves, screenshots and what changed since you last played come first"
+        },
+        {
+          "id": "not-now",
+          "label": "Not for now"
+        }
+      ],
+      "lean": "after-games",
+      "why": "The game-files views are more use day to day; S1 and S5 serve agents more than you",
+      "from": "docs/cross-links.md",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "size-as-installed",
+      "question": "Add 'Size as installed' to Make-up?",
+      "context": "Make-up measures lines, size in the repository and files. Size as installed would measure what each mod takes in the game's Mods folder, encoded textures included.",
+      "options": [
+        {
+          "id": "build",
+          "label": "Add it"
+        },
+        {
+          "id": "leave",
+          "label": "Leave it out"
+        }
+      ],
+      "lean": "build",
+      "why": "Textures make installed size very different from repository size, and the install records already know where each mod is",
+      "from": "docs/design-record.md, Make-up",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "delete-old-files",
+      "question": "May the Companion offer to delete old autosaves and Real Ruins files to free space?",
+      "context": "RimWorld's saves folder holds 15 GB (46 files) and Real Ruins 1.5 GB in 16,231 files. Today the Companion would only show sizes.",
+      "options": [
+        {
+          "id": "sizes-only",
+          "label": "Sizes only",
+          "detail": "It shows what takes the space; you delete by hand"
+        },
+        {
+          "id": "offer",
+          "label": "Offer, and ask every time",
+          "detail": "A button lists exactly what would go and waits for your yes; never your named saves, only autosaves and caches"
+        }
+      ],
+      "lean": "sizes-only",
+      "why": "Saves are the one thing that cannot be rebuilt; this is yours to choose, not mine",
+      "from": "docs/later.md",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "run-elsewhere",
+      "question": "Make the Companion run on another computer, or for someone else?",
+      "context": "Today it finds the tool kit by the folder it was built from and needs Python on the PATH, so it cannot be handed to anyone.",
+      "options": [
+        {
+          "id": "now",
+          "label": "Work on it now"
+        },
+        {
+          "id": "later",
+          "label": "Later, before it goes public"
+        },
+        {
+          "id": "never",
+          "label": "It stays mine"
+        }
+      ],
+      "lean": "later",
+      "why": "Nothing needs it yet, and it is easiest once the pages settle",
+      "from": "docs/design-record.md, Limits",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "screen-note-key",
+      "question": "Is ! (Shift+1) the right key for Something's off?",
+      "context": "One key on any page draws the page and asks what looks wrong, for the next agent session.",
+      "options": [
+        {
+          "id": "keep",
+          "label": "Keep !"
+        },
+        {
+          "id": "x",
+          "label": "Use X"
+        },
+        {
+          "id": "o",
+          "label": "Use O (for off)"
+        }
+      ],
+      "lean": "keep",
+      "why": "An exclamation is what you would say on seeing it; any key can still be changed under Settings",
+      "from": "docs/design-record.md, Screen notes",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "records-stale",
+      "question": "How old may the newest records copy get before Home speaks up?",
+      "context": "Home shows a note when the Companion's records have never been copied, or the newest copy is this old.",
+      "options": [
+        {
+          "id": "seven",
+          "label": "7 days (as now)"
+        },
+        {
+          "id": "three",
+          "label": "3 days"
+        },
+        {
+          "id": "fourteen",
+          "label": "14 days"
+        }
+      ],
+      "lean": "seven",
+      "why": "A week of verdicts is the most you would want to lose, and a weekly nudge is not nagging",
+      "from": "docs/design-record.md, Records backup",
+      "asked": "2026-11-19"
+    },
+    {
+      "id": "claims-old",
+      "question": "When should a session's claim be marked old?",
+      "context": "The claims board marks a claim old after a day: perhaps a session that ended without letting go.",
+      "options": [
+        {
+          "id": "day",
+          "label": "After a day (as now)"
+        },
+        {
+          "id": "half-day",
+          "label": "After 12 hours"
+        },
+        {
+          "id": "two-days",
+          "label": "After two days"
+        }
+      ],
+      "lean": "day",
+      "why": "Batches run over an evening; a claim older than a day is almost always forgotten",
+      "from": "docs/design-record.md, Claims board",
+      "asked": "2026-11-19"
+    }
+  ]
+}

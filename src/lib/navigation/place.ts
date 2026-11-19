@@ -4,16 +4,17 @@ import type { StoodRequest } from "../timeline/types";
 /** Every page, in the bar's order. */
 export const PAGE_NAMES = [
   "home",
-  "reports",
-  "atlas",
-  "tests",
   "mods",
+  "tests",
+  "logs",
+  "atlas",
   "changes",
   "timeline",
   "codemap",
-  "settings",
-  "logs",
   "makeup",
+  "reports",
+  "settings",
+  "decisions",
 ] as const;
 
 export type PageName = (typeof PAGE_NAMES)[number];

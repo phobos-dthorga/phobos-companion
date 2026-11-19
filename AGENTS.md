@@ -39,6 +39,11 @@ reads them.
   owner flagged, with its picture (`picture.png` in the note's folder: read it), its address and their words. Raise them with the
   owner before other work, and when one is dealt with, `screen-notes resolve ID --how "what was done, and in which version"`.
   **Never delete a note.**
+- **Put every choice you make for the owner to revise, and every question you need their word on, in `config/decisions.json`**
+  (owner's go-ahead for the Decisions page, 19 Nov 2026; phobos-modkit's `docs/decisions.md`): a question, two or more options,
+  your lean and why. Read the answers at the start of a session with `python -m phobos_modkit decisions list --root ../../..`
+  (from `external/phobos-modkit/python`), **act on each answer and remove its decision from the file in the same commit.** Design
+  records still label agent choices as now.
 - Every new behaviour says, in the design record, what it lets the person do, what it stops them doing and how it changes the
   way they work. Owner choices, agent defaults and agent choices are labelled as such.
 - Write plainly: answer first, short sentences, **bold** for must-dos, tables for comparisons. Diagrams are Mermaid. Never use
@@ -80,7 +85,8 @@ reads them.
   (`src-tauri/src/screen_notes.rs`): the page's picture and `note.json`; only the kit's `screen-notes resolve` writes beside them.
   **Back up now** (0.22.0, `src-tauri/src/records_backup.rs`) runs the kit's `records backup`, which copies this program's records
   into a new dated folder in the folder the owner chose (`recordsBackupPath`), only on the owner's press and while the manifest
-  calls it `writes`; it never deletes a copy.
+  calls it `writes`; it never deletes a copy. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
+  answer`, which appends the owner's answer to `decisions/<repository>.jsonl` in this program's folder.
 - **The core never names a game.** A game reaches it only through the manifest's `game` field and the owner's own list,
   `.local/games.json`, which holds personal paths and is never committed.
 - **Git is read with `--no-optional-locks` and `core.fsmonitor=false`**, through `src-tauri/src/git.rs`: reading takes no lock and

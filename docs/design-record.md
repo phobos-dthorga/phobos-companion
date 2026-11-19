@@ -691,6 +691,30 @@ edge; half a second of staying loaded before the picture; the side column's widt
 appears. Two questions are on the Decisions page: Code map readers for TypeScript, Svelte and Rust, and how much of decompiling to
 take on.
 
+## About (built 19 Nov 2026, 0.25.0)
+
+**The owner asked (19 Nov 2026) for "a proper, About, page"**: they kept forgetting which version was installed and could find no
+version number anywhere.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See at a glance which version is running, and from any page; learn whether a newer one is waiting and where its installer is; read what this version brought |
+| What does it stop them doing? | Guessing whether the last install took, or running an old version without knowing |
+| How does it change the way they work? | No asking an agent session or digging through folders for a version: it is in the status bar, and About answers the rest |
+
+| Part | How |
+| --- | --- |
+| The version in sight | The status bar's version button, from package.json at build time (`__COMPANION_VERSION__` in `vite.config.ts`; a test keeps package.json and the host's version equal). It opens About |
+| Build facts | `src-tauri/build.rs` records the commit, the moment and the build output folder (`CARGO_TARGET_DIR`), and runs again whenever the repository moves to another commit |
+| The page | `src-tauri/src/about_page.rs` reads the running version, the repository's `package.json` version, its changelog (each version's number, date and opening paragraph), commits since the build (`git rev-list --count`, through `companion_core::git::text`, without locks or a watcher), the remote as a web address, the installer for the repository's version (found by its name's ending in the bundle folder, so no product name is written in code) and the notices' "In the program" table. Whatever cannot be read is left out, never a failure. It only reads |
+| Where it stands | Newer version waiting (with the installer's path, or a word that it is not built yet), up to date with commits not yet in a version, or up to date (`src/lib/about/presentation.ts`) |
+
+**Checked on:** this repository, by the host's and the window's tests and a browser build; **nothing here is tested on screen.**
+It serves every game the same: it is about the program, not a game.
+
+**Agent choices, owner to revise:** the I key; the page under Tools, last; the version in the status bar's right end; at most ten
+newer versions listed; no Show in folder buttons (the paths are plain text to copy).
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

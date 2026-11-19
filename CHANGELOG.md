@@ -4,6 +4,24 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-11-19
+
+The owner asked (19 November 2026) for a proper About page: "I keep forgetting which version I have installed and I cannot find a version number anywhere." Not yet tested on screen.
+
+### Added
+
+- **The version is always in sight**: the status bar at the bottom of the window says D'thorga Companion and its version. Press it to open About.
+- **An About page** (the I key, or its button under Tools):
+  - **Which version you are running**, the commit it was built from and when.
+  - **Whether a newer version is waiting in the repository**, with what each newer version brings and, when its installer has been built, the installer's full path to run. When you are up to date it says so, and how many commits the repository has had since that are not yet part of a version.
+  - **What this version brought**: its changelog's opening words, with a button to read it all on the Changes page when your games list holds the Companion's repository (the D'thorga Tools entry does).
+  - **Where it lives**: the program, the repository it was built from (where it finds the tool kit and your games list, wherever it is installed), its own records folder, the tool kit's version and the source's web address.
+  - **What it is built with**: each library inside it and its licence, read from the third-party notices.
+
+### Fixed
+
+- The third-party notices now name html-to-image, the library behind Save a picture and Something's off since 0.21.0.
+
 ## [0.24.0] - 2026-11-19
 
 The owner asked (19 November 2026) for three things: no more pages that are only a progress bar and empty space, which is also all Save a picture caught while a page loaded; a neater top to the Atlas page; and the Companion listed as its own game. They chose one entry holding all three tools (the Companion, the tool kit and the logger), with pages that say plainly when they have nothing for it. Not yet tested on screen.

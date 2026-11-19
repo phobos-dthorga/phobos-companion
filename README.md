@@ -5,6 +5,9 @@ what you did, and what your saves and logs say, without typing a command.
 
 ## Read this first (gotchas)
 
+- **Which version is this?** It is in the bottom right of the window; press it for the About page (the I key), which also says
+  whether a newer version is waiting in the repository and where its installer is.
+
 - **You need a list of your games first**: `.local/games.json` in this folder, naming each game and its repositories.
   `config/games.example.json` shows how. Without one, the program says so and shows nothing else. A game may also name its
   folders (`places`: `data`, `saves`, `screenshots`) and its Steam app ID (`steam_app_id`) for the Game files page. **An entry

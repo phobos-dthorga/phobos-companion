@@ -65,6 +65,12 @@ pub fn read(path: &Path, limit: usize) -> Result<Reading, ReadFailure> {
     Ok(Reading { commits, uncommitted: String::from_utf8_lossy(&status.stdout).lines().count() })
 }
 
+/// One answer from git as trimmed text (a commit count, a remote), or None when git is missing or the question fails (0.25.0).
+pub fn text(path: &Path, args: &[&str]) -> Option<String> {
+    let output = git(path, args).ok()?;
+    output.status.success().then(|| String::from_utf8_lossy(&output.stdout).trim().to_owned())
+}
+
 /// Runs git so that reading takes no locks and starts no background watcher.
 fn git(path: &Path, args: &[&str]) -> Result<Output, ReadFailure> {
     let mut command = Command::new("git");

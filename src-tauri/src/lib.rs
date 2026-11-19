@@ -3,6 +3,7 @@
 //! What more than one part uses, and needs no window, lives in the `companion-core` crate (`core/`): the games list, the tool kit,
 //! request checks, failures. This file holds the Tauri commands, each one line of delegation on a worker thread.
 
+mod about_page;
 mod changes_page;
 mod claims_board;
 mod connections_page;
@@ -49,6 +50,12 @@ fn hearing(channel: Channel<kit::Progress>) -> impl Fn(kit::Progress) + Sync {
     move |progress| {
         let _ = channel.send(progress);
     }
+}
+
+/// What this program is: its version, what it was built from and when, and what its repository holds since (0.25.0).
+#[tauri::command]
+async fn about(app: tauri::AppHandle) -> Result<about_page::About, Failure> {
+    blocking(move || Ok(about_page::read(data_folder(&app).ok()))).await
 }
 
 /// How the tools are: read on a worker thread, since it starts a process.
@@ -507,6 +514,7 @@ async fn memory_mark(
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            about,
             kit_status,
             home_status,
             report_catalogue,

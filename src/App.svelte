@@ -24,6 +24,7 @@
   import WherePage from "./lib/home/WherePage.svelte";
   import NotForTools from "./lib/home/NotForTools.svelte";
   import { pageServes } from "./lib/home/kinds";
+  import { VERSION } from "./lib/about/version";
   import { readHome } from "./lib/home/desktopClient";
   import { formatTime, formatUnixDate } from "./lib/home/presentation";
   import type { HomeReading } from "./lib/home/types";
@@ -42,6 +43,7 @@
   import ScreenNoteButton from "./lib/notes/ScreenNoteButton.svelte";
   import MakeupPage from "./lib/makeup/MakeupPage.svelte";
   import DecisionsPage from "./lib/decisions/DecisionsPage.svelte";
+  import AboutPage from "./lib/about/AboutPage.svelte";
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
   import MemoryPage from "./lib/memory/MemoryPage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
@@ -101,6 +103,7 @@
     ["page.logs", "logs"],
     ["page.makeup", "makeup"],
     ["page.decisions", "decisions"],
+    ["page.about", "about"],
     ["page.gamefiles", "gamefiles"],
     ["page.memory", "memory"],
   ];
@@ -141,6 +144,7 @@
         { page: "reports", key: "page-reports" },
         { page: "settings", key: "page-settings" },
         { page: "decisions", key: "page-decisions" },
+        { page: "about", key: "page-about" },
       ],
     },
   ];
@@ -319,6 +323,8 @@
         <NotForTools game={selected} {page} />
       {:else if page === "settings" && home.state !== "reading"}
         <SettingsPage {games} />
+      {:else if page === "about"}
+        <AboutPage {games} {kit} />
       {:else if page === "decisions" && home.state !== "reading"}
         <DecisionsPage />
       {:else if selected && page === "reports"}
@@ -404,11 +410,13 @@
                       ? t("source-body-makeup")
                       : page === "decisions"
                         ? t("source-body-decisions")
-                        : page === "gamefiles"
-                          ? t("source-body-gamefiles")
-                          : page === "memory"
-                            ? t("source-body-memory")
-                            : t("source-body")}
+                        : page === "about"
+                          ? t("source-body-about")
+                          : page === "gamefiles"
+                            ? t("source-body-gamefiles")
+                            : page === "memory"
+                              ? t("source-body-memory")
+                              : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>
@@ -473,7 +481,16 @@
 
   <footer class="status-bar">
     <span>{t("status-reading-only")}</span>
-    <span>{t("status-independent")}</span>
+    <span class="footer-end">
+      <button
+        type="button"
+        class="version"
+        aria-label={t("status-version-label", { version: VERSION })}
+        onclick={() => goPage("about")}
+        >{t("status-version", { version: VERSION })}</button
+      >
+      <span>{t("status-independent")}</span>
+    </span>
   </footer>
 </div>
 
@@ -489,6 +506,29 @@
 
   .command-bar,
   .observation-bar,
+  /* The version, always in sight (0.25.0: the owner could not find one anywhere); it opens About. */
+  .footer-end {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+  }
+
+  .version {
+    min-height: var(--control-min);
+    padding-inline: 10px;
+    font: inherit;
+    color: var(--colour-text);
+    background: transparent;
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .version:hover {
+    border-color: var(--colour-accent);
+  }
+
   .status-bar {
     display: flex;
     flex-wrap: wrap;

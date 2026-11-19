@@ -17,6 +17,7 @@ export const PAGE_NAMES = [
   "reports",
   "settings",
   "decisions",
+  "about",
 ] as const;
 
 export type PageName = (typeof PAGE_NAMES)[number];

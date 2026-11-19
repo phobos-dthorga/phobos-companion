@@ -74,6 +74,7 @@ build differs from its proposal.
 | Logs | `signature` |
 | Memory | `watch` (a kept watch's name, such as `20261119-205419-reload-test-2`; 0.23.0) |
 | Reports | `command`, `report` |
+| About | none (0.25.0) |
 
 ## Proposed order
 

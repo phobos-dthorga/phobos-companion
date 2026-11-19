@@ -1,8 +1,15 @@
 import { defineConfig } from "vitest/config";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { readFileSync } from "node:fs";
+
+// The version shown in the window's footer and on About (0.25.0): package.json's, which a test keeps equal to the host's.
+const { version } = JSON.parse(
+  readFileSync(new URL("./package.json", import.meta.url), "utf-8"),
+) as { version: string };
 
 export default defineConfig({
   plugins: [svelte()],
+  define: { __COMPANION_VERSION__: JSON.stringify(version) },
   test: {
     exclude: [
       "tests/accessibility/**",

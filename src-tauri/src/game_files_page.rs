@@ -66,12 +66,16 @@ pub fn inside(path: &Path, folders: &[PathBuf]) -> bool {
     false
 }
 
-/// The game's report. `since` is a moment (2026-11-19, or with a time); None means since the last launch.
+/// "Since the launch before the last" (phobos-modkit 1.51.0): while the game runs, Steam's last launch is this one.
+pub const PREVIOUS: &str = "previous";
+
+/// The game's report. `since` is a moment (2026-11-19, or with a time), or `previous`; None means since the last launch.
 pub fn read(game: &str, since: Option<String>) -> Result<Value, Failure> {
     if !checks::plain_name(game) {
         return Err(Failure::refused("that is not a game's id"));
     }
     if let Some(since) = &since
+        && since != PREVIOUS
         && !checks::moment(since)
     {
         return Err(Failure::refused("that is not a moment"));

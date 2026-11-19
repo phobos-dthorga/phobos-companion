@@ -150,6 +150,15 @@ pub fn decompile(
     Ok(Answer::of(&kit::run_hearing(&tool, &arguments, listener)?))
 }
 
+/// Keeps the new builds of the game and the mods a repository ties into (`rimworld-archive snapshot`, phobos-modkit 1.51.0's
+/// `updates` surface), on the owner's press, so an update can be compared: it writes only into the tools' archive.
+pub fn keep_builds(game: &str, repository: &str, listener: Option<kit::Listener>) -> Result<Answer, Failure> {
+    let found = games::named_repository(game, repository)?;
+    let Some(tool) = tool(game, UPDATES, "snapshot", "writes")? else { return Ok(Answer::missing()) };
+    let arguments = Args::new(&tool, "snapshot").root(&found.path).json();
+    Ok(Answer::of(&kit::run_hearing(&tool, &arguments, listener)?))
+}
+
 /// The arguments for the kept builds (no file) or a comparison of one file's last two, optionally one member's diff.
 pub fn update_arguments(
     tool: &str,

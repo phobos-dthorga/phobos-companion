@@ -13,7 +13,14 @@ export type PatchTarget = {
   mods: string[];
   /** How many of their patches are prefixes that may skip the original. */
   skippers: number;
-  changed: { mod: string; file: string; versions: string; change: string }[];
+  changed: {
+    mod: string;
+    file: string;
+    versions: string;
+    change: string;
+    /** When the tools first kept the newer build, as an ISO time (phobos-modkit 1.51.0). */
+    newestKept?: string;
+  }[];
 };
 
 export type PatchTargets = {
@@ -58,6 +65,11 @@ export function riskyNodes(targets: PatchTarget[]): Set<string> {
 
 /** Read once a window, by game and repository: the tools take a few seconds, and a picture re-centres often. */
 const read = new Map<string, Promise<PatchTargets>>();
+
+/** Forgets a repository's patch targets, so the next ask reads them again (after new builds were kept, 0.28.0). */
+export function forgetPatchTargets(game: string, repository: string): void {
+  read.delete(`${game}/${repository}`);
+}
 
 export function patchTargetsOf(
   game: string,

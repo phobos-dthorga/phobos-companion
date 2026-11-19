@@ -23,6 +23,10 @@ export interface GameFiles {
     }[];
     workshopCount: number;
     workshopInstalled: number;
+    /** phobos-modkit 1.51.0: compared with the launch before the last, when asked for and known. */
+    sincePrevious?: boolean;
+    previousLaunchAt?: string;
+    launchesSeen?: number;
   };
   saves: {
     list: {

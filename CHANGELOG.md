@@ -4,6 +4,26 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-11-20
+
+The owner chose (20 November 2026) "Since you last played" as the next build: the question they have before launching, answered from parts the tools already had. Built on phobos-modkit 1.51.0. Checked on RimWorld, against the owner's real update of Vanilla Furniture Expanded - Factory, which changed methods D'thorga Factory Additions patches; not yet tested on screen.
+
+### Added
+
+- **Since you last played**, in the Mods page's Before you play: what updated since the session before (the game, and how many of your mods, with Which ones to unfold), then whether any of those updates changed a method our mods patch.
+  - **A mod whose update changed something we patch is named, with the methods**, and **See what changed** opens that update's comparison on the Code map, method by method.
+  - **A mod ours tie into whose new build the tools have not kept yet** is named too, since it could not be checked, with **Keep the new builds**: it keeps them in the tools' own archive (never the game's or the mods' folders) and checks again.
+  - **While RimWorld runs, it compares with the launch before this one.** Steam records only the latest launch, so the tools now remember each launch they see; the very first time, it says it can only compare with this launch, and from your next launch it compares with the one before.
+
+### Dependencies
+
+- phobos-modkit 1.51.0 (launches remembered; when an update's build was kept, as data).
+
+### Compatibility and limits
+
+- The patch check reads every patch our code makes and compares the kept builds, which takes about a minute the first time in a session; the update list shows first, and the check follows.
+- Only RimWorld's tools can say what an update changed in what we patch; other games show what updated, and say nothing about patches.
+
 ## [0.27.0] - 2026-11-20
 
 The owner saw the Mods page's settings list sit on its bar for about a minute just after starting the Companion, and asked (20 November 2026) for the list to show at once, for the tools' cache to leave Windows' Temp folder for K:, and for "some kind of ongoing cleanup process", with their yes before anything goes. Not yet tested on screen.

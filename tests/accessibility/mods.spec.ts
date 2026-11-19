@@ -664,3 +664,142 @@ test.describe("Settings to look at, shown at once (0.27.0)", () => {
     await expect(panel).not.toContainText("checking for changes");
   });
 });
+
+test.describe("Since you last played (0.28.0)", () => {
+  const since = "2026-11-19T00:00:00+00:00";
+  const gameFiles = {
+    name: "First Sample",
+    game: null,
+    places: { data: null, saves: null, screenshots: [] },
+    changed: {
+      since,
+      sinceLastPlayed: false,
+      sincePrevious: true,
+      previousLaunchAt: since,
+      launchesSeen: 2,
+      gameUpdated: false,
+      workshop: [
+        {
+          id: "1",
+          title: "Sample Factory",
+          bytes: 1,
+          updated: 1,
+          updatedAt: since,
+        },
+        {
+          id: "2",
+          title: "Sample Sails",
+          bytes: 1,
+          updated: 1,
+          updatedAt: since,
+        },
+        {
+          id: "3",
+          title: "A Style Pack",
+          bytes: 1,
+          updated: 1,
+          updatedAt: since,
+        },
+      ],
+      workshopCount: 3,
+      workshopInstalled: 40,
+    },
+    saves: { list: [], count: 0, bytes: 0, autosaves: 0 },
+    screenshots: { list: [], count: 0, bytes: 0 },
+    space: { data: [], dataBytes: 0, install: null, workshop: 0 },
+  };
+  const kept = {
+    available: true,
+    ok: true,
+    refusal: null,
+    report: null,
+    data: {
+      files: [
+        {
+          owner: "sample.factory",
+          owner_name: "Sample Factory",
+          file: "SampleFactory.dll",
+          versions: 2,
+          newest_version: null,
+          newest_seen: "2026-11-19 09:08 UTC",
+          previous_seen: "2026-11-18 03:13 UTC",
+        },
+        {
+          owner: "sample.sails",
+          owner_name: "Sample Sails",
+          file: "SampleSails.dll",
+          versions: 2,
+          newest_version: null,
+          newest_seen: "2026-11-18 03:13 UTC",
+          previous_seen: "2026-11-10 03:13 UTC",
+        },
+      ],
+    },
+  };
+  const targets = {
+    available: true,
+    data: {
+      updates: true,
+      updatesNote: null,
+      targets: [
+        {
+          node: "cs:Sample.Conveyor.Tick",
+          target: "Sample.Conveyor.Tick",
+          name: "Conveyor.Tick",
+          assembly: null,
+          ours: ["cs:Ours.TickPatch.Prefix"],
+          mods: [],
+          skippers: 0,
+          changed: [
+            {
+              mod: "Sample Factory",
+              file: "SampleFactory.dll",
+              versions: "a to b",
+              change: "new body (code, +5 -1)",
+              newestKept: "2026-11-19T09:08:00+00:00",
+            },
+          ],
+        },
+      ],
+    },
+  };
+
+  test("names the update that changed what our mods patch, leads to it, and offers to keep the builds not kept yet", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      mod_installs: sampleInstalls(["RimWorld"]),
+      texture_status: sampleTextures(["RimWorld"]),
+      mod_settings: { result: sampleLedger },
+      game_files: { result: gameFiles },
+      updates: { result: kept },
+      patch_targets: { result: targets },
+      keep_builds: {
+        result: {
+          available: true,
+          ok: true,
+          refusal: null,
+          report: null,
+          data: {},
+        },
+      },
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Mods", exact: true }).click();
+    const since = page.getByRole("group", { name: "Since you last played" });
+    await expect(since).toContainText("3 mods updated.");
+    await expect(since).toContainText(
+      "Sample Factory changed a method our mods patch: Conveyor.Tick.",
+    );
+    await expect(since).toContainText("could not be checked: Sample Sails.");
+    await audit(page);
+    await since.getByRole("button", { name: "Keep the new builds" }).click();
+    await expect(since).toContainText("The new builds are kept");
+    await since.getByRole("button", { name: "See what changed" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "code fits together",
+    );
+  });
+});

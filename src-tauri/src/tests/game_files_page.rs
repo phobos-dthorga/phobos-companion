@@ -39,3 +39,9 @@ fn a_file_is_shown_only_from_a_folder_the_report_named() {
     assert!(!inside(Path::new("/elsewhere/a.jpg"), &folders));
     assert!(!inside(Path::new("/d/a/b/c/deep.txt"), &folders));
 }
+
+#[test]
+fn the_launch_before_the_last_passes_as_previous_and_other_words_are_refused() {
+    assert!(arguments(&zed(), Some(PREVIOUS)).contains(&"--since=previous".to_owned()));
+    assert!(read("zed", Some("--evil".to_owned())).is_err());
+}

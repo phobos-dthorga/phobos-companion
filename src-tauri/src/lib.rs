@@ -535,6 +535,16 @@ async fn decompile_assembly(
     blocking(move || other_code_page::decompile(&game, &repository, &assembly, Some(&hearing(on_progress)))).await
 }
 
+/// Keeps the new builds of the game and the mods a repository ties into, on the owner's press (0.28.0).
+#[tauri::command]
+async fn keep_builds(
+    game: String,
+    repository: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<other_code_page::Answer, Failure> {
+    blocking(move || other_code_page::keep_builds(&game, &repository, Some(&hearing(on_progress)))).await
+}
+
 /// The builds the tools have kept, or what changed in one file's last update (and in one member of it).
 #[tauri::command]
 async fn updates(
@@ -581,6 +591,7 @@ pub fn run() {
             their_code,
             decompile_assembly,
             updates,
+            keep_builds,
             kit_status,
             home_status,
             report_catalogue,

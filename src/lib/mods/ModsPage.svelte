@@ -1,6 +1,7 @@
 <script lang="ts">
   import Placeholder from "../shell/Placeholder.svelte";
   import SettingsToLook from "./SettingsToLook.svelte";
+  import SinceLastPlayed from "./SinceLastPlayed.svelte";
   import Pager from "../shell/Pager.svelte";
   import { pageHolding, pageOf } from "../shell/paging";
   import { here, setFocus } from "../navigation/navigation.svelte";
@@ -833,6 +834,11 @@
     {#if asking?.place === STRIP}
       {@render question()}
     {/if}
+    <SinceLastPlayed
+      game={game.id}
+      repositories={repositories.map((r) => r.repository)}
+      running={running.length > 0}
+    />
     <div class="buttons">
       <button
         type="button"

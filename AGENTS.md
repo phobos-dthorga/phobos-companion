@@ -83,6 +83,9 @@ reads them.
   **Decompile runs only on the owner's press, only for an assembly the kit's `holder` named in this run of the program, and only
   while the manifest calls it `runs`**; it writes only into the kit's cache. Names go to the kit after `--`, checked to have the
   shape of a type or member name; a kept file is a plain `.dll` name. Other authors' code is shown, never copied into a repository.
+- **Keep the new builds writes only into the tools' archive** (0.28.0, `other_code_page::keep_builds`): the kit's
+  `rimworld-archive snapshot`, found by the `updates` surface, only on the owner's press and while the manifest calls it `writes`. It
+  copies new builds of the game and tied mods into the archive, never touching the game's or the mods' folders.
 - **Clean up deletes only what the owner chose and confirmed** (owner, 20 Nov 2026: "some kind of ongoing cleanup process", with
   their yes first; `src-tauri/src/cleanup_page.rs`): the kit's `cleanup`, listing by default; deleting runs only after the owner
   chooses the groups, presses Clean up the chosen and confirms, only the groups chosen (`--group`, each one argument), and only while

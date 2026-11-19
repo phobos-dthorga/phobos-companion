@@ -34,6 +34,19 @@ export async function decompileAssembly<T>(
   );
 }
 
+/** Keeps the new builds of the game and the mods a repository ties into, on the owner's press (0.28.0). */
+export async function keepBuilds<T>(
+  game: string,
+  repository: string,
+  onProgress?: OnProgress,
+): Promise<Ready<T> | Failed> {
+  return ask<OtherAnswer<T>, Ready<T>>(
+    "keep_builds",
+    { game, repository, onProgress: progressChannel(onProgress) },
+    (answer) => ({ state: "ready", answer }),
+  );
+}
+
 /** The builds kept (no file), or what one file's last update changed, and in one member of it. */
 export async function askUpdates<T>(
   game: string,

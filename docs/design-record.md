@@ -772,6 +772,32 @@ K: (`modkitCachePath`), where Windows' clean-ups do not reach.
 **Agent choices, owner to revise (both on the Decisions page):** Home's 5 GB threshold; install backups starting unchosen. Also:
 the half-hour between Home's looks; the panel's place under Back up your records.
 
+## Since you last played (built 20 Nov 2026, 0.28.0)
+
+**The owner chose it as the next build (20 Nov 2026)**, from three offered: the question they have before launching, answered by
+joining parts that already existed (Game files, the patch targets' updates, the archive, the code compare).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See before playing what updated since the session before, and whether any update changed a method our mods patch, going straight to the change |
+| What does it stop them doing? | Launching into a broken patch unawares; trusting "nothing changed" when the new build was never compared (it says so, and offers to keep it) |
+| How does it change the way they work? | No agent session or script before a launch to ask what an update did |
+
+| Part | How |
+| --- | --- |
+| What updated | Game files' report (phobos-modkit 1.51.0), with `--since previous` while the game runs: Steam keeps only the latest launch, so the kit remembers each launch it sees (`game-files/launches-<id>.json` in its cache) |
+| Which are ours to check | The archive's kept files (`rimworld-archive list`), matched by name to the updated items: the mods our code ties into, and the game's own file when the game updated |
+| What changed in what we patch | `rimworld-patches targets --updates`, each change with `newestKept`; counted only when kept since the moment compared with and from an update since (`src/lib/mods/sinceLastPlayed.ts`) |
+| Not kept yet | A tied update whose newest kept build is older than that moment; Keep the new builds runs `rimworld-archive snapshot` on the owner's press, then checks again |
+| See what changed | The Code map's update view for that file (0.26.0) |
+
+**Checked on:** RimWorld, with the owner's real data (Vanilla Furniture Expanded - Factory's update of 19 Nov 2026 changed
+`Building_Conveyor.Tick` and `PeriodicCacheCheck`, which D'thorga Factory Additions patches), and the browser checks. **Nothing here
+is tested on screen.**
+
+**Agent choices, owner to revise:** matching updated items to kept files by name (a mod renamed between builds would be missed);
+the line's place in Before you play; Keep the new builds without a second question (it writes only into the tools' archive).
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

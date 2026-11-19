@@ -544,6 +544,27 @@ grouping it is still open), and "Size as installed" left out (it needs each game
 **Agent choices, owner to revise:** the ! key (Shift+1); the button's words "Something's off"; five dealt-with notes on Home; the
 folder fixed in the Companion's own folder, not a setting, because the Companion and the kit must agree on it.
 
+## Records backup (built 19 Nov 2026, 0.22.0)
+
+**The owner said yes to backing up the Companion's own records** (19 Nov 2026): Synology does not back up the local application data
+where they live.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Keep a copy of every verdict, mark, note and history line somewhere their NAS keeps, in one press |
+| What does it stop them doing? | Losing weeks of test verdicts and history to a disk failure or a reinstall |
+| How does it change the way they work? | Home says when the copy is old, so backing up is a nudge, never a chore to remember |
+
+| Part | How |
+| --- | --- |
+| What is copied | phobos-modkit 1.43.0's `records`: everything in this program's folder but WebView2's browser cache (`EBWebView`, about 79 MB of the owner's 80), so a new kind of record is included without a change; any record a setting keeps elsewhere too |
+| Where | A new folder named for the local time, inside `recordsBackupPath`, written whole with a `backup.json`; a folder inside the records is refused |
+| Settings page | Back up your records: when last copied, what a copy holds, where it goes, Back up now (waits until a folder is chosen), and a button to the setting |
+| Home | A note when there is no copy, or the newest is at least seven days old |
+
+**Agent choices, owner to revise:** seven days before Home speaks up; never deleting old copies (the owner prunes by hand); saves
+left out (a separate, larger question, in `later.md`).
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

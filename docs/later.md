@@ -1,6 +1,7 @@
 # Kept for later: everything proposed and not yet built
 
-**Status (19 Nov 2026):** item 1, screen notes, is built (Companion 0.22.0, untested on screen); the rest is not built yet. The owner said yes to all of it ("Absolutely with all of these and
+**Status (19 Nov 2026):** items 1 and 2, screen notes and the records backup, are built (Companion 0.22.0, untested on screen);
+the rest is not built yet. The owner said yes to all of it ("Absolutely with all of these and
 for what we are not implementing just yet, make sure to document and record those for later so that they are not lost"), in the
 order of the build list below. Each item's status changes here in the change that builds it; once built, its design moves to
 `design-record.md` and this record keeps one line pointing there.
@@ -22,7 +23,7 @@ order of the build list below. Each item's status changes here in the change tha
 | # | Item | What it lets the owner do | Status |
 | --- | --- | --- | --- |
 | 1 | **Screen notes ("something's off")** | Press one key on any page, add a few words or none, and the picture, the address, the version and the time land in a folder agent sessions read at the start: "this looks wrong" without having to describe where | **Built**, 0.22.0 (see `design-record.md`) |
-| 2 | **Records backup** | Copy the Companion's own records (test verdicts, key decisions, "looked at" marks, the history log, shortcuts, the central settings file) to a folder of the owner's choosing on the NAS, with a note on Home when the last copy is old. Synology does not back up the app data folder | Not built |
+| 2 | **Records backup** | Copy the Companion's own records (test verdicts, key decisions, "looked at" marks, the history log, shortcuts, the central settings file) to a folder of the owner's choosing on the NAS, with a note on Home when the last copy is old. Synology does not back up the app data folder | **Built**, 0.22.0 (see `design-record.md`) |
 | 3 | **Claims board** | See which agent session holds which version number, test row or file, from a tiny shared claims file the sessions write and read; ends the cross-session "is 0.174.0 yours?" messages | Not built |
 | 4 | **Decisions page, and the page bar grouped** | Answer open decisions with a button, each showing its options and the agent's lean, instead of hunting through design records; the bar grouped into Play (Home, Mods, Tests, Logs, Atlas), Code (Changes, Timeline, Code map, Make-up) and Tools (Reports, Settings, Decisions) | Not built |
 | 5 | **Game files** | See what the game itself writes: what changed since you last played, saves, screenshots, disk use; add a game from Steam without hand-editing `games.json` | Not built |
@@ -99,6 +100,6 @@ order of the build list below. Each item's status changes here in the change tha
 | **Size as installed** on Make-up | Make-up, 0.20.0 | Each game's install records read for sizes |
 | **Prefs, KeyPrefs and Knowledge views** | Game-files discussion | Low value; build only if the owner asks |
 | **Saves backup** (15 GB) | Records backup discussion | Its own decision: where, how often, how many |
-| **phobos-rimworld's kit pin** was at 1.30.0, ten versions behind | Noticed 19 Nov 2026 | Being moved to 1.42.0 by another session (19 Nov 2026) |
+| **phobos-rimworld's kit pin** was at 1.30.0, ten versions behind | Noticed 19 Nov 2026 | **Done**: moved to 1.42.0 by another session (19 Nov 2026) |
 | **"Decisions waiting for you"** on Home | Owner's idea, 10 Nov 2026 | Folded into item 4, the Decisions page |
 | **Atlas: stepping through saves**, and links from places to the atlas | `design-record.md`, atlas | Not scheduled |

@@ -78,6 +78,9 @@ reads them.
   `src-tauri/src/tests_page.rs`, owner, 17 Nov 2026); phobos-modkit's `test-pass` reads both and `apply` writes verdicts into a test
   list, never this program. **Screen notes** (0.22.0) are written whole into `screen-notes/<id>/` in its own data folder
   (`src-tauri/src/screen_notes.rs`): the page's picture and `note.json`; only the kit's `screen-notes resolve` writes beside them.
+  **Back up now** (0.22.0, `src-tauri/src/records_backup.rs`) runs the kit's `records backup`, which copies this program's records
+  into a new dated folder in the folder the owner chose (`recordsBackupPath`), only on the owner's press and while the manifest
+  calls it `writes`; it never deletes a copy.
 - **The core never names a game.** A game reaches it only through the manifest's `game` field and the owner's own list,
   `.local/games.json`, which holds personal paths and is never committed.
 - **Git is read with `--no-optional-locks` and `core.fsmonitor=false`**, through `src-tauri/src/git.rs`: reading takes no lock and

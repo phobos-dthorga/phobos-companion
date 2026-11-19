@@ -17,6 +17,7 @@
   import type { Notes } from "../notes/notes";
   import { readScreenNotes, showScreenNote } from "../notes/desktopClient";
   import { noteSaves } from "../notes/saves.svelte";
+  import RecordsNote from "../records/RecordsNote.svelte";
 
   const PENDING_SHOWN = 6;
   const OPEN_SHOWN = 6;
@@ -205,6 +206,8 @@
     >
   </section>
 {/if}
+
+<RecordsNote game={game.id} />
 
 {#if notes && (notes.open.length > 0 || notes.dealt_count > 0)}
   <section

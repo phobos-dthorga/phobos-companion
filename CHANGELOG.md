@@ -12,9 +12,11 @@ The owner said yes (19 November 2026) to four new tools for working with agent s
 
 - **Something's off** (the ! key, or the button beside Save a picture): when a page looks wrong, press it. It draws the page as it is, then asks what looks wrong (the words are optional; Ctrl+Enter saves). The picture, the page's address and your words are kept in the Companion's own folder, and the next agent session reads every open note when it starts, then says what it did. **Home lists the notes still waiting**, with Show the picture and Go to the page, and the newest ones dealt with, saying how.
 
+- **Back up your records**, on the Settings page: your test verdicts, the history log, the settings you have looked at, screen notes, keyboard shortcuts and the central settings file live in this computer's local app data, which the NAS does not back up. Choose a folder it does keep (the new setting Where copies of the Companion's own records go), then **Back up now** copies them into a new dated folder there. Old copies are never deleted. **Home says when they have never been copied, or the newest copy is a week old or more**, with a button leading to the backup.
+
 ### Dependencies
 
-- Tool kit 1.42.0, now pinned (1.41.0 brought screen-notes, which agent sessions use to read and resolve the notes).
+- Tool kit 1.44.0, now pinned (1.41.0 brought screen-notes, which agent sessions use to read and resolve the notes; 1.43.0 the records backup and its setting).
 
 ## [0.21.0] - 2026-11-19
 

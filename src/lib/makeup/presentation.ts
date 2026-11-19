@@ -1,3 +1,4 @@
+import { formatSize } from "../shell/sizes";
 import { shelfOf } from "../tests/presentation";
 import type { TestList } from "../tests/types";
 import type { Churned, GrowthPoint, Kind, MadeFile, Measure } from "./types";
@@ -265,14 +266,7 @@ export function busiest(
     .slice(0, top);
 }
 
-/** A size in the units a person reads: bytes, KB, MB. */
-export function formatSize(bytes: number, locale: string): string {
-  const number = (value: number, digits: number) =>
-    value.toLocaleString(locale, { maximumFractionDigits: digits });
-  if (bytes < 1024) return `${number(bytes, 0)} B`;
-  if (bytes < 1024 * 1024) return `${number(bytes / 1024, 1)} KB`;
-  return `${number(bytes / (1024 * 1024), 1)} MB`;
-}
+export { formatSize } from "../shell/sizes";
 
 /** An amount under a measure, in words a person reads. */
 export function formatAmount(

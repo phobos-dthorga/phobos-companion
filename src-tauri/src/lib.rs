@@ -15,6 +15,7 @@ mod open_work;
 mod patch_targets;
 mod pending;
 mod pictures;
+mod records_backup;
 mod reports;
 mod screen_notes;
 mod settings_ledger;
@@ -388,6 +389,18 @@ async fn show_screen_note(app: tauri::AppHandle, id: String) -> Result<(), Failu
     blocking(move || screen_notes::show(&data, &id)).await
 }
 
+/// What a copy of this program's records would hold, where it goes, and how old the newest copy is.
+#[tauri::command]
+async fn records_status() -> Result<serde_json::Value, Failure> {
+    blocking(records_backup::status).await
+}
+
+/// Copies this program's records into a new dated folder, once the owner presses Back up now.
+#[tauri::command]
+async fn backup_records() -> Result<records_backup::BackupResult, Failure> {
+    blocking(records_backup::backup).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -436,6 +449,8 @@ pub fn run() {
             save_screen_note,
             screen_notes_list,
             show_screen_note,
+            records_status,
+            backup_records,
             read_shortcuts,
             save_shortcuts
         ])

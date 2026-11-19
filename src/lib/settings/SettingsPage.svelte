@@ -12,6 +12,7 @@
   import { readSettings, saveSetting } from "./desktopClient";
   import { byGame, otherRepositories, sendable } from "./presentation";
   import ShortcutsDialog from "../shortcuts/ShortcutsDialog.svelte";
+  import RecordsPanel from "../records/RecordsPanel.svelte";
   import type { Setting, SettingsReading } from "./types";
 
   /**
@@ -97,6 +98,12 @@
 
   /** A setting the place names is scrolled to and outlined once the list is read. */
   const focusKey = $derived(here().focus.key ?? null);
+  /** Home's note about the records backup leads to its panel (0.22.0). */
+  const focusPanel = $derived(here().focus.panel ?? null);
+  $effect(() => {
+    if (focusPanel === "records")
+      untrack(() => void reveal("settings-records"));
+  });
   $effect(() => {
     if (focusKey && reading.state === "ready")
       untrack(() => void reveal(`setting-${focusKey}`));
@@ -114,6 +121,7 @@
     >{t("settings-keyboard-open")}</button
   >
 </section>
+<RecordsPanel />
 {#if editingShortcuts}
   <ShortcutsDialog editable={true} onclose={() => (editingShortcuts = false)} />
 {/if}

@@ -14,9 +14,11 @@ The owner said yes (19 November 2026) to four new tools for working with agent s
 
 - **Back up your records**, on the Settings page: your test verdicts, the history log, the settings you have looked at, screen notes, keyboard shortcuts and the central settings file live in this computer's local app data, which the NAS does not back up. Choose a folder it does keep (the new setting Where copies of the Companion's own records go), then **Back up now** copies them into a new dated folder there. Old copies are never deleted. **Home says when they have never been copied, or the newest copy is a week old or more**, with a button leading to the backup.
 
+- **Who is working on what**, on Home: what each agent session holds on the claims board (a version number, a test row, a file being reworked), for how long and what for. A claim a day old or more is marked old: perhaps a session that ended without letting go. Sessions take and release claims themselves, under a new shared rule, so two never take the same version number again.
+
 ### Dependencies
 
-- Tool kit 1.44.0, now pinned (1.41.0 brought screen-notes, which agent sessions use to read and resolve the notes; 1.43.0 the records backup and its setting).
+- Tool kit 1.44.0, now pinned (1.41.0 brought screen-notes, which agent sessions use to read and resolve the notes; 1.43.0 the records backup and its setting; 1.44.0 the claims board and its rule).
 
 ## [0.21.0] - 2026-11-19
 

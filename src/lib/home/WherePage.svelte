@@ -18,6 +18,7 @@
   import { readScreenNotes, showScreenNote } from "../notes/desktopClient";
   import { noteSaves } from "../notes/saves.svelte";
   import RecordsNote from "../records/RecordsNote.svelte";
+  import ClaimsPanel from "../claims/ClaimsPanel.svelte";
 
   const PENDING_SHOWN = 6;
   const OPEN_SHOWN = 6;
@@ -279,6 +280,8 @@
     <p class="muted small more">{t("notes-how")}</p>
   </section>
 {/if}
+
+<ClaimsPanel />
 
 {#if pins && pins.pins.length > 0}
   <section class="panel" aria-labelledby="pins-title">

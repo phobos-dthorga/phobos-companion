@@ -565,6 +565,25 @@ where they live.
 **Agent choices, owner to revise:** seven days before Home speaks up; never deleting old copies (the owner prunes by hand); saves
 left out (a separate, larger question, in `later.md`).
 
+## Claims board (built 19 Nov 2026, 0.22.0)
+
+**The owner said yes to a claims board** (19 Nov 2026), after an evening of sessions messaging each other to ask which version
+number was free.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See which agent session is working on what, and spot one that ended holding something |
+| What does it stop them doing? | Relaying "is 0.174.0 yours?" between sessions, and two sessions shipping the same version number |
+| How does it change the way they work? | Sessions sort out shared numbers among themselves; the owner reads the board instead of asking |
+
+| Part | How |
+| --- | --- |
+| The board | phobos-modkit 1.44.0's `claims`: one file in this program's folder (`claimsPath`), changed under a lock file and written whole; a thing is its words, ignoring case and spacing |
+| The rule | `rules/every-session.md` in the kit: take before using, release once committed, ask a holder rather than pick around them |
+| Home | Who is working on what: each claim, its session, how long, its note, and old ones marked. Only read |
+
+**Agent choices, owner to revise:** a day before a claim is called old; nothing expires by itself.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

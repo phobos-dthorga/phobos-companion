@@ -4,6 +4,7 @@
 //! request checks, failures. This file holds the Tauri commands, each one line of delegation on a worker thread.
 
 mod changes_page;
+mod claims_board;
 mod connections_page;
 mod history_page;
 mod home;
@@ -401,6 +402,12 @@ async fn backup_records() -> Result<records_backup::BackupResult, Failure> {
     blocking(records_backup::backup).await
 }
 
+/// Who is working on what: the agent sessions' claims board.
+#[tauri::command]
+async fn claims_list() -> Result<serde_json::Value, Failure> {
+    blocking(claims_board::read).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -451,6 +458,7 @@ pub fn run() {
             show_screen_note,
             records_status,
             backup_records,
+            claims_list,
             read_shortcuts,
             save_shortcuts
         ])

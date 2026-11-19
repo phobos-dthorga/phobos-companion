@@ -66,7 +66,7 @@ build differs from its proposal.
 | Page | Keys |
 | --- | --- |
 | Changes | `repository`, and `changelog` or `product`; `page` (0.21.0) |
-| Code map | `repository`, `node` (a thing's id, `cs:...`, `def:...`, `lua:...`, `py:...`) |
+| Code map | `repository`, `node` (a thing's id, `cs:...`, `def:...`, `lua:...`, `py:...`); `their` (another author's type or member, 0.26.0); `update` (a kept file, such as `Vehicles.dll`), `owner` (its mod's id) and `member` (one declaration's change), 0.26.0 |
 | Timeline | `day` (YYYY-MM-DD) |
 | Tests | `repository`, `row` |
 | Settings | `key` |

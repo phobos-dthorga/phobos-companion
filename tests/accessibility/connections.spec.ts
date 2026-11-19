@@ -197,8 +197,86 @@ const samplePatches = {
   },
 };
 
-async function openCodeMap(page: Page) {
+const sampleKept = {
+  available: true,
+  ok: true,
+  refusal: null,
+  report: null,
+  data: {
+    files: [
+      {
+        owner: "sample.game",
+        owner_name: "Sample Game",
+        file: "SampleGame.dll",
+        versions: 2,
+        newest_version: "1.0.2",
+        newest_seen: "2026-11-19 09:00 UTC",
+        previous_seen: "2026-11-18 09:00 UTC",
+      },
+    ],
+  },
+};
+
+const sampleCompare = {
+  available: true,
+  ok: true,
+  refusal: null,
+  data: {},
+  report: {
+    format: 1,
+    title: "code compare",
+    facts: [],
+    lines: ["1 with a new body."],
+    blocks: [],
+    sections: [
+      {
+        heading: "New bodies, largest first (1)",
+        level: 2,
+        blocks: [
+          {
+            type: "table",
+            headers: ["Kind", "Name", "Where"],
+            rows: [["method", "Verse.Thing.Destroy", "Verse/Thing.cs:10"]],
+            values: [],
+            total: 1,
+          },
+        ],
+      },
+    ],
+  },
+};
+
+const sampleTheirCode = {
+  available: true,
+  ok: true,
+  refusal: null,
+  report: null,
+  data: {
+    name: "Verse.Thing.Destroy",
+    looked_in: 3,
+    found: [
+      {
+        corpus: "SampleGame-src",
+        source: "source",
+        kind: "method",
+        full: "Verse.Thing.Destroy",
+        signature: "public virtual void Destroy()",
+        file: "Source/Thing.cs",
+        start: 10,
+        end: 13,
+        language: "cs",
+        lines: ["public virtual void Destroy()", "{", "    // A sample.", "}"],
+        numbers: [10, 11, 12, 13],
+        more: false,
+      },
+    ],
+  },
+};
+
+async function openCodeMap(page: Page, more: Record<string, unknown> = {}) {
   await mockHost(page, {
+    updates: { result: { ...sampleKept, data: { files: [] } } },
+    ...more,
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
     "connections:summary": { result: sampleSummary },
@@ -207,7 +285,7 @@ async function openCodeMap(page: Page) {
     "connections:flow": { result: sampleFlow },
     "connections:history": { result: sampleHistory },
     patch_targets: { result: samplePatches },
-  });
+  } as Parameters<typeof mockHost>[1]);
   await page.goto("/");
   await page.getByRole("button", { name: "Code map", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
@@ -415,3 +493,55 @@ for (const [name, viewport] of [
     });
   });
 }
+
+test.describe("Other authors' code on the Code map", () => {
+  test("a patch's target opens their code, from their public source, and Back closes it", async ({
+    page,
+  }) => {
+    await openCodeMap(page, {
+      "their_code:show": { result: sampleTheirCode },
+    });
+    await search(page);
+    await page
+      .getByRole("region", {
+        name: "Patches on Boat.Tick, and who else is there",
+      })
+      .getByRole("button", { name: "Read their code" })
+      .click();
+    const their = page.getByRole("region", {
+      name: "Verse.Thing.Destroy",
+      exact: true,
+    });
+    await expect(their).toContainText("From their public source");
+    await expect(
+      their.getByRole("region", { name: "The code of Verse.Thing.Destroy" }),
+    ).toContainText("// A sample.");
+    await audit(page);
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(their).toHaveCount(0);
+  });
+
+  test("what an update changed: a kept file, then one declaration's change", async ({
+    page,
+  }) => {
+    // One answer serves both questions: the kept files as data, the comparison as a report.
+    await openCodeMap(page, {
+      updates: { result: { ...sampleCompare, data: sampleKept.data } },
+    });
+    await page.getByRole("button", { name: /^SampleGame\.dll/ }).click();
+    await expect(
+      page.getByRole("heading", {
+        name: "What the last update changed in SampleGame.dll",
+      }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Verse.Thing.Destroy", exact: true })
+      .click();
+    await expect(
+      page.getByRole("heading", {
+        name: "How Verse.Thing.Destroy changed in SampleGame.dll",
+      }),
+    ).toBeVisible();
+    await audit(page);
+  });
+});

@@ -715,6 +715,33 @@ It serves every game the same: it is about the program, not a game.
 **Agent choices, owner to revise:** the I key; the page under Tools, last; the version in the status bar's right end; at most ten
 newer versions listed; no Show in folder buttons (the paths are plain text to copy).
 
+## Their code and updates (built 19 Nov 2026, 0.26.0)
+
+**The owner chose "Read and compare, on your press" (19 Nov 2026)** for how much of decompiling the Companion takes on, and was
+delighted by the idea of reading third-party code: "I like that we can delve even deeper into code now".
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Follow a patch of ours into the method it patches and read it; read any outside thing on the map; see what a mod's or the game's update changed, down to one method's diff |
+| What does it stop them doing? | Guessing what a method we patch does, or asking an agent session to decompile and read it out. Decompiling a file the tools did not name |
+| How does it change the way they work? | When an update breaks something, the trail is Code map → the patch → See what changed → Their code, all in the window |
+
+| Part | How |
+| --- | --- |
+| Finding the tools | `kit::offered` in `companion-core` (new): the command whose report carries a surface, its effect checked, and `allowed_by_manifest` for one that runs. The first page to use it; the Memory page and patch targets still have their own finders, to move when next touched |
+| Their code | phobos-modkit 1.49.0 `rimworld-code show` (public clones first, then `.local/decompiled`, then the kit's own decompiles; IL notes left out, each line's own number kept), `holder` (the assembly and mod, from metadata) and `decompile` (on a press, into the kit's cache). The panel stands above the Code map's results, under the focus key `their` |
+| Updates | `rimworld-archive list` (now with data) and `compare`, optionally `--show` one declaration. The panel stands under Busiest code while nothing is chosen, under `update`, `owner` and `member` |
+| Code colours | Moved from the code viewer into `app.css` as `.code-colours`, used by the viewer and the new `CodeLines` |
+| Safety | The host remembers every assembly `holder` named in this run and refuses to decompile any other path. Names reach the kit after `--` |
+
+**Checked on:** RimWorld, against the owner's real clones, decompiles and archive (VF's `TurretRotation` from its public source in
+0.5 s once indexed; the game's `WorldPawns.PassToWorld` from a decompile; `holder` in about 5 s; Fortified Features Framework's
+last update compared). Every other game has no `other-code` or `updates` surface, and the Code map says so in words. **Nothing here
+is tested on screen.**
+
+**Agent choices, owner to revise:** Decompile asks no second question (it writes only into the tools' cache, like Build); the
+panels' places on the Code map; files kept only once are left out of the updates list; the first lines shown (400).
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

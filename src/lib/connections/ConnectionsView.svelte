@@ -30,6 +30,8 @@
   import ThingHistory from "./ThingHistory.svelte";
   import WatchingRows from "./WatchingRows.svelte";
   import PatchBadges from "./PatchBadges.svelte";
+  import { openTheirCode } from "../othercode/navigation";
+  import { theirName } from "../othercode/presentation";
   import { patchTargetsOf, riskyNodes, type PatchTargets } from "./patches";
 
   /**
@@ -531,6 +533,15 @@
             {t("connections-count", { count: focused.connections })}
           </p>
         {/if}
+        {#if focused.external && theirName(focused.id)}
+          <button
+            type="button"
+            class="action"
+            onclick={() =>
+              openTheirCode(game, repository, theirName(focused!.id) ?? "")}
+            >{t("their-open")}</button
+          >
+        {/if}
         {#if focused.id !== centreId}
           <button
             type="button"
@@ -544,7 +555,13 @@
     </aside>
   </div>
   {#if centre && !centre.external && centre.file}
-    <PatchBadges targets={patchTargets} node={centre.id} name={centre.name} />
+    <PatchBadges
+      targets={patchTargets}
+      node={centre.id}
+      name={centre.name}
+      {game}
+      {repository}
+    />
     <WatchingRows {game} {repository} node={centre.id} name={centre.name} />
     <ThingHistory {game} {repository} node={centre.id} name={centre.name} />
   {/if}

@@ -93,3 +93,22 @@ fn one_rule_reads_every_answer() {
     assert!(Outcome::required(&json!({"data": {"ok": false, "refusal": "no"}})).is_err());
     assert!(Outcome::required(&json!({"data": {}})).is_ok());
 }
+
+#[test]
+fn finds_a_report_by_what_it_does_and_checks_its_effect() {
+    let manifest = serde_json::json!({"data": {"commands": [
+        {"name": "other-game-code", "game": "other", "reports": [{"name": "show", "surface": "other-code", "effect": "reads"}]},
+        {"name": "rimworld-code", "game": "rimworld", "reports": [
+            {"name": "show", "surface": "other-code", "effect": "reads"},
+            {"name": "decompile", "surface": "other-code", "effect": "runs"}]}]}});
+    assert_eq!(
+        offered(&manifest, "rimworld", "other-code", "show", "reads"),
+        Offered::Tool("rimworld-code".to_owned())
+    );
+    assert_eq!(
+        offered(&manifest, "rimworld", "other-code", "decompile", "runs"),
+        Offered::Tool("rimworld-code".to_owned())
+    );
+    assert_eq!(offered(&manifest, "kenshi", "other-code", "show", "reads"), Offered::Missing);
+    assert!(matches!(offered(&manifest, "rimworld", "other-code", "show", "runs"), Offered::Changed(_)));
+}

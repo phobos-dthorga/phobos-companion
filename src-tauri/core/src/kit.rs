@@ -169,6 +169,45 @@ pub fn allowed_by_manifest(manifest: &Value, command: &str, report: &str) -> Res
     }
 }
 
+/// Where a game's tools offer a report a page needs, found by what it does (its surface), never by a tool's name (0.26.0).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Offered {
+    /// The command to run.
+    Tool(String),
+    /// This game's tools have no such report: the page says so in words.
+    Missing,
+    /// The report is there but the manifest now gives it another effect than the page runs: refused, with the reason.
+    Changed(String),
+}
+
+/// The kit command of this game whose `report` carries `surface`, checked to still have the effect the page expects; a report
+/// that writes or runs is also checked by `allowed_by_manifest`. Pages that find a tool by surface go through this one place.
+pub fn offered(manifest: &Value, game: &str, surface: &str, report: &str, effect: &str) -> Offered {
+    let commands = manifest["data"]["commands"].as_array().map_or(&[][..], Vec::as_slice);
+    for command in commands.iter().filter(|c| c["game"].as_str() == Some(game)) {
+        let reports = command["reports"].as_array().map_or(&[][..], Vec::as_slice);
+        let Some(found) =
+            reports.iter().find(|r| r["name"].as_str() == Some(report) && r["surface"].as_str() == Some(surface))
+        else {
+            continue;
+        };
+        let name = command["name"].as_str().unwrap_or_default().to_owned();
+        let has = found["effect"].as_str().unwrap_or_default();
+        if has != effect {
+            return Offered::Changed(format!(
+                "the tool kit now says {name} {report} is {has:?}, not what this page runs"
+            ));
+        }
+        if effect != "reads"
+            && let Err(reason) = allowed_by_manifest(manifest, &name, report)
+        {
+            return Offered::Changed(reason);
+        }
+        return Offered::Tool(name);
+    }
+    Offered::Missing
+}
+
 /// The kit's description of every command.
 pub fn read_manifest() -> Result<Value, Failure> {
     let arguments = [MANIFEST.to_owned(), "--json".to_owned()];

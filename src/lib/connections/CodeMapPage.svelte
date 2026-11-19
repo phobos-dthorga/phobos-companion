@@ -10,6 +10,8 @@
   import type { Failure } from "../shell/types";
   import ConnectionsView from "./ConnectionsView.svelte";
   import BusiestCode from "./BusiestCode.svelte";
+  import TheirCode from "../othercode/TheirCode.svelte";
+  import UpdatesPanel from "../othercode/UpdatesPanel.svelte";
   import { askConnections } from "./desktopClient";
   import { kindMark, whereWords } from "./presentation";
   import type { Found, Summary, Thing } from "./types";
@@ -31,6 +33,16 @@
   /** The repository and the thing in the middle are part of the place. */
   const repository = $derived(here().focus.repository || null);
   const chosenId = $derived(here().focus.node || null);
+  /** Another author's code shown, and the kept file (and declaration) whose last update is shown (0.26.0). */
+  const their = $derived(here().focus.their || null);
+  const update = $derived(here().focus.update || null);
+  const updateOwner = $derived(here().focus.owner || null);
+  const updateMember = $derived(here().focus.member || null);
+
+  /** A step on the trail with these focus keys changed, so Back undoes it. */
+  function goFocus(focus: Record<string, string>) {
+    go({ ...here(), focus: { ...here().focus, ...focus } });
+  }
   let summary = $state<Reading<Summary>>({ state: "idle" });
   let found = $state<Reading<Found>>({ state: "idle" });
   let progress = $state(started());
@@ -164,6 +176,17 @@
         </div>
       </form>
 
+      {#if their && current}
+        {#key `${current}/${their}`}
+          <TheirCode
+            game={game.id}
+            repository={current}
+            name={their}
+            onclose={() => goFocus({ their: "" })}
+          />
+        {/key}
+      {/if}
+
       {#if found.state === "reading"}
         <ProgressBar
           progress={started()}
@@ -212,6 +235,19 @@
             onopen={(id) => setFocus({ node: id })}
           />
         {/key}
+      {/if}
+
+      {#if !chosenId && !their && current}
+        <UpdatesPanel
+          game={game.id}
+          file={update}
+          owner={updateOwner}
+          member={updateMember}
+          onpick={(kept) =>
+            goFocus({ update: kept.file, owner: kept.owner, member: "" })}
+          onmember={(name) => goFocus({ member: name })}
+          onclose={() => goFocus({ update: "", owner: "", member: "" })}
+        />
       {/if}
 
       {#if chosenId && current}

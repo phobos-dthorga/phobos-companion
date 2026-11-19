@@ -78,6 +78,11 @@ reads them.
 - **The Settings page writes one file, the central settings file**, through the kit's `settings set`
   (`src-tauri/src/settings_page.rs`): only when the owner presses Save or Use the default, only while the manifest still calls it
   `writes`, and only a setting the tools list, as one line. It never writes a repository's own settings.
+- **Their code and What did an update change? read, except one press** (owner's choice of 19 Nov 2026, "Read and compare, on
+  your press"; `src-tauri/src/other_code_page.rs`): the kit's reports carrying the manifest's `other-code` and `updates` surfaces.
+  **Decompile runs only on the owner's press, only for an assembly the kit's `holder` named in this run of the program, and only
+  while the manifest calls it `runs`**; it writes only into the kit's cache. Names go to the kit after `--`, checked to have the
+  shape of a type or member name; a kept file is a plain `.dll` name. Other authors' code is shown, never copied into a repository.
 - **The code viewer's How it connects and the Code map page only read**: the kit's `connections`, through
   `src-tauri/src/connections_page.rs`, which checks the repository is one of the game's, a thing's id has the tools' shape, a commit
   is a commit and a search is one line, before the kit sees any of them. Pictures are drawn by `src/lib/connections/`, with the

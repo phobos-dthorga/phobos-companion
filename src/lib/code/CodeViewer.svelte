@@ -288,7 +288,7 @@
                     <span class="hunk-where">{hunk.header}</span>
                   {/if}
                 </p>
-                <div class="lines">
+                <div class="lines code-colours">
                   {#each hunk.lines as line, lineIndex (lineIndex)}
                     {#if mode === "changes" || line.kind !== "-"}
                       <div
@@ -558,52 +558,6 @@
     font: inherit;
     white-space: pre;
     tab-size: 4;
-  }
-
-  /* What each piece of code is, coloured from the theme's roles. The grammar names the piece; the theme owns the colour. */
-  code :global(.hljs-comment),
-  code :global(.hljs-quote),
-  code :global(.hljs-meta) {
-    font-style: italic;
-    color: var(--colour-text-muted);
-  }
-
-  code :global(.hljs-keyword),
-  code :global(.hljs-selector-tag),
-  code :global(.hljs-doctag),
-  code :global(.hljs-section) {
-    color: var(--colour-comparison);
-  }
-
-  code :global(.hljs-string),
-  code :global(.hljs-regexp) {
-    color: var(--colour-success);
-  }
-
-  /* Amber for values and attribute names. The "something went wrong" colour is never used for code: nothing here is a fault. */
-  code :global(.hljs-number),
-  code :global(.hljs-literal),
-  code :global(.hljs-symbol),
-  code :global(.hljs-bullet),
-  code :global(.hljs-attr),
-  code :global(.hljs-attribute) {
-    color: var(--colour-accent);
-  }
-
-  code :global(.hljs-type),
-  code :global(.hljs-built_in),
-  code :global(.hljs-title),
-  code :global(.hljs-name),
-  code :global(.hljs-tag) {
-    color: var(--colour-observed);
-  }
-
-  code :global(.hljs-strong) {
-    font-weight: 600;
-  }
-
-  code :global(.hljs-emphasis) {
-    font-style: italic;
   }
 
   @media (max-width: 900px) {

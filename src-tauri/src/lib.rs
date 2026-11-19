@@ -17,6 +17,7 @@ mod logs_page;
 mod makeup_page;
 mod memory_page;
 mod open_work;
+mod other_code_page;
 mod patch_targets;
 mod pending;
 mod pictures;
@@ -510,11 +511,58 @@ async fn memory_mark(
     blocking(move || memory_page::mark(&game, watch.as_deref(), &text, at)).await
 }
 
+/// Another author's code on the Code map: a name's source (`show`) or the assembly declaring it (`holder`). Only reads.
+#[tauri::command]
+async fn their_code(
+    game: String,
+    repository: String,
+    kind: String,
+    name: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<other_code_page::Answer, Failure> {
+    blocking(move || other_code_page::their_code(&game, &repository, &kind, &name, Some(&hearing(on_progress)))).await
+}
+
+/// Decompiles an assembly the tools named as holding the code, on the owner's press, into the kit's cache.
+#[tauri::command]
+async fn decompile_assembly(
+    game: String,
+    repository: String,
+    assembly: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<other_code_page::Answer, Failure> {
+    blocking(move || other_code_page::decompile(&game, &repository, &assembly, Some(&hearing(on_progress)))).await
+}
+
+/// The builds the tools have kept, or what changed in one file's last update (and in one member of it).
+#[tauri::command]
+async fn updates(
+    game: String,
+    file: Option<String>,
+    owner: Option<String>,
+    member: Option<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<other_code_page::Answer, Failure> {
+    blocking(move || {
+        other_code_page::updates(
+            &game,
+            file.as_deref(),
+            owner.as_deref(),
+            member.as_deref(),
+            Some(&hearing(on_progress)),
+        )
+    })
+    .await
+}
+
 /// Starts the program.
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             about,
+            their_code,
+            decompile_assembly,
+            updates,
             kit_status,
             home_status,
             report_catalogue,

@@ -418,32 +418,6 @@
       "why": "The join that matters most is a window request to the host command that answers it, and that needs both sides read",
       "from": "CHANGELOG.md, 0.24.0",
       "asked": "2026-11-19"
-    },
-    {
-      "id": "decompiles",
-      "question": "How much of decompiling should the Companion take on?",
-      "context": "Today agents decompile through the kit (query-code, assembly-archive compare, ilspycmd set in central settings) and the results stay in each repository's .local or the kit's cache. The Code map reads only your own repositories. Other authors' code you meet there (a Harmony patch's target, a VF method) is a dead end on screen.",
-      "options": [
-        {
-          "id": "read-and-compare",
-          "label": "Read and compare, on your press",
-          "detail": "Code map follows a patch into the other author's method: public source first, an existing decompile second, and a Decompile button (with its bar) when neither is there. A 'What did this update change?' view over the assembly archive. Read-only, per game through the kit, so .NET games (RimWorld, Ostranauts) and Java (Project Zomboid's classes) can each bring their own decompiler"
-        },
-        {
-          "id": "compare-only",
-          "label": "Only what an update changed",
-          "detail": "The archive's member-by-member compare on a page; no browsing of other authors' code"
-        },
-        {
-          "id": "no",
-          "label": "Leave it to agents",
-          "detail": "The Companion shows our code only"
-        }
-      ],
-      "lean": "read-and-compare",
-      "why": "The patch-to-target jump and the update compare are the two questions you ask most when something breaks after an update; the kit already does the work, the Companion would only show it",
-      "from": "CHANGELOG.md, 0.24.0",
-      "asked": "2026-11-19"
     }
   ]
 }

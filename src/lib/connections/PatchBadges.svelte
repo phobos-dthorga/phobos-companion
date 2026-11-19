@@ -1,6 +1,7 @@
 <script lang="ts">
   import { t } from "../i18n/runtime";
   import { isRisky, targetsAbout, type PatchTargets } from "./patches";
+  import { openTheirCode, openUpdate } from "../othercode/navigation";
 
   /**
    * The risk around a thing's patches (cross-links L5): for each method it patches, or that it is, how many other mods patch the
@@ -10,7 +11,15 @@
     targets,
     node,
     name,
-  }: { targets: PatchTargets | null; node: string; name: string } = $props();
+    game,
+    repository,
+  }: {
+    targets: PatchTargets | null;
+    node: string;
+    name: string;
+    game: string;
+    repository: string;
+  } = $props();
 
   const about = $derived(
     targets?.data ? targetsAbout(targets.data.targets, node) : [],
@@ -24,6 +33,13 @@
       {#each about as target (target.node)}
         <li class:risky={isRisky(target)}>
           <p class="target"><code>{target.target}</code></p>
+          <button
+            type="button"
+            class="action"
+            onclick={() =>
+              openTheirCode(game, repository, target.target.replace(/^\./, ""))}
+            >{t("their-open")}</button
+          >
           <p class="small">
             {target.mods.length === 0
               ? t("patches-alone")
@@ -43,6 +59,17 @@
                 versions: change.versions,
                 change: change.change,
               })}
+              <button
+                type="button"
+                class="action"
+                onclick={() =>
+                  openUpdate(
+                    game,
+                    repository,
+                    change.file,
+                    target.target.replace(/^\./, ""),
+                  )}>{t("updates-see-change")}</button
+              >
             </p>
           {/each}
           {#if target.changed.length === 0 && targets.data.updates && !targets.data.updatesNote}

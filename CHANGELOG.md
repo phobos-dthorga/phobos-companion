@@ -4,6 +4,33 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-11-19
+
+The owner chose (19 November 2026) "Read and compare, on your press" for how much of decompiling the Companion takes on: follow one of our patches into the method it patches, read other authors' code, and see what an update changed. Built on phobos-modkit 1.49.0. Checked on RimWorld, the only game whose tools can do it yet; not yet tested on screen.
+
+### Added
+
+- **Read their code**: on the Code map, a button beside each method our code patches (in its patches box) and beside any thing outside our code that you pick on the map. It shows that type's or method's code, numbered and coloured like ours:
+  - **from the author's public source first**, saying which repository and file, since it has their own names and comments;
+  - **else from a decompile already kept**, saying so: a decompile has no comments, and some names are the decompiler's;
+  - **else it names the file and mod that hold it** and offers **Decompile**, on your press. A mod's file takes seconds; the game's own takes about five minutes the first time, and you can keep playing meanwhile. Only a file the tools named can be decompiled, and the result stays in the tools' own folder on this PC, never in a repository.
+  - The first look searches every copy kept on this PC, which took about four minutes once on your machine; after that it is quick.
+- **What did an update change?**: on the Code map, the game's file and the mods we tie into, newest update first, for every file kept twice or more. Choose one to see what its last update added, removed and changed, declaration by declaration; choose a declaration to see its change as a diff. A patch whose target the last update changed now has **See what changed**, straight to that diff.
+- Both are steps on the trail: Back closes their code and steps out of an update.
+
+### Changed
+
+- The code viewer's colours for code now live in one place shared with Their code, so the two always look the same.
+
+### Dependencies
+
+- phobos-modkit 1.49.0 (rimworld-code; the archive's kept files as data).
+
+### Compatibility and limits
+
+- Only RimWorld's tools can find other authors' code and compare updates today; on every other game the Code map says so in words.
+- A decompile of the game's own file is large (tens of megabytes of code); the tools keep the twelve most recently used decompiles and remove older ones by themselves.
+
 ## [0.25.0] - 2026-11-19
 
 The owner asked (19 November 2026) for a proper About page: "I keep forgetting which version I have installed and I cannot find a version number anywhere." Not yet tested on screen.

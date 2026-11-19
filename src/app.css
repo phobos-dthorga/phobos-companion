@@ -130,3 +130,49 @@ h1 {
   outline: 3px solid var(--colour-accent);
   outline-offset: 3px;
 }
+
+/* Code coloured by what each piece is (0.26.0: one place for the code viewer and Their code), from the theme's roles. */
+.code-colours code .hljs-comment,
+.code-colours code .hljs-quote,
+.code-colours code .hljs-meta {
+  font-style: italic;
+  color: var(--colour-text-muted);
+}
+
+.code-colours code .hljs-keyword,
+.code-colours code .hljs-selector-tag,
+.code-colours code .hljs-doctag,
+.code-colours code .hljs-section {
+  color: var(--colour-comparison);
+}
+
+.code-colours code .hljs-string,
+.code-colours code .hljs-regexp {
+  color: var(--colour-success);
+}
+
+/* Amber for values and attribute names. The "something went wrong" colour is never used for code: nothing here is a fault. */
+.code-colours code .hljs-number,
+.code-colours code .hljs-literal,
+.code-colours code .hljs-symbol,
+.code-colours code .hljs-bullet,
+.code-colours code .hljs-attr,
+.code-colours code .hljs-attribute {
+  color: var(--colour-accent);
+}
+
+.code-colours code .hljs-type,
+.code-colours code .hljs-built_in,
+.code-colours code .hljs-title,
+.code-colours code .hljs-name,
+.code-colours code .hljs-tag {
+  color: var(--colour-observed);
+}
+
+.code-colours code .hljs-strong {
+  font-weight: 600;
+}
+
+.code-colours code .hljs-emphasis {
+  font-style: italic;
+}

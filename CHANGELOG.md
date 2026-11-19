@@ -10,6 +10,7 @@ The owner asked (19 November 2026) for new mod settings to be tracked alongside 
 
 ### Added
 
+- **Save a picture** (the button beside Copy address, or the P key): the whole page, the parts scrolled out of view included and wide tables opened out, drawn into a PNG, saved into a D'thorga Companion folder in your Pictures and copied, ready to paste into a message for friends. A note says where it went, with Show it in its folder. Only the page is drawn, never the bars around it. The Atlas's globe now keeps its last frame so it can appear in a picture.
 - **Progress you can follow** (the owner's pick of all six ideas from the mock-up page):
   - **A trail of steps** above every progress bar: the steps already done, ticked, and the one underway glowing. Items of one count (comparing each mod in turn) stay one step.
   - **A sense of time**: a bar for work that cannot be counted fills against how long the same work took last time and says about how long is left, instead of only sliding.

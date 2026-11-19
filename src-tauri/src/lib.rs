@@ -14,6 +14,7 @@ mod makeup_page;
 mod open_work;
 mod patch_targets;
 mod pending;
+mod pictures;
 mod reports;
 mod settings_ledger;
 mod settings_page;
@@ -317,6 +318,41 @@ async fn mark_settings(
     blocking(move || settings_ledger::mark(&game, &repository, &ids, seen, &data)).await
 }
 
+/// The folder in the owner's Pictures that every picture of a page goes into.
+fn pictures_folder(app: &tauri::AppHandle) -> Result<std::path::PathBuf, Failure> {
+    let pictures = app
+        .path()
+        .picture_dir()
+        .or_else(|_| app.path().home_dir().map(|home| home.join("Pictures")))
+        .map_err(|problem| Failure::new(FailureCode::WriteFailed, problem.to_string()))?;
+    Ok(pictures.join(pictures::FOLDER))
+}
+
+/// Saves a picture of a page: its PNG bytes as the request's body, its name (percent-encoded) in the `x-picture-name` header.
+/// Returns where it went.
+#[tauri::command]
+async fn save_picture(app: tauri::AppHandle, request: tauri::ipc::Request<'_>) -> Result<String, Failure> {
+    let tauri::ipc::InvokeBody::Raw(bytes) = request.body() else {
+        return Err(Failure::refused("a picture is sent as its bytes"));
+    };
+    let name = request
+        .headers()
+        .get("x-picture-name")
+        .and_then(|value| value.to_str().ok())
+        .map(pictures::decode_name)
+        .unwrap_or_default();
+    let bytes = bytes.clone();
+    let folder = pictures_folder(&app)?;
+    blocking(move || pictures::save(&folder, &name, &bytes).map(|path| path.display().to_string())).await
+}
+
+/// Shows a saved picture in the file manager.
+#[tauri::command]
+async fn show_picture(app: tauri::AppHandle, path: String) -> Result<(), Failure> {
+    let folder = pictures_folder(&app)?;
+    blocking(move || pictures::show(&folder, std::path::Path::new(&path))).await
+}
+
 /// The owner's keyboard shortcuts as saved; None before they change any.
 #[tauri::command]
 async fn read_shortcuts(app: tauri::AppHandle) -> Result<Option<serde_json::Value>, Failure> {
@@ -360,6 +396,8 @@ pub fn run() {
             makeup,
             mod_settings,
             mark_settings,
+            save_picture,
+            show_picture,
             read_shortcuts,
             save_shortcuts
         ])

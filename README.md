@@ -43,6 +43,8 @@ what you did, and what your saves and logs say, without typing a command.
   map lists the busiest code before you search.
 - **Settings to look at** (Mods page): every setting your mods added, removed or gave a new default, until you mark it as looked
   at; Home says how many are new, and the Timeline shows each on the day it was made.
+- **Save a picture** (P) draws the whole page, scrolled parts included, into your Pictures (a D'thorga Companion folder) and
+  copies it, ready to paste into a message.
 - **Keyboard shortcuts, one key each**: 1 to 9 for the first nine pages and G for Logs, [ and ] for the games, ? for the full list. They never act while
   you type in a box. **Change any of them, or turn them off, under Settings, Change keyboard shortcuts.**
 - **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central

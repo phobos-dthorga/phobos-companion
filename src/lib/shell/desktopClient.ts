@@ -13,16 +13,18 @@ export function inBrowser(): boolean {
 
 /**
  * Asks the host one thing, the one way every page does: the answer, shaped by `ready` into what the page shows, or the host's
- * failure. Only the `desktopClient.ts` files call it, so only they talk to the host.
+ * failure. Only the `desktopClient.ts` files call it, so only they talk to the host. A request may send raw bytes as its body, with
+ * headers beside them (a picture of a page, 0.21.0).
  */
 export async function ask<T, R>(
   command: string,
-  args: Record<string, unknown>,
+  args: Record<string, unknown> | Uint8Array,
   ready: (answer: T) => R,
+  options?: { headers: Record<string, string> },
 ): Promise<R | Failed> {
   // Every request is a job on the activity strip while it runs (0.21.0), hearing the same progress its page hears.
   const job = begin(command);
-  const channel = args.onProgress;
+  const channel = args instanceof Uint8Array ? undefined : args.onProgress;
   if (channel instanceof Channel) {
     const before = channel.onmessage;
     channel.onmessage = (message: ProgressMessage) => {
@@ -31,7 +33,7 @@ export async function ask<T, R>(
     };
   }
   try {
-    return ready(await invoke<T>(command, args));
+    return ready(await invoke<T>(command, args, options));
   } catch (failure) {
     return { state: "failed", failure: failure as Failure };
   } finally {

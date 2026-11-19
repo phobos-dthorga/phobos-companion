@@ -190,7 +190,12 @@ export class GlobeScene {
     options: SceneOptions,
   ) {
     this.options = options;
-    this.renderer = new WebGLRenderer({ canvas, antialias: true });
+    // The drawing is kept after each frame so a picture of the page (0.21.0) can copy the globe as it is shown.
+    this.renderer = new WebGLRenderer({
+      canvas,
+      antialias: true,
+      preserveDrawingBuffer: true,
+    });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setClearColor(new Color(options.background), 1);
     this.camera = new PerspectiveCamera(40, 1, 0.01, 20);

@@ -4,6 +4,23 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.39.0] - 2026-11-20
+
+A mod your repository holds but you never installed is no longer easy to miss. Not yet tested on screen.
+
+### Added
+
+- **Before you play names every mod never installed, with Install for the first time**: a line of its own, marked as worth knowing rather than left to do, so Ready to play still shows beside it (a repository may hold mods you do not want). Its question says nothing is replaced and reminds you to turn the mod on in the game's mod list. Install everything that changed still installs only changes, and each card keeps its own Install.
+
+### Changed
+
+- **Installing several mods at once warns about uncommitted work**, naming the mods with files not yet committed, as a card's Install already did.
+- Ready to play now says every mod you have installed is built and up to date, so it stays true beside a mod not installed.
+
+### Compatibility and limits
+
+- Tried on one game's repository only (RimWorld's), the only one with an install config today; the line reads only the tool kit's general not-installed state, so any repository that adopts one gets it.
+
 ## [0.38.0] - 2026-11-20
 
 The third step of the release audit: its tools are ready to use (A4 and B7). Not yet tested on screen, and not yet tried on a clean PC.

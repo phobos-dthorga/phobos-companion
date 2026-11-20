@@ -43,6 +43,7 @@
     hasChanges,
     MOVE_WORDS,
     names,
+    newMods,
     SAME_WORDS,
     preflight,
     SETTING_WORDS,
@@ -80,6 +81,8 @@
     | {
         kind: "all";
         place: string;
+        /** Mods never installed before, offered by name, rather than everything that changed. */
+        fresh: boolean;
         groups: { repository: string; mods: ModInstall[] }[];
       }
     | { kind: "encode"; place: string; mods: TextureMod[] }
@@ -248,7 +251,9 @@
         now.mod.name,
       );
     } else if (now.kind === "all") {
-      working = started(t("mods-working-install-all"));
+      working = started(
+        t(now.fresh ? "mods-working-install-new" : "mods-working-install-all"),
+      );
       for (const group of now.groups) {
         hear(
           await makeMove(
@@ -298,7 +303,19 @@
   function runCheck(check: Check) {
     if (check.action === "build") void build();
     else if (check.action === "install-all")
-      ask({ kind: "all", place: STRIP, groups: changedMods(repositories) });
+      ask({
+        kind: "all",
+        place: STRIP,
+        fresh: false,
+        groups: changedMods(repositories),
+      });
+    else if (check.action === "install-new")
+      ask({
+        kind: "all",
+        place: STRIP,
+        fresh: true,
+        groups: newMods(repositories),
+      });
     else if (check.action === "encode" && textures.state === "ready")
       ask({
         kind: "encode",
@@ -308,7 +325,11 @@
   }
 
   function checkBlocked(check: Check): string | null {
-    if (check.action === "install-all" || check.action === "encode")
+    if (
+      check.action === "install-all" ||
+      check.action === "install-new" ||
+      check.action === "encode"
+    )
       return running.length > 0 ? "mods-blocked-running" : null;
     return null;
   }
@@ -504,10 +525,14 @@
       <p class="confirm-question" tabindex="-1" use:takeFocus>
         {#if now.kind === "all"}
           {@const all = now.groups.flatMap((g) => g.mods)}
-          {t("mods-confirm-install-all", {
-            count: all.length,
-            names: all.map((m) => m.name).join(", "),
-          })}
+          {t(
+            now.fresh ? "mods-confirm-install-new" : "mods-confirm-install-all",
+            {
+              count: all.length,
+              names: all.map((m) => m.name).join(", "),
+              game: game.name,
+            },
+          )}
         {:else if now.kind === "dedupe"}
           {t(MOVE_WORDS.dedupe.confirm, {
             count: now.count,
@@ -554,6 +579,20 @@
           {t("mods-confirm-all-saves")}
         </p>
       {/if}
+      {#if now.kind === "all"}
+        {@const unsure = now.groups
+          .flatMap((g) => g.mods)
+          .filter((m) => m.uncommittedCount > 0)}
+        {#if unsure.length > 0}
+          <p class="confirm-warning">
+            <span aria-hidden="true">⚠</span>
+            {t("mods-confirm-all-uncommitted", {
+              count: unsure.length,
+              ...names(unsure.map((m) => m.name)),
+            })}
+          </p>
+        {/if}
+      {/if}
       {#if now.kind === "mod" && now.move === "install" && now.mod.uncommittedCount > 0}
         <p class="confirm-warning">
           <span aria-hidden="true">⚠</span>
@@ -568,7 +607,11 @@
           onclick={confirm}
         >
           {now.kind === "all"
-            ? t("mods-yes-install-all")
+            ? now.fresh
+              ? t("mods-yes-install-new", {
+                  count: now.groups.reduce((sum, g) => sum + g.mods.length, 0),
+                })
+              : t("mods-yes-install-all")
             : now.kind === "encode"
               ? t("mods-yes-encode")
               : now.kind === "dedupe"
@@ -840,7 +883,12 @@
               class="move-button"
               disabled={busy !== null || blocked !== null}
               aria-pressed={asking?.place === STRIP &&
-                ((check.action === "install-all" && asking.kind === "all") ||
+                ((check.action === "install-all" &&
+                  asking.kind === "all" &&
+                  !asking.fresh) ||
+                  (check.action === "install-new" &&
+                    asking.kind === "all" &&
+                    asking.fresh) ||
                   (check.action === "encode" && asking.kind === "encode"))}
               onclick={() => runCheck(check)}
             >

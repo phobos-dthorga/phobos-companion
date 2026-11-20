@@ -8,6 +8,7 @@ import {
   groupByVersion,
   hasChanges,
   names,
+  newMods,
   preflight,
   changedSources,
   rebuiltCount,
@@ -218,6 +219,37 @@ describe("before you play", () => {
     expect(behind.map((c) => c.action)).toEqual(["encode", null]);
   });
 
+  it("offers a mod never installed, without holding back Ready to play", () => {
+    const fresh = mod({
+      name: "Farming",
+      installed: null,
+      state: "not-installed",
+    });
+    const checks = preflight(
+      [repo([mod(), fresh])],
+      texturesReady([]),
+      "Sample Game",
+    );
+    expect(checks.map((c) => [c.kind, c.words, c.action])).toEqual([
+      ["info", "mods-pre-new", "install-new"],
+      ["ready", "mods-pre-ready", null],
+    ]);
+    expect(checks[0].args).toMatchObject({
+      count: 1,
+      names: "Farming",
+    });
+  });
+
+  it("keeps a mod never installed apart from the changes to install", () => {
+    const fresh = mod({ name: "New", installed: null, state: "not-installed" });
+    const behind = mod({ name: "Words", state: "behind" });
+    const checks = preflight([repo([behind, fresh])], texturesReady([]), "G");
+    expect(checks.map((c) => [c.words, c.args.names])).toEqual([
+      ["mods-pre-install", "Words"],
+      ["mods-pre-new", "New"],
+    ]);
+  });
+
   it("says it is still checking textures rather than calling them current", () => {
     const checks = preflight([repo([mod()])], { state: "reading" }, "G");
     expect(checks.map((c) => c.words)).toEqual([
@@ -308,6 +340,17 @@ describe("what counts as a change", () => {
       repo([mod({ mod: "A", state: "behind" }), mod({ mod: "B" })]),
     ]);
     expect(groups.map((g) => g.mods.map((m) => m.mod))).toEqual([["A"]]);
+  });
+
+  it("installs for the first time only the mods never installed, by repository", () => {
+    const groups = newMods([
+      repo([
+        mod({ mod: "A", state: "behind" }),
+        mod({ mod: "B", installed: null, state: "not-installed" }),
+      ]),
+      repo([mod({ mod: "C" })]),
+    ]);
+    expect(groups.map((g) => g.mods.map((m) => m.mod))).toEqual([["B"]]);
   });
 
   it("encodes stale textures first, then new ones, then those Waylith unpacks", () => {

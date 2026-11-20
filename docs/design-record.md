@@ -308,7 +308,7 @@ four before-and-after extras (files, settings, test rows, side by side); a Befor
 
 | Part | How |
 | --- | --- |
-| Before you play | Built from both readings: needs a build, changes not installed, textures stale or never encoded, the game running; Ready to play when nothing is left. Each line carries the button that does it |
+| Before you play | Built from both readings: needs a build, changes not installed, mods never installed (from 0.39.0, worth knowing rather than left to do), textures stale or never encoded, the game running; Ready to play when nothing is left. Each line carries the button that does it |
 | Build | `installs build` (the repository's `deploy.py --build-only`); no question asked, since it writes only inside the repository; allowed while the game runs (agent choice) |
 | Install everything that changed | Mods whose changelog, files or build differ, one `installs install` per repository with every mod named: one run, one restart |
 | Side by side | Installed now (version, where it came from, entries lost) beside After installing (version, needs a build, entries gained, files, settings, rows to look out for); save notes above both |
@@ -1006,6 +1006,31 @@ run it); the words of the new entries.
 
 **Agent choices, owner to revise:** the reader is framework-dependent (about 0.25 MB, needing the .NET 10 runtime) rather than
 self-contained (tens of megabytes, unmeasured); the .NET runtime is not carried.
+
+## A mod never installed, in Before you play (built 20 Nov 2026, 0.39.0)
+
+**The owner's request** (20 Nov 2026: a new mod in their repository was never installed, and they had only ever pressed Install
+everything that changed, which leaves out a mod with nothing installed to change; they asked for it to be offered, "neat", where it
+belongs).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See, beside the rest of Before you play, which of the repository's mods were never installed, and install them on one press with **Install for the first time** |
+| What does it stop them doing? | Nothing: the card's own Install button stays, and Install everything that changed still installs only changes |
+| How does it change the way they work? | A new mod is found where they already look before a launch, instead of only on its card further down |
+| What outside it notices? | Nothing new: the kit's `installs install` with the mods named, as a card's Install runs it |
+
+| Part | How |
+| --- | --- |
+| The line | `presentation.newMods` and a `mods-pre-new` line in `preflight`: every mod with no installed copy, named; marked ● as worth knowing, not ◆ as left to do, so Ready to play still shows beside it |
+| Why not a to-do | A repository may hold mods the person does not want (a mod set aside, or one for another audience); counting them would keep Ready to play away forever (agent choice) |
+| The question | The same confirmation as Install everything that changed (`Asking` `all`, with `fresh`): one run per repository with every new mod named, worded for a first install (nothing replaced; turn it on in the game's mod list), waiting for the game to close |
+| Uncommitted work | Both installs of several mods now warn, naming them, when any has files with changes not yet committed, as a card's Install already did |
+| Ready to play's words | "every mod you have installed is built and up to date", so it stays true beside a mod not installed |
+
+**Agent choices, owner to revise:** the line is information, not a to-do; one button installs every new mod at once (each card's
+Install remains for one). Tried on phobos-rimworld only, the one repository with an install config today; the line reads only the
+kit's general `not-installed` state, so any game's repository that adopts `config/installs.json` gets it.
 
 ## Kept for later
 

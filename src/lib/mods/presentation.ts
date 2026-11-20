@@ -175,6 +175,19 @@ export function changedMods(
     .filter((r) => r.mods.length > 0);
 }
 
+/** The mods a repository holds that were never installed, by repository. They are not changes: a repository may hold mods
+ * the person does not want, so installing one is offered, never counted as something left to do. */
+export function newMods(
+  repositories: RepositoryInstalls[],
+): { repository: string; mods: ModInstall[] }[] {
+  return repositories
+    .map((r) => ({
+      repository: r.repository,
+      mods: r.status.mods.filter((m) => m.installed === null),
+    }))
+    .filter((r) => r.mods.length > 0);
+}
+
 /** The mods whose textures need encoding: stale first (they would show old pictures), then those never encoded, then those whose
  * textures Waylith unpacks at four times the memory. */
 export function encodeTargets(mods: TextureMod[]): TextureMod[] {
@@ -190,7 +203,7 @@ export type Check = {
   kind: "ready" | "todo" | "info";
   words: string;
   args: Record<string, string | number>;
-  action: "build" | "install-all" | "encode" | null;
+  action: "build" | "install-all" | "install-new" | "encode" | null;
 };
 
 /** "Before you play": what stands between now and a launch with everything current, or "Ready to play". */
@@ -226,6 +239,16 @@ export function preflight(
       words: "mods-pre-install",
       args: { count: changed.length, ...names(changed.map((m) => m.name)) },
       action: "install-all",
+    });
+  }
+  // Worth knowing, not something left to do, so "Ready to play" still shows beside it.
+  const fresh = mods.filter((m) => m.installed === null);
+  if (fresh.length > 0) {
+    checks.push({
+      kind: "info",
+      words: "mods-pre-new",
+      args: { count: fresh.length, ...names(fresh.map((m) => m.name)) },
+      action: "install-new",
     });
   }
   if (textures.state === "reading") {
@@ -332,5 +355,6 @@ export const CHECK_ACTION_WORDS: Record<
 > = {
   build: "mods-pre-action-build",
   "install-all": "mods-pre-action-install-all",
+  "install-new": "mods-pre-action-install-new",
   encode: "mods-pre-action-encode",
 };

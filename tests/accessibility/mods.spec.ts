@@ -195,6 +195,30 @@ function sampleInstalls(running: string[]) {
               lookOut: [],
               backups: [],
             },
+            {
+              mod: "NewMod",
+              name: "New Sample",
+              changelog: "mods/NewMod/CHANGELOG.md",
+              state: "not-installed",
+              repository: copy("repository", "0.1.0"),
+              installed: null,
+              update: {
+                gain: [],
+                lose: [],
+                reworded: [],
+                saveNotes: [],
+                summaries: {},
+              },
+              uncommittedCount: 4,
+              commitsSince: null,
+              installedCommit: null,
+              files: null,
+              build: { needsBuild: false, projects: [] },
+              settings: null,
+              settingsNote: null,
+              lookOut: [],
+              backups: [],
+            },
           ],
         },
       },
@@ -436,7 +460,9 @@ for (const [name, viewport] of [
       await open(page, [], false, (installs) => {
         const other = installs.result[0].status.mods[1];
         other.state = "unlisted";
-        other.installed = { ...other.installed, version: "0.5.0" };
+        // Other Sample is installed; the sample's never-installed mod makes the type allow null.
+        if (other.installed)
+          other.installed = { ...other.installed, version: "0.5.0" };
         Object.assign(other.update, {
           unlisted: [
             entry("0.5.0", "Changed", "Sample engines cut."),
@@ -533,6 +559,33 @@ for (const [name, viewport] of [
       await expect(confirm).toHaveCount(0);
     });
 
+    test("a mod never installed is offered by name, apart from the changes, and asks first", async ({
+      page,
+    }) => {
+      await open(page);
+      const strip = page.getByRole("region", { name: "Before you play" });
+      await expect(strip).toContainText(
+        "One mod in the repository has never been installed: New Sample. Install it if you want it.",
+      );
+      await expect(strip).toContainText("One mod has changes not installed");
+      await strip
+        .getByRole("button", { name: "Install for the first time" })
+        .click();
+      const confirm = strip.getByRole("group", { name: "Confirm" });
+      await expect(confirm).toContainText(
+        "Build and install one mod for the first time (New Sample)?",
+      );
+      await expect(confirm).toContainText(
+        "files with changes not yet committed (New Sample)",
+      );
+      await expect(
+        confirm.getByRole("button", { name: "Yes, install it" }),
+      ).toBeVisible();
+      await audit(page);
+      await confirm.getByRole("button", { name: "Cancel" }).click();
+      await expect(confirm).toHaveCount(0);
+    });
+
     test("installing and encoding wait while the game runs; building doesn't", async ({
       page,
     }) => {
@@ -541,6 +594,9 @@ for (const [name, viewport] of [
       await expect(strip).toContainText("First Sample is running");
       await expect(
         strip.getByRole("button", { name: "Install everything that changed" }),
+      ).toBeDisabled();
+      await expect(
+        strip.getByRole("button", { name: "Install for the first time" }),
       ).toBeDisabled();
       await expect(
         strip.getByRole("button", { name: "Encode their textures" }),

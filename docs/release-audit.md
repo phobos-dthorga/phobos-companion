@@ -1,6 +1,6 @@
 # Release audit: what stands between the Companion and another person (20 Nov 2026)
 
-**Status (20 Nov 2026):** written at the owner's request; nothing is built from it yet. The owner chooses the order. Written after
+**Status (20 Nov 2026):** written at the owner's request; nothing is built from it yet. The owner chose the first step (A1, A2, A3 and A5) and answered four of the questions below. Written after
 the owner said: "eventually, I wish to make Companion available to others. That's the greater view we should be taking with regard
 to everything revolving around the Companion." The rule that follows from it is in `AGENTS.md` ("Design for a stranger").
 
@@ -71,11 +71,19 @@ Much of the foundation already suits others, and should be kept so:
 
 ## Questions for the owner
 
+**Answered (20 Nov 2026):**
+
+| Question | The owner's answer |
+| --- | --- |
+| Bundle Python and the kit inside the installer, so nothing else need be installed first (except git)? | **Yes, bundle them** |
+| When features for AI agents (claims, screen notes read by sessions, decisions) aren't in use? | **Hidden unless switched on, or otherwise detected**: shown by themselves where a repository uses them, otherwise off until turned on in Settings |
+| Where should releases live? | **GitHub Releases** (the phobos-companion repository) |
+| Which part first? | **A clean PC can install it and start** (A1, A2, A3, A5) |
+
+**Still open:**
+
 | Question | Agent lean |
 | --- | --- |
-| Bundle Python and the kit inside the installer, so nothing else need be installed first (except git)? | Yes |
-| When features for AI agents (claims, screen notes read by sessions, decisions) aren't in use, hide them? | Show them only where a repository uses them, with a setting |
-| Where should releases live? | The phobos-companion repository's GitHub Releases |
 | Sign the installer? | Look into free open-source signing; until then, say plainly what Windows will warn |
 | Which platform after Windows? | Linux, after the first Windows release |
 | Should the general Mods adapter (B2) come before a first release? | No: after, once someone asks for a game that needs it |

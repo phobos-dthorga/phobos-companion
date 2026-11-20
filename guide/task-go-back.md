@@ -11,4 +11,4 @@ see: term-backup, task-back-up-mod, page-mods
 4. Press **What going back changes** to see what you would gain and lose, by its changelog entries.
 5. Press **Go back to this**, and confirm.
 
-**Nothing is lost:** the backup stays, and the install it replaces becomes a new backup, so you can go forward again the same way.
+**Nothing is lost:** the backup stays, and the install it replaces becomes a new backup, so you can go forward again the same way. If either repeats an older backup file for file, that older one is kept and the repeat is removed; the report says which.

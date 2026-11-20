@@ -4,6 +4,23 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.40.0] - 2026-11-20
+
+Repeated backups no longer pile up: removing them is now part of every install and go-back (the owner, 20 Nov 2026). Not yet tested on screen.
+
+### Changed
+
+- **Every install and every go-back removes the mod's repeated backups**: a backup the same as the one before it, file for file, or only rebuilt from source code that had not changed, as Remove repeated backups does. The oldest of each run is kept, so nothing you could go back to is lost, and the report names each one removed. If the removal cannot finish, the install or go-back still stands and the report says why. The questions before installing and going back now say so, and the Guide's Backup, Go back, Back up a mod and Get ready to play entries match.
+- Remove repeated backups stays, for repeats made before this version and for every mod at once.
+
+### Dependencies
+
+- Tool kit 1.62.0 to 1.64.0: installs restore removes repeated backups, and installs.tidy lets a repository's install command do the same (RimWorld's deploy.py does since this day's pin of 1.64.0).
+
+### Compatibility and limits
+
+- Tried on one game's repository only (RimWorld's). A repository's install command removes repeats only if it runs installs.tidy; going back always does.
+
 ## [0.39.0] - 2026-11-20
 
 A mod your repository holds but you never installed is no longer easy to miss. Not yet tested on screen.

@@ -134,10 +134,13 @@ for (const [name, viewport] of [
         kit_status: healthyKit,
       });
       await page.goto("/");
+      // From 0.36.0 a PC with no list is welcomed with First steps, not told to write a file (first-steps.spec.ts).
       await expect(page.getByRole("heading", { level: 1 })).toContainText(
-        "No games are listed yet.",
+        "Welcome to D'thorga Companion",
       );
-      await expect(page.locator(".canvas")).toContainText(".local/games.json");
+      await expect(page.locator(".canvas")).toContainText(
+        "Where are your mod projects?",
+      );
       await audit(page);
     });
 

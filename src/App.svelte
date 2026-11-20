@@ -52,6 +52,7 @@
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
   import MemoryPage from "./lib/memory/MemoryPage.svelte";
   import GuidePage from "./lib/guide/GuidePage.svelte";
+  import FirstSteps from "./lib/home/FirstSteps.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
   import ProgressBar from "./lib/shell/ProgressBar.svelte";
@@ -333,6 +334,9 @@
     </nav>
 
     <main class="canvas">
+      {#if home.state === "ready" && home.home.git_found === false}
+        <p class="no-git" role="status">{t("home-no-git")}</p>
+      {/if}
       {#if selected && !pageServes(selected.kind, page)}
         <NotForTools game={selected} {page} />
       {:else if page === "settings" && home.state !== "reading"}
@@ -401,9 +405,11 @@
         <h1>{t("home-failed-title")}</h1>
         <FailurePanel failure={home.failure} onretry={refresh} />
       {:else}
-        <div class="eyebrow accent">{t("home-kicker")}</div>
-        <h1>{t("home-no-list-title")}</h1>
-        <p class="lead">{t("home-no-list-body")}</p>
+        <FirstSteps
+          listFound={home.home.list_found}
+          listFile={home.home.list_file ?? ""}
+          onchanged={() => void refresh()}
+        />
       {/if}
     </main>
 
@@ -594,6 +600,13 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .no-git {
+    margin-bottom: 14px;
+    padding: 8px 12px;
+    border-inline-start: 3px solid var(--colour-risk);
+    background: var(--colour-surface-raised);
   }
 
   .page-group {

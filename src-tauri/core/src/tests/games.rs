@@ -166,3 +166,37 @@ fn only_unlisted_git_folders_are_offered() {
     fs::remove_dir_all(&root).unwrap();
     assert_eq!(found, ["Another", "new-mod"]);
 }
+
+// ---------------------------------------------------------------- where the list is, and starting one (0.35.0)
+
+#[test]
+fn the_list_is_where_the_program_runs() {
+    let data = Path::new("/home/someone/AppData/Local/companion");
+    let named = PathBuf::from("/elsewhere/games.json");
+    assert_eq!(list_path_from(Some(named.clone()), Some(PathBuf::from("/repo")), Some(data)), named);
+    // Beside the repository it was built from (the owner's PC): as it always was.
+    assert_eq!(
+        list_path_from(None, Some(PathBuf::from("/repo")), Some(data)),
+        Path::new("/repo").join(".local").join("games.json")
+    );
+    // A stranger's PC: in their own data folder.
+    assert_eq!(list_path_from(None, None, Some(data)), data.join("games.json"));
+}
+
+#[test]
+fn a_first_list_is_started_empty_with_the_folder_chosen() {
+    let folder = std::env::temp_dir().join(format!("companion-first-list-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&folder);
+    let path = folder.join("games.json");
+    let projects = if cfg!(windows) { r"C:\Projects" } else { "/projects" };
+    start_at(&path, Some(projects), |_| true).unwrap();
+    let text = fs::read_to_string(&path).unwrap();
+    assert!(parse(&text).unwrap().is_empty());
+    assert!(text.contains("Projects"));
+    assert!(start_at(&path, None, |_| true).unwrap_err().detail.contains("already"));
+    fs::remove_dir_all(&folder).unwrap();
+    assert!(start_at(&path, Some("relative/folder"), |_| true).unwrap_err().detail.contains("not a folder"));
+    start_at(&path, None, |_| true).unwrap();
+    assert!(!fs::read_to_string(&path).unwrap().contains("root"));
+    fs::remove_dir_all(&folder).unwrap();
+}

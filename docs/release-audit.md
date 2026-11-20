@@ -1,6 +1,6 @@
 # Release audit: what stands between the Companion and another person (20 Nov 2026)
 
-**Status (20 Nov 2026):** written at the owner's request; nothing is built from it yet. The owner chose the first step (A1, A2, A3 and A5) and answered four of the questions below. Written after
+**Status (20 Nov 2026):** written at the owner's request. **A1, A2, A3 and A5 are built in Companion 0.36.0** (the installer carries its own Python and tool kit, the games list starts on First steps, and a missing git is said plainly); not yet tried on a clean PC. The rest is not built. The owner answered four of the questions below. Written after
 the owner said: "eventually, I wish to make Companion available to others. That's the greater view we should be taking with regard
 to everything revolving around the Companion." The rule that follows from it is in `AGENTS.md` ("Design for a stranger").
 

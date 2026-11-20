@@ -44,7 +44,14 @@ export type GameHome = {
   problems: Problem[];
 };
 
-export type Home = { list_found: boolean; games: GameHome[] };
+export type Home = {
+  list_found: boolean;
+  games: GameHome[];
+  /** Whether git is on this PC (0.36.0); history is read with it. */
+  git_found?: boolean;
+  /** Where the games list is, or would be started (0.36.0). */
+  list_file?: string;
+};
 
 export type HomeReading = Waiting | { state: "ready"; home: Home };
 

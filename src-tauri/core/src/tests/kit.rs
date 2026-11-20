@@ -9,7 +9,7 @@ fn counts_the_commands_in_a_manifest() {
     let text = envelope(r#"{"envelope":1,"tool":"manifest","kit_version":"1.0.0","data":{"commands":[{},{}]}}"#);
     assert_eq!(
         parse_envelope(&text, "manifest").and_then(|v| status_of(&v)),
-        Ok(KitStatus { kit_version: "1.0.0".to_owned(), tools: 2 })
+        Ok(KitStatus { kit_version: "1.0.0".to_owned(), tools: 2, source: runtime().source.to_owned() })
     );
 }
 
@@ -137,4 +137,29 @@ fn a_command_with_no_reports_is_found_by_its_surface() {
         Offered::Tool("rimworld-code".to_owned())
     );
     assert!(matches!(offered(&manifest, "rimworld", "update-check", "", "reads"), Offered::Changed(_)));
+}
+
+// ---------------------------------------------------------------- where the kit and its Python are (0.35.0)
+
+#[test]
+fn the_kit_is_found_beside_its_repository_first_then_where_the_installer_put_it() {
+    let runtime = std::env::temp_dir().join(format!("companion-runtime-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&runtime);
+    std::fs::create_dir_all(runtime.join("kit").join(PACKAGE)).unwrap();
+    std::fs::create_dir_all(runtime.join("python")).unwrap();
+    std::fs::write(runtime.join("python").join("python.exe"), b"").unwrap();
+
+    // The environment wins.
+    let named = locate(Some(PathBuf::from("/kit")), Some("py".into()), None, Some(&runtime));
+    assert_eq!((named.kit, named.python.as_str(), named.source), (PathBuf::from("/kit"), "py", "environment"));
+    // Beside the repository it was built from (the owner's PC): that kit, with the Python on the PATH, as before.
+    let built = locate(None, None, Some(PathBuf::from("/repo")), Some(&runtime));
+    assert_eq!(built.source, "build-folder");
+    assert!(built.kit.ends_with(Path::new("external").join("phobos-modkit").join("python")));
+    assert_eq!(built.python, DEFAULT_PYTHON);
+    // A stranger's PC: the installer's own kit and Python.
+    let installed = locate(None, None, None, Some(&runtime));
+    assert_eq!((installed.kit, installed.source), (runtime.join("kit"), "installed"));
+    assert!(installed.python.ends_with("python.exe"));
+    std::fs::remove_dir_all(&runtime).unwrap();
 }

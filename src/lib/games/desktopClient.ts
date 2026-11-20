@@ -24,3 +24,14 @@ export async function addGame(
     (added) => ({ state: "done", added }),
   );
 }
+
+/** Starts an empty games list on First steps, with the folder the person's projects are in, if they chose one (0.36.0). */
+export async function startGamesList(
+  root: string | null,
+): Promise<{ state: "done"; path: string } | Failed> {
+  return ask<string, { state: "done"; path: string }>(
+    "start_games_list",
+    { root },
+    (path) => ({ state: "done", path }),
+  );
+}

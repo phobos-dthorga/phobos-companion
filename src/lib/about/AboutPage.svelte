@@ -134,6 +134,15 @@
             version: kit.status.kit_version,
             tools: kit.status.tools,
           })}
+          {#if kit.status.source}
+            <br /><span class="muted small"
+              >{kit.status.source === "installed"
+                ? t("about-kit-source-installed")
+                : kit.status.source === "environment"
+                  ? t("about-kit-source-environment")
+                  : t("about-kit-source-build-folder")}</span
+            >
+          {/if}
         {:else if kit.state === "failed"}
           {t("about-kit-unreadable")}
         {:else}

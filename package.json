@@ -1,6 +1,6 @@
 {
   "name": "phobos-companion",
-  "version": "0.35.0",
+  "version": "0.36.0",
   "private": true,
   "description": "D'thorga Companion: one desktop program for every game you mod.",
   "license": "MIT",
@@ -13,7 +13,7 @@
     "dev": "vite",
     "build:web": "vite build",
     "desktop": "node scripts/with-target.mjs npx tauri dev",
-    "installer": "node scripts/with-target.mjs npx tauri build --bundles nsis",
+    "installer": "node scripts/installer.mjs",
     "test": "vitest run",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "format": "prettier --write ."

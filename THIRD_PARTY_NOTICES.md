@@ -19,6 +19,13 @@ first release anyone else can install.
 | [html-to-image](https://github.com/bubkoo/html-to-image) (`html-to-image` 1.11.13) | MIT | Save a picture and Something's off: drawing the page into a PNG (since 0.21.0; added to these notices 19 November 2026). Only `src/lib/pictures/capture.ts` imports it, and only when a picture is taken |
 | [three.js](https://threejs.org/) (`three` 0.186.1), with its addons for orbit controls and wide lines | MIT | Drawing the atlas's globe (read 10 November 2026). Only `src/lib/atlas/globeScene.ts` imports it, and only when the atlas opens |
 
+## Carried by the installer (0.36.0)
+
+| Package | Licence | Why it is carried |
+| --- | --- | --- |
+| [Python](https://www.python.org/) 3.14.10, the portable Windows build (`python-3.14.10-embed-amd64.zip`) | Python Software Foundation License (its `LICENSE.txt` travels with it, in the runtime folder) | Runs the tool kit on a PC where no Python is installed. Fetched by `scripts/installer.mjs` from python.org and checked against python.org's published SHA-256 before it is used |
+| [phobos-modkit](https://github.com/phobos-dthorga/phobos-modkit), the tools' Python package at this repository's pin | MIT | Every page asks it; carried so the installed program works away from the repository it was built from |
+
 ## Only to build and check it
 
 | Package | Licence | Why it is used |

@@ -4,6 +4,25 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-11-20
+
+The first step of the release audit (A1, A2, A3 and A5), chosen by the owner on 20 November 2026 after saying the Companion is to be released for others, with Python and the tool kit bundled. Not yet tested on screen, and not yet tried on a clean PC.
+
+### Added
+
+- **The installer brings everything it needs**: its own Python (3.14.10, checked against python.org's own checksum when the installer is built) and the tool kit. On a PC without them, nothing else need be installed, except git. On the PC it was built on, it uses that repository's tools and the Python there, as before.
+- **First steps**: the first time on a PC, Home welcomes you with two steps: where your mod projects are kept (or that they aren't in one folder), then your first game from Steam. Your games list is then kept in the Companion's own data folder, never beside the program. A new Guide entry says the same.
+- **A missing git is said plainly**, above every page, with where to get it, instead of pages failing in git's own words.
+- About says where the tools came from: installed with the program, or the repository it was built from.
+
+### Fixed
+
+- **Screenshots can be drawn in the installed program.** Its security policy refused the small pictures and the whole ones the Timeline and Game files show (from 0.32.0); the browser checks never saw it, since they run without that policy.
+
+### Dependencies
+
+- Python 3.14.10, the portable Windows build from python.org (Python Software Foundation License), carried by the installer.
+
 ## [0.35.0] - 2026-11-20
 
 The owner asked whether the check run by hand after the updates of 20 November 2026 could live in the Companion, and chose all four parts it lacked. Not yet tested on screen.

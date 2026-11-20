@@ -938,6 +938,31 @@ new builds (the owner's "Read and compare, on your press" of 19 Nov 2026), and t
 (Decisions page: `update-check-when`); it checks the first repository of the game only; five updates are shown before "and N
 smaller ones". No keyboard shortcut, as Keep the new builds has none. **Nothing here is tested on screen.**
 
+## A clean PC can install it and start (built 20 Nov 2026, 0.36.0)
+
+**The release audit's first step** (A1, A2, A3 and A5), chosen by the owner on 20 Nov 2026 after saying the Companion is to be
+released for others; they chose to bundle Python and the kit.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Install the Companion on any Windows PC and start, with nothing else to install but git |
+| What does it stop them doing? | Hand-editing a JSON file before anything works; meeting "python not found" or a path from someone else's PC |
+| How does it change the way they work? | The first launch is a welcome with two steps; the owner's own PC is unchanged |
+
+| Part | How |
+| --- | --- |
+| The runtime | `scripts/installer.mjs`: Python 3.14.10's portable build, pinned to python.org's SHA-256, unpacked with a `._pth` naming the kit beside it, and the kit's package copied from the submodule. All in the build folder, outside the repository |
+| Into the installer | Through NSIS installer hooks, which copy it to `<install folder>\runtime` and remove it on uninstall. Not Tauri's resources: Tauri drops the drive letter from an absolute resource path, and a copy inside the repository would be synced |
+| Finding it | `kit::locate`: named by the environment; else beside the repository it was built from, when its kit is there (the owner's PC, as before), with the Python on the PATH; else the runtime the installer brought. `PHOBOS_COMPANION_BUNDLED=1` tries the last |
+| The games list | `games::list_path_from`: the same order; on another PC, `games.json` in the person's own data folder. `games::start` begins an empty one |
+| First steps | `FirstSteps.svelte`, on Home while no game is listed: the folder projects are kept in (or none), then Add a game from Steam |
+| git | `git::available`, on Home's reading; a line above every page when it is missing |
+
+**Also fixed here:** the window's content-security policy did not allow `blob:` pictures, so 0.32.0's screenshot thumbnails and
+whole pictures could not be drawn in the installed program (the browser checks run without that policy). **Agent choices, owner to
+revise:** Python 3.14.10; the words of First steps. **Not tried on a clean PC yet**: the next check is an install under a fresh
+Windows account.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

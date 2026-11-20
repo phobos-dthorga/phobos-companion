@@ -1,4 +1,9 @@
-export type KitStatus = { kit_version: string; tools: number };
+export type KitStatus = {
+  kit_version: string;
+  tools: number;
+  /** Where the tool kit came from (0.36.0): named by the environment, beside the repository it was built from, or installed. */
+  source?: "environment" | "build-folder" | "installed";
+};
 
 export type FailureCode =
   | "python_missing"

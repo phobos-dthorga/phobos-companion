@@ -56,6 +56,10 @@ pub struct GameHome {
 pub struct Home {
     pub list_found: bool,
     pub games: Vec<GameHome>,
+    /// Whether git is on this PC (0.35.0): Home says plainly when it is not, since history is read with it.
+    pub git_found: bool,
+    /// Where the games list is, or would be started: shown on First steps.
+    pub list_file: String,
 }
 
 struct RepositoryReading {
@@ -68,7 +72,12 @@ struct RepositoryReading {
 /// work in one run beside them.
 pub fn read_home() -> Result<Home, Failure> {
     let Some(listed) = games::load()? else {
-        return Ok(Home { list_found: false, games: Vec::new() });
+        return Ok(Home {
+            list_found: false,
+            games: Vec::new(),
+            git_found: git::available(),
+            list_file: games::list_file().display().to_string(),
+        });
     };
     let repositories: Vec<&Repository> = listed.iter().flat_map(|game| &game.repositories).collect();
     let (pending, mut games) = thread::scope(|scope| {
@@ -80,7 +89,12 @@ pub fn read_home() -> Result<Home, Failure> {
         attach_pending(home, game, &pending);
     }
     sort_games(&mut games);
-    Ok(Home { list_found: true, games })
+    Ok(Home {
+        list_found: true,
+        games,
+        git_found: git::available(),
+        list_file: games::list_file().display().to_string(),
+    })
 }
 
 /// A game's unreleased work, from every one of its repositories, the newest draft first.

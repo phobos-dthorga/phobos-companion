@@ -71,11 +71,54 @@ pub struct Game {
     pub kind: GameKind,
 }
 
-/// The list's place: the variable if set, else `.local/games.json` in the folder the program was built from.
+/// The list's place: the variable if set; else `.local/games.json` in the folder the program was built from, when it runs beside
+/// it (the owner's, unchanged); else `games.json` in this person's own data folder (0.35.0, the release audit's A3).
 fn list_path() -> PathBuf {
-    env::var_os(LIST_VARIABLE)
-        .map(PathBuf::from)
+    list_path_from(
+        env::var_os(LIST_VARIABLE).map(PathBuf::from),
+        crate::from_build_folder().then(crate::repository_root),
+        crate::installed().map(|installed| installed.data.as_path()),
+    )
+}
+
+/// `list_path`, free of the environment, for its tests.
+pub fn list_path_from(variable: Option<PathBuf>, built: Option<PathBuf>, data: Option<&Path>) -> PathBuf {
+    variable
+        .or_else(|| built.map(|root| root.join(".local").join("games.json")))
+        .or_else(|| data.map(|folder| folder.join("games.json")))
         .unwrap_or_else(|| crate::repository_root().join(".local").join("games.json"))
+}
+
+/// Starts an empty list where `list_path` looks (0.35.0, First steps), with the folder the person's projects are in, if they
+/// chose one. Refused when a list is there already, or the folder is not a full path to a folder on this PC.
+pub fn start(root: Option<&str>) -> Result<PathBuf, Failure> {
+    start_at(&list_path(), root, Path::is_dir)
+}
+
+pub fn start_at(path: &Path, root: Option<&str>, exists: impl Fn(&Path) -> bool) -> Result<PathBuf, Failure> {
+    if path.exists() {
+        return Err(Failure::refused(format!("there is a games list at {} already", path.display())));
+    }
+    let root = root.map(|r| r.trim().trim_matches('"')).filter(|r| !r.is_empty());
+    if let Some(root) = root
+        && (!Path::new(root).is_absolute() || !exists(Path::new(root)))
+    {
+        return Err(Failure::refused(format!("{root} is not a folder on this PC")));
+    }
+    let mut document = serde_json::Map::new();
+    document.insert("schema_version".into(), SCHEMA_VERSION.into());
+    if let Some(root) = root {
+        document.insert("root".into(), root.into());
+    }
+    document.insert("games".into(), serde_json::Value::Array(Vec::new()));
+    let text = serde_json::to_string_pretty(&serde_json::Value::Object(document)).unwrap_or_default() + "\n";
+    let failed =
+        |problem: std::io::Error| Failure::new(FailureCode::WriteFailed, format!("{}: {problem}", path.display()));
+    if let Some(folder) = path.parent() {
+        fs::create_dir_all(folder).map_err(failed)?;
+    }
+    fs::write(path, text).map_err(failed)?;
+    Ok(path.to_path_buf())
 }
 
 /// The games on the list, or None when there is no list yet.

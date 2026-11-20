@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::env;
 use std::io::{BufRead, BufReader, ErrorKind, Read};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::thread;
 
@@ -50,17 +50,61 @@ pub fn parse_progress(line: &str) -> Option<Progress> {
 pub struct KitStatus {
     pub kit_version: String,
     pub tools: usize,
+    /// Where the kit came from (0.35.0): "environment", "build-folder" or "installed".
+    pub source: String,
 }
 
-/// The kit's Python folder. A packaged program will carry its own copy; for now it is the submodule it was built from.
+/// Where the kit and the Python that runs it are, and which way they were found.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Runtime {
+    pub kit: PathBuf,
+    pub python: String,
+    pub source: &'static str,
+}
+
+/// The kit's folder, the Python to run it with, and which way they were found (0.35.0): named by the environment; else beside
+/// the repository this program was built from, when it is on this PC (the owner's, unchanged), with the Python on the PATH; else
+/// what the installer brought: its own portable Python and kit. Kept free of the environment, for its tests.
+pub fn locate(
+    env_kit: Option<PathBuf>,
+    env_python: Option<String>,
+    built: Option<PathBuf>,
+    installed: Option<&Path>,
+) -> Runtime {
+    let (kit, source) = match (env_kit, built, installed) {
+        (Some(kit), _, _) => (kit, "environment"),
+        (None, Some(root), _) => (root.join("external").join("phobos-modkit").join("python"), "build-folder"),
+        (None, None, Some(runtime)) if runtime.join("kit").join(PACKAGE).is_dir() => (runtime.join("kit"), "installed"),
+        (None, None, _) => {
+            (crate::repository_root().join("external").join("phobos-modkit").join("python"), "build-folder")
+        }
+    };
+    let own_python = installed.map(|runtime| runtime.join("python").join("python.exe")).filter(|path| path.is_file());
+    let python = match (env_python, source, own_python) {
+        (Some(python), _, _) => python,
+        (None, "installed", Some(own)) => own.to_string_lossy().into_owned(),
+        _ => DEFAULT_PYTHON.to_owned(),
+    };
+    Runtime { kit, python, source }
+}
+
+/// Where the kit and its Python are, on this PC, now.
+pub fn runtime() -> Runtime {
+    let built = crate::from_build_folder().then(crate::repository_root);
+    locate(
+        env::var_os(KIT_FOLDER_VARIABLE).map(PathBuf::from),
+        env::var(PYTHON_VARIABLE).ok(),
+        built,
+        crate::installed().map(|installed| installed.runtime.as_path()),
+    )
+}
+
 fn kit_folder() -> PathBuf {
-    env::var_os(KIT_FOLDER_VARIABLE)
-        .map(PathBuf::from)
-        .unwrap_or_else(|| crate::repository_root().join("external").join("phobos-modkit").join("python"))
+    runtime().kit
 }
 
 fn python() -> String {
-    env::var(PYTHON_VARIABLE).unwrap_or_else(|_| DEFAULT_PYTHON.to_owned())
+    runtime().python
 }
 
 /// Runs a kit command that prints an envelope, and returns it. The command's own exit code does not decide: a tool may
@@ -236,7 +280,7 @@ fn status_of(value: &Value) -> Result<KitStatus, Failure> {
     let unreadable = |detail: &str| Failure::new(FailureCode::Unreadable, detail);
     let kit_version = value["kit_version"].as_str().ok_or_else(|| unreadable("the answer names no kit version"))?;
     let commands = value["data"]["commands"].as_array().ok_or_else(|| unreadable("the answer lists no commands"))?;
-    Ok(KitStatus { kit_version: kit_version.to_owned(), tools: commands.len() })
+    Ok(KitStatus { kit_version: kit_version.to_owned(), tools: commands.len(), source: runtime().source.to_owned() })
 }
 
 #[cfg(test)]

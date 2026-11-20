@@ -429,6 +429,12 @@ async fn add_game(game: companion_core::games::NewGame) -> Result<games_page::Ad
     blocking(move || games_page::add(&game)).await
 }
 
+/// Starts an empty games list on First steps, with the folder the person's projects are in if they chose one (0.35.0).
+#[tauri::command]
+async fn start_games_list(root: Option<String>) -> Result<String, Failure> {
+    blocking(move || companion_core::games::start(root.as_deref()).map(|path| path.display().to_string())).await
+}
+
 /// The last copy the timer made or tried in this run, for Home and the Settings page (0.29.0).
 #[tauri::command]
 async fn records_automatic() -> Result<Option<records_backup::Automatic>, Failure> {
@@ -755,10 +761,16 @@ pub fn run() {
             export_theme,
             remove_theme,
             keep_theme,
-            export_theme_draft
+            export_theme_draft,
+            start_games_list
         ])
         .plugin(tauri_plugin_dialog::init())
-        .setup(|_| {
+        .setup(|app| {
+            // Where the installer put its own Python and tool kit, and this person's data folder (0.35.0): used where the program
+            // does not run beside the repository it was built from.
+            if let (Ok(resources), Ok(data)) = (app.path().resource_dir(), app.path().app_local_data_dir()) {
+                companion_core::set_installed(resources.join("runtime"), data);
+            }
             // The records copy themselves every few hours while the program is open (0.29.0).
             records_backup::start();
             Ok(())

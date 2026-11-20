@@ -65,6 +65,15 @@ pub fn read(path: &Path, limit: usize) -> Result<Reading, ReadFailure> {
     Ok(Reading { commits, uncommitted: String::from_utf8_lossy(&status.stdout).lines().count() })
 }
 
+/// Whether git is on this PC (0.35.0, the release audit's A5): Home, Changes, the Timeline and the code viewer read history with
+/// it, so Home says plainly when it is missing instead of each page failing in git's words.
+pub fn available() -> bool {
+    let mut command = Command::new("git");
+    command.arg("--version");
+    hide_console(&mut command);
+    command.output().is_ok_and(|output| output.status.success())
+}
+
 /// One answer from git as trimmed text (a commit count, a remote), or None when git is missing or the question fails (0.25.0).
 pub fn text(path: &Path, args: &[&str]) -> Option<String> {
     let output = git(path, args).ok()?;

@@ -24,7 +24,7 @@ first release anyone else can install.
 | Package | Licence | Why it is carried |
 | --- | --- | --- |
 | [Python](https://www.python.org/) 3.14.10, the portable Windows build (`python-3.14.10-embed-amd64.zip`) | Python Software Foundation License (its `LICENSE.txt` travels with it, in the runtime folder) | Runs the tool kit on a PC where no Python is installed. Fetched by `scripts/installer.mjs` from python.org and checked against python.org's published SHA-256 before it is used |
-| [phobos-modkit](https://github.com/phobos-dthorga/phobos-modkit), the tools' Python package at this repository's pin | MIT | Every page asks it; carried so the installed program works away from the repository it was built from |
+| [phobos-modkit](https://github.com/phobos-dthorga/phobos-modkit), the tools' Python package at this repository's pin | MIT | Every page asks it; carried so the installed program works away from the repository it was built from. From 0.38.0 its compiled tools come too, built from its own source: the XML indexer (Rust, with the crates its `THIRD_PARTY_NOTICES.md` lists) and the assembly reader (C#, needing the .NET 10 runtime, which is not carried) |
 
 ## Only to build and check it
 

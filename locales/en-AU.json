@@ -634,6 +634,7 @@
     "about-kit-version": "{ $version }, with { $tools } tools",
     "about-kit-source-installed": "Installed with the program, with its own Python",
     "about-kit-source-build-folder": "From the repository the program was built from, with the Python on this PC",
+    "about-programs": "Which other programs do the tools use, and are they here?",
     "about-kit-source-environment": "From the folder named by PHOBOS_COMPANION_KIT",
     "about-kit-unreadable": "Could not be read: see the panel beside the page.",
     "about-kit-reading": "Reading…",

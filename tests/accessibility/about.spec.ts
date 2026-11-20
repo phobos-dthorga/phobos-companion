@@ -61,6 +61,23 @@ async function audit(page: Page) {
 }
 
 test.describe("About", () => {
+  test("leads to which other programs the tools use (0.38.0)", async ({
+    page,
+  }) => {
+    await open(page, false);
+    await page.keyboard.press("i");
+    await page
+      .getByRole("button", {
+        name: "Which other programs do the tools use, and are they here?",
+      })
+      .click();
+    await expect(
+      page
+        .getByRole("navigation", { name: "Pages" })
+        .getByRole("button", { name: "Reports", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+  });
+
   test("the version is in the status bar on every page, and opens About", async ({
     page,
   }) => {

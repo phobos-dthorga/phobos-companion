@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-11-20
+
+The third step of the release audit: its tools are ready to use (A4 and B7). Not yet tested on screen, and not yet tried on a clean PC.
+
+### Added
+
+- **The installer brings the tool kit's compiled tools ready-built**: reading a save no longer needs Rust installed, and the Code map's C# links need only the .NET 10 runtime, not its SDK.
+- **Which other programs do the tools use, and are they here?** A button on About opens the answer on Reports: git, .NET 10, ilspycmd, Steam and a game's own (RimSort's texture encoder for RimWorld), each with whether it is on this PC, what needs it and where to get it. A new Guide entry says which page needs what.
+
+### Dependencies
+
+- Tool kit 1.62.0 (programs status and bundle; ready-built tools found first). Building the installer now needs Rust's cargo and the .NET 10 SDK on the PC that builds it.
+
 ## [0.37.0] - 2026-11-20
 
 The second step of the release audit: it speaks to someone who isn't you (B1, B3 and part of B4). On your own PC nothing should look different. Not yet tested on screen.

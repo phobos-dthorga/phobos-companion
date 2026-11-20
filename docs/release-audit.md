@@ -1,6 +1,6 @@
 # Release audit: what stands between the Companion and another person (20 Nov 2026)
 
-**Status (20 Nov 2026):** written at the owner's request. **A1, A2, A3 and A5 are built in Companion 0.36.0** (the installer carries its own Python and tool kit, the games list starts on First steps, and a missing git is said plainly); not yet tried on a clean PC. **B1 and B3 are built in 0.37.0, and B4 in part** (the Guide's entries from the kit and each repository are not); see "Built in 0.37.0" below. The rest is not built. The owner answered four of the questions below. Written after
+**Status (20 Nov 2026):** written at the owner's request. **A1, A2, A3 and A5 are built in Companion 0.36.0** (the installer carries its own Python and tool kit, the games list starts on First steps, and a missing git is said plainly); not yet tried on a clean PC. **B1 and B3 are built in 0.37.0, and B4 in part** (the Guide's entries from the kit and each repository are not); see "Built in 0.37.0" below. **A4 and B7 are built in 0.38.0** (the kit's compiled tools come ready-built; About leads to which other programs the tools use). The rest is not built. The owner answered four of the questions below. Written after
 the owner said: "eventually, I wish to make Companion available to others. That's the greater view we should be taking with regard
 to everything revolving around the Companion." The rule that follows from it is in `AGENTS.md` ("Design for a stranger").
 
@@ -54,6 +54,13 @@ to everything revolving around the Companion." The rule that follows from it is 
 | B1 | **Make a repository ready for the Companion**, a Guide entry: what each page reads (git and a `CHANGELOG.md`; the optional `outstanding-work.md`, `test-evidence.json`, `installs.json`, `settings.json`, `decisions.json`). Changes, Mods and Tests, with nothing to read, say so with a button to it; Tests names its file | Small examples of the JSON files live in the kit's docs, which the Guide cannot link to yet |
 | B3 | **Features for agent sessions are hidden unless switched on, or detected** (the owner's answer): Settings' "Features for AI agent sessions" offers When a repository uses them (the default), Always and Never, and says what it found. Hidden, there is no Something's off or its key, no Decisions page, key or note, no screen notes and no claims board. The NAS is "your backup" in words and the Guide; Waylith is named only where a mod's textures are affected, and explained | About still says "ask an agent session" to build the installer: that goes with B6 |
 | B4 | **Entries for agent sessions are marked** (`for: agents`), grouped last, with the way to show those features; First steps (0.36.0) and the repository entry are there; entries name `test-pass apply` rather than an agent | **Entries from the kit and each repository** (namespaced, versioned, checked by the host), and other languages (C1) |
+
+## Built in 0.38.0: its tools are ready to use (A4, B7)
+
+| # | What was done | Left |
+| --- | --- | --- |
+| A4 | **The installer carries the kit's compiled tools ready-built** (kit 1.62.0's `programs bundle`): the XML indexer, so reading a save needs no Rust, and the assembly reader, needing only the .NET 10 runtime. The installed kit finds them before building anything | The .NET 10 runtime is not carried: the Code map's C# links and the patch pages need it installed (B7 says so) |
+| B7 | **One answer to "what else is needed?"**: kit 1.62.0's `programs status` (git, the two compiled tools, .NET 10, the diagnostics tools, ilspycmd, Steam, a game's own), on Reports and from a button on About; a Guide entry lists which page needs what | Each tool's own refusal already names what it lacks; none was reworded |
 
 ## Already right
 

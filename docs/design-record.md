@@ -987,6 +987,26 @@ switched on, or otherwise detected".
 test verdicts' "written by an agent" became "the tool kit's test-pass apply, run by you or an agent session", since a person can
 run it); the words of the new entries.
 
+## Its tools are ready to use (built 20 Nov 2026, 0.38.0)
+
+**The release audit's third step** (A4 and B7).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Read a save, and see the Code map's C# links, without installing Rust or the .NET SDK; learn in one place what else a page needs |
+| What does it stop them doing? | Meeting "cargo is not installed" the first time they open a save |
+| How does it change the way they work? | Nothing on the owner's PC (the kit there finds its own builds as before); another PC uses what the installer brought |
+| What outside it notices? | The kit's other tools: every one that reads saves or assemblies finds the ready-built copies first |
+
+| Part | How |
+| --- | --- |
+| Building them | `scripts/installer.mjs` runs the repository's own kit, `programs bundle --out <runtime>\tools`, with this PC's cargo and .NET 10 SDK; a failure stops the installer before anything is built |
+| Finding them | The installed kit's `native.bundled_dir` is `<install folder>\runtime\tools`, beside its package folder; the indexer and the reader are looked for there first |
+| Saying what else is needed | The kit's `programs status`, a read-only report with a question, so Reports lists it; About's "Which other programs do the tools use, and are they here?" opens it there |
+
+**Agent choices, owner to revise:** the reader is framework-dependent (about 0.25 MB, needing the .NET 10 runtime) rather than
+self-contained (tens of megabytes, unmeasured); the .NET runtime is not carried.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

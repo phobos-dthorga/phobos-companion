@@ -81,7 +81,7 @@ what you did, and what your saves and logs say, without typing a command.
 - **What it changes, and only when you ask:** your test verdicts, in its own folder; your installed mods and their textures, from
   the Mods page; the repository's build output when you press Build; and the central settings file, from the Settings page. It never changes a save, and never deletes anything.
 - **It needs git**, to read your projects' history; every page says so if it is missing. **The installer brings its own Python
-  and tool kit** (from 0.36.0), so nothing else need be installed. Run beside the repository it was built from, it uses that
+  and tool kit** (from 0.36.0), **and the kit's compiled tools ready-built** (from 0.38.0: reading a save needs no Rust), so nothing else need be installed. Run beside the repository it was built from, it uses that
   repository's kit and the Python on the PATH instead, as before; `PHOBOS_COMPANION_KIT` and `PHOBOS_COMPANION_PYTHON` still name
   others, and `PHOBOS_COMPANION_BUNDLED=1` tries what another PC's install does.
 - **Open it from the Start menu once installed** (see [Install it](#install-it-windows)). **The first time on a PC, Home shows
@@ -105,6 +105,8 @@ build and run a newer one over the top; to remove it, use Windows' **Installed a
 - **On the PC it was built on**, the installed program still reads its tools and your games list from the folder it was built in,
   so keep that folder where it is. On any other PC it uses what the installer brought, and keeps your games list in its own
   data folder.
+- **Building the installer needs Rust's cargo and the .NET 10 SDK** (from 0.38.0), to build the kit's compiled tools
+  (`programs bundle`); the installed program needs neither.
 - **Building the installer fetches Python** 3.14.10's portable Windows build from python.org once (about 12 MB), checks it against
   python.org's own checksum, and keeps it outside the repository (`scripts/installer.mjs`).
 - In Windows the name is spelled with a curly apostrophe (D’thorga), because the installer cannot hold a straight one.

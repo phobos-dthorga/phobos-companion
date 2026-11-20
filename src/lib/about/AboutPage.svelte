@@ -2,7 +2,8 @@
   import { onMount } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
-  import { go } from "../navigation/navigation.svelte";
+  import { go, here } from "../navigation/navigation.svelte";
+  import { place } from "../navigation/place";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import Placeholder from "../shell/Placeholder.svelte";
   import { formatUnixDate } from "../shell/dates";
@@ -143,6 +144,17 @@
                   : t("about-kit-source-build-folder")}</span
             >
           {/if}
+          <br /><button
+            type="button"
+            class="action programs"
+            onclick={() =>
+              go(
+                place("reports", here().game, {
+                  command: "programs",
+                  report: "status",
+                }),
+              )}>{t("about-programs")}</button
+          >
         {:else if kit.state === "failed"}
           {t("about-kit-unreadable")}
         {:else}

@@ -99,8 +99,40 @@ function assemble(zip) {
   });
 }
 
+/**
+ * The kit's compiled tools, ready-built (kit 1.62.0's programs bundle): its XML indexer, so reading a save needs no Rust, and its
+ * assembly reader, needing only the .NET 10 runtime. Built by the repository's own kit (the runtime's copy has no build files) with
+ * this PC's cargo and .NET SDK, into the runtime's tools folder, where the installed kit looks first.
+ */
+function bundleTools() {
+  const result = spawnSync(
+    process.env.PHOBOS_COMPANION_PYTHON ?? "python",
+    [
+      "-m",
+      "phobos_modkit",
+      "programs",
+      "bundle",
+      "--out",
+      join(runtime, "tools"),
+    ],
+    {
+      cwd: join(repository, "external", "phobos-modkit", "python"),
+      stdio: "inherit",
+      env: { ...process.env, CARGO_TARGET_DIR: target },
+    },
+  );
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    console.error(
+      "The kit's compiled tools could not be built (it needs Rust's cargo and the .NET 10 SDK): nothing was built.",
+    );
+    process.exit(result.status ?? 1);
+  }
+}
+
 const zip = await python();
 assemble(zip);
+bundleTools();
 // The installer carries the runtime through its own hooks, not Tauri's resources: Tauri drops the drive letter from an absolute
 // resource path (C:\… is read as \… on the repository's drive), and the runtime must stay out of the repository's synced folder.
 // The hooks put it at <install folder>\runtime, which is where the program's resource folder is on Windows.
@@ -108,7 +140,7 @@ const hooks = join(target, "companion-runtime-hooks.nsh");
 writeFileSync(
   hooks,
   [
-    "; Written by scripts/installer.mjs: the Companion's own Python and tool kit.",
+    "; Written by scripts/installer.mjs: the Companion's own Python, tool kit and the kit's compiled tools.",
     "!macro NSIS_HOOK_POSTINSTALL",
     '  SetOutPath "$INSTDIR\\runtime"',
     `  File /r "${runtime}\\*.*"`,

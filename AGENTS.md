@@ -78,6 +78,12 @@ reads them.
   Decisions page. Reading a watch only reads; stopping and marking write only into the watch's own folder in the kit's cache, while
   the manifest calls them `writes`. The host checks the length is one offered, every text is one line of a sane length and a
   watch's name has the kit's shape, and puts a mark's words after `--`.
+- **The Explorer takes a snapshot of the running game only on the owner's press and confirmation** (owner, 20 Nov 2026: debugging
+  tools that look at "variables in memory"; `docs/debugging.md`, design record "Explorer"): the kit's `look-serve`, found by the
+  manifest's `look-inside` surface and run only while the manifest calls it `runs`. A snapshot pauses the game for about half a
+  second and nothing is written to the game. **Never take one by itself.** One is held at a time, and let go on Let it go, on
+  leaving the page, when the program closes, or after ten minutes (the owner's choice). Each request's kind is from a fixed list,
+  and its type name, address, words and numbers are checked for shape and size before the kit sees them.
 - **The Changes page and the code viewer only read**: the kit's `changes`, through `src-tauri/src/changes_page.rs`, which checks
   the repository is one of the game's and the changelog a plain path inside it before the kit sees either.
 - **The Timeline page only reads**: the kit's `history`, through `src-tauri/src/history_page.rs`, which checks the repository is one

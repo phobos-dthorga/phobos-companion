@@ -1032,6 +1032,34 @@ belongs).
 Install remains for one). Tried on phobos-rimworld only, the one repository with an install config today; the line reads only the
 kit's general `not-installed` state, so any game's repository that adopts `config/installs.json` gets it.
 
+## Explorer: look inside the running game (built 21 Nov 2026, 0.41.0)
+
+**The owner's request** (20 Nov 2026: debugging tools "that you can attach to the games (supported) ... see things like
+relationships between things ... While looking at variables in memory"). The design, its probe, its three layers and the owner's
+choices are in [debugging.md](debugging.md); this is layer 1, "Look inside", on the page the Save explorer will share (the owner's
+choice of one explorer for saves and the running game).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Take a snapshot of their running game and browse it: memory by kind and by mod, one kind's objects, any object with every value it holds, each link a press to the next, what holds it, and why it is still in memory |
+| What does it stop them doing? | Guessing from code, or from a heap snapshot that stops near ten million objects, why memory grows or a value is wrong; taking a snapshot by accident (every one asks first); changing the game (nothing is written) |
+| How does it change the way they work? | A question for a debugger, a many-gigabyte dump or an agent session becomes a few presses beside the Memory page and the Code map |
+| What outside it notices? | **The game pauses for about half a second at each snapshot** (431 to 470 ms on the owner's colony). Nothing else |
+
+| Part | How |
+| --- | --- |
+| The tools | phobos-modkit 1.65.1's heap reader, through `rimworld-perf look-serve`, found by the manifest's `look-inside` surface and run only while the manifest calls it `runs` |
+| Holding a snapshot | One at a time: the host keeps the kit's process open and sends one checked request a line; it is let go on **Let it go**, on leaving the page, when the program closes, or after ten minutes (the owner's choice), because Windows keeps a snapshot by copying each page the game changes after it |
+| The host's checks | The request's kind from a fixed list; a type name, an address, a word filter and the numbers checked for shape and size before the kit sees them |
+| Addresses | Good within one snapshot only: a trail step back to an object from an earlier snapshot says it is gone and offers the overview |
+| Games | RimWorld 1.7 (its tools have the reader); any other game is told in words that its tools cannot look inside it yet. Checked on RimWorld and, through the kit's tests, on a small made-up .NET program; not on a second game, as none of the owner's other games runs on .NET's CoreCLR |
+
+**Agent choices, owner to revise:** the page's key (V, on the Decisions page), its place under Play after Game files, its words;
+the page's own keys **E** (look inside, asks first), **Q** (let it go) and **O** (back to the overview); leaving the page, even for
+the Guide, lets the snapshot go; trail steps name an object by a token and the snapshot's number, never by its memory address; and
+it is shown to everyone, not hidden as an agent feature. **First real use** (21 Nov 2026, with the kit's command line): 453 MB of every mod's patch XML kept alive, read back by
+Vanilla Expanded Framework's settings code after the game had let it go.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

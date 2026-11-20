@@ -4,6 +4,32 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.41.0] - 2026-11-21
+
+The Explorer looks inside your running game (the owner, 20 Nov 2026: debugging tools to see "variables in memory" and the relationships between things; look inside first was their choice). Not yet tested on screen.
+
+### Added
+
+- **The Explorer (key V, under Play): look inside your running game.** Press **Look inside the running game** and confirm; the game pauses for about half a second while a snapshot is taken, then runs on, and nothing in it is changed. Then see what is in its memory by kind and by mod, open a kind to see its objects (filter them, largest first), and open any object to see every value it holds, with each link a press to the next. **What holds it** lists what points to it; **Why is it still in memory?** draws the path from where the game keeps it down to it, or says nothing holds it: garbage not yet swept up, not a leak.
+- A snapshot is held while you look and let go when you press **Let it go**, leave the page, close the program, or after ten minutes (your choice), because holding one costs memory while the game runs on. The page counts the time down.
+- Keys on the page: **E** to look inside (it asks first), **Q** to let it go, **O** back to the overview; all can be changed in Settings. Go to anything offers **Look inside the running game**.
+- Guide: the Explorer's page, "Find out what is using my game's memory", "Find why something is still in memory", and the words Snapshot and Garbage.
+
+### Changed
+
+- The shared pager gained First, Previous, Next and Last for lists that are not by date, and can page a filtered list whose length is not known yet; every page that used it before is unchanged.
+- Your choices on the Decisions page about the Explorer (one page for saves and the running game; ten minutes) are acted on and gone from it; the page key is still asked.
+
+### Dependencies
+
+- Tool kit 1.64.0 to 1.65.1: the heap reader (Microsoft's ClrMD) and rimworld-perf's look commands; look-serve refuses in its own first line when the game is not running.
+
+### Compatibility and limits
+
+- RimWorld 1.7 only for now: the one game the owner plays on .NET's CoreCLR, whose install carries the library the reader needs. Any other game is told in words that its tools cannot look inside it yet. The reader itself was checked on a small made-up .NET program as well as on the owner's colony (from the command line, 21 Nov 2026), where it read 27.4 million objects in 17.6 s.
+- Saves will open on the same page once the save explorer is built.
+- How much memory a held snapshot costs over its ten minutes is not measured yet.
+
 ## [0.40.0] - 2026-11-20
 
 Repeated backups no longer pile up: removing them is now part of every install and go-back (the owner, 20 Nov 2026). Not yet tested on screen.

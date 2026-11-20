@@ -4,7 +4,7 @@ kind: page
 page: memory
 go: memory
 words: memory, RAM, leak, watch, performance, heap
-see: task-memory-watch
+see: task-memory-watch, task-find-memory-use
 ---
 **How the game's memory behaves while you play.** A watch follows what the game holds every 5 seconds, without pausing it, and says whether it climbs steadily or in jumps.
 

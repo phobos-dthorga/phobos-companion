@@ -15,6 +15,7 @@ import { place, placeOf, PAGE_NAMES, type PageName, type Place } from "./place";
 export type Kind =
   | "address"
   | "page"
+  | "action"
   | "guide"
   | "version"
   | "entry"
@@ -29,6 +30,7 @@ export type Kind =
 export const KINDS: Kind[] = [
   "address",
   "page",
+  "action",
   "guide",
   "code",
   "version",
@@ -59,6 +61,28 @@ export function fromPages(
     label: words(page),
     detail: "",
     place: place(page, game),
+  }));
+}
+
+/**
+ * Things to do that open the page where they are done, never doing them from here: Look inside the running game opens the
+ * Explorer with its question asked, so a snapshot is still taken only on the person's confirmation in the card. Offered only
+ * where the game's page can serve.
+ */
+export function fromActions(
+  game: string | null,
+  actions: {
+    label: string;
+    detail: string;
+    page: PageName;
+    focus: Record<string, string>;
+  }[],
+): Candidate[] {
+  return actions.map((a) => ({
+    kind: "action" as const,
+    label: a.label,
+    detail: a.detail,
+    place: place(a.page, game, a.focus),
   }));
 }
 

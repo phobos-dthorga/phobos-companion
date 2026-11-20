@@ -16,6 +16,7 @@
   import { formatStarted } from "../memory/presentation";
   import type { StatusData } from "../memory/types";
   import {
+    fromActions,
     fromAddress,
     fromChanges,
     fromCode,
@@ -34,6 +35,7 @@
   import { FOR_AGENTS_PAGES, type Place } from "./place";
   import { agents } from "../agents/state.svelte";
   import { ENTRIES, GUIDE_KIND_WORDS } from "../guide/entries";
+  import { pageServes } from "../home/kinds";
 
   /**
    * Go to anything (docs/cross-links.md, N2): one search over pages, changelog versions and entries, methods, classes and Defs,
@@ -68,6 +70,7 @@
   const KIND_KEYS: Record<Kind, string> = {
     address: "goto-kind-address",
     page: "goto-kind-page",
+    action: "goto-kind-action",
     guide: "goto-kind-guide",
     code: "goto-kind-code",
     version: "goto-kind-version",
@@ -91,6 +94,19 @@
       game?.id ?? null,
       (page) => t(`page-${page}`),
       agents.shown ? [] : FOR_AGENTS_PAGES,
+    ),
+    ...fromActions(
+      game?.id ?? null,
+      game && pageServes(game.kind, "explorer")
+        ? [
+            {
+              label: t("explorer-look-action"),
+              detail: t("page-explorer"),
+              page: "explorer",
+              focus: { start: "yes" },
+            },
+          ]
+        : [],
     ),
     ...fromGuide(game?.id ?? null, ENTRIES, (kind) =>
       t(GUIDE_KIND_WORDS[kind as keyof typeof GUIDE_KIND_WORDS]),

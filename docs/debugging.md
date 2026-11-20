@@ -1,8 +1,9 @@
 # Debugging the running game: design (20 Nov 2026)
 
-**Status (20 Nov 2026):** designed; **a throwaway probe proved layer 1 on the owner's running RimWorld** (below); nothing is built
-in the Companion or the kit. Layer 1 waits for the owner's word to build. When a layer is built, its design moves into
-`design-record.md` and `later.md` keeps one line pointing there.
+**Status (21 Nov 2026):** **layer 1 is built**: phobos-modkit 1.65.0's heap reader and the Companion's Explorer page (0.41.0,
+"The running game" source); its design is now in `design-record.md` ("Explorer"). Not tested on screen. Layers 2 and 3 are designed
+in outline, not built. The owner's word of 20 Nov 2026 ("You may proceed with all that was suggested") built layer 1 and chased the
+XML lead (below).
 
 **The owner asked for "debug(ging) tools into Companion that you can attach to the games (supported) and with our tools, visual
 code analysis, etc. see things like relationships between things, and so much more! While looking at variables in memory"**
@@ -13,6 +14,9 @@ code analysis, etc. see things like relationships between things, and so much mo
   editor.
 - **An in-game part behind its own setting, off by default** (layer 2), talking to the Companion on this PC only.
 - **A test attach once the probe was ready**: run the same day, with a colony loaded, after the owner saved.
+- **Later the same day, by question card and on the Decisions page:** one explorer page for saves and the running game; a held
+  snapshot let go after ten minutes; Microsoft's ClrMD as phobos-modkit's one C# package, and loading a game's own memory-reading
+  library, both as written exceptions to the kit's rules; and a card before every snapshot of their game, including the XML chase.
 
 ## Read this first (gotchas)
 
@@ -57,7 +61,7 @@ holds it**; none was chased.
 | Kind | Memory | Lead |
 | --- | --- | --- |
 | Free space between objects | 714.8 MB | The heap's gaps; matches the kit's memory watch, which already subtracts them |
-| XML: elements, text, attribute lists, names | **at least 380 MB** (8.8 million objects) | Defs' XML is normally let go after loading; something still holds a parsed document |
+| XML: elements, text, attribute lists, names | **at least 380 MB** (8.8 million objects) | **Answered 21 Nov 2026 with the finished reader: 453 MB, live.** Every mod's patch list, which the game clears after loading, read back by Vanilla Expanded Framework's settings code, so the game loads all 10,499 patch files again and keeps them (phobos-rimworld `docs/development/patch-xml-kept-alive-2026-11-21.md`) |
 | `MouseoverSounds+MouseoverRegionCall[]` | 128 MB in two arrays | Unusually large for two arrays |
 | Character Editor's preset sets, a `KTrie` search tree | 34 MB and 63 MB | Two mods' caches |
 | Vanilla Expanded Framework's `PipeSystem.CachedIngredient` | 22 MB, 722,371 objects | Many small objects |
@@ -158,16 +162,18 @@ not among them today), so layer 1 is RimWorld-only at first and says so for ever
 
 ## For other people
 
-This is a modder's tool. It sits with the agent features (`docs/release-audit.md`, B1): **hidden unless switched on**, and the
-Guide's entry says what it does before anyone presses it. ClrMD and netcoredbg are MIT, so both can be bundled.
+It is for people, not for AI agent sessions, so it is **not** among the agent features hidden unless switched on
+(`docs/release-audit.md`, B1; agent's choice when building 0.41.0, owner to revise): any player whose game's tools can look inside
+sees it, a game whose tools cannot is told so in words, and the Guide's entry says what it does before anyone presses it. Its words
+say "your game", never one game's terms. ClrMD and netcoredbg are MIT, so both can be bundled.
 
 ## Agent choices, owner to revise
 
-The page's place and key; one explorer for saves and the running game (below); the snapshot's time limit; the words "Look inside",
-"What holds it" and "Why is it still in memory"; layer 2's risk grade. The first two are on the Decisions page.
+The page's place and key (V, still on the Decisions page); the words "Look inside", "What holds it" and "Why is it still in memory";
+layer 2's risk grade.
 
 ## Not decided yet
 
-- The page's place and key, and whether it shares the Save explorer's page (Decisions page).
-- How long a snapshot may be held (Decisions page), once its memory cost is measured.
+- The Explorer's key (Decisions page).
+- How much memory a held snapshot costs over its ten minutes: not yet measured; the limit can change once it is.
 - Layer 3's design beyond its outline, until the second probe.

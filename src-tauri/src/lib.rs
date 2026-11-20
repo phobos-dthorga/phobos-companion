@@ -9,6 +9,7 @@ mod claims_board;
 mod cleanup_page;
 mod connections_page;
 mod decisions_page;
+mod explorer_page;
 mod game_files_page;
 mod games_page;
 mod history_page;
@@ -637,6 +638,38 @@ async fn memory_mark(
     blocking(move || memory_page::mark(&game, watch.as_deref(), &text, at)).await
 }
 
+/// Whether this game's tools can look inside the running game; says so before anything is pressed. Only reads the manifest.
+#[tauri::command]
+async fn explorer_offer(game: String) -> Result<explorer_page::Offer, Failure> {
+    blocking(move || explorer_page::offer(&game)).await
+}
+
+/// Takes a snapshot of the running game and holds it, on the person's press and confirmation; any held one is let go first.
+#[tauri::command]
+async fn explorer_start(
+    game: String,
+    label: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<explorer_page::Taken, Failure> {
+    blocking(move || explorer_page::start(&game, &label, Some(&hearing(on_progress)))).await
+}
+
+/// Asks the held snapshot one question the host has checked; says when the snapshot named is no longer held.
+#[tauri::command]
+async fn explorer_ask(
+    snapshot: u64,
+    request: serde_json::Value,
+    on_progress: Channel<kit::Progress>,
+) -> Result<explorer_page::Answer, Failure> {
+    blocking(move || explorer_page::ask(snapshot, &request, Some(&hearing(on_progress)))).await
+}
+
+/// Lets the held snapshot go: on Let it go, and when the page closes. True when one was held.
+#[tauri::command]
+async fn explorer_release(snapshot: Option<u64>) -> Result<bool, Failure> {
+    blocking(move || Ok(explorer_page::release(snapshot))).await
+}
+
 /// Another author's code on the Code map: a name's source (`show`) or the assembly declaring it (`holder`). Only reads.
 #[tauri::command]
 async fn their_code(
@@ -772,6 +805,10 @@ pub fn run() {
             memory_start,
             memory_stop,
             memory_mark,
+            explorer_offer,
+            explorer_start,
+            explorer_ask,
+            explorer_release,
             read_shortcuts,
             save_shortcuts,
             records_automatic,
@@ -802,6 +839,12 @@ pub fn run() {
             records_backup::start();
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("the desktop window could not start");
+        .build(tauri::generate_context!())
+        .expect("the desktop window could not start")
+        .run(|_, event| {
+            // A snapshot of the running game is never left held when the program closes (owner's choice, 20 Nov 2026).
+            if let tauri::RunEvent::Exit = event {
+                explorer_page::release_at_exit();
+            }
+        });
 }

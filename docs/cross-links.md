@@ -73,6 +73,7 @@ build differs from its proposal.
 | Mods | `repository`, and `mod` or `changelog`; `before` (a moment) marks the newest backup from before it; `panel=settings` brings the settings to look at into view (0.21.0) |
 | Logs | `signature` |
 | Memory | `watch` (a kept watch's name, such as `20261119-205419-reload-test-2`; 0.23.0) |
+| Explorer | `view` (`kind` or `object`; none for the overview), `kind` (a type's full name, such as `Verse.Pawn`), with `match` (a word filter), `largest` (`yes`) and `page`; `object` (a token such as `o7`, never a memory address) with `snapshot` (the snapshot's number in this run of the program): a step back to an object from a snapshot let go says it is gone and offers the overview; `start` (`yes`: asks at once whether to take a snapshot, as Go to anything's **Look inside the running game** does) |
 | Reports | `command`, `report` |
 | About | none (0.25.0) |
 | Guide | `entry` (an entry's id, such as `task-go-back`; 0.34.0). Each entry opened is a step |

@@ -3,7 +3,8 @@
  * needs two keys held at once). A scope is where it works: everywhere outside a dialog, in the code viewer, or in the connections
  * view (on the Code map page or inside the code viewer).
  */
-export type Scope = "everywhere" | "code" | "connections" | "memory";
+export type Scope =
+  "everywhere" | "code" | "connections" | "memory" | "explorer";
 
 export type Action = {
   id: string;
@@ -106,6 +107,13 @@ export const ACTIONS: Action[] = [
     scope: "everywhere",
     defaultKey: "u",
     words: "shortcut-page-memory",
+  },
+  /** The Explorer (agent's choice of V, an open decision: changeable like every page key). */
+  {
+    id: "page.explorer",
+    scope: "everywhere",
+    defaultKey: "v",
+    words: "shortcut-page-explorer",
   },
   {
     id: "game.previous",
@@ -260,6 +268,25 @@ export const ACTIONS: Action[] = [
     defaultKey: "x",
     words: "shortcut-memory-stop",
   },
+  /** The Explorer's moves (agent's choices, all changeable): take a snapshot (asks first), let it go, back to the overview. */
+  {
+    id: "explorer.look",
+    scope: "explorer",
+    defaultKey: "e",
+    words: "shortcut-explorer-look",
+  },
+  {
+    id: "explorer.release",
+    scope: "explorer",
+    defaultKey: "q",
+    words: "shortcut-explorer-release",
+  },
+  {
+    id: "explorer.overview",
+    scope: "explorer",
+    defaultKey: "o",
+    words: "shortcut-explorer-overview",
+  },
 ];
 
 export const SCOPES: { scope: Scope; words: string }[] = [
@@ -267,6 +294,7 @@ export const SCOPES: { scope: Scope; words: string }[] = [
   { scope: "code", words: "shortcut-scope-code" },
   { scope: "connections", words: "shortcut-scope-connections" },
   { scope: "memory", words: "shortcut-scope-memory" },
+  { scope: "explorer", words: "shortcut-scope-explorer" },
 ];
 
 export function action(id: string): Action | undefined {

@@ -92,3 +92,41 @@ fn a_search_is_one_line_of_a_sane_length() {
     assert!(!search_pattern("a\nb"));
     assert!(!search_pattern(&"x".repeat(MAX_PATTERN + 1)));
 }
+
+#[test]
+fn a_label_is_folded_onto_one_line_and_kept_short() {
+    assert_eq!(label("  day\n 40 ").unwrap(), "day 40");
+    assert_eq!(label("").unwrap(), "");
+    assert_eq!(label(&"é".repeat(MAX_LABEL)).unwrap().chars().count(), MAX_LABEL);
+    assert!(label(&"x".repeat(MAX_LABEL + 1)).is_err());
+}
+
+#[test]
+fn a_type_name_is_one_line_of_the_marks_a_dotnet_name_holds() {
+    assert!(type_name("Verse.Pawn"));
+    assert!(type_name("System.Collections.Generic.Dictionary<System.String, Verse.Def>"));
+    assert!(type_name("MouseoverSounds+MouseoverRegionCall[]"));
+    assert!(type_name("System.Collections.Generic.List`1"));
+    assert!(type_name("<>c__DisplayClass12_0"));
+    assert!(type_name("Größe.Ding"));
+    assert!(!type_name(""));
+    assert!(!type_name("--json"));
+    assert!(!type_name(" Verse.Pawn"));
+    assert!(!type_name("Verse.Pawn\n{\"op\":\"release\"}"));
+    assert!(!type_name("Verse.Pawn\"}"));
+    assert!(!type_name("a/b"));
+    assert!(!type_name(&"A".repeat(MAX_TYPE_NAME + 1)));
+}
+
+#[test]
+fn an_address_is_hexadecimal_after_0x() {
+    assert!(memory_address("0x1629EFD6E98"));
+    assert!(memory_address("0xabc"));
+    assert!(memory_address("0xFFFFFFFFFFFFFFFF"));
+    assert!(!memory_address("0x"));
+    assert!(!memory_address("1629EFD6E98"));
+    assert!(!memory_address("0X1629"));
+    assert!(!memory_address("0x1FFFFFFFFFFFFFFFF"));
+    assert!(!memory_address("0x12g4"));
+    assert!(!memory_address("0x12 "));
+}

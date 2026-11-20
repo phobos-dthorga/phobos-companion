@@ -24,6 +24,16 @@ const FOCUS_KEYS: Partial<Record<PageName, string[]>> = {
   mods: ["repository", "mod", "changelog", "before", "panel"],
   logs: ["signature"],
   memory: ["watch"],
+  explorer: [
+    "view",
+    "kind",
+    "object",
+    "snapshot",
+    "start",
+    "match",
+    "largest",
+    "page",
+  ],
   reports: ["command", "report"],
   guide: ["entry"],
 };

@@ -15,6 +15,7 @@ export const GAME_ONLY_PAGES: readonly string[] = [
   "logs",
   "memory",
   "gamefiles",
+  "explorer",
 ];
 
 /** Whether a page has anything to show for an entry of this kind; an entry from an older list is a game. */

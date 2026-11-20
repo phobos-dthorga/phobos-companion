@@ -114,8 +114,11 @@ export async function mockHost(
         },
       ) => {
         const more = command === "run_report" && (args?.top ?? 0) > 100;
-        // One command asked several kinds of question (connections) may have an answer for each kind: "command:kind".
-        const kind = (args as { kind?: string } | undefined)?.kind;
+        // One command asked several kinds of question (connections) may have an answer for each kind: "command:kind"; a question
+        // sent whole (the Explorer's) is told apart by its op.
+        const asked = args as
+          { kind?: string; request?: { op?: string } } | undefined;
+        const kind = asked?.kind ?? asked?.request?.op;
         const answer =
           (kind ? given[`${command}:${kind}`] : undefined) ??
           given[more ? "run_report_more" : command];

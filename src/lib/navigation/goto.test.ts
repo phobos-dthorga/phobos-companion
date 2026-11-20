@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  fromActions,
   fromAddress,
   fromChanges,
   fromCode,
@@ -139,5 +140,20 @@ describe("go to anything", () => {
     expect(found[0].place).toEqual(where);
     expect(fromAddress("not an address", "x")).toEqual([]);
     expect(rank(found, addressOf(where))).toHaveLength(1);
+  });
+
+  it("offers a thing to do as the page where it is done, never doing it", () => {
+    const found = fromActions("sample", [
+      {
+        label: "Look inside the running game",
+        detail: "Explorer",
+        page: "explorer",
+        focus: { start: "yes" },
+      },
+    ]);
+    expect(rank(found, "look inside").map((c) => c.place)).toEqual([
+      place("explorer", "sample", { start: "yes" }),
+    ]);
+    expect(rank(found, "")).toEqual([]);
   });
 });

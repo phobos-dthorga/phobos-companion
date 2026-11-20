@@ -77,3 +77,34 @@ pub fn search_pattern(text: &str) -> bool {
     let text = text.trim();
     !text.is_empty() && text.chars().count() <= MAX_PATTERN && !text.contains(['\n', '\r', '\0'])
 }
+
+pub const MAX_LABEL: usize = 80;
+pub const MAX_TYPE_NAME: usize = 400;
+pub const MAX_ADDRESS_DIGITS: usize = 16;
+
+/// A few words a person gives something to find it by later (a memory watch, a snapshot): folded onto one line, at most
+/// `MAX_LABEL` characters, or the words that refuse it.
+pub fn label(text: &str) -> Result<String, String> {
+    let label = one_line(text);
+    if label.chars().count() > MAX_LABEL {
+        return Err(format!("keep the label under {MAX_LABEL} characters"));
+    }
+    Ok(label)
+}
+
+/// A .NET type's full name as a snapshot of a running program writes it: one line of letters, digits and the marks a type's name
+/// holds (`.` `_` `+` `<` `>` `,` `[` `]`, the backtick of a generic's count, and the space after a comma), such as
+/// `System.Collections.Generic.Dictionary<System.String, Verse.Def>` or `Sounds+RegionCall[]`.
+pub fn type_name(text: &str) -> bool {
+    !text.is_empty()
+        && text.chars().count() <= MAX_TYPE_NAME
+        && !text.starts_with([' ', '-'])
+        && text.chars().all(|c| c.is_alphanumeric() || "._+<>,[]` ".contains(c))
+}
+
+/// A memory address as a snapshot writes it: `0x` and one to sixteen hexadecimal digits.
+pub fn memory_address(text: &str) -> bool {
+    text.strip_prefix("0x").is_some_and(|digits| {
+        (1..=MAX_ADDRESS_DIGITS).contains(&digits.len()) && digits.bytes().all(|b| b.is_ascii_hexdigit())
+    })
+}

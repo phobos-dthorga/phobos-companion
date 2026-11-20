@@ -26,7 +26,6 @@ const WRITES: &str = "writes";
 const RUNS: &str = "runs";
 /// The lengths the page offers, in minutes (agent's choice from the owner's word: 60 was "a bit generous", 15 to 20 workable).
 pub const MINUTES: [u32; 6] = [5, 10, 15, 20, 30, 60];
-const MAX_LABEL: usize = 80;
 const MAX_MARK: usize = 200;
 const MAX_ID: usize = 60;
 /// Rows per table in a kept watch's report, as the kit's own default.
@@ -124,10 +123,7 @@ pub fn start_arguments(tool: &str, minutes: u32, counters: bool, label: &str) ->
     if !MINUTES.contains(&minutes) {
         return Err(format!("{minutes} minutes is not one of the lengths offered"));
     }
-    let label = checks::one_line(label);
-    if label.chars().count() > MAX_LABEL {
-        return Err(format!("keep the label under {MAX_LABEL} characters"));
-    }
+    let label = checks::label(label)?;
     let mut arguments = Args::new(tool, WATCH).pair("--minutes", &minutes.to_string());
     if !counters {
         arguments = arguments.flag("--no-counters");

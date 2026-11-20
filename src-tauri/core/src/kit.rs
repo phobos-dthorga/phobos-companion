@@ -113,9 +113,10 @@ pub fn run(tool: &str, arguments: &[String]) -> Result<Value, Failure> {
     run_hearing(tool, arguments, None)
 }
 
-/// Runs a kit command as `run` does, and passes each progress line it writes to the listener while it works. Standard output is
-/// read on its own thread, so a tool that fills one pipe never waits on the other.
-pub fn run_hearing(tool: &str, arguments: &[String], listener: Option<Listener>) -> Result<Value, Failure> {
+/// The kit run as a process for these arguments, as every request runs it: the pinned kit's Python, from the kit's folder, with no
+/// bytecode written, UTF-8 throughout and no console. Standard output and error are piped and standard input is closed; a kit
+/// command that stays running (`serve`) pipes its input instead. Progress lines are asked for only when someone will hear them.
+pub(crate) fn kit_command(arguments: &[String], progress: bool) -> Result<Command, Failure> {
     let folder = kit_folder();
     if !folder.join(PACKAGE).is_dir() {
         return Err(Failure::new(FailureCode::KitMissing, folder.display().to_string()));
@@ -130,17 +131,25 @@ pub fn run_hearing(tool: &str, arguments: &[String], listener: Option<Listener>)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
-    if listener.is_some() {
+    if progress {
         command.env(PROGRESS_VARIABLE, "1");
     } else {
         command.env_remove(PROGRESS_VARIABLE);
     }
     hide_console(&mut command);
-    let mut child = command.spawn().map_err(|problem| {
-        let code =
-            if problem.kind() == ErrorKind::NotFound { FailureCode::PythonMissing } else { FailureCode::ToolFailed };
-        Failure::new(code, problem.to_string())
-    })?;
+    Ok(command)
+}
+
+/// Why a kit process could not start: no Python, or anything else.
+pub(crate) fn not_started(problem: std::io::Error) -> Failure {
+    let code = if problem.kind() == ErrorKind::NotFound { FailureCode::PythonMissing } else { FailureCode::ToolFailed };
+    Failure::new(code, problem.to_string())
+}
+
+/// Runs a kit command as `run` does, and passes each progress line it writes to the listener while it works. Standard output is
+/// read on its own thread, so a tool that fills one pipe never waits on the other.
+pub fn run_hearing(tool: &str, arguments: &[String], listener: Option<Listener>) -> Result<Value, Failure> {
+    let mut child = kit_command(arguments, listener.is_some())?.spawn().map_err(not_started)?;
     let failed = |problem: std::io::Error| Failure::new(FailureCode::ToolFailed, problem.to_string());
     let mut stdout = child.stdout.take().expect("standard output was piped");
     let stderr = child.stderr.take().expect("standard error was piped");

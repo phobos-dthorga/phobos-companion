@@ -16,6 +16,7 @@
     logs: "tools-page-logs",
     memory: "tools-page-memory",
     gamefiles: "tools-page-gamefiles",
+    explorer: "tools-page-explorer",
   };
 </script>
 

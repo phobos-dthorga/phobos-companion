@@ -53,6 +53,7 @@
   import AboutPage from "./lib/about/AboutPage.svelte";
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
   import MemoryPage from "./lib/memory/MemoryPage.svelte";
+  import ExplorerPage from "./lib/explorer/ExplorerPage.svelte";
   import GuidePage from "./lib/guide/GuidePage.svelte";
   import FirstSteps from "./lib/home/FirstSteps.svelte";
   import Crest from "./lib/shell/Crest.svelte";
@@ -115,6 +116,7 @@
     ["page.about", "about"],
     ["page.gamefiles", "gamefiles"],
     ["page.memory", "memory"],
+    ["page.explorer", "explorer"],
     ["page.guide", "guide"],
   ];
 
@@ -134,6 +136,7 @@
         { page: "logs", key: "page-logs" },
         { page: "memory", key: "page-memory" },
         { page: "gamefiles", key: "page-gamefiles" },
+        { page: "explorer", key: "page-explorer" },
         { page: "atlas", key: "page-atlas" },
       ],
     },
@@ -390,6 +393,10 @@
         {#key selected.id}
           <MemoryPage game={selected} />
         {/key}
+      {:else if selected && page === "explorer"}
+        {#key selected.id}
+          <ExplorerPage game={selected} />
+        {/key}
       {:else if selected && page === "logs"}
         {#key selected.id}
           <LogsPage game={selected} />
@@ -449,7 +456,9 @@
                             ? t("source-body-gamefiles")
                             : page === "memory"
                               ? t("source-body-memory")
-                              : t("source-body")}
+                              : page === "explorer"
+                                ? t("source-body-explorer")
+                                : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

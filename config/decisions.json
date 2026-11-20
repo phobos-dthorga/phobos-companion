@@ -156,8 +156,8 @@
     },
     {
       "id": "save-explorer-key",
-      "question": "Which key should open the save explorer once it is built?",
-      "context": "The save explorer (docs/save-explorer.md) will sit under Play, after Game files. E, O, Q, S, V, Y and Z are free today; E and S are proposed for Reports and Settings if the page keys are renumbered.",
+      "question": "Which key should open the Explorer (saves and the running game)?",
+      "context": "The Explorer (docs/debugging.md, docs/save-explorer.md; your choice of 20 Nov 2026: one page for saves and the running game) sits under Play, after Game files, and opens on V for now (0.41.0). O, Q, S, Y and Z are free too; E and S are proposed for Reports and Settings if the page keys are renumbered.",
       "options": [
         {
           "id": "v",
@@ -166,13 +166,13 @@
         },
         {
           "id": "o",
-          "label": "O, for open a save",
+          "label": "O, for open",
           "detail": "Also free today"
         }
       ],
       "lean": "v",
       "why": "It stays free whichever way the page keys go, and every key can be changed in Settings anyway",
-      "from": "docs/save-explorer.md, How it is built",
+      "from": "docs/debugging.md and docs/save-explorer.md",
       "asked": "2026-11-20"
     },
     {
@@ -194,53 +194,6 @@
       "lean": "one-entry",
       "why": "Go to anything stays instant, and a save's results are many enough to need the explorer's own list",
       "from": "docs/save-explorer.md, How it is built",
-      "asked": "2026-11-20"
-    },
-    {
-      "id": "look-inside-page",
-      "question": "Should looking inside the running game share the save explorer's page, or have a page of its own?",
-      "context": "Both show one thing in full, what holds it and what it holds (docs/debugging.md, docs/save-explorer.md). One reads a save, the other a snapshot of the running game.",
-      "options": [
-        {
-          "id": "one-page",
-          "label": "One explorer, two sources",
-          "detail": "The page opens on a save or on the running game; one key, one set of views, the same trail steps"
-        },
-        {
-          "id": "two-pages",
-          "label": "Two pages",
-          "detail": "A Save explorer under Play and a Look inside page beside the Memory page; two keys"
-        }
-      ],
-      "lean": "one-page",
-      "why": "The views are the same component either way, and one page means one place to learn; the source is named in large words at the top",
-      "from": "docs/debugging.md, Layer 1: what the page shows",
-      "asked": "2026-11-20"
-    },
-    {
-      "id": "look-inside-hold",
-      "question": "How long may a snapshot of the running game be held while you browse it?",
-      "context": "Windows keeps a snapshot by copying each page of memory the game changes afterwards, so a held snapshot grows while the game runs on. It is always let go when the page closes or on Let it go; this is the limit when neither happens. Its real cost is not measured yet.",
-      "options": [
-        {
-          "id": "10",
-          "label": "10 minutes",
-          "detail": "Long enough to follow a chain of links; let go automatically after"
-        },
-        {
-          "id": "30",
-          "label": "30 minutes",
-          "detail": "Room for a long look; more memory if the game is running meanwhile"
-        },
-        {
-          "id": "paused",
-          "label": "No limit while the game is paused",
-          "detail": "10 minutes while it runs; a paused game changes little memory"
-        }
-      ],
-      "lean": "10",
-      "why": "Safe until the first measurement says otherwise; the limit can be raised once the cost is known",
-      "from": "docs/debugging.md, Layer 1: how it is built",
       "asked": "2026-11-20"
     }
   ]

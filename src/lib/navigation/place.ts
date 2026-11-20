@@ -9,6 +9,7 @@ export const PAGE_NAMES = [
   "logs",
   "memory",
   "gamefiles",
+  "explorer",
   "atlas",
   "changes",
   "timeline",

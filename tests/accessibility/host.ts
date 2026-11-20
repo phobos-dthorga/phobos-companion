@@ -92,6 +92,11 @@ export async function mockHost(
   page: Page,
   answers: Record<string, Answer>,
 ): Promise<void> {
+  // Features for agent sessions are shown unless a test says otherwise (0.37.0): most tests were written with them in view.
+  const withDefaults: Record<string, Answer> = {
+    agent_features: agentsShown,
+    ...answers,
+  };
   await page.addInitScript((given) => {
     const scope = window as unknown as Record<string, unknown>;
     scope.isTauri = true;
@@ -122,9 +127,23 @@ export async function mockHost(
         return answer.result;
       },
     };
-  }, answers);
+  }, withDefaults);
 }
 
 export const healthyKit: Answer = {
   result: { kit_version: "1.0.0", tools: 15 },
+};
+
+/** Features for agent sessions, shown because a repository uses them (0.37.0). */
+export const agentsShown: Answer = {
+  result: {
+    choice: "found",
+    shown: true,
+    signs: [{ what: "AGENTS.md", repository: "first-mods" }],
+  },
+};
+
+/** Nothing on this PC shows agent sessions at work, so their features are hidden. */
+export const agentsHidden: Answer = {
+  result: { choice: "found", shown: false, signs: [] },
 };

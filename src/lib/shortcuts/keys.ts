@@ -65,7 +65,12 @@ export function belongsElsewhere(target: EventTarget | null): boolean {
   );
 }
 
-/** The actions in scope, ordered as listed. */
-export function actionsIn(scope: Action["scope"]): Action[] {
-  return ACTIONS.filter((a) => a.scope === scope);
+/** The actions in scope, ordered as listed; those for agent sessions only while they are shown (0.37.0). */
+export function actionsIn(
+  scope: Action["scope"],
+  agentsShown = true,
+): Action[] {
+  return ACTIONS.filter(
+    (a) => a.scope === scope && (agentsShown || !a.forAgents),
+  );
 }

@@ -4,6 +4,7 @@
   import { t } from "../i18n/runtime";
   import { go, here } from "../navigation/navigation.svelte";
   import { place } from "../navigation/place";
+  import { agents } from "../agents/state.svelte";
   import {
     ENTRIES,
     entry as entryById,
@@ -27,17 +28,20 @@
     task: "guide-group-task",
     page: "guide-group-page",
     term: "guide-group-term",
+    agents: "guide-group-agents",
   };
 
   const chosenId = $derived(here().focus.entry ?? "page-guide");
   const chosen = $derived(entryById(chosenId) ?? entryById("page-guide"));
   const found = $derived(search(query));
-  const groups = $derived(
-    KINDS.map((kind) => ({
-      kind,
-      entries: ENTRIES.filter((e) => e.kind === kind),
+  /** Entries about features for agent sessions come last, in a group of their own (0.37.0), so the rest read without them. */
+  const groups = $derived([
+    ...KINDS.map((kind) => ({
+      kind: kind as string,
+      entries: ENTRIES.filter((e) => e.kind === kind && !e.forAgents),
     })),
-  );
+    { kind: "agents", entries: ENTRIES.filter((e) => e.forAgents) },
+  ]);
 
   /** Each entry opened is a step of the trail, as each new thing in the middle of the Code map is, so Back returns to the last. */
   async function open(id: string) {
@@ -111,6 +115,22 @@
     <article class="entry" aria-labelledby="guide-entry-title">
       <p class="eyebrow muted">{t(GUIDE_KIND_WORDS[chosen.kind])}</p>
       <h2 id="guide-entry-title" tabindex="-1">{chosen.title}</h2>
+      {#if chosen.forAgents}
+        <p class="for-agents small">
+          {agents.shown
+            ? t("guide-for-agents-shown")
+            : t("guide-for-agents-hidden")}
+          {#if !agents.shown}
+            <button
+              type="button"
+              class="inline-link"
+              onclick={() =>
+                go(place("settings", game?.id ?? null, { panel: "agents" }))}
+              >{t("guide-for-agents-switch")}</button
+            >
+          {/if}
+        </p>
+      {/if}
       {#if chosen.go}
         <button
           type="button"
@@ -160,6 +180,12 @@
 {/snippet}
 
 <style>
+  .for-agents {
+    padding: 6px 10px;
+    border-inline-start: 3px solid var(--colour-accent);
+    background: var(--colour-surface-soft);
+  }
+
   .layout {
     display: grid;
     grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);

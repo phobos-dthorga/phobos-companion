@@ -4,6 +4,21 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.37.0] - 2026-11-20
+
+The second step of the release audit: it speaks to someone who isn't you (B1, B3 and part of B4). On your own PC nothing should look different. Not yet tested on screen.
+
+### Added
+
+- **Features for AI agent sessions are hidden unless switched on, or found**, as you chose: Something's off and its ! key, the Decisions page and its D key, the decisions and screen notes on Home, and the claims board show only when a repository on your list has an AGENTS.md, a CLAUDE.md, a .claude folder or a config/decisions.json, or the Companion already keeps notes or answers. Settings has a new panel, **Features for AI agent sessions**: When a repository uses them (the default), Always or Never, with what it found and whether they are shown now.
+- **Make a repository ready for the Companion**, a new Guide entry: what each page reads from a repository, and which small files switch on Tests, Mods, Settings and Decisions. Changes, Mods and Tests, when they have nothing to show, lead to it.
+- **The Guide marks its entries about agent sessions**, lists them in a group of their own at the end, and, while those features are hidden, says so with a way to show them.
+
+### Changed
+
+- **Words for anyone's PC**: the records backup speaks of "your backup" (a synced folder, a network drive or an external disk) instead of a NAS, and Waylith is named only when a mod's textures are affected by it, with what it is. Test verdicts are written into a test list by the tool kit's test-pass apply, run by you or an agent session, rather than "by an agent".
+- Go to anything leaves out the Decisions page while it is hidden; the shortcuts list leaves out its keys.
+
 ## [0.36.0] - 2026-11-20
 
 The first step of the release audit (A1, A2, A3 and A5), chosen by the owner on 20 November 2026 after saying the Companion is to be released for others, with Python and the tool kit bundled. Not yet tested on screen, and not yet tried on a clean PC.

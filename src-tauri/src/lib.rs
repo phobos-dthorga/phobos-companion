@@ -501,6 +501,31 @@ async fn theme_status(app: tauri::AppHandle) -> Result<companion_core::themes::S
     blocking(move || Ok(companion_core::themes::status(&folder))).await
 }
 
+/// Whether features for AI agent sessions are shown (0.37.0): the person's choice, and what on this PC shows sessions at work.
+#[tauri::command]
+async fn agent_features(app: tauri::AppHandle) -> Result<companion_core::agents::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || {
+        let repositories = companion_core::games::listed_repository_paths().unwrap_or_default();
+        Ok(companion_core::agents::status(&data, &repositories))
+    })
+    .await
+}
+
+/// Keeps the person's choice of when features for agent sessions show: found, on or off.
+#[tauri::command]
+async fn choose_agent_features(
+    app: tauri::AppHandle,
+    choice: String,
+) -> Result<companion_core::agents::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || {
+        let repositories = companion_core::games::listed_repository_paths().unwrap_or_default();
+        companion_core::agents::choose(&data, &choice, &repositories)
+    })
+    .await
+}
+
 /// Uses a theme on offer from now on, on the owner's press.
 #[tauri::command]
 async fn choose_theme(app: tauri::AppHandle, id: String) -> Result<companion_core::themes::Status, Failure> {
@@ -762,7 +787,9 @@ pub fn run() {
             remove_theme,
             keep_theme,
             export_theme_draft,
-            start_games_list
+            start_games_list,
+            agent_features,
+            choose_agent_features
         ])
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {

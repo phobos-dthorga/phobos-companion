@@ -4,6 +4,7 @@ kind: task
 go: decisions
 words: decide, choice, question, agent asked, lean
 see: term-decision, page-decisions
+for: agents
 ---
 1. Open **Decisions** (the **D** key). Home says how many are waiting.
 2. Read the question and its options. The agent's lean is marked, and chosen to begin with.

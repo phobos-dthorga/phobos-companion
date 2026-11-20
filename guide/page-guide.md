@@ -9,7 +9,7 @@ What the Companion can do and how to do it, in three parts:
 
 - **How do I…?** Short answers to a task, in steps. **Take me there** opens the right page with the right part in view.
 - **Pages:** what each page is for, where its information comes from, and its keys.
-- **Words:** what the Companion's own words mean, such as a [backup](term-backup) or a [claim](term-claim).
+- **Words:** what the Companion's own words mean, such as a [backup](term-backup) or a [theme](term-theme). Entries about features for [AI agent sessions](term-agent-session) come last, in a group of their own.
 
 **Press F1 on any page** and the Guide opens at that page's entry. Search the Guide with the box at its top, or search everything at once with [Go to anything](task-find-anything): the Guide's entries are among its results.
 

@@ -2,10 +2,11 @@
 //!
 //! The games on the owner's list (`games`), running the tool kit and reading its answers (`kit`), the failures every part reports
 //! (`failure`), checks on what the window asks for (`checks`), the kit's arguments built so the window's text is never read as an
-//! option (`args`), reading git (`git`), starting processes without a console (`process`) and times as the kit reads them (`time`). The program's Tauri commands and its
+//! option (`args`), reading git (`git`), when features for agent sessions show (`agents`), starting processes without a console (`process`) and times as the kit reads them (`time`). The program's Tauri commands and its
 //! pages' own modules live in the program; a second front end could use this crate whole (owner, 19 Nov 2026:
 //! `docs/shared-code-audit.md`).
 
+pub mod agents;
 pub mod args;
 pub mod checks;
 pub mod failure;

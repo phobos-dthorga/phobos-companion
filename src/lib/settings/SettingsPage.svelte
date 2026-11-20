@@ -22,6 +22,7 @@
   import CleanupPanel from "../cleanup/CleanupPanel.svelte";
   import AddGamePanel from "../games/AddGamePanel.svelte";
   import ThemesPanel from "../theme/ThemesPanel.svelte";
+  import AgentsPanel from "../agents/AgentsPanel.svelte";
   import type { Setting, SettingsReading } from "./types";
 
   /**
@@ -169,6 +170,7 @@
     // The Guide's Take me there (0.34.0).
     if (focusPanel === "themes") untrack(() => void reveal("settings-themes"));
     if (focusPanel === "games") untrack(() => void reveal("settings-games"));
+    if (focusPanel === "agents") untrack(() => void reveal("settings-agents"));
   });
   $effect(() => {
     if (focusKey && reading.state === "ready")
@@ -188,6 +190,7 @@
   >
 </section>
 <ThemesPanel />
+<AgentsPanel />
 <RecordsPanel
   {saved}
   onbrowse={(key) => void browseKey(key)}

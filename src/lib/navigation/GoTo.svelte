@@ -31,7 +31,8 @@
     type Candidate,
     type Kind,
   } from "./goto";
-  import type { Place } from "./place";
+  import { FOR_AGENTS_PAGES, type Place } from "./place";
+  import { agents } from "../agents/state.svelte";
   import { ENTRIES, GUIDE_KIND_WORDS } from "../guide/entries";
 
   /**
@@ -86,7 +87,11 @@
   );
   const candidates = $derived([
     ...fromAddress(query, t("goto-open-address")),
-    ...fromPages(game?.id ?? null, (page) => t(`page-${page}`)),
+    ...fromPages(
+      game?.id ?? null,
+      (page) => t(`page-${page}`),
+      agents.shown ? [] : FOR_AGENTS_PAGES,
+    ),
     ...fromGuide(game?.id ?? null, ENTRIES, (kind) =>
       t(GUIDE_KIND_WORDS[kind as keyof typeof GUIDE_KIND_WORDS]),
     ),

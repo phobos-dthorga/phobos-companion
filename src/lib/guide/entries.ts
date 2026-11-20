@@ -13,6 +13,7 @@ import { PAGE_NAMES, type PageName } from "../navigation/place";
  *     go: mods?panel=settings        (Take me there: a page, and what it should show)
  *     words: restore, undo, rollback (more words a search finds it by)
  *     see: term-backup, page-mods    (See also)
+ *     for: agents                    (a feature for AI agent sessions, marked so and grouped apart; 0.37.0)
  *     ---
  *     Short paragraphs. **Bold** for what to press or must not miss; `code` for names.
  *     1. Numbered steps.
@@ -37,6 +38,8 @@ export type GuideEntry = {
   go: Destination | null;
   words: string[];
   see: string[];
+  /** About a feature for AI agent sessions (0.37.0): marked so, and grouped apart, since many people never use them. */
+  forAgents: boolean;
   blocks: Block[];
   /** Everything it says, plain, for searching. */
   text: string;
@@ -49,7 +52,7 @@ export const GUIDE_KIND_WORDS: Record<GuideKind, string> = {
   page: "guide-kind-page",
   term: "guide-kind-term",
 };
-const HEADER_KEYS = ["title", "kind", "page", "go", "words", "see"];
+const HEADER_KEYS = ["title", "kind", "page", "go", "words", "see", "for"];
 
 function isPage(name: string): name is PageName {
   return (PAGE_NAMES as readonly string[]).includes(name);
@@ -89,6 +92,8 @@ export function parseEntry(id: string, raw: string): GuideEntry {
   if (!KINDS.includes(kind))
     throw new Error(`${id}: kind must be task, page or term`);
   if (!header.title) throw new Error(`${id}: it has no title`);
+  if (header.for !== undefined && header.for !== "agents")
+    throw new Error(`${id}: for: may only be agents`);
   if (kind === "page" && !isPage(header.page ?? ""))
     throw new Error(`${id}: a page entry names its page`);
   const blocks = parseBlocks(match[2]);
@@ -105,6 +110,7 @@ export function parseEntry(id: string, raw: string): GuideEntry {
     go: header.go ? destination(header.go) : null,
     words: list(header.words),
     see: list(header.see),
+    forAgents: header.for === "agents",
     blocks,
     text: plain,
   };

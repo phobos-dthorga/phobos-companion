@@ -54,9 +54,11 @@ what you did, and what your saves and logs say, without typing a command.
   copies it, ready to paste into a message.
 - **Something's off** (the ! key, or its button beside Save a picture): saves a picture of the page as it is, with its address and
   a few words of yours (or none), for the next agent session to read when it starts. Home lists the notes still waiting, and what
-  was done about the others.
+  was done about the others. **It, the Decisions page and the claims board are features for AI agent sessions**: from 0.37.0
+  they show only where a repository on your list uses them (an `AGENTS.md`, a `CLAUDE.md`, a `.claude` folder or a
+  `config/decisions.json`), or once you switch them on in Settings.
 - **Back up your records** (Settings page): copies the Companion's own records (verdicts, history log, marks, screen notes,
-  shortcuts, central settings) into a folder you choose, which your NAS keeps; **choose that folder first**. Home reminds you
+  shortcuts, central settings) into a folder you choose, which your backup keeps; **choose that folder first**. Home reminds you
   when the newest copy is a week old.
 - **Who is working on what** (Home): what each agent session holds on the claims board, and for how long.
 - **Decisions** (D): every choice an agent made for you to revise, with its options and the agent's lean chosen to begin

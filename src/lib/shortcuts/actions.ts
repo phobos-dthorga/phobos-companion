@@ -11,6 +11,8 @@ export type Action = {
   defaultKey: string | null;
   /** The words for it in the catalogue, written out so the catalogue check can find them. */
   words: string;
+  /** A feature for AI agent sessions (0.37.0): listed and offered only while those are shown. */
+  forAgents?: true;
 };
 
 export const ACTIONS: Action[] = [
@@ -85,6 +87,7 @@ export const ACTIONS: Action[] = [
     scope: "everywhere",
     defaultKey: "d",
     words: "shortcut-page-decisions",
+    forAgents: true,
   },
   {
     id: "page.about",
@@ -139,6 +142,7 @@ export const ACTIONS: Action[] = [
     scope: "everywhere",
     defaultKey: "!",
     words: "shortcut-screen-note",
+    forAgents: true,
   },
   { id: "help", scope: "everywhere", defaultKey: "?", words: "shortcut-help" },
   /** The Guide (0.34.0): F1, Windows' usual help key, opens it at the page shown; the page itself has no key of its own. */

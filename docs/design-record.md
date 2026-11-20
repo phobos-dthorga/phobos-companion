@@ -963,6 +963,30 @@ whole pictures could not be drawn in the installed program (the browser checks r
 revise:** Python 3.14.10; the words of First steps. **Not tried on a clean PC yet**: the next check is an install under a fresh
 Windows account.
 
+## It speaks to a stranger (built 20 Nov 2026, 0.37.0)
+
+**The release audit's second step** (B1, B3 and part of B4). The owner's answer for features for agent sessions: "Hidden unless
+switched on, or otherwise detected".
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Use the Companion without AI agent sessions and never meet their features; learn from the Guide what a repository needs for each page |
+| What does it stop them doing? | Reading notes for sessions they don't have, a claims board that is always empty, and pages that say "nothing" with no way to learn why |
+| How does it change the way they work? | Nothing changes on the owner's PC (their repositories carry `AGENTS.md`); another person sees a quieter program, and a page with nothing to show leads to the Guide |
+| What outside it notices? | The Guide's entries for those features, marked and grouped, and Go to anything, which leaves their page out while they are hidden |
+
+| Part | How |
+| --- | --- |
+| Finding them | `companion_core::agents::signs`: `AGENTS.md`, `CLAUDE.md`, `.claude` or `config/decisions.json` in a listed repository; screen notes or answered decisions in the program's own folder (an empty folder is not a sign) |
+| The choice | `features.json` in the program's own folder, `found` (the default), `on` or `off`, written whole; an unreadable file reads as the default |
+| The window | `src/lib/agents/state.svelte.ts`: hidden until the host answers, then as last time at the next start (kept in the window's storage) so nothing blinks. Something's off and its key, the Decisions page, key and note, screen notes (not even read) and the claims board follow it |
+| The Guide | `for: agents` marks an entry; it says so at its top with "Show them, in Settings" while they are hidden, and is listed in its own group last |
+| Empty pages | `GuideLink.svelte`: Changes, Mods and Tests lead to "Make a repository ready for the Companion" |
+
+**Agent choices, owner to revise:** the signs looked for; the default (found); what counts as a feature for agent sessions (the
+test verdicts' "written by an agent" became "the tool kit's test-pass apply, run by you or an agent session", since a person can
+run it); the words of the new entries.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

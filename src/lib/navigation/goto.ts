@@ -52,8 +52,9 @@ export const PER_KIND = 8;
 export function fromPages(
   game: string | null,
   words: (page: PageName) => string,
+  hidden: readonly PageName[] = [],
 ): Candidate[] {
-  return PAGE_NAMES.map((page) => ({
+  return PAGE_NAMES.filter((page) => !hidden.includes(page)).map((page) => ({
     kind: "page",
     label: words(page),
     detail: "",

@@ -25,6 +25,7 @@ see: term-backup, task-back-up-mod
 | `go` | Take me there: a page, and what it should show, as `settings?panel=records` (the keys each page reads are in `cross-links.md`, N3) |
 | `words` | More words a search finds it by, comma-separated |
 | `see` | See also: other entries' ids, comma-separated |
+| `for` | Optional, `agents` only (0.37.0): about a feature for AI agent sessions. Marked so at its top, with the way to show those features while they are hidden, and listed in a group of its own after the rest |
 
 The words: short paragraphs; `1.` for steps and `-` for bullets; `###` for a small heading; `**bold**` for what to press or must not
 miss; `` `code` `` for names; `[words](entry-id)` links to another entry. Nothing else is read as markup.

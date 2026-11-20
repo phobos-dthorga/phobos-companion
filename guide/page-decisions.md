@@ -5,6 +5,7 @@ page: decisions
 go: decisions
 words: questions, choices, answer, agent, lean, decide
 see: task-answer-decision, term-decision
+for: agents
 ---
 **Choices the agents made for you to revise, and questions they need your word on**, from every repository.
 

@@ -1,6 +1,6 @@
 # Release audit: what stands between the Companion and another person (20 Nov 2026)
 
-**Status (20 Nov 2026):** written at the owner's request. **A1, A2, A3 and A5 are built in Companion 0.36.0** (the installer carries its own Python and tool kit, the games list starts on First steps, and a missing git is said plainly); not yet tried on a clean PC. The rest is not built. The owner answered four of the questions below. Written after
+**Status (20 Nov 2026):** written at the owner's request. **A1, A2, A3 and A5 are built in Companion 0.36.0** (the installer carries its own Python and tool kit, the games list starts on First steps, and a missing git is said plainly); not yet tried on a clean PC. **B1 and B3 are built in 0.37.0, and B4 in part** (the Guide's entries from the kit and each repository are not); see "Built in 0.37.0" below. The rest is not built. The owner answered four of the questions below. Written after
 the owner said: "eventually, I wish to make Companion available to others. That's the greater view we should be taking with regard
 to everything revolving around the Companion." The rule that follows from it is in `AGENTS.md` ("Design for a stranger").
 
@@ -46,6 +46,14 @@ to everything revolving around the Companion." The rule that follows from it is 
 | C3 | **Privacy is not stated anywhere a person would read it** | Say it in About and the Guide: the Companion itself makes no network calls (as read for this audit: no web client in the host or the window); the kit reads Steam's public pages only when a report asks; nothing is sent anywhere | Small |
 | C4 | **Licences of what would be bundled** | MIT for the code and the art clause for the crest are in `LICENSE`; add Python, the kit and the built tools to `THIRD_PARTY_NOTICES.md` when they are bundled | Small |
 | C5 | **Something's off goes to agent sessions only** | For others: an opt-in way to turn a note into a report they send themselves, showing exactly what would be sent | Medium |
+
+## Built in 0.37.0: it speaks to a stranger (B1, B3, part of B4)
+
+| # | What was done | Left |
+| --- | --- | --- |
+| B1 | **Make a repository ready for the Companion**, a Guide entry: what each page reads (git and a `CHANGELOG.md`; the optional `outstanding-work.md`, `test-evidence.json`, `installs.json`, `settings.json`, `decisions.json`). Changes, Mods and Tests, with nothing to read, say so with a button to it; Tests names its file | Small examples of the JSON files live in the kit's docs, which the Guide cannot link to yet |
+| B3 | **Features for agent sessions are hidden unless switched on, or detected** (the owner's answer): Settings' "Features for AI agent sessions" offers When a repository uses them (the default), Always and Never, and says what it found. Hidden, there is no Something's off or its key, no Decisions page, key or note, no screen notes and no claims board. The NAS is "your backup" in words and the Guide; Waylith is named only where a mod's textures are affected, and explained | About still says "ask an agent session" to build the installer: that goes with B6 |
+| B4 | **Entries for agent sessions are marked** (`for: agents`), grouped last, with the way to show those features; First steps (0.36.0) and the repository entry are there; entries name `test-pass apply` rather than an agent | **Entries from the kit and each repository** (namespaced, versioned, checked by the host), and other languages (C1) |
 
 ## Already right
 

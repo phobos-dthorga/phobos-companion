@@ -69,7 +69,7 @@ build differs from its proposal.
 | Code map | `repository`, `node` (a thing's id, `cs:...`, `def:...`, `lua:...`, `py:...`); `their` (another author's type or member, 0.26.0); `update` (a kept file, such as `Vehicles.dll`), `owner` (its mod's id) and `member` (one declaration's change), 0.26.0 |
 | Timeline | `day` (YYYY-MM-DD) |
 | Tests | `repository`, `row` |
-| Settings | `key` |
+| Settings | `key`; `panel` brings a panel into view: `records`, `cleanup`, `themes`, `games`, `agents` (0.37.0) |
 | Mods | `repository`, and `mod` or `changelog`; `before` (a moment) marks the newest backup from before it; `panel=settings` brings the settings to look at into view (0.21.0) |
 | Logs | `signature` |
 | Memory | `watch` (a kept watch's name, such as `20261119-205419-reload-test-2`; 0.23.0) |

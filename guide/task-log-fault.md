@@ -9,4 +9,4 @@ see: page-logs, task-something-off
 2. Open a message to see its stack and the mods it points at.
 3. A step in your own code opens on the **Code map**, where its history shows the changes that touched it.
 
-For an agent to look into it, press **!** on the page and say what you were doing.
+If you work with [AI agent sessions](task-agent-features), press **!** on the page and say what you were doing, for the next one to look into.

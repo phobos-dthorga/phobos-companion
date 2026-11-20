@@ -5,6 +5,7 @@
   import PictureViewer from "./lib/gamefiles/PictureViewer.svelte";
   import {
     addressOf,
+    FOR_AGENTS_PAGES,
     place as placeAt,
     type PageName,
   } from "./lib/navigation/place";
@@ -48,6 +49,7 @@
   import ScreenNoteButton from "./lib/notes/ScreenNoteButton.svelte";
   import MakeupPage from "./lib/makeup/MakeupPage.svelte";
   import DecisionsPage from "./lib/decisions/DecisionsPage.svelte";
+  import { agents } from "./lib/agents/state.svelte";
   import AboutPage from "./lib/about/AboutPage.svelte";
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
   import MemoryPage from "./lib/memory/MemoryPage.svelte";
@@ -176,7 +178,14 @@
       inDialog: false,
       run: {
         ...Object.fromEntries(
-          PAGES.map(([id, next]) => [id, () => goPage(next)]),
+          PAGES.map(([id, next]) => [
+            id,
+            // A page for agent sessions has no key while they are hidden (0.37.0).
+            () => {
+              if (agents.shown || !FOR_AGENTS_PAGES.includes(next))
+                goPage(next);
+            },
+          ]),
         ),
         "game.previous": () => stepGame(-1),
         "game.next": () => stepGame(1),
@@ -242,7 +251,7 @@
         >
           <span class="group-name" id={`pages-${group.id}`}>{t(group.key)}</span
           >
-          {#each group.pages as next (next.page)}
+          {#each group.pages.filter((p) => agents.shown || !FOR_AGENTS_PAGES.includes(p.page)) as next (next.page)}
             <button
               type="button"
               class="page"
@@ -295,7 +304,9 @@
     </span>
     {#if selected}
       <PictureButton game={selected.name} page={t(`page-${page}`)} />
-      <ScreenNoteButton game={selected.name} page={t(`page-${page}`)} />
+      {#if agents.shown}
+        <ScreenNoteButton game={selected.name} page={t(`page-${page}`)} />
+      {/if}
     {/if}
     <span class="look-again">
       {#if !looking && home.state === "ready"}

@@ -8,6 +8,7 @@
   import { onMount } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
+  import GuideLink from "../guide/GuideLink.svelte";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
@@ -152,6 +153,7 @@
   <FailurePanel failure={reading.failure} onretry={load} />
 {:else if choices.length === 0}
   <p class="lead">{t("changes-none", { game: game.name })}</p>
+  <GuideLink entry="task-repository-ready" words={t("guide-ready-link")} />
 {:else if chosen}
   <div class="toggles" role="group" aria-label={t("changes-products-label")}>
     {#each choices as choice (keyOf(choice))}

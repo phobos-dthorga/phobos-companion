@@ -9,4 +9,4 @@ see: term-test-row, term-seen-working, page-tests
 2. Read **What to do** and **What passes**, and try it in the game if you haven't.
 3. Press **Passed** or **Failed**. Add a note if part of it worked: say which.
 
-Changed your mind? **Take it back**. Your verdict waits under **Your verdicts** until an agent writes it into the test list.
+Changed your mind? **Take it back**. Your verdict waits under **Your verdicts** until it is written into the test list (the tool kit's `test-pass apply` does it, run by you or an agent session).

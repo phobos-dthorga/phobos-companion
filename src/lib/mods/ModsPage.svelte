@@ -10,6 +10,7 @@
   import { onMount, untrack } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
+  import GuideLink from "../guide/GuideLink.svelte";
   import type { EntryRequest } from "../code/types";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import RichText from "../shell/RichText.svelte";
@@ -808,6 +809,7 @@
   <FailurePanel failure={reading.failure} onretry={() => load()} />
 {:else if repositories.length === 0}
   <p class="lead">{t("mods-none", { game: game.name })}</p>
+  <GuideLink entry="task-repository-ready" words={t("guide-ready-link")} />
 {:else}
   <section class="strip" aria-labelledby="before-you-play">
     <h2 id="before-you-play">{t("mods-pre-heading")}</h2>
@@ -1129,7 +1131,12 @@
   {#if textures.state === "ready" && encodeTargets(textures.status.mods).length > 0}
     <section class="textures" aria-labelledby="textures-heading">
       <h2 id="textures-heading">{t("mods-textures-heading")}</h2>
-      <p class="small">{t("mods-textures-lead")}</p>
+      <p class="small">
+        {t("mods-textures-lead")}
+        {#if textures.status.mods.some((m) => m.unpacked > 0)}
+          {t("mods-textures-lead-unpacked")}
+        {/if}
+      </p>
       <ul class="entries">
         {#each encodeTargets(textures.status.mods) as found (found.folderName)}
           <li>

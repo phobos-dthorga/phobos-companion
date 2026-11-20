@@ -4,6 +4,7 @@ import "./app.css";
 import { applyTheme, rememberedTheme, useTheme } from "./lib/theme/runtime";
 import { readThemes } from "./lib/theme/desktopClient";
 import houseDthorga from "../themes/house-dthorga.json";
+import { loadAgents } from "./lib/agents/state.svelte";
 
 const target = document.getElementById("app");
 
@@ -18,3 +19,5 @@ mount(App, { target });
 void readThemes().then((answer) => {
   if (answer.state === "ready") useTheme(answer.status.active.colours);
 });
+// Whether features for agent sessions show (0.37.0): hidden, or as last time, until the host answers.
+void loadAgents();

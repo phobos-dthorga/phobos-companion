@@ -21,6 +21,7 @@
   import CleanupNote from "../cleanup/CleanupNote.svelte";
   import ClaimsPanel from "../claims/ClaimsPanel.svelte";
   import DecisionsNote from "../decisions/DecisionsNote.svelte";
+  import { agents } from "../agents/state.svelte";
 
   const PENDING_SHOWN = 6;
   const OPEN_SHOWN = 6;
@@ -68,6 +69,8 @@
   let notes = $state<Notes | null>(null);
   $effect(() => {
     void noteSaves.count;
+    // Notes are for agent sessions (0.37.0): not read at all while those features are hidden.
+    if (!agents.shown) return;
     void readScreenNotes().then((answer) => {
       if (answer.state === "ready") notes = answer.notes;
     });
@@ -210,12 +213,14 @@
   </section>
 {/if}
 
-<DecisionsNote game={game.id} />
+{#if agents.shown}
+  <DecisionsNote game={game.id} />
+{/if}
 
 <RecordsNote game={game.id} />
 <CleanupNote game={game.id} />
 
-{#if notes && (notes.open.length > 0 || notes.dealt_count > 0)}
+{#if agents.shown && notes && (notes.open.length > 0 || notes.dealt_count > 0)}
   <section
     class="panel"
     class:attention={notes.open.length > 0}
@@ -286,7 +291,9 @@
   </section>
 {/if}
 
-<ClaimsPanel />
+{#if agents.shown}
+  <ClaimsPanel />
+{/if}
 
 {#if pins && pins.pins.length > 0}
   <section class="panel" aria-labelledby="pins-title">

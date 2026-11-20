@@ -14,6 +14,7 @@
     type Saved,
   } from "./bindings";
   import { actionsIn, keyOf, keyWords } from "./keys";
+  import { agents } from "../agents/state.svelte";
   import { keepShortcuts, shortcuts } from "./state.svelte";
 
   /**
@@ -155,7 +156,7 @@
       <section aria-labelledby={`shortcuts-scope-${scope}`}>
         <h3 id={`shortcuts-scope-${scope}`}>{t(scopeWords)}</h3>
         <ul class="rows">
-          {#each actionsIn(scope) as item (item.id)}
+          {#each actionsIn(scope, agents.shown) as item (item.id)}
             {@const key = keys.get(item.id) ?? null}
             <li class="row">
               <span class="what">{t(item.words)}</span>

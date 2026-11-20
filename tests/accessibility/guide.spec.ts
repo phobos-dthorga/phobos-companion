@@ -113,3 +113,29 @@ for (const [name, viewport] of [
     });
   });
 }
+
+test("a page with nothing to read says what a repository needs, in the Guide (0.37.0)", async ({
+  page,
+}) => {
+  await mockHost(page, {
+    home_status: { result: sampleHome() },
+    kit_status: healthyKit,
+    test_lists: { result: [] },
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Tests", exact: true }).click();
+  await expect(page.locator("main")).toContainText("config/test-evidence.json");
+  await page
+    .getByRole("button", {
+      name: "How does a repository give this page something?",
+    })
+    .click();
+  const article = page.getByRole("article");
+  await expect(article).toContainText(
+    "Make a repository ready for the Companion",
+  );
+  await expect(article).toContainText("CHANGELOG.md");
+  await audit(page);
+  await page.keyboard.press(",");
+  await expect(page.locator("main")).toContainText("config/test-evidence.json");
+});

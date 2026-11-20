@@ -112,6 +112,12 @@ reads them.
   geometry in `layout.ts`, tested without a screen.
 - **The owner's keyboard shortcuts are kept in `shortcuts.json` in this program's own folder** (`src-tauri/src/shortcuts.rs`),
   written only from the Settings page's shortcuts dialog, whole and checked.
+- **Features for AI agent sessions are offered, never assumed** (0.37.0; the owner, 20 Nov 2026: "Hidden unless switched on, or
+  otherwise detected"). Something's off, the Decisions page and its note, open screen notes and the claims board show only while
+  `src/lib/agents/state.svelte.ts` says so: by the person's choice in Settings, or, by default, when `companion_core::agents`
+  finds sessions at work (a listed repository's `AGENTS.md`, `CLAUDE.md`, `.claude` or `config/decisions.json`, or notes and
+  answers already kept). A new feature for agent sessions joins that switch, its key carries `forAgents`, its page joins
+  `FOR_AGENTS_PAGES` and its Guide entries `for: agents`. The choice is kept in `features.json` in the program's own folder.
 - **Otherwise read-only towards games, saves and repositories.** The only other things the program writes are the owner's test verdicts and, since
   0.9.0, their word on notes no row names ("make a row" or "no row needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks),
   each appended to its own data folder (`test-verdicts/<repository>.jsonl` and `test-key-decisions/<repository>.jsonl`,

@@ -28,7 +28,7 @@ const FOCUS_KEYS: Partial<Record<PageName, string[]>> = {
   guide: ["entry"],
 };
 const PANELS: Partial<Record<PageName, string[]>> = {
-  settings: ["records", "cleanup", "themes", "games"],
+  settings: ["records", "cleanup", "themes", "games", "agents"],
   mods: ["settings"],
 };
 
@@ -117,6 +117,29 @@ describe("reading an entry", () => {
       parseEntry("x", "---\ntitle: X\nkind: term\ncolour: red\n---\nWords."),
     ).toThrow(/not one of/);
     expect(() => destination("nowhere?x=1")).toThrow(/not a page/);
+    expect(() =>
+      parseEntry("x", "---\ntitle: X\nkind: term\nfor: robots\n---\nWords."),
+    ).toThrow(/only be agents/);
+  });
+
+  it("marks an entry about features for agent sessions (0.37.0), and only that one", () => {
+    const marked = parseEntry(
+      "term-x",
+      "---\ntitle: X\nkind: term\nfor: agents\n---\nWords.",
+    );
+    expect(marked.forAgents).toBe(true);
+    expect(
+      parseEntry("term-y", "---\ntitle: Y\nkind: term\n---\nWords.").forAgents,
+    ).toBe(false);
+    // The Decisions page and the words for what agent sessions do are marked, so a person without them reads past them.
+    for (const id of [
+      "page-decisions",
+      "term-claim",
+      "term-screen-note",
+      "task-something-off",
+    ])
+      expect(entry(id)?.forAgents).toBe(true);
+    expect(entry("page-home")?.forAgents).toBe(false);
   });
 
   it("turns links into pieces of their own, and leaves the rest as written", () => {

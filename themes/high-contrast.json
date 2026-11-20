@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "org.phobosdthorga.companion.high-contrast",
+  "name": "High contrast",
+  "author": "D'thorga Companion",
+  "colours": {
+    "canvas": "#000000",
+    "surface": "#0A0A0A",
+    "surface_raised": "#141414",
+    "surface_soft": "#1E1E1E",
+    "text": "#FFFFFF",
+    "text_muted": "#D7D7D7",
+    "line": "#858585",
+    "accent": "#FFD75A",
+    "observed": "#67C8FF",
+    "risk": "#FF786D",
+    "success": "#6EFF9F",
+    "comparison": "#D39BFF",
+    "series_1": "#59FFBE",
+    "series_2": "#FFD75A",
+    "series_3": "#67C8FF",
+    "series_4": "#FF786D",
+    "series_5": "#D39BFF",
+    "series_6": "#6EFF9F",
+    "series_7": "#FFA94D",
+    "series_8": "#F2F2F2"
+  }
+}

@@ -865,6 +865,32 @@ overnight on their go-ahead of 20 Nov 2026.
 **Not built:** the RimWorld extras (start-up chart, crashes on the Timeline, the creations shelf). **Nothing here is tested on
 screen.**
 
+## Themes (built 20 Nov 2026, 0.33.0)
+
+**The owner asked for themes (20 Nov 2026), with their OnAir WyrmGrid as the best reference**, and chose everything OnAir has
+(choosing, import, export, removal and the authoring tool) and two built-ins beside House D'thorga: Phobos D'thorga and High contrast.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Choose how the Companion looks, share a theme as a file, and make their own with every colour checked as they go |
+| What does it stop them doing? | Making a theme whose words cannot be read; bringing in anything but colours (no CSS, fonts, pictures or addresses) |
+| How does it change the way they work? | High contrast for tired eyes or a bright room is one press away; a theme made once travels with the records backup |
+
+| Part | How |
+| --- | --- |
+| The format | `themes/*.json`, as House D'thorga's has been since 0.1: schema 1, an id, a name, an optional author, twenty roles. Built-ins' ids start `org.phobosdthorga.companion.`, which the owner's may not |
+| The checks | `companion_core::themes::usable` (the host's, the authority) and `src/lib/theme/presentation.ts`'s `problems` (the window's, for the maker's live list), the same rules, each tested on every theme file |
+| Kept | `themes/` in the program's own folder: the owner's themes as `<id>.json` and `chosen.json`; a theme with the same id is a revision, the same colours under another id are refused |
+| Drawn | `applyTheme` sets only the roles, only as `#RRGGBB`; the window remembers the colours in its own storage so the next start draws in them at once, and the host's answer confirms them |
+| Open and Save | Windows' own dialogs, opened by the host (`pick::open_file`, `pick::save_file`), so the window never names a path to read or write |
+| Making one | `ThemeMaker.svelte`: starts from any theme; a colour box and a `#RRGGBB` box per role, in four groups; a preview drawn in the draft's colours; each failing pair listed; Keep and use waits until all pass; Save as a file checks the shape only |
+
+**Phobos D'thorga** is OnAir's of that name, mapped to the Companion's roles: ember-red accent, amber for what was read, lilac for
+what was worked out, pale coral for what went wrong (so it is not the accent's red). **High contrast** is OnAir's, with yellow as
+the accent. Both pass every check (weakest words 6.0:1). **Agent choices, owner to revise:** those mappings; the role names the maker
+shows; the author line shown only on the owner's themes. **Not built** (as OnAir): fonts, pictures, layouts or any CSS, which stay
+refused. **Nothing here is tested on screen.**
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

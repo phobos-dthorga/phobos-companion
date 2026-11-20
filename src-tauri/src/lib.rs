@@ -31,6 +31,7 @@ mod settings_ledger;
 mod settings_page;
 mod shortcuts;
 mod tests_page;
+mod themes_page;
 
 use companion_core::failure::{Failure, FailureCode};
 use companion_core::kit;
@@ -487,6 +488,55 @@ async fn game_screenshots(game: String) -> Result<serde_json::Value, Failure> {
     blocking(move || game_files_page::screenshots(&game)).await
 }
 
+/// Every theme on offer and the one in use (0.33.0). Only reads.
+#[tauri::command]
+async fn theme_status(app: tauri::AppHandle) -> Result<companion_core::themes::Status, Failure> {
+    let folder = themes_page::folder(&data_folder(&app)?);
+    blocking(move || Ok(companion_core::themes::status(&folder))).await
+}
+
+/// Uses a theme on offer from now on, on the owner's press.
+#[tauri::command]
+async fn choose_theme(app: tauri::AppHandle, id: String) -> Result<companion_core::themes::Status, Failure> {
+    let folder = themes_page::folder(&data_folder(&app)?);
+    blocking(move || companion_core::themes::choose(&folder, &id)).await
+}
+
+/// Brings in a theme file the owner chooses in Windows' Open dialog; checked, kept and used.
+#[tauri::command]
+async fn import_theme(app: tauri::AppHandle, title: String) -> Result<themes_page::Moved, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || themes_page::import(&app, &data, &title)).await
+}
+
+/// Saves a theme on offer where the owner chooses in Windows' Save dialog.
+#[tauri::command]
+async fn export_theme(app: tauri::AppHandle, id: String, title: String) -> Result<themes_page::Moved, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || themes_page::export(&app, &data, &id, &title)).await
+}
+
+/// Takes away a theme of the owner's, on their press; the program's own stay.
+#[tauri::command]
+async fn remove_theme(app: tauri::AppHandle, id: String) -> Result<companion_core::themes::Status, Failure> {
+    let folder = themes_page::folder(&data_folder(&app)?);
+    blocking(move || companion_core::themes::remove(&folder, &id)).await
+}
+
+/// Keeps a theme the owner made, and uses it, once every check passes.
+#[tauri::command]
+async fn keep_theme(app: tauri::AppHandle, text: String) -> Result<companion_core::themes::Status, Failure> {
+    let folder = themes_page::folder(&data_folder(&app)?);
+    blocking(move || companion_core::themes::keep(&folder, &text)).await
+}
+
+/// Saves a theme being made where the owner chooses, before every check passes.
+#[tauri::command]
+async fn export_theme_draft(app: tauri::AppHandle, text: String, title: String) -> Result<themes_page::Moved, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || themes_page::export_draft(&app, &data, &text, &title)).await
+}
+
 /// One listed screenshot's bytes, raw, for the window to draw small or whole (0.32.0).
 #[tauri::command]
 async fn screenshot(path: String) -> Result<tauri::ipc::Response, Failure> {
@@ -685,7 +735,14 @@ pub fn run() {
             steam_games,
             add_game,
             game_screenshots,
-            screenshot
+            screenshot,
+            theme_status,
+            choose_theme,
+            import_theme,
+            export_theme,
+            remove_theme,
+            keep_theme,
+            export_theme_draft
         ])
         .plugin(tauri_plugin_dialog::init())
         .setup(|_| {

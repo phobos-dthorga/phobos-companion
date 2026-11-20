@@ -1,12 +1,20 @@
 import { mount } from "svelte";
 import App from "./App.svelte";
 import "./app.css";
-import { applyTheme } from "./lib/theme/runtime";
+import { applyTheme, rememberedTheme, useTheme } from "./lib/theme/runtime";
+import { readThemes } from "./lib/theme/desktopClient";
 import houseDthorga from "../themes/house-dthorga.json";
 
 const target = document.getElementById("app");
 
 if (!target) throw new Error("The application root is missing.");
 
+// House D'thorga underneath everything, then the theme in use last time, so the window draws in it at once (0.33.0); the host's
+// answer then confirms it, or sets the one it holds.
 applyTheme(houseDthorga.colours);
+const remembered = rememberedTheme();
+if (remembered) applyTheme(remembered);
 mount(App, { target });
+void readThemes().then((answer) => {
+  if (answer.state === "ready") useTheme(answer.status.active.colours);
+});

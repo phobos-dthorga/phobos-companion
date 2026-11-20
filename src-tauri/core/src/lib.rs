@@ -14,6 +14,7 @@ pub mod git;
 pub mod kit;
 pub mod prefs;
 pub mod process;
+pub mod themes;
 pub mod time;
 
 use std::path::PathBuf;

@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-11-20
+
+The owner asked for themes (20 November 2026), with their OnAir WyrmGrid as the reference, and chose everything it has. Not yet tested on screen.
+
+### Added
+
+- **Appearance**, on the Settings page: choose how the Companion looks. Each theme is shown in its own colours; **Use this** changes the whole window at once and is kept for next time, drawn from the first moment the program opens.
+- **Three themes come with it**: House D'thorga (as before, and still the default), **Phobos D'thorga** (oxblood with ember red and amber, after OnAir's of that name) and **High contrast** (black, white and bright colours, for tired eyes or a bright room).
+- **Bring in a theme file…** and **Save a copy…** use Windows' own Open and Save dialogs, so a theme can be shared as a file. Your own themes can be removed (after a second press); the Companion's cannot.
+- **Make your own from this**, on any theme: change each colour with a colour box or by typing its code, see a preview of the page in your colours, and see each pair that cannot be read as you go. **Keep and use** waits until every colour can be read; **Save as a file…** keeps a draft at any time.
+- A theme is colours only: a file holding anything else (styles, fonts, pictures, addresses) is refused, and every theme is checked so its words, charts and lines can be read on every background. If the theme in use goes missing or fails, House D'thorga is used and the page says why.
+- Your themes are kept in the Companion's own folder, which the records backup copies.
+
 ## [0.32.0] - 2026-11-20
 
 Item 5 of docs/later.md, which the owner said yes to on 19 November 2026: a screenshot gallery, each picture placed on the Timeline on its day. Built overnight on the owner's go-ahead of 20 November. Not yet tested on screen.

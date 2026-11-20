@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "org.phobosdthorga.companion.phobos-dthorga",
+  "name": "Phobos D'thorga",
+  "author": "D'thorga Companion",
+  "colours": {
+    "canvas": "#100708",
+    "surface": "#1A0B0D",
+    "surface_raised": "#261014",
+    "surface_soft": "#32161B",
+    "text": "#F8EDEF",
+    "text_muted": "#D7B8BE",
+    "line": "#8C4A55",
+    "accent": "#FF6B7A",
+    "observed": "#F2A65A",
+    "risk": "#FFB4A8",
+    "success": "#8FE3B2",
+    "comparison": "#C8B4FF",
+    "series_1": "#FF6B7A",
+    "series_2": "#F2A65A",
+    "series_3": "#E68AC3",
+    "series_4": "#A99CFF",
+    "series_5": "#8FE3B2",
+    "series_6": "#6EC3E0",
+    "series_7": "#E8D27A",
+    "series_8": "#D9A27E"
+  }
+}

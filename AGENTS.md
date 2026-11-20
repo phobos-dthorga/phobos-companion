@@ -138,7 +138,14 @@ reads them.
   `src/lib/changelog/` for showing a changelog, and `src/app.css` for a page's `h1`, `.lead`, `.how`, `.small` and pressed
   `.toggle` choices. Before writing a helper or a style, look there first.
 - **Words live in `locales/en-AU.json`**, never in a component; a test holds every key to it. Fluent, with named variables.
-- **Colours come from the theme file**, by role. A test holds them to the contrast rules. Colour never carries a meaning alone.
+- **Colours come from the theme in use**, by role, never a literal colour in a component. A test holds the program's own themes
+  (`themes/*.json`) to the contrast rules. Colour never carries a meaning alone.
+- **A theme is data, never CSS** (0.33.0; the owner, 20 Nov 2026: themes "as OnAir has them", after onair-wyrmgrid's ADR-0009): a
+  version, an id, a name, an optional author and exactly the twenty roles as `#RRGGBB`, at most 32 KB. The host's
+  `companion_core::themes` is the authority: it checks the shape and the contrast (words 4.5:1, chart colours 3:1, lines 1.5:1, on
+  every surface) before a theme is kept or used, keeps the owner's themes and choice in the program's own folder, opens the Open
+  and Save dialogs itself, and falls back to House D'thorga, saying why, when the chosen theme is missing or fails. The window sets
+  only `--colour-<role>` from it. A new role is added to the format, every theme file, both checks and the maker in one change.
 - **Controls are at least 44 px**, nothing needs a drag or appears only on hover, everything is reachable from the keyboard, and
   the type floor is 12 px.
 - **Failures say what happened, what stayed safe and what to do**, then the technical detail folded away.

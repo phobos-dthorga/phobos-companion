@@ -21,6 +21,7 @@
   import RecordsPanel from "../records/RecordsPanel.svelte";
   import CleanupPanel from "../cleanup/CleanupPanel.svelte";
   import AddGamePanel from "../games/AddGamePanel.svelte";
+  import ThemesPanel from "../theme/ThemesPanel.svelte";
   import type { Setting, SettingsReading } from "./types";
 
   /**
@@ -183,6 +184,7 @@
     >{t("settings-keyboard-open")}</button
   >
 </section>
+<ThemesPanel />
 <RecordsPanel
   {saved}
   onbrowse={(key) => void browseKey(key)}

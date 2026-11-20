@@ -63,6 +63,43 @@ pub fn pick(app: &AppHandle, kind: Kind, title: &str, current: Option<&str>) -> 
     }
 }
 
+/// A kind of file the pickers offer by its extension (0.33.0): "Theme files (*.json)".
+pub struct Filter<'a> {
+    pub name: &'a str,
+    pub extensions: &'a [&'a str],
+}
+
+fn checked_title(title: &str) -> Result<String, Failure> {
+    let title = checks::one_line(title);
+    if title.chars().count() > MAX_TITLE {
+        return Err(Failure::refused("a picker's title is one short line"));
+    }
+    Ok(title)
+}
+
+fn into_path(path: tauri_plugin_dialog::FilePath) -> Result<PathBuf, Failure> {
+    path.into_path().map_err(|problem| {
+        Failure::refused(format!("the picker gave something that is not a path on this PC ({problem})"))
+    })
+}
+
+/// Windows' Open dialog for one file of a kind; None when the owner closes it.
+pub fn open_file(app: &AppHandle, title: &str, filter: &Filter) -> Result<Option<PathBuf>, Failure> {
+    let dialog = app.dialog().file().set_title(checked_title(title)?).add_filter(filter.name, filter.extensions);
+    dialog.blocking_pick_file().map(into_path).transpose()
+}
+
+/// Windows' Save dialog, offering a file name; None when the owner closes it. The caller writes the file.
+pub fn save_file(app: &AppHandle, title: &str, file_name: &str, filter: &Filter) -> Result<Option<PathBuf>, Failure> {
+    let dialog = app
+        .dialog()
+        .file()
+        .set_title(checked_title(title)?)
+        .set_file_name(file_name)
+        .add_filter(filter.name, filter.extensions);
+    dialog.blocking_save_file().map(into_path).transpose()
+}
+
 #[cfg(test)]
 #[path = "tests/pick.rs"]
 mod tests;

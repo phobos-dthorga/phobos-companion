@@ -106,7 +106,7 @@ screenshots as a list, and where the space goes; places and the Steam app ID in 
 | Item | Where it came from | What it needs or waits for |
 | --- | --- | --- |
 | **Deleting old autosaves or Real Ruins files** from the Companion | Game-files discussion, 19 Nov 2026 | **The owner's decision.** Until then, sizes only |
-| **Running the Companion on another machine, or for someone else** | Limits in `design-record.md` | It finds the kit by the folder it was built from; it needs the kit bundled or found by setting, and Python found without the PATH |
+| **Running the Companion on another machine, or for someone else** | Limits in `design-record.md`; the owner's word of 20 Nov 2026 that it is to be released for others | **The [release audit](release-audit.md)**: every finding, in the order a stranger would hit them, with the owner's questions |
 | **S1: design records joined to code** | `cross-links.md` | A way to tie a design record's sections to the code that builds them |
 | **S5: rules joined to the checks that enforce them** | `cross-links.md` | A list tying each rule to its check script |
 | **Size as installed** on Make-up | Make-up, 0.20.0 | Each game's install records read for sizes |

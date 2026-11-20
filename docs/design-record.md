@@ -341,8 +341,8 @@ change and removal starts from that sentence (the rule is in `AGENTS.md`):
 | Reports, Atlas | RimWorld only | Kit commands for that game's saves and logs |
 | Mods (0.26.2), Atlas, Logs, Memory, Game files, for a set of tools (0.24.0) | Never: a set of tools has none of what they read | Nothing: the page says so in words; Mods points to About |
 
-**What stands between this and another person** (not built; listed so later work does not add to it): the program finds the kit
-and the games list by the folder it was built in; it needs Python; and each repository's install is that repository's own script.
+**What stands between this and another person** is now the [release audit](release-audit.md) (20 Nov 2026, after the owner's word
+that the Companion is to be released for others): what a stranger would hit, in order, with options and the owner's questions.
 
 ## Progress (built 19 Nov 2026)
 

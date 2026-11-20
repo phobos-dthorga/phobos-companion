@@ -18,10 +18,18 @@ reads them.
 ## Working with the owner
 
 - Author: Phobos A. D'thorga (phobosgekko). **Built for humans and dragons first**; agents keep the command line.
-- **It is a viewer for every game and every framework the owner mods, mainly for the owner and maybe for others too** (owner, 19 Nov
+- **It is a viewer for every game and every framework the owner mods, and it is to be released for others** (owner, 19 Nov
   2026: "any further work designed, changed, or removed with the Companion should be done around the fact that this is going to
-  be a multi-game, multi-framework, viewer"). Before designing, changing or removing anything, ask what it does for a game other
-  than the one in hand, and for a person who is not the owner:
+  be a multi-game, multi-framework, viewer"; owner, 20 Nov 2026: "eventually, I wish to make Companion available to others. That's
+  the greater view we should be taking with regard to everything revolving around the Companion"). Before designing, changing or
+  removing anything, ask what it does for a game other than the one in hand, and for a person who is not the owner:
+  - **Design for a stranger.** Someone who has never seen these repositories, may not mod RimWorld, may not work with AI agents
+    and may not read English. Features for agent sessions (claims, screen notes read by sessions, decisions) and for one game's
+    tools are offered where they apply, never assumed; the Guide explains everything in words for that person.
+  - **What others bring is data, checked by the host** (themes, guide entries, anything a person imports or a repository
+    supplies): never markup, scripts or addresses to fetch, and refused in words when it fails a check.
+  - **Nothing adds to what stands between the Companion and another person**: the release audit (`docs/release-audit.md`) lists
+    it, and a change that must add to it says so there.
   - **Build the general thing first.** A page reads what every repository has (a changelog, git history, a config file it opts in
     with), and a game's own knowledge reaches it through the kit's manifest and adapters. A feature that can only ever serve one
     game says so in the design record, with the reason.

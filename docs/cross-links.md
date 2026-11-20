@@ -75,6 +75,7 @@ build differs from its proposal.
 | Memory | `watch` (a kept watch's name, such as `20261119-205419-reload-test-2`; 0.23.0) |
 | Reports | `command`, `report` |
 | About | none (0.25.0) |
+| Guide | `entry` (an entry's id, such as `task-go-back`; 0.34.0). Each entry opened is a step |
 
 ## Proposed order
 

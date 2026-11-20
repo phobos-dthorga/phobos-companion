@@ -141,6 +141,19 @@ export const ACTIONS: Action[] = [
     words: "shortcut-screen-note",
   },
   { id: "help", scope: "everywhere", defaultKey: "?", words: "shortcut-help" },
+  /** The Guide (0.34.0): F1, Windows' usual help key, opens it at the page shown; the page itself has no key of its own. */
+  {
+    id: "guide.here",
+    scope: "everywhere",
+    defaultKey: "F1",
+    words: "shortcut-guide-here",
+  },
+  {
+    id: "page.guide",
+    scope: "everywhere",
+    defaultKey: null,
+    words: "shortcut-page-guide",
+  },
   {
     id: "nav.back",
     scope: "everywhere",

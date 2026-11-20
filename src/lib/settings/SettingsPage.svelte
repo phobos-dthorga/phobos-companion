@@ -166,6 +166,9 @@
       untrack(() => void reveal("settings-records"));
     if (focusPanel === "cleanup")
       untrack(() => void reveal("settings-cleanup"));
+    // The Guide's Take me there (0.34.0).
+    if (focusPanel === "themes") untrack(() => void reveal("settings-themes"));
+    if (focusPanel === "games") untrack(() => void reveal("settings-games"));
   });
   $effect(() => {
     if (focusKey && reading.state === "ready")

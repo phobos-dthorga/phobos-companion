@@ -4,6 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-11-20
+
+The owner asked for "documentation, or an encyclopedia, into the Companion, so I know what to do or how to find something" (20 November 2026), and chose the Companion's own guide first and F1 to open it. Not yet tested on screen.
+
+### Added
+
+- **The Guide**, under Tools in the page bar: **How do I…?** answers in steps (going back to an older version of a mod, getting ready to play, backing up your records, passing a test, adding a game, making a theme and more), an entry for **every page**, and the Companion's own **words** explained (backup, claim, seen working, install record…).
+- **Press F1 on any page** and the Guide opens at that page's entry. F1 can be changed in Settings like every shortcut.
+- **Take me there** on an answer opens the right page with the right part in view. Links between entries, and See also, lead on; **Back** (the , key) returns, one entry at a time.
+- **Search the Guide** with the box at its top; **Go to anything** (the / key) finds the Guide's entries too.
+- Settings can now be opened at Appearance and at Games on the list, for Take me there.
+
 ### Changed
 
 - **The LICENSE adds two paragraphs** (phobos-modkit's shared licence rule, the owner's decisions of 20 November 2026): our own art and sound are CC BY 4.0, credited to House D'thorga, and the D'thorga names and preview images are not part of either grant, so a fork or reupload uses its own name. The code stays MIT; nothing granted before is withdrawn.

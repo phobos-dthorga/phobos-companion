@@ -3,7 +3,11 @@
   import CodeViewer from "./lib/code/CodeViewer.svelte";
   import AsItStood from "./lib/timeline/AsItStood.svelte";
   import PictureViewer from "./lib/gamefiles/PictureViewer.svelte";
-  import { addressOf, type PageName } from "./lib/navigation/place";
+  import {
+    addressOf,
+    place as placeAt,
+    type PageName,
+  } from "./lib/navigation/place";
   import {
     back,
     canGoBack,
@@ -47,6 +51,7 @@
   import AboutPage from "./lib/about/AboutPage.svelte";
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
   import MemoryPage from "./lib/memory/MemoryPage.svelte";
+  import GuidePage from "./lib/guide/GuidePage.svelte";
   import Crest from "./lib/shell/Crest.svelte";
   import FailurePanel from "./lib/shell/FailurePanel.svelte";
   import ProgressBar from "./lib/shell/ProgressBar.svelte";
@@ -107,6 +112,7 @@
     ["page.about", "about"],
     ["page.gamefiles", "gamefiles"],
     ["page.memory", "memory"],
+    ["page.guide", "guide"],
   ];
 
   /** The page bar's groups (0.22.0): what you play with, the code behind it, and the tools' own pages. */
@@ -146,6 +152,7 @@
         { page: "settings", key: "page-settings" },
         { page: "decisions", key: "page-decisions" },
         { page: "about", key: "page-about" },
+        { page: "guide", key: "page-guide" },
       ],
     },
   ];
@@ -175,6 +182,12 @@
         "look-again": () => void refresh(),
         search: () => (goToOpen = true),
         help: () => (helpOpen = true),
+        // F1 (0.34.0): the Guide, at the entry for the page shown; on the Guide itself it stays where it is.
+        "guide.here": () => {
+          const shown = here();
+          if (shown.page !== "guide")
+            go(placeAt("guide", shown.game, { entry: `page-${shown.page}` }));
+        },
         "nav.back": back,
         "nav.forward": forward,
       },
@@ -326,6 +339,8 @@
         <SettingsPage {games} ongameadded={() => void refresh()} />
       {:else if page === "about"}
         <AboutPage {games} {kit} />
+      {:else if page === "guide"}
+        <GuidePage game={selected} />
       {:else if page === "decisions" && home.state !== "reading"}
         <DecisionsPage />
       {:else if selected && page === "reports"}

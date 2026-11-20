@@ -173,6 +173,13 @@ reads them.
   `openDialog` (`src/lib/navigation/navigation.svelte.ts`), a choice on a page calls `setFocus` and reads it back from `here()`, and
   the code viewer and the changelog as it stood are drawn by the App from the trail, never by a page. A new page lists the focus keys
   it reads in `docs/cross-links.md`, and a new kind of thing joins Go to anything (`src/lib/navigation/goto.ts`).
+- **The Guide is kept with the program** (0.34.0; the owner, 20 Nov 2026: "documentation, or an encyclopedia, into the
+  Companion, so I know what to do or how to find something"). **A change that adds or alters a page, a panel or a button updates
+  its entries in `guide/` in the same commit**: the page's entry, any How do I…? answer whose steps it changes, and a word it
+  introduces. Each entry is a small file (`docs/guide-entries.md` gives the format); write it as the player guides are written:
+  answer first, numbered steps, **bold** for what to press, the key beside it, and the button's words exactly as the page shows
+  them. `src/lib/guide/entries.test.ts` refuses a page with no entry, a link or See also to no entry, a Take me there a page cannot
+  show, and an entry nothing links to.
 - **A page's common moves have keyboard shortcuts** (owner, 19 Nov 2026): one key each, never two held together, listed once in
   `src/lib/shortcuts/actions.ts` with its default, and offered by the view while it is on screen (`register` in
   `src/lib/shortcuts/registry.ts`). They never act in a text box or a part that takes keys itself, and every one can be changed or

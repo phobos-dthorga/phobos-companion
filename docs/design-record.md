@@ -891,6 +891,30 @@ the accent. Both pass every check (weakest words 6.0:1). **Agent choices, owner 
 shows; the author line shown only on the owner's themes. **Not built** (as OnAir): fonts, pictures, layouts or any CSS, which stay
 refused. **Nothing here is tested on screen.**
 
+## The Guide (built 20 Nov 2026, 0.34.0)
+
+**The owner asked for "documentation, or an encyclopedia, into the Companion, so I know what to do or how to find something"**,
+and chose the Companion's own guide first (game guides later) and F1 to open it at the page shown.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Find how to do something, or what a page or word means, without leaving the Companion; go straight there |
+| What does it stop them doing? | Hunting through pages, or asking an agent, for something the program already does |
+| How does it change the way they work? | F1 on any page answers "what is this?"; a search answers "how do I…?"; re-reading is easy |
+
+| Part | How |
+| --- | --- |
+| Entries | `guide/*.md`, one file each (`docs/guide-entries.md`): 21 How do I…? answers, one entry per page (16), 16 words. Built into the window with Vite's `import.meta.glob`, so the Guide needs nothing from the host |
+| Reading | `src/lib/guide/entries.ts`: header lines, then paragraphs, steps, bullets, small headings, **bold**, `code` and links; nothing else is markup |
+| The page | `GuidePage.svelte`, under Tools: a search and the entries by kind on the left, the entry on the right with Take me there and See also. Each entry opened is a step of the trail |
+| F1 | `guide.here` (changeable like every shortcut): the Guide at `page-<page>`; the Guide page itself has no key |
+| Go to anything | `fromGuide`: every entry, by title and search words |
+| Kept current | The rule in `AGENTS.md`, and the checks in `entries.test.ts` |
+
+**Agent choices, owner to revise:** the entries' wording (agent-authored, written to the player-language rules), the three kinds and
+their names (How do I…?, Pages, Words), and the search's weighting (title over search words over text). **Next, on the owner's
+word:** each game's own player guide (RimWorld's `docs/player-guide/` first) on the same page. **Nothing here is tested on screen.**
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

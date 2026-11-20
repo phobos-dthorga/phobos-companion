@@ -19,6 +19,7 @@
     fromAddress,
     fromChanges,
     fromCode,
+    fromGuide,
     fromPages,
     fromReports,
     fromWatches,
@@ -31,6 +32,7 @@
     type Kind,
   } from "./goto";
   import type { Place } from "./place";
+  import { ENTRIES, GUIDE_KIND_WORDS } from "../guide/entries";
 
   /**
    * Go to anything (docs/cross-links.md, N2): one search over pages, changelog versions and entries, methods, classes and Defs,
@@ -65,6 +67,7 @@
   const KIND_KEYS: Record<Kind, string> = {
     address: "goto-kind-address",
     page: "goto-kind-page",
+    guide: "goto-kind-guide",
     code: "goto-kind-code",
     version: "goto-kind-version",
     entry: "goto-kind-entry",
@@ -84,6 +87,9 @@
   const candidates = $derived([
     ...fromAddress(query, t("goto-open-address")),
     ...fromPages(game?.id ?? null, (page) => t(`page-${page}`)),
+    ...fromGuide(game?.id ?? null, ENTRIES, (kind) =>
+      t(GUIDE_KIND_WORDS[kind as keyof typeof GUIDE_KIND_WORDS]),
+    ),
     ...Object.values(loaded).flatMap((v) => (Array.isArray(v) ? v : [])),
     ...code,
   ]);

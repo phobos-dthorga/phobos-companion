@@ -15,6 +15,7 @@ import { place, placeOf, PAGE_NAMES, type PageName, type Place } from "./place";
 export type Kind =
   | "address"
   | "page"
+  | "guide"
   | "version"
   | "entry"
   | "code"
@@ -28,6 +29,7 @@ export type Kind =
 export const KINDS: Kind[] = [
   "address",
   "page",
+  "guide",
   "code",
   "version",
   "entry",
@@ -56,6 +58,23 @@ export function fromPages(
     label: words(page),
     detail: "",
     place: place(page, game),
+  }));
+}
+
+/**
+ * The Guide's entries (0.34.0): each found by its title and its search words, opening on the Guide. The detail names its kind,
+ * so How do I…? answers read apart from pages and words.
+ */
+export function fromGuide(
+  game: string | null,
+  entries: { id: string; title: string; words: string[]; kind: string }[],
+  kindWords: (kind: string) => string,
+): Candidate[] {
+  return entries.map((e) => ({
+    kind: "guide" as const,
+    label: e.title,
+    detail: `${kindWords(e.kind)} · ${e.words.join(", ")}`,
+    place: place("guide", game, { entry: e.id }),
   }));
 }
 

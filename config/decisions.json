@@ -153,6 +153,48 @@
       "why": "It matches your choice of 19 Nov 2026 (Read and compare, on your press), and keeps the Mods page quick to open after a big round of updates",
       "from": "docs/design-record.md, Check what they mean for ours",
       "asked": "2026-11-20"
+    },
+    {
+      "id": "save-explorer-key",
+      "question": "Which key should open the save explorer once it is built?",
+      "context": "The save explorer (docs/save-explorer.md) will sit under Play, after Game files. E, O, Q, S, V, Y and Z are free today; E and S are proposed for Reports and Settings if the page keys are renumbered.",
+      "options": [
+        {
+          "id": "v",
+          "label": "V",
+          "detail": "Free today and not wanted by the renumbering proposal"
+        },
+        {
+          "id": "o",
+          "label": "O, for open a save",
+          "detail": "Also free today"
+        }
+      ],
+      "lean": "v",
+      "why": "It stays free whichever way the page keys go, and every key can be changed in Settings anyway",
+      "from": "docs/save-explorer.md, How it is built",
+      "asked": "2026-11-20"
+    },
+    {
+      "id": "save-explorer-goto",
+      "question": "Should Go to anything search inside a save as you type, or offer one Search this save entry?",
+      "context": "Go to anything (/) searches pages, code, changelog entries, test rows, settings and reports. A save holds hundreds of thousands of things; searching it is quick once the save has been read, but reading it the first time takes a moment.",
+      "options": [
+        {
+          "id": "one-entry",
+          "label": "One Search this save entry",
+          "detail": "Pressing it opens the save explorer with the search filled in; Go to anything itself stays as quick as now"
+        },
+        {
+          "id": "live",
+          "label": "Search the save as I type",
+          "detail": "Things from the newest save appear among the other results; slower, and only once that save has been read"
+        }
+      ],
+      "lean": "one-entry",
+      "why": "Go to anything stays instant, and a save's results are many enough to need the explorer's own list",
+      "from": "docs/save-explorer.md, How it is built",
+      "asked": "2026-11-20"
     }
   ]
 }

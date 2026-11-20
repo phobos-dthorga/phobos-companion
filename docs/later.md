@@ -115,3 +115,4 @@ screenshots as a list, and where the space goes; places and the Steam app ID in 
 | **phobos-rimworld's kit pin** was at 1.30.0, ten versions behind | Noticed 19 Nov 2026 | **Done**: moved to 1.42.0 by another session (19 Nov 2026) |
 | **"Decisions waiting for you"** on Home | Owner's idea, 10 Nov 2026 | **Done**: folded into item 4, the Decisions page, with a count on Home |
 | **Atlas: stepping through saves**, and links from places to the atlas | `design-record.md`, atlas | Not scheduled |
+| **Save explorer**: any save's contents as a tree, search, one thing in full; then relationship pictures, what each mod has in a save, save against save | The owner's question of 20 Nov 2026; the first slice and "for players from the start" are the owner's choices | **Designed, not built**: [save-explorer.md](save-explorer.md). Waits for the owner's word to build; kit changes first |

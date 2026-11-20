@@ -183,13 +183,13 @@ pub enum Offered {
 
 /// The kit command of this game whose `report` carries `surface`, checked to still have the effect the page expects; a report
 /// that writes or runs is also checked by `allowed_by_manifest`. Pages that find a tool by surface go through this one place.
+/// An empty `report` is a command with no reports of its own (0.35.0), as in `allowed_by_manifest`.
 pub fn offered(manifest: &Value, game: &str, surface: &str, report: &str, effect: &str) -> Offered {
     let commands = manifest["data"]["commands"].as_array().map_or(&[][..], Vec::as_slice);
+    let named = |r: &Value| if report.is_empty() { r["name"].is_null() } else { r["name"].as_str() == Some(report) };
     for command in commands.iter().filter(|c| c["game"].as_str() == Some(game)) {
         let reports = command["reports"].as_array().map_or(&[][..], Vec::as_slice);
-        let Some(found) =
-            reports.iter().find(|r| r["name"].as_str() == Some(report) && r["surface"].as_str() == Some(surface))
-        else {
+        let Some(found) = reports.iter().find(|r| named(r) && r["surface"].as_str() == Some(surface)) else {
             continue;
         };
         let name = command["name"].as_str().unwrap_or_default().to_owned();

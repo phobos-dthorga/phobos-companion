@@ -91,3 +91,100 @@ export function patchedSince(
   }
   return [...found.values()];
 }
+
+/**
+ * The check after an update (0.35.0; phobos-modkit 1.61.1's `rimworld-update-check`, the owner's choice of 20 Nov 2026: all four
+ * parts), run on the owner's press because it may decompile new builds: whether our patches' targets still exist, whether an update
+ * touched a temporary patch's fault, how big each update was, and whether our XML patches still find their Defs.
+ */
+export type NamesPart = {
+  found: number;
+  failing: { where: string; target: string; status: string; detail: string }[];
+  notChecked: number;
+  atRunTime: number;
+};
+export type TemporaryRow = {
+  row: number | string;
+  patch: string;
+  mod: string;
+  file: string;
+  status: "changed" | "removed" | "unchanged" | "no-update" | "one-build";
+  detail: string;
+};
+export type UpdateRow = {
+  mod: string;
+  file: string;
+  added: number;
+  removed: number;
+  signatures: number;
+  bodies: number;
+  newTypes: string[];
+  newTypeCount: number;
+};
+export type XmlRow = {
+  mod: string;
+  file: string;
+  def: string;
+  status: "missing" | "node-missing" | "patched" | "made" | "found";
+  detail: string;
+};
+export type UpdateCheck = {
+  since: string;
+  names?: NamesPart;
+  temporary?: TemporaryRow[];
+  updates?: UpdateRow[];
+  xml?: { checked: number; rows: XmlRow[]; patchedDefs?: string };
+};
+
+export type CheckSummary = {
+  names: { found: number; failing: NamesPart["failing"] } | null;
+  temporary: { touched: TemporaryRow[]; total: number } | null;
+  updates: { shown: UpdateRow[]; more: number } | null;
+  xml: { checked: number; problems: XmlRow[]; patched: number } | null;
+};
+
+/** How much an update changed: every declaration added, removed or changed. */
+export function updateSize(row: UpdateRow): number {
+  return row.added + row.removed + row.signatures + row.bodies;
+}
+
+/** What the window shows of a check: the touched temporary patches, the updates that changed code (largest first, `shown` of
+ *  them), and our XML patches that find nothing even once every patch has run. */
+export function summariseCheck(data: UpdateCheck, shown = 5): CheckSummary {
+  const changed = (data.updates ?? []).filter((row) => updateSize(row) > 0);
+  const rows = data.xml?.rows ?? [];
+  return {
+    names: data.names
+      ? { found: data.names.found, failing: data.names.failing }
+      : null,
+    temporary: data.temporary
+      ? {
+          touched: data.temporary.filter(
+            (row) => row.status === "changed" || row.status === "removed",
+          ),
+          total: data.temporary.length,
+        }
+      : null,
+    updates: data.updates
+      ? {
+          shown: changed.slice(0, shown),
+          more: Math.max(0, changed.length - shown),
+        }
+      : null,
+    xml: data.xml
+      ? {
+          checked: data.xml.checked,
+          problems: rows.filter(
+            (row) => row.status === "missing" || row.status === "node-missing",
+          ),
+          patched: rows.filter((row) => row.status === "patched").length,
+        }
+      : null,
+  };
+}
+
+/** An update's new types as words: the first few, and how many more. */
+export function newTypes(row: UpdateRow): string {
+  const more = row.newTypeCount - row.newTypes.length;
+  return row.newTypes.join(", ") + (more > 0 ? ` +${more}` : "");
+}

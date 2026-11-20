@@ -9,7 +9,7 @@ see: task-before-playing, task-go-back, task-back-up-mod, term-backup, term-chan
 **Your installed mods, beside what installing from the repository would bring.** The page for updating, going back and backups.
 
 ### At the top: Before you play
-Whether anything needs building, installing or encoding, with a button for each: **Build now**, **Install everything that changed** and **Encode their textures**. It also says what updated [since you last played](task-what-updated), and [Settings to look at](task-new-settings) lists every mod setting added, removed or given a new default.
+Whether anything needs building, installing or encoding, with a button for each: **Build now**, **Install everything that changed** and **Encode their textures**. It also says what updated [since you last played](task-what-updated), with **Check what they mean for ours** to see whether those updates touch our mods, and [Settings to look at](task-new-settings) lists every mod setting added, removed or given a new default.
 
 ### Each mod
 - **Installed now** and **After installing**, side by side: the [changelog entries](term-changelog-entry) each copy has, the files that would change, settings, and in-game tests to look out for.

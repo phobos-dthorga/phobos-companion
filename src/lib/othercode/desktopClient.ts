@@ -47,6 +47,21 @@ export async function keepBuilds<T>(
   );
 }
 
+/** What the updates since a moment mean for a repository's code: our targets, temporary patches, update sizes and our XML
+ *  patches (0.35.0). On the owner's press: it may decompile new builds. */
+export async function checkUpdates<T>(
+  game: string,
+  repository: string,
+  since: string | null,
+  onProgress?: OnProgress,
+): Promise<Ready<T> | Failed> {
+  return ask<OtherAnswer<T>, Ready<T>>(
+    "update_check",
+    { game, repository, since, onProgress: progressChannel(onProgress) },
+    (answer) => ({ state: "ready", answer }),
+  );
+}
+
 /** The builds kept (no file), or what one file's last update changed, and in one member of it. */
 export async function askUpdates<T>(
   game: string,

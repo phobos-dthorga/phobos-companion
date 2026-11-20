@@ -639,6 +639,18 @@ async fn keep_builds(
     blocking(move || other_code_page::keep_builds(&game, &repository, Some(&hearing(on_progress)))).await
 }
 
+/// What the updates mean for a repository's code: our targets, temporary patches, update sizes, our XML patches (0.35.0).
+#[tauri::command]
+async fn update_check(
+    game: String,
+    repository: String,
+    since: Option<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<other_code_page::Answer, Failure> {
+    blocking(move || other_code_page::update_check(&game, &repository, since.as_deref(), Some(&hearing(on_progress))))
+        .await
+}
+
 /// The builds the tools have kept, or what changed in one file's last update (and in one member of it).
 #[tauri::command]
 async fn updates(
@@ -686,6 +698,7 @@ pub fn run() {
             decompile_assembly,
             updates,
             keep_builds,
+            update_check,
             kit_status,
             home_status,
             report_catalogue,

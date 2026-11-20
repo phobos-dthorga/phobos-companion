@@ -122,3 +122,19 @@ fn an_unnamed_report_is_checked_by_an_empty_name() {
     assert!(allowed_by_manifest(&manifest, "cleanup", "apply").is_err());
     assert!(allowed_by_manifest(&manifest, "reader", "").is_err());
 }
+
+#[test]
+fn a_command_with_no_reports_is_found_by_its_surface() {
+    let manifest = serde_json::json!({"data": {"commands": [
+        {"name": "rimworld-update-check", "game": "rimworld", "reports": [{"name": null, "surface": "update-check", "effect": "runs"}]},
+        {"name": "rimworld-code", "game": "rimworld", "reports": [{"name": "show", "surface": "update-check", "effect": "runs"}]}]}});
+    assert_eq!(
+        offered(&manifest, "rimworld", "update-check", "", "runs"),
+        Offered::Tool("rimworld-update-check".to_owned())
+    );
+    assert_eq!(
+        offered(&manifest, "rimworld", "update-check", "show", "runs"),
+        Offered::Tool("rimworld-code".to_owned())
+    );
+    assert!(matches!(offered(&manifest, "rimworld", "update-check", "", "reads"), Offered::Changed(_)));
+}

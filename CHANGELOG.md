@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-11-20
+
+The owner asked whether the check run by hand after the updates of 20 November 2026 could live in the Companion, and chose all four parts it lacked. Not yet tested on screen.
+
+### Added
+
+- **Check what they mean for ours**, in Since you last played on the Mods page, after any update: one press asks the tools whether every method and field our code names is still there, whether an update touched the code behind one of our **temporary patches** (with **See what changed** to read whether the author fixed the fault), how big each update was and what new things it brought, and whether everything our XML patches name is still there. It shows a bar while it works (a couple of minutes the first time, while the tools read the new builds) and changes nothing.
+- The Guide's **See what updated since you last played** and **Mods** entries explain it.
+
+### Changed
+
+- The tool kit moves to 1.61.1, which brings the check (rimworld-update-check).
+
 ## [0.34.0] - 2026-11-20
 
 The owner asked for "documentation, or an encyclopedia, into the Companion, so I know what to do or how to find something" (20 November 2026), and chose the Companion's own guide first and F1 to open it. Not yet tested on screen.

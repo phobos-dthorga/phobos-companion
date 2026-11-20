@@ -57,6 +57,19 @@ fn update_requests_are_a_list_or_one_checked_file() {
 }
 
 #[test]
+fn the_check_after_an_update_takes_a_repository_and_a_checked_moment() {
+    let root = std::path::Path::new("C:/Repos/phobos-rimworld");
+    let plain = update_check_arguments("rimworld-update-check", root, None).unwrap();
+    assert_eq!(plain[0], "rimworld-update-check");
+    assert!(plain.contains(&"--root".to_owned()));
+    assert_eq!(plain.last().map(String::as_str), Some("--json"));
+    let since = update_check_arguments("rimworld-update-check", root, Some("2026-11-19T10:00:00.000Z")).unwrap();
+    assert!(since.contains(&"--since=2026-11-19T10:00:00.000Z".to_owned()));
+    assert!(update_check_arguments("rimworld-update-check", root, Some("--only names")).is_err());
+    assert!(update_check_arguments("rimworld-update-check", root, Some("yesterday")).is_err());
+}
+
+#[test]
 fn a_refusal_in_the_data_is_a_refusal() {
     let answer = Answer::of(&json!({"report": {}, "data": {"ok": false, "reason": "No assembly at x"}}));
     assert!(answer.available);

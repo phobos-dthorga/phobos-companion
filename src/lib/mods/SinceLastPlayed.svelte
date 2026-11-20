@@ -7,19 +7,28 @@
     type PatchTarget,
   } from "../connections/patches";
   import { readGameFiles } from "../gamefiles/desktopClient";
-  import { askUpdates, keepBuilds } from "../othercode/desktopClient";
+  import {
+    askUpdates,
+    checkUpdates,
+    keepBuilds,
+  } from "../othercode/desktopClient";
   import { openUpdate } from "../othercode/navigation";
   import type { KeptFile, KeptFiles } from "../othercode/types";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
   import { formatWhen } from "../shell/dates";
   import {
+    newTypes,
     notKeptYet,
     patchedSince,
     summarise,
+    summariseCheck,
     tiedUpdates,
+    updateSize,
+    type CheckSummary,
     type PatchedChange,
     type SinceSummary,
+    type UpdateCheck,
   } from "./sinceLastPlayed";
 
   /**
@@ -27,6 +36,10 @@
    * (while the game runs, the launch before this one), which of those changed a method our mods patch, with See what changed,
    * and which have new builds the tools have not kept yet, with Keep the new builds. It reads only, except that press, which writes
    * only into the tools' archive.
+   *
+   * Check what they mean for ours (0.35.0; the owner's choice of 20 Nov 2026, all four checks) runs the tools' check after an update
+   * on the owner's press, for the first repository: our patches' targets, the temporary patches' faults, each update's size and
+   * new types, and our XML patches. It may decompile new builds into the tools' cache, so it never runs by itself.
    */
   let {
     game,
@@ -51,6 +64,15 @@
   let keeping = $state(false);
   let progress = $state(started());
   let said = $state("");
+
+  type Check =
+    | { state: "idle" }
+    | { state: "running" }
+    | { state: "missing" }
+    | { state: "failed"; reason: string }
+    | { state: "ready"; summary: CheckSummary };
+  let checked = $state<Check>({ state: "idle" });
+  let checkProgress = $state(started());
 
   async function read() {
     const answer = await readGameFiles(game, running ? "previous" : null);
@@ -108,6 +130,31 @@
       ? t("since-keep-failed", { reason: failed })
       : t("since-kept");
     await check();
+  }
+
+  /** The check after an update, for the first repository, counting updates the tools kept since the moment compared with. */
+  async function checkOurs() {
+    const repository = repositories[0];
+    if (!repository || !summary) return;
+    checked = { state: "running" };
+    checkProgress = started();
+    const done = await checkUpdates<UpdateCheck>(
+      game,
+      repository,
+      summary.since,
+      (m) => {
+        checkProgress = heard(checkProgress, m);
+      },
+    );
+    if (done.state === "failed") {
+      checked = { state: "failed", reason: done.failure.detail };
+    } else if (!done.answer.available) {
+      checked = { state: "missing" };
+    } else if (!done.answer.ok) {
+      checked = { state: "failed", reason: done.answer.refusal ?? "" };
+    } else {
+      checked = { state: "ready", summary: summariseCheck(done.answer.data) };
+    }
   }
 
   const names = (files: KeptFile[]) =>
@@ -191,6 +238,138 @@
       {/if}
     {/if}
     <p class="small" role="status" aria-live="polite">{said}</p>
+
+    {#if (summary.updated.length > 0 || summary.gameUpdated) && repositories.length > 0}
+      <div class="check" role="group" aria-label={t("check-label")}>
+        {#if checked.state === "running"}
+          <ProgressBar progress={checkProgress} fallback={t("check-running")} />
+        {:else if checked.state === "ready"}
+          {@const found = checked.summary}
+          {#if found.names}
+            <p class="small">
+              {#if found.names.failing.length === 0}
+                <span class="mark" aria-hidden="true">✓</span>
+                {t("check-names-ok", { count: found.names.found })}
+              {:else}
+                <span class="mark" aria-hidden="true">◆</span>
+                {t("check-names-broken", {
+                  count: found.names.failing.length,
+                  targets: found.names.failing.map((f) => f.target).join(", "),
+                })}
+              {/if}
+            </p>
+          {/if}
+          {#if found.temporary}
+            {#if found.temporary.touched.length === 0}
+              <p class="small">
+                <span class="mark" aria-hidden="true">✓</span>
+                {t("check-temporary-none", { count: found.temporary.total })}
+              </p>
+            {:else}
+              <p class="small">
+                {t("check-temporary-lead", {
+                  count: found.temporary.touched.length,
+                })}
+              </p>
+              <ul class="patched">
+                {#each found.temporary.touched as row (String(row.row) + row.file)}
+                  <li>
+                    <span class="mark" aria-hidden="true">◆</span>
+                    <span
+                      >{t("check-temporary-row", {
+                        row: String(row.row),
+                        patch: row.patch,
+                        mod: row.mod,
+                        detail: row.detail,
+                      })}</span
+                    >
+                    {#each repositories.slice(0, 1) as repository (repository)}
+                      <button
+                        type="button"
+                        class="action"
+                        onclick={() => openUpdate(game, repository, row.file)}
+                        >{t("since-see-change")}</button
+                      >
+                    {/each}
+                  </li>
+                {/each}
+              </ul>
+            {/if}
+          {/if}
+          {#if found.updates && found.updates.shown.length > 0}
+            <details>
+              <summary
+                >{t("check-updates", {
+                  count: found.updates.shown.length + found.updates.more,
+                })}</summary
+              >
+              <ul class="sizes small">
+                {#each found.updates.shown as row (row.file)}
+                  <li>
+                    {t("check-update-row", {
+                      mod: row.mod,
+                      file: row.file,
+                      size: updateSize(row),
+                      added: row.added,
+                      types: newTypes(row),
+                    })}
+                  </li>
+                {/each}
+                {#if found.updates.more > 0}
+                  <li>
+                    {t("check-updates-more", { count: found.updates.more })}
+                  </li>
+                {/if}
+              </ul>
+            </details>
+          {/if}
+          {#if found.xml}
+            {#if found.xml.problems.length === 0}
+              <p class="small">
+                <span class="mark" aria-hidden="true">✓</span>
+                {t("check-xml-ok", {
+                  count: found.xml.checked,
+                  patched: found.xml.patched,
+                })}
+              </p>
+            {:else}
+              <p class="small">
+                {t("check-xml-lead", {
+                  count: found.xml.problems.length,
+                  checked: found.xml.checked,
+                })}
+              </p>
+              <ul class="sizes small">
+                {#each found.xml.problems as row (row.file + row.def)}
+                  <li>
+                    {t("check-xml-row", {
+                      def: row.def,
+                      file: row.file,
+                      detail: row.detail,
+                    })}
+                  </li>
+                {/each}
+              </ul>
+            {/if}
+          {/if}
+          <p class="small muted">{t("check-limits")}</p>
+          <button type="button" class="action" onclick={checkOurs}
+            >{t("check-again")}</button
+          >
+        {:else}
+          {#if checked.state === "failed"}
+            <p class="small">{t("check-failed", { reason: checked.reason })}</p>
+          {:else if checked.state === "missing"}
+            <p class="small">{t("check-missing")}</p>
+          {:else}
+            <p class="small">{t("check-lead")}</p>
+          {/if}
+          <button type="button" class="action" onclick={checkOurs}
+            >{t("check-button")}</button
+          >
+        {/if}
+      </div>
+    {/if}
   </div>
 {:else if unread}
   <p class="small muted">{t("since-unread")}</p>
@@ -234,5 +413,20 @@
 
   .mark {
     color: var(--colour-accent);
+  }
+
+  .check {
+    display: grid;
+    gap: 4px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--colour-line);
+  }
+
+  .sizes {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding-inline-start: 18px;
   }
 </style>

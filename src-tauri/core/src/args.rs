@@ -14,6 +14,11 @@ impl Args {
         Self(vec![tool.to_owned(), report.to_owned()])
     }
 
+    /// A tool with no reports of its own (0.35.0).
+    pub fn command(tool: &str) -> Self {
+        Self(vec![tool.to_owned()])
+    }
+
     /// The repository to run on.
     pub fn root(self, path: &Path) -> Self {
         self.pair("--root", &path.display().to_string())

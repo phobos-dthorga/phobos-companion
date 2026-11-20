@@ -132,6 +132,27 @@
       "why": "The join that matters most is a window request to the host command that answers it, and that needs both sides read",
       "from": "CHANGELOG.md, 0.24.0",
       "asked": "2026-11-19"
+    },
+    {
+      "id": "update-check-when",
+      "question": "Should Check what they mean for ours run by itself after an update, or only when you press it?",
+      "context": "On the Mods page, Since you last played now offers Check what they mean for ours (0.35.0). It may decompile new builds into the tools' cache, and its first run after an update took about two minutes on your game; later runs take seconds.",
+      "options": [
+        {
+          "id": "on-press",
+          "label": "Only when I press it",
+          "detail": "As What did an update change? and Keep the new builds: nothing runs the decompiler without your press"
+        },
+        {
+          "id": "by-itself",
+          "label": "By itself, once after each update",
+          "detail": "When Since you last played sees an update, the check starts by itself and its bar shows on the Mods page"
+        }
+      ],
+      "lean": "on-press",
+      "why": "It matches your choice of 19 Nov 2026 (Read and compare, on your press), and keeps the Mods page quick to open after a big round of updates",
+      "from": "docs/design-record.md, Check what they mean for ours",
+      "asked": "2026-11-20"
     }
   ]
 }

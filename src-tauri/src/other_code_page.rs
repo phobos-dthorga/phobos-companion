@@ -8,6 +8,7 @@
 //! this run of the program may be decompiled**, so the window can never point the decompiler at another file.
 
 use companion_core::args::Args;
+use companion_core::checks;
 use companion_core::failure::Failure;
 use companion_core::games;
 use companion_core::kit::{self, Offered, Outcome};
@@ -18,6 +19,7 @@ use std::sync::Mutex;
 
 const OTHER_CODE: &str = "other-code";
 const UPDATES: &str = "updates";
+const UPDATE_CHECK: &str = "update-check";
 const READS: &str = "reads";
 const RUNS: &str = "runs";
 /// Longest name or file name accepted from the window.
@@ -199,6 +201,33 @@ pub fn updates(
     let (report, effect) = if file.is_some() { ("compare", RUNS) } else { ("list", READS) };
     let Some(tool) = tool(game, UPDATES, report, effect)? else { return Ok(Answer::missing()) };
     let arguments = update_arguments(&tool, file, owner, member).map_err(Failure::refused)?;
+    Ok(Answer::of(&kit::run_hearing(&tool, &arguments, listener)?))
+}
+
+/// The arguments for the check after an update: the repository, and the moment updates count from when the window gives one.
+pub fn update_check_arguments(tool: &str, root: &std::path::Path, since: Option<&str>) -> Result<Vec<String>, String> {
+    let mut arguments = Args::command(tool).root(root);
+    if let Some(since) = since {
+        if !checks::moment(since) {
+            return Err("that is not a moment".to_owned());
+        }
+        arguments = arguments.given("--since", since);
+    }
+    Ok(arguments.json())
+}
+
+/// What the updates mean for a repository's code (0.35.0; phobos-modkit 1.61.1's `update-check` surface), on the owner's press:
+/// whether our patches' targets and XML patches still find what they name, whether an update touched a temporary patch's fault,
+/// and how big each update was. It decompiles builds not yet decompiled into the kit's cache, and otherwise only reads.
+pub fn update_check(
+    game: &str,
+    repository: &str,
+    since: Option<&str>,
+    listener: Option<kit::Listener>,
+) -> Result<Answer, Failure> {
+    let found = games::named_repository(game, repository)?;
+    let Some(tool) = tool(game, UPDATE_CHECK, "", RUNS)? else { return Ok(Answer::missing()) };
+    let arguments = update_check_arguments(&tool, &found.path, since).map_err(Failure::refused)?;
     Ok(Answer::of(&kit::run_hearing(&tool, &arguments, listener)?))
 }
 

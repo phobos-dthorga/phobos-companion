@@ -915,6 +915,29 @@ and chose the Companion's own guide first (game guides later) and F1 to open it 
 their names (How do I…?, Pages, Words), and the search's weighting (title over search words over text). **Next, on the owner's
 word:** each game's own player guide (RimWorld's `docs/player-guide/` first) on the same page. **Nothing here is tested on screen.**
 
+## Check what they mean for ours (built 20 Nov 2026, 0.35.0)
+
+**The owner asked "Can this be implemented into Companion, actually, if not already the case? This kind of check?"** (20 Nov 2026),
+after an agent answered "what do these updates mean for our mods?" by hand with five tools, and chose all four missing checks by
+question card. Since you last played already flagged methods we patch that an update changed (0.28.0); this adds the rest.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | After an update, see in one press whether our code and XML patches still find what they name, whether a temporary patch's fault was touched, and how big each update was |
+| What does it stop them doing? | Asking an agent to run five tools and read the answers, after every round of updates |
+| How does it change the way they work? | Before playing after updates: press, read the ticks, open **See what changed** for a touched temporary patch |
+
+| Part | How |
+| --- | --- |
+| The check | phobos-modkit 1.61.1's `rimworld-update-check`, found by its `update-check` surface (`kit::offered` now finds a command with no reports of its own); `other_code_page::update_check`, with `--since` the moment Since you last played compares with, checked by `checks::moment` |
+| What is ours | The repository's own `config/update-check.json` and `config/temporary-patches.json` (phobos-rimworld has both) |
+| The window | `SinceLastPlayed.svelte`: **Check what they mean for ours**, a bar while it runs, then a line per part; touched temporary patches carry **See what changed**; the update sizes are folded away. `summariseCheck` in `sinceLastPlayed.ts` decides what is shown, tested without a screen |
+
+**Agent choices, owner to revise:** it runs **on the owner's press**, not by itself when the page opens, because it may decompile
+new builds (the owner's "Read and compare, on your press" of 19 Nov 2026), and the first run took 1 min 46 s on the owner's game
+(Decisions page: `update-check-when`); it checks the first repository of the game only; five updates are shown before "and N
+smaller ones". No keyboard shortcut, as Keep the new builds has none. **Nothing here is tested on screen.**
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

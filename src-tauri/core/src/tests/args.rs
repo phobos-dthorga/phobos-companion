@@ -7,6 +7,14 @@ fn text_from_the_window_is_always_one_argument() {
 }
 
 #[test]
+fn a_tool_with_no_reports_starts_with_its_name_alone() {
+    assert_eq!(
+        Args::command("rimworld-update-check").given("--since", "2026-11-20").json(),
+        ["rimworld-update-check", "--since=2026-11-20", "--json"]
+    );
+}
+
+#[test]
 fn a_checked_value_is_two_arguments_unless_it_opens_with_a_dash() {
     assert_eq!(Args::new("t", "r").pair("--mod", "Boats").done(), ["t", "r", "--mod", "Boats"]);
     assert_eq!(Args::new("t", "r").pair("--mod", "-x").done(), ["t", "r", "--mod=-x"]);

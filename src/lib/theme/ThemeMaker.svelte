@@ -73,9 +73,11 @@
       ],
     },
   ];
-  const WORDS: Record<string, string> = Object.fromEntries(
-    GROUPS.flatMap((g) => g.roles),
-  );
+  const WORDS: Record<string, string> = {
+    ...Object.fromEntries(GROUPS.flatMap((g) => g.roles)),
+    diff_removed: "themes-role-diff-removed",
+    diff_added: "themes-role-diff-added",
+  };
 
   // svelte-ignore state_referenced_locally
   let name = $state(

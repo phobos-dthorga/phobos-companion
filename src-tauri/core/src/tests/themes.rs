@@ -55,6 +55,23 @@ fn a_theme_that_cannot_be_read_says_which_colours() {
 }
 
 #[test]
+fn mixing_is_css_color_mix_in_srgb() {
+    assert_eq!(mix("#FF0000", "#000000", 0.2), "#330000");
+    assert_eq!(mix("#FF8A7A", "#0E0B10", 0.2), "#3E2425");
+    assert_eq!(mix("#123456", "#123456", 0.2), "#123456");
+}
+
+#[test]
+fn words_must_read_on_removed_and_added_lines_too() {
+    // Muted words that read on every plain surface (4.55:1 on the softest) but not on a changed line's tinted background.
+    let muted = mine("muted.theme").replace("\"text_muted\": \"#C9BEC8\"", "\"text_muted\": \"#8C8C8C\"");
+    let problems = contrast_problems(&parse(&muted, false).unwrap());
+    assert!(problems.iter().all(|p| p.role == "text_muted" && p.on.starts_with("diff_")), "{problems:?}");
+    let on: Vec<&str> = problems.iter().map(|p| p.on.as_str()).collect();
+    assert_eq!(on, ["diff_removed", "diff_added"]);
+}
+
+#[test]
 fn choosing_keeping_and_removing_themes() {
     let folder = folder("keep");
     let start = status(&folder);

@@ -1,4 +1,4 @@
-import { contrast } from "./contrast";
+import { contrast, mix } from "./contrast";
 import type { Problem, Theme } from "./types";
 
 /**
@@ -50,6 +50,15 @@ export const TEXT_MIN = 4.5;
 export const GRAPHIC_MIN = 3;
 export const LINE_MIN = 1.5;
 export const BUILT_IN_PREFIX = "org.phobosdthorga.companion.";
+/**
+ * Removed and added lines' backgrounds: their role, this share of it over the background (0.41.1; the owner, 21 Nov 2026: removed
+ * code had "not nearly high enough" contrast). `app.css` mixes the same share; words must read on both, as on any surface.
+ */
+export const DIFF_SHARE = 0.2;
+export const DIFF_TINTS: [string, Role][] = [
+  ["diff_removed", "risk"],
+  ["diff_added", "success"],
+];
 
 export function validColour(value: string): boolean {
   return /^#[0-9A-Fa-f]{6}$/.test(value);
@@ -70,6 +79,22 @@ export function problems(colours: Record<string, string>): Problem[] {
       const ratio = contrast(colours[role], colours[on]);
       if (ratio < needs)
         found.push({ role, on, ratio: Math.round(ratio * 100) / 100, needs });
+    }
+  }
+  for (const [on, tint] of DIFF_TINTS) {
+    if (!validColour(colours[tint] ?? "") || !validColour(colours.canvas ?? ""))
+      continue;
+    const background = mix(colours[tint], colours.canvas, DIFF_SHARE);
+    for (const role of READABLE) {
+      if (!validColour(colours[role] ?? "")) continue;
+      const ratio = contrast(colours[role], background);
+      if (ratio < TEXT_MIN)
+        found.push({
+          role,
+          on,
+          ratio: Math.round(ratio * 100) / 100,
+          needs: TEXT_MIN,
+        });
     }
   }
   return found;

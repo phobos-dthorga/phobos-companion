@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cellText,
+  diffLine,
   hasMoreRows,
   headingTag,
   MAX_TOP,
@@ -107,5 +108,28 @@ describe("headings", () => {
     expect(headingTag(2)).toBe("h2");
     expect(headingTag(3)).toBe("h3");
     expect(headingTag(6)).toBe("h4");
+  });
+});
+
+describe("a diff from the tools", () => {
+  it("splits each line into its sign and its text", () => {
+    expect(diffLine("@@ -3,4 +3,5 @@")).toEqual({
+      kind: "where",
+      sign: "",
+      text: "@@ -3,4 +3,5 @@",
+    });
+    expect(diffLine("-    return x;")).toEqual({
+      kind: "removed",
+      sign: "−",
+      text: "    return x;",
+    });
+    expect(diffLine("+    return y;").kind).toBe("added");
+    expect(diffLine("     kept();")).toEqual({
+      kind: "same",
+      sign: "",
+      text: "    kept();",
+    });
+    expect(diffLine("--- a/file").kind).toBe("same");
+    expect(diffLine("... 12 more lines").kind).toBe("same");
   });
 });

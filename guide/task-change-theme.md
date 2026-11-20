@@ -11,6 +11,8 @@ see: term-theme
 ### Make your own
 1. Press **Make your own from this** on the theme closest to what you want.
 2. Change any colour with its colour box, or type its code. The preview follows, and each pair that can't be read is listed.
+   Words must also read on removed and added code, whose backgrounds are a little of **Something went wrong** and **It worked**
+   over the **Background**.
 3. **Keep and use** when every colour can be read. **Save as a file…** keeps a draft at any time.
 
 **Bring in a theme file…** and **Save a copy…** share themes as files.

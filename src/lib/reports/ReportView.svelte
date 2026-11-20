@@ -4,7 +4,7 @@
   import { t } from "../i18n/runtime";
   import RichText from "../shell/RichText.svelte";
   import TableBlock from "./TableBlock.svelte";
-  import { headingTag } from "./presentation";
+  import { diffLine, headingTag } from "./presentation";
   import type { Block, Report } from "./types";
 
   /**
@@ -38,6 +38,23 @@
     <ChartBlock chart={block} />
   {:else if block.type === "globe"}
     <GlobeBlock globe={block} caption={globeCaption} />
+  {:else if block.language === "diff"}
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+    <pre
+      class="diff"
+      tabindex="0"
+      role="region"
+      aria-label={t(
+        "code-region",
+      )}>{#each block.lines.map(diffLine) as line, index (index)}<span
+          class="diff-line"
+          class:diff-removed={line.kind === "removed"}
+          class:diff-added={line.kind === "added"}
+          class:diff-where={line.kind === "where"}
+          ><span class="diff-sign" aria-hidden={line.sign ? undefined : "true"}
+            >{line.sign || " "}</span
+          >{line.text}</span
+        >{/each}</pre>
   {:else}
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <pre
@@ -159,5 +176,33 @@
     background: var(--colour-canvas);
     border: 1px solid var(--colour-line);
     border-radius: 4px;
+  }
+
+  /* A diff's lines fill the width, so a removed or added line's tint reads as one band (app.css .diff-removed, .diff-added). */
+  pre.diff {
+    padding-inline: 0;
+  }
+
+  .diff-line {
+    display: block;
+    min-width: max-content;
+    padding-inline-end: 12px;
+  }
+
+  /* Unchanged lines keep the changed lines' indent; a changed line's bar comes from app.css, which this must not outrank. */
+  .diff-line:not(.diff-removed):not(.diff-added) {
+    border-inline-start: 6px solid transparent;
+  }
+
+  .diff-sign {
+    display: inline-block;
+    width: 3ch;
+    text-align: center;
+    user-select: none;
+  }
+
+  .diff-where {
+    color: var(--colour-text-muted);
+    background: var(--colour-surface-raised);
   }
 </style>

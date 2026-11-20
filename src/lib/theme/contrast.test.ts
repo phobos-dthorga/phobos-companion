@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { contrast } from "./contrast";
+import { contrast, mix } from "./contrast";
 import {
   BUILT_IN_PREFIX,
   idFor,
@@ -69,6 +69,21 @@ describe("checking a theme being made", () => {
     const found = problems(dim).map((p) => `${p.role}/${p.on}`);
     expect(found).toContain("text_muted/canvas");
     expect(found.every((pair) => pair.startsWith("text_muted/"))).toBe(true);
+  });
+
+  it("mixes as CSS's color-mix in sRGB does, and as the host does", () => {
+    expect(mix("#FF0000", "#000000", 0.2)).toBe("#330000");
+    expect(mix("#FF8A7A", "#0E0B10", 0.2)).toBe("#3E2425");
+  });
+
+  it("holds words to removed and added lines' backgrounds too", () => {
+    const house = themes.find((theme) => theme.name === "House D'thorga")!;
+    // Reads on every plain surface (4.55:1 on the softest), not on a changed line's tint.
+    const muted = { ...house.colours, text_muted: "#8C8C8C" };
+    expect(problems(muted).map((p) => `${p.role}/${p.on}`)).toEqual([
+      "text_muted/diff_removed",
+      "text_muted/diff_added",
+    ]);
   });
 
   it("gives a made theme a plain id, never the program's own", () => {

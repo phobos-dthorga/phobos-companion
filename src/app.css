@@ -7,6 +7,18 @@
   --type-body: 1rem;
   --type-lead: 1.125rem;
   --control-min: 44px;
+  /* Removed and added lines (0.41.1): 20 % of their role over the background, the share the theme checks hold words to
+     (companion_core::themes DIFF_SHARE, src/lib/theme/presentation.ts). */
+  --diff-removed: color-mix(
+    in srgb,
+    var(--colour-risk) 20%,
+    var(--colour-canvas)
+  );
+  --diff-added: color-mix(
+    in srgb,
+    var(--colour-success) 20%,
+    var(--colour-canvas)
+  );
   font-family: var(--font-body);
   font-size: 100%;
   line-height: 1.5;
@@ -129,6 +141,35 @@ h1 {
 .revealed {
   outline: 3px solid var(--colour-accent);
   outline-offset: 3px;
+}
+
+/* A changed line, wherever code changes are shown (0.41.1; the owner, 21 Nov 2026: removed code had "not nearly high enough"
+   contrast): a tinted background, a full-strength bar at its start and a bold sign, so colour never carries it alone. */
+.diff-removed,
+.diff-added {
+  border-inline-start: 6px solid transparent;
+}
+
+.diff-removed {
+  background: var(--diff-removed);
+  border-inline-start-color: var(--colour-risk);
+}
+
+.diff-added {
+  background: var(--diff-added);
+  border-inline-start-color: var(--colour-success);
+}
+
+.diff-sign {
+  font-weight: 700;
+}
+
+.diff-removed .diff-sign {
+  color: var(--colour-risk);
+}
+
+.diff-added .diff-sign {
+  color: var(--colour-success);
 }
 
 /* Code coloured by what each piece is (0.26.0: one place for the code viewer and Their code), from the theme's roles. */

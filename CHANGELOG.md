@@ -4,6 +4,20 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.41.1] - 2026-11-21
+
+Removed code stands out (the owner, 21 Nov 2026: its contrast in the compare and view tools was "not nearly high enough"). Not yet tested on screen.
+
+### Fixed
+
+- **Removed and added lines are easy to tell apart.** In the code viewer (Show the code, What changed), a removed line now has a red-tinted background and an added line a green-tinted one, each with a wider bar at its start and a bold − or +. Before, both had the same faint background, so only a thin bar told them apart.
+- **What did an update change? colours its comparisons** the same way. Its member-by-member diffs had been plain text, with a removed line marked only by a - at its start.
+- The tints come from your theme (a fifth of its Something went wrong or It worked colour over its Background), so every theme gets them, and every colour of words still reads on them: at least 4.5 to 1 in all three of the program's themes.
+
+### Changed
+
+- A theme you make or bring in is checked on removed and added lines' backgrounds too, so it cannot make changed code hard to read; the maker names the pair when one fails. The Guide's theme entry says so.
+
 ## [0.41.0] - 2026-11-21
 
 The Explorer looks inside your running game (the owner, 20 Nov 2026: debugging tools to see "variables in memory" and the relationships between things; look inside first was their choice). Not yet tested on screen.

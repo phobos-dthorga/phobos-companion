@@ -404,11 +404,11 @@ for (const [name, viewport] of [
         name: "The code of src/Sample/Wheel.cs",
       });
       await expect(pane).toContainText("void Turn() { }");
-      await expect(pane.locator(".line.removed .mark")).toHaveText("−");
+      await expect(pane.locator(".line.diff-removed .mark")).toHaveText("−");
       await viewer
         .getByRole("button", { name: "The code as it now stands" })
         .click();
-      await expect(pane.locator(".line.removed")).toHaveCount(0);
+      await expect(pane.locator(".line.diff-removed")).toHaveCount(0);
       await expect(pane).toContainText("void Turn() { Spin(); }");
       await viewer.getByRole("button", { name: /Boat\.png/ }).click();
       await expect(viewer).toContainText("isn't text");

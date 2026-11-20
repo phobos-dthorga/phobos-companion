@@ -59,6 +59,11 @@ pub const TEXT_MIN: f64 = 4.5;
 pub const GRAPHIC_MIN: f64 = 3.0;
 /// Dividers need only show (Observatory's figure, which the House D'thorga theme was first held to).
 pub const LINE_MIN: f64 = 1.5;
+/// How much of its role's colour a changed line's background takes, over the background (0.41.1; the owner, 21 Nov 2026: removed
+/// code had "not nearly high enough" contrast). The window mixes the same share in `app.css`.
+pub const DIFF_SHARE: f64 = 0.2;
+/// The backgrounds of removed and added lines, each its role mixed into `canvas`; words must read on both, as on any surface.
+pub const DIFF_TINTS: [(&str, &str); 2] = [("diff_removed", "risk"), ("diff_added", "success")];
 
 const BUILT_INS: [&str; 3] = [
     include_str!("../../../themes/house-dthorga.json"),
@@ -194,6 +199,15 @@ pub fn contrast(first: &str, second: &str) -> f64 {
     (a.max(b) + 0.05) / (a.min(b) + 0.05)
 }
 
+/// `share` of `fore` over `back`, both `#RRGGBB`, mixed channel by channel as CSS's `color-mix(in srgb, ...)` does.
+pub fn mix(fore: &str, back: &str, share: f64) -> String {
+    let channel =
+        |hex: &str, at: usize| f64::from(u8::from_str_radix(hex.get(at..at + 2).unwrap_or("00"), 16).unwrap_or(0));
+    let mixed =
+        |at: usize| (channel(fore, at) * share + channel(back, at) * (1.0 - share)).round().clamp(0.0, 255.0) as u8;
+    format!("#{:02X}{:02X}{:02X}", mixed(1), mixed(3), mixed(5))
+}
+
 /// One pair a theme draws together that cannot be told apart well enough.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Problem {
@@ -220,6 +234,20 @@ pub fn contrast_problems(theme: &Theme) -> Vec<Problem> {
                     on: on.to_owned(),
                     ratio: (ratio * 100.0).round() / 100.0,
                     needs,
+                });
+            }
+        }
+    }
+    for (on, tint) in DIFF_TINTS {
+        let background = mix(theme.colour(tint), theme.colour("canvas"), DIFF_SHARE);
+        for role in READABLE {
+            let ratio = contrast(theme.colour(role), &background);
+            if ratio < TEXT_MIN {
+                found.push(Problem {
+                    role: role.to_owned(),
+                    on: on.to_owned(),
+                    ratio: (ratio * 100.0).round() / 100.0,
+                    needs: TEXT_MIN,
                 });
             }
         }

@@ -806,6 +806,8 @@
     "themes-role-surface": "Panels",
     "themes-role-surface-raised": "Raised panels",
     "themes-role-surface-soft": "Soft panels",
+    "themes-role-diff-removed": "Removed code's background (a little of Something went wrong, over Background)",
+    "themes-role-diff-added": "Added code's background (a little of It worked, over Background)",
     "themes-role-text": "Words",
     "themes-role-text-muted": "Quieter words",
     "themes-role-line": "Lines",

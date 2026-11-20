@@ -13,3 +13,23 @@ export function contrast(first: string, second: string): number {
   );
   return (light + 0.05) / (dark + 0.05);
 }
+
+/** `share` of `fore` over `back`, both #RRGGBB, channel by channel as CSS's `color-mix(in srgb, ...)` mixes them. */
+export function mix(fore: string, back: string, share: number): string {
+  const channel = (hex: string, start: number) =>
+    parseInt(hex.slice(start, start + 2), 16);
+  const mixed = (start: number) =>
+    Math.min(
+      255,
+      Math.max(
+        0,
+        Math.round(
+          channel(fore, start) * share + channel(back, start) * (1 - share),
+        ),
+      ),
+    )
+      .toString(16)
+      .toUpperCase()
+      .padStart(2, "0");
+  return `#${mixed(1)}${mixed(3)}${mixed(5)}`;
+}

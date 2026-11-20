@@ -293,14 +293,16 @@
                     {#if mode === "changes" || line.kind !== "-"}
                       <div
                         class="line"
-                        class:added={line.kind === "+"}
-                        class:removed={line.kind === "-"}
+                        class:diff-added={line.kind === "+"}
+                        class:diff-removed={line.kind === "-"}
                       >
                         {#if mode === "changes"}
                           <span class="number">{line.old ?? ""}</span>
                         {/if}
                         <span class="number">{line.new ?? ""}</span>
-                        <span class="mark">{LINE_MARKS[line.kind]}</span>
+                        <span class="mark diff-sign"
+                          >{LINE_MARKS[line.kind]}</span
+                        >
                         <!-- eslint-disable-next-line svelte/no-at-html-tags -- escaped by the highlighter, or by hunkHtml -->
                         <code
                           >{@html painted[file.path]?.[hunkIndex]?.[
@@ -515,17 +517,11 @@
 
   .line {
     display: flex;
-    border-inline-start: 4px solid transparent;
   }
 
-  .line.added {
-    border-inline-start-color: var(--colour-success);
-    background: var(--colour-surface);
-  }
-
-  .line.removed {
-    border-inline-start-color: var(--colour-risk);
-    background: var(--colour-surface);
+  /* Unchanged lines keep the changed lines' indent; a changed line's bar comes from app.css, which this must not outrank. */
+  .line:not(.diff-removed):not(.diff-added) {
+    border-inline-start: 6px solid transparent;
   }
 
   .number {
@@ -540,17 +536,8 @@
   .mark {
     flex: none;
     width: 2ch;
-    font-weight: 600;
     text-align: center;
     user-select: none;
-  }
-
-  .added .mark {
-    color: var(--colour-success);
-  }
-
-  .removed .mark {
-    color: var(--colour-risk);
   }
 
   code {

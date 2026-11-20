@@ -80,6 +80,26 @@ export function nextTop(top: number): number {
   return Math.min(top * SHOW_MORE_FACTOR, MAX_TOP);
 }
 
+/** One line of a code block the tools call a `diff` (a unified diff: What did an update change?), split into its sign and text. */
+export type DiffLine = {
+  kind: "removed" | "added" | "where" | "same";
+  sign: string;
+  text: string;
+};
+
+export function diffLine(line: string): DiffLine {
+  if (line.startsWith("@@")) return { kind: "where", sign: "", text: line };
+  if (line.startsWith("-") && !line.startsWith("---"))
+    return { kind: "removed", sign: "−", text: line.slice(1) };
+  if (line.startsWith("+") && !line.startsWith("+++"))
+    return { kind: "added", sign: "+", text: line.slice(1) };
+  return {
+    kind: "same",
+    sign: "",
+    text: line.startsWith(" ") ? line.slice(1) : line,
+  };
+}
+
 /** A section's heading level, below the page's own heading. */
 export function headingTag(level: number): "h2" | "h3" | "h4" {
   if (level <= 2) return "h2";

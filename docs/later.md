@@ -118,3 +118,25 @@ screenshots as a list, and where the space goes; places and the Steam app ID in 
 | **Save explorer**: any save's contents as a tree, search, one thing in full; then relationship pictures, what each mod has in a save, save against save | The owner's question of 20 Nov 2026; the first slice and "for players from the start" are the owner's choices | **Designed, not built**: [save-explorer.md](save-explorer.md). Waits for the owner's word to build; kit changes first |
 | **Search, overview first**: one search across everything the Companion reads (Go to anything's sources, Defs as patched, the snapshot, logs and saves), counts by source and mod before any match, and contexts to keep it small | The owner's ask of 21 Nov 2026, after Needle; overview first, in the Companion, every source and switchable contexts are the owner's choices | **Designed, not built**: [search.md](search.md). Waits for the owner's word; kit changes first |
 | **Debugging the running game**: layer 1, look inside a snapshot, is **built** (0.41.0, the Explorer); then a live view through D'thorga Framework, then a debugger | The owner's ask of 20 Nov 2026; the order, the debugger protocol, the off-by-default setting and the test attach are the owner's choices | **Layer 1 built**: [design-record.md](design-record.md), Explorer. Layers 2 and 3: [debugging.md](debugging.md), designed in outline; layer 3 waits for a second probe |
+| **Theming, round two**: the rest of the theme ideas from the owner's other programs, OnAir WyrmGrid and Republic Observatory (list below) | The owner's wish of 21 Nov 2026: "eventually" implement "the rest of the theming ideas from my other Svelte, etc. projects like OnAir" | Not designed; waits for the owner's word. [Theming, round two](#theming-round-two) lists what is left |
+
+## Theming, round two
+
+**The owner's wish (21 Nov 2026):** to bring in, eventually, the rest of the theming ideas from their other programs. Companion 0.33.0
+took OnAir WyrmGrid's data-only themes (ADR-0009: choosing, bringing in, saving, removing, the maker, Phobos D'thorga and High
+contrast), and 0.41.1 added the first colour the host derives from a theme (changed code's tints). **What is left**, read from each
+program's own records on 21 Nov 2026 (agent's reading, to confirm with the owner when this is designed):
+
+| # | Idea | From | What it would give |
+| --- | --- | --- | --- |
+| T1 | **A light theme** for a bright room (OnAir's Daylight) | OnAir WyrmGrid, its fourth built-in | A choice beside the dark ones; dark stays the default (the owner's preference) |
+| T2 | **Where each theme came from**: built in, or brought in, and when it was brought in and last changed | OnAir WyrmGrid (`provenance`: bundled or local import, imported and updated times) | Knowing which themes are yours and how old they are |
+| T3 | **Revisions kept, never overwritten**: bringing a theme in and using it are separate steps; the chosen one is pinned by its id, version and a hash of its contents; a broken chosen one falls back without the failed file being deleted | Republic Observatory, ADR-0015 | No theme lost to a bad edit, and evidence kept of what failed |
+| T4 | **Remedies, not just ratios**: the maker says how to fix a failing pair (lighter or darker, and by about how much) | Republic Observatory, ADR-0015 | A theme author fixes a problem without guessing |
+| T5 | **A contrast audit of every page** in every built-in theme and a generated "boundary" theme (one at the edge of every rule), in the browser check | Republic Observatory, ADR-0015 | Catches a component that draws a colour the theme checks never saw, as removed code's background was until 0.41.1 |
+| T6 | **More colours the host derives and checks**, such as a tinted guidance surface for help and tutorial panels (a little of the success role over a surface, with ordinary and muted words checked on it) | Republic Observatory, accessibility guidance | The Guide's panels and tips stand out as help, readably, in every theme |
+| T7 | **The atlas's colours from the theme**: places, labels and their halos as theme roles | OnAir WyrmGrid (`map_label`, `map_halo` and the like) | The globe matches the chosen theme instead of fixed ramps |
+| T8 | **Text size, 100 to 200%**, as a setting beside the theme | Republic Observatory, ADR-0025 | Larger words for tired eyes, without a theme of their own |
+
+**Not on this list**, as in both programs: fonts, pictures, layouts or any CSS in a theme, which stay refused. Community language
+packs (OnAir's ADR-0010) are the same idea for words, and belong with translation, not theming.

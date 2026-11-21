@@ -784,7 +784,7 @@
     "games-title": "Games on the list",
     "games-body": "The Companion shows the games on your list. Add one Steam has installed: choose it, check where it keeps its files, tick its repositories if it has any, and see the entry before it is written. The list as it was is kept beside it.",
     "games-open": "Add a game from Steam",
-    "games-reading": "Reading Steam's games…",
+    "games-steam-reading": "Reading Steam's games…",
     "games-no-list": "There is no games list at { $path } yet. Make one from config/games.example.json first: this adds to a list, it does not start one.",
     "games-list-file": "Your list: { $path }",
     "games-steam-label": "Games Steam has installed",

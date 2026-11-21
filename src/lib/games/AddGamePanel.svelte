@@ -140,7 +140,7 @@
       >{t("games-open")}</button
     >
   {:else if reading.state === "reading"}
-    <ProgressBar {progress} fallback={t("games-reading")} />
+    <ProgressBar {progress} fallback={t("games-steam-reading")} />
   {:else if reading.state === "failed"}
     <FailurePanel failure={reading.failure} onretry={open} />
   {:else if steam && !steam.list_exists}

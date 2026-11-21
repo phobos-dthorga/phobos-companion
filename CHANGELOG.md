@@ -4,6 +4,13 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.45.1] - 2026-11-22
+
+### Fixed
+
+- **Starting up says "Reading your list…" again**, not "Reading Steam's games…": the word file held one key twice, and the second
+  meaning hid the first. Add a game from Steam keeps its own words, and a test now refuses a key written twice.
+
 ## [0.45.0] - 2026-11-22
 
 The first step of the program's own mod manager (the owner, 22 Nov 2026: "We actually should have our own, third-party, mod

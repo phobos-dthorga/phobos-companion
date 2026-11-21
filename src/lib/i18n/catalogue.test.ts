@@ -25,6 +25,12 @@ const asked = [
 ].map((match) => match[1]);
 
 describe("the message catalogue", () => {
+  it("has no key twice (JSON keeps only the last, so the first meaning is lost)", () => {
+    const raw = readFileSync("locales/en-AU.json", "utf-8");
+    const all = [...raw.matchAll(/^ {4}"([^"]+)":/gm)].map((m) => m[1]);
+    expect(all.filter((key, i) => all.indexOf(key) !== i)).toEqual([]);
+  });
+
   it("has every key the code asks for", () => {
     expect(asked.filter((key) => !keys.includes(key))).toEqual([]);
   });

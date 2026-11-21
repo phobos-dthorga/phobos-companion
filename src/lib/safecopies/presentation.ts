@@ -1,9 +1,21 @@
 import type {
   CopyResult,
   DestinationState,
+  ListRef,
   RepositoryCopies,
   SafeSet,
 } from "./types";
+
+/**
+ * The times the daily run offers as buttons (0.44.0; an agent default, for the owner to change: buttons rather than a free time,
+ * spread over the day, since a run missed while the PC was off is caught up at the next sign-in).
+ */
+export const DAILY_TIMES = ["03:00", "09:00", "13:00", "19:00"] as const;
+
+/** One key for a list on the card: its repository, and whether it is the game's own list that repository keeps (0.44.0). */
+export function listKey(where: ListRef): string {
+  return where.list ? `${where.repository}#game` : where.repository;
+}
 
 /** How many sets were never copied, and how many changed since their copy, across every repository. */
 export function summarise(repositories: RepositoryCopies[]): {

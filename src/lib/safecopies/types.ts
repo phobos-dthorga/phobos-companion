@@ -35,31 +35,63 @@ export interface SafeDestination {
   unsent?: number | null;
 }
 
-/** Kit 1.69.0: a copy kept of a file the list no longer takes, such as a save that left the newest pair. */
+/** Kit 1.69.0: a copy kept of a file the list no longer takes, such as a save that left the newest pair. Kit 1.71.0: a save that
+ * is a folder is one copy, with how many files it holds. */
 export interface KeptOnly {
   key: string;
   set: string;
   why: string;
   bytes: number;
+  files?: number;
   earlier: number;
   earlierBytes: number;
 }
 
 export interface SafeStatus {
   game: string;
+  /** Kit 1.71.0: which list this is, such as "phobos-modkit:kenshi" for a game's own list. */
+  list?: string;
   notes: string[];
   sets: SafeSet[];
   destinations: SafeDestination[];
   keptOnly?: KeptOnly[];
 }
 
-/** One repository of the game that lists safe copies, as the host read it. */
-export interface RepositoryCopies {
+/** Which list: a repository's own, or the game's own list (its saves and settings) that repository keeps (0.44.0). */
+export interface ListRef {
   repository: string;
+  list: boolean;
+}
+
+/** One list of safe copies the game's Home shows, as the host read it. */
+export interface RepositoryCopies extends ListRef {
   status: SafeStatus;
   title: string;
   command_line: string;
 }
+
+/** The daily run (0.44.0; kit 1.71.0 `safe-copies schedule`). */
+export interface DailyRun {
+  schedule: {
+    set: boolean;
+    supported?: boolean;
+    enabled?: boolean;
+    at?: string | null;
+  };
+  next: string | null;
+  last: {
+    time: string | null;
+    ok: boolean | null;
+    copied: number;
+    problems: string[];
+  } | null;
+}
+
+export type DailyReading =
+  | { state: "reading" }
+  | { state: "browser" }
+  | Failed
+  | { state: "ready"; daily: DailyRun; refusal: string | null };
 
 /** What Copy now or Check the copies did. */
 export interface CopyResult {

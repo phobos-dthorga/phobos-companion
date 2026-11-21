@@ -3,12 +3,30 @@ import {
   cellKey,
   checkCounts,
   copyCounts,
+  DAILY_TIMES,
   kindKey,
+  listKey,
   setName,
   summarise,
   wantsCopy,
 } from "./presentation";
 import type { RepositoryCopies, SafeSet } from "./types";
+
+describe("a list's key and the daily run's times (0.44.0)", () => {
+  it("keeps a repository's own list apart from the game's list it keeps", () => {
+    expect(listKey({ repository: "phobos-modkit", list: false })).toBe(
+      "phobos-modkit",
+    );
+    expect(listKey({ repository: "phobos-modkit", list: true })).toBe(
+      "phobos-modkit#game",
+    );
+  });
+
+  it("offers only times of day the host accepts", () => {
+    for (const at of DAILY_TIMES)
+      expect(at).toMatch(/^([01]\d|2[0-3]):[0-5]\d$/);
+  });
+});
 
 function set(
   name: string,
@@ -31,6 +49,7 @@ function set(
 function repository(sets: SafeSet[]): RepositoryCopies {
   return {
     repository: "repo",
+    list: false,
     title: "",
     command_line: "",
     status: { game: "g", notes: [], sets, destinations: [] },

@@ -10,21 +10,27 @@
     checkCopies,
     copyNow,
     letGoCopy,
+    readDaily,
     readSafeCopies,
     restoreCopies,
+    setDaily,
   } from "./desktopClient";
   import {
     cellKey,
     checkCounts,
     copyCounts,
+    DAILY_TIMES,
     kindKey,
+    listKey,
     setName,
     summarise,
     wantsCopy,
   } from "./presentation";
   import type {
     CopyReading,
+    DailyReading,
     KeptOnly,
+    ListRef,
     SafeCopiesReading,
     SafeSet,
   } from "./types";
@@ -33,7 +39,8 @@
   type Pending =
     | {
         kind: "restore";
-        repository: string;
+        key: string;
+        where: ListRef;
         set: string;
         unit: string | null;
         name: string;
@@ -41,13 +48,14 @@
         to: string;
         overwrite: boolean;
       }
-    | { kind: "let-go"; repository: string; copy: KeptOnly };
+    | { kind: "let-go"; key: string; where: ListRef; copy: KeptOnly };
 
   /**
-   * Safe copies on Home (0.42.0; the owner, 21 Nov 2026): for each of the game's repositories that lists what cannot be made again
-   * (training sets, style models, notes), whether each is copied, changed since its copy, or never copied, at each place the copies
-   * go. Copy now copies what changed and sends the repository's copy; Check the copies hashes every copy again. Hidden in the
-   * browser; a game that lists none is told so in one line.
+   * Safe copies on Home (0.42.0; the owner, 21 Nov 2026): for each list of what cannot be made again (training sets, style models,
+   * notes; and from 0.44.0 the game's own saves and settings, wherever a repository keeps its list), whether each is copied,
+   * changed since its copy, or never copied, at each place the copies go. Copy now copies what changed and sends the repository's
+   * copy; Check the copies hashes every copy again. The daily run of every list is set or turned off at the foot of the card.
+   * Hidden in the browser; a game that lists none is told so in one line.
    */
   let { game }: { game: string } = $props();
 
@@ -58,6 +66,10 @@
   let pending = $state<Pending | null>(null);
   /** After a restore that found different files in the folder: the same restore, offered again to replace the older ones. */
   let replaceOffer = $state<Pending | null>(null);
+  /** The daily run of every list (0.44.0): one for the whole PC, shown on every game's card. */
+  let daily = $state<DailyReading>({ state: "reading" });
+  let dailyBusy = $state(false);
+  let dailySaid = $state("");
 
   async function read() {
     progress = started();
@@ -66,8 +78,13 @@
     });
   }
 
+  async function readTheDaily() {
+    daily = await readDaily();
+  }
+
   onMount(() => {
     void read();
+    void readTheDaily();
   });
 
   // A host that answers with no list (one from before 0.42.0) counts as listing none.
@@ -138,24 +155,28 @@
       : t("safe-copies-checked-whole", { count: counts.checked });
   }
 
-  async function act(repository: string, kind: "copy" | "check") {
-    busy = `${repository}:${kind}`;
-    progress = started();
-    const hear = (m: Parameters<typeof heard>[1]) => {
+  function hearing() {
+    return (m: Parameters<typeof heard>[1]) => {
       progress = heard(progress, m);
     };
+  }
+
+  async function act(where: ListRef, kind: "copy" | "check") {
+    const key = listKey(where);
+    busy = `${key}:${kind}`;
+    progress = started();
     const answer =
       kind === "copy"
-        ? await copyNow(game, repository, hear)
-        : await checkCopies(game, repository, hear);
+        ? await copyNow(game, where, hearing())
+        : await checkCopies(game, where, hearing());
     said = {
       ...said,
-      [repository]: kind === "copy" ? sayCopy(answer) : sayCheck(answer),
+      [key]: kind === "copy" ? sayCopy(answer) : sayCheck(answer),
     };
     if (kind === "copy") {
       // A read again keeps its bar on screen until the new state is in.
-      busy = `${repository}:read`;
-      const fresh = await readSafeCopies(game, hear);
+      busy = `${key}:read`;
+      const fresh = await readSafeCopies(game, hearing());
       if (fresh.state === "ready") reading = fresh;
     }
     busy = null;
@@ -169,14 +190,9 @@
     return t("safe-copies-reading");
   }
 
-  function hearing() {
-    return (m: Parameters<typeof heard>[1]) => {
-      progress = heard(progress, m);
-    };
-  }
-
   /** Restore…: Windows' own folder picker, then a yes on the card before anything is copied. */
-  async function chooseRestore(repository: string, set: SafeSet) {
+  async function chooseRestore(where: ListRef, set: SafeSet) {
+    const key = listKey(where);
     replaceOffer = null;
     const picked = await pickPath(
       "folder",
@@ -186,7 +202,7 @@
     if (picked.state === "failed") {
       said = {
         ...said,
-        [repository]: t("safe-copies-restore-failed", {
+        [key]: t("safe-copies-restore-failed", {
           reason: reasonOf(picked.failure),
         }),
       };
@@ -195,7 +211,8 @@
     if (picked.state !== "picked") return;
     pending = {
       kind: "restore",
-      repository,
+      key,
+      where: { repository: where.repository, list: where.list },
       set: set.set,
       unit: set.unit,
       name: setName(set),
@@ -208,12 +225,12 @@
   async function confirm(chosen: Pending) {
     pending = null;
     replaceOffer = null;
-    busy = `${chosen.repository}:${chosen.kind}`;
+    busy = `${chosen.key}:${chosen.kind}`;
     progress = started();
     if (chosen.kind === "restore") {
       const answer = await restoreCopies(
         game,
-        chosen.repository,
+        chosen.where,
         chosen.set,
         chosen.unit,
         chosen.to,
@@ -223,14 +240,14 @@
       if (answer.state === "failed") {
         said = {
           ...said,
-          [chosen.repository]: t("safe-copies-restore-failed", {
+          [chosen.key]: t("safe-copies-restore-failed", {
             reason: reasonOf(answer.failure),
           }),
         };
       } else if (!answer.result.ok) {
         said = {
           ...said,
-          [chosen.repository]: t("safe-copies-restore-failed", {
+          [chosen.key]: t("safe-copies-restore-failed", {
             reason: answer.result.refusal ?? "",
           }),
         };
@@ -239,7 +256,7 @@
       } else {
         said = {
           ...said,
-          [chosen.repository]: t("safe-copies-restored", {
+          [chosen.key]: t("safe-copies-restored", {
             count: answer.result.data.restored ?? 0,
             same: answer.result.data.same ?? 0,
             folder: chosen.to,
@@ -249,7 +266,7 @@
     } else {
       const answer = await letGoCopy(
         game,
-        chosen.repository,
+        chosen.where,
         chosen.copy.key,
         hearing(),
       );
@@ -261,25 +278,47 @@
             : (answer.result.refusal ?? "");
       said = {
         ...said,
-        [chosen.repository]:
+        [chosen.key]:
           failed === null
             ? t("safe-copies-let-go-done", { copy: chosen.copy.key })
             : t("safe-copies-let-go-failed", { reason: failed }),
       };
-      busy = `${chosen.repository}:read`;
+      busy = `${chosen.key}:read`;
       const fresh = await readSafeCopies(game, hearing());
       if (fresh.state === "ready") reading = fresh;
     }
     busy = null;
   }
 
-  /** Commits the repository's copy holds that its remote has not had yet, across every repository (kit 1.69.0). */
+  /** The daily run set to a time the owner pressed, or turned off (null). A refusal keeps what was shown and says why. */
+  async function chooseDaily(at: string | null) {
+    dailyBusy = true;
+    dailySaid = "";
+    const answer = await setDaily(at);
+    if (answer.state === "failed")
+      dailySaid = t("safe-copies-daily-failed", {
+        reason: reasonOf(answer.failure),
+      });
+    else if (answer.state === "ready" && answer.refusal)
+      dailySaid = t("safe-copies-daily-failed", { reason: answer.refusal });
+    else daily = answer;
+    dailyBusy = false;
+  }
+
+  /** Commits the repository's copy holds that its remote has not had yet, across every list (kit 1.69.0). */
   const unsentCount = $derived(
     reading.state === "ready" && Array.isArray(reading.repositories)
       ? reading.repositories
           .flatMap((r) => r.status.destinations)
           .reduce((n, d) => n + (d.unsent ?? 0), 0)
       : 0,
+  );
+
+  /** The daily run's time, when it is set. */
+  const dailyAt = $derived(
+    daily.state === "ready" && daily.daily.schedule?.set
+      ? (daily.daily.schedule.at ?? null)
+      : null,
   );
 </script>
 
@@ -316,9 +355,14 @@
             )}{/if}
         </p>
       {/if}
-      {#each reading.repositories as found (found.repository)}
+      {#each reading.repositories as found (listKey(found))}
         {@const destinations = found.status.destinations}
-        {#if reading.repositories.length > 1}
+        {@const key = listKey(found)}
+        {#if found.list}
+          <h3>
+            {t("safe-copies-game-list", { repository: found.repository })}
+          </h3>
+        {:else if reading.repositories.length > 1}
           <h3>
             {t("safe-copies-repository", { repository: found.repository })}
           </h3>
@@ -355,7 +399,7 @@
                       aria-label={t("safe-copies-restore-named", {
                         name: setName(set),
                       })}
-                      onclick={() => chooseRestore(found.repository, set)}
+                      onclick={() => chooseRestore(found, set)}
                       >{t("safe-copies-restore")}</button
                     >
                   {/if}
@@ -409,7 +453,8 @@
                     replaceOffer = null;
                     pending = {
                       kind: "let-go",
-                      repository: found.repository,
+                      key,
+                      where: { repository: found.repository, list: found.list },
                       copy,
                     };
                   }}>{t("safe-copies-let-go")}</button
@@ -418,7 +463,7 @@
             {/each}
           </ul>
         {/if}
-        {#if pending && pending.repository === found.repository}
+        {#if pending && pending.key === key}
           {@const waiting = pending}
           <div
             class="confirm"
@@ -458,7 +503,7 @@
             </div>
           </div>
         {/if}
-        {#if replaceOffer && replaceOffer.repository === found.repository && !busy}
+        {#if replaceOffer && replaceOffer.key === key && !busy}
           {@const again = replaceOffer}
           <div
             class="confirm"
@@ -483,7 +528,7 @@
             </div>
           </div>
         {/if}
-        {#if busy?.startsWith(`${found.repository}:`)}
+        {#if busy?.startsWith(`${key}:`)}
           <ProgressBar {progress} fallback={busyWords(busy)} />
         {:else}
           <div class="buttons">
@@ -491,22 +536,86 @@
               type="button"
               class="action"
               disabled={busy !== null}
-              onclick={() => act(found.repository, "copy")}
-              >{t("safe-copies-copy")}</button
+              onclick={() => act(found, "copy")}>{t("safe-copies-copy")}</button
             >
             <button
               type="button"
               class="action"
               disabled={busy !== null}
-              onclick={() => act(found.repository, "check")}
+              onclick={() => act(found, "check")}
               >{t("safe-copies-check")}</button
             >
           </div>
         {/if}
-        {#if said[found.repository]}
-          <p class="small" role="status">{said[found.repository]}</p>
+        {#if said[key]}
+          <p class="small" role="status">{said[key]}</p>
         {/if}
       {/each}
+    {/if}
+    {#if daily.state === "ready" || daily.state === "failed"}
+      <div class="daily" role="group" aria-labelledby="safe-copies-daily-title">
+        <h3 id="safe-copies-daily-title">{t("safe-copies-daily-title")}</h3>
+        {#if daily.state === "failed"}
+          <p class="small">
+            {t("safe-copies-daily-unread", {
+              reason: reasonOf(daily.failure),
+            })}
+          </p>
+        {:else if daily.daily.schedule?.supported === false}
+          <p class="small">{t("safe-copies-daily-windows-only")}</p>
+        {:else}
+          <p>
+            {dailyAt
+              ? t("safe-copies-daily-set", {
+                  at: dailyAt,
+                  next: daily.daily.next ? formatWhen(daily.daily.next) : "",
+                })
+              : t("safe-copies-daily-off")}
+          </p>
+          {#if daily.daily.last}
+            <p class="small">
+              {daily.daily.last.ok
+                ? t("safe-copies-daily-last-fine", {
+                    when: daily.daily.last.time
+                      ? formatWhen(daily.daily.last.time)
+                      : "",
+                    count: daily.daily.last.copied,
+                  })
+                : t("safe-copies-daily-last-problems", {
+                    when: daily.daily.last.time
+                      ? formatWhen(daily.daily.last.time)
+                      : "",
+                    first: daily.daily.last.problems[0] ?? "",
+                  })}
+            </p>
+          {/if}
+          <p class="small">{t("safe-copies-daily-lead")}</p>
+          <div class="buttons">
+            {#each DAILY_TIMES as at (at)}
+              <button
+                type="button"
+                class="action"
+                aria-pressed={dailyAt === at}
+                disabled={dailyBusy}
+                onclick={() => chooseDaily(at)}
+                >{t("safe-copies-daily-at", { at })}</button
+              >
+            {/each}
+            {#if dailyAt}
+              <button
+                type="button"
+                class="action"
+                disabled={dailyBusy}
+                onclick={() => chooseDaily(null)}
+                >{t("safe-copies-daily-turn-off")}</button
+              >
+            {/if}
+          </div>
+        {/if}
+        {#if dailySaid}
+          <p class="small" role="status">{dailySaid}</p>
+        {/if}
+      </div>
     {/if}
   </section>
 {/if}
@@ -577,6 +686,11 @@
     margin-bottom: 8px;
   }
 
+  .buttons button[aria-pressed="true"] {
+    border-color: var(--colour-accent);
+    font-weight: 700;
+  }
+
   .kept {
     display: grid;
     gap: 6px;
@@ -599,5 +713,11 @@
     border-inline-start: 3px solid var(--colour-accent);
     background: var(--colour-surface-soft);
     overflow-wrap: anywhere;
+  }
+
+  .daily {
+    margin-top: 14px;
+    padding-top: 6px;
+    border-top: 1px solid var(--colour-line);
   }
 </style>

@@ -9,6 +9,7 @@ const WHEN = "2026-11-21T11:40:29+00:00";
 const COPIES = [
   {
     repository: "first-mods",
+    list: false,
     title: "Safe copies: 1 never copied",
     command_line: "python -m phobos_modkit safe-copies status",
     status: {
@@ -100,8 +101,81 @@ const COPIES = [
   },
 ];
 
-async function open(page: Page, copies: unknown) {
+/** The daily run as the kit answers (kit 1.71.0): set or not, and how the last run went. */
+function dailyAnswer(at: string | null, lastOk = true) {
+  return {
+    ok: true,
+    title: at ? `Daily safe copies: every day at ${at}` : "not set",
+    refusal: null,
+    data: {
+      ok: true,
+      schedule: at
+        ? { set: true, supported: true, enabled: true, at }
+        : { set: false, supported: true },
+      next: at ? "2026-11-23T03:00" : null,
+      last: {
+        time: WHEN,
+        ok: lastOk,
+        copied: 12,
+        problems: lastOk ? [] : ["gone-repo: not on this PC"],
+      },
+    },
+  };
+}
+
+/** The same repository, and the game's own list kept in the shared tools' repository (0.44.0): two saves that are folders. */
+function withGameList() {
+  return [
+    ...structuredClone(COPIES),
+    {
+      repository: "shared-tools",
+      list: true,
+      title: "Safe copies: everything copied",
+      command_line: "python -m phobos_modkit safe-copies status --game first",
+      status: {
+        game: "first",
+        list: "shared-tools:first",
+        notes: [],
+        destinations: COPIES[0].status.destinations.slice(0, 1),
+        sets: [
+          {
+            set: "saves",
+            unit: "PG10",
+            kind: "personal",
+            why: "named so in the list; the newest 2",
+            files: 3648,
+            bytes: 341_000_000,
+            neverCopied: false,
+            destinations: {
+              local: {
+                state: "copied",
+                lastCopied: WHEN,
+                changed: 0,
+                files: 3648,
+              },
+            },
+          },
+        ],
+        keptOnly: [
+          {
+            key: "first/saves/PG9",
+            set: "saves",
+            why: "no longer among the newest 2",
+            bytes: 340_000_000,
+            files: 3640,
+            earlier: 0,
+            earlierBytes: 0,
+          },
+        ],
+      },
+    },
+  ];
+}
+
+async function open(page: Page, copies: unknown, daily = dailyAnswer(null)) {
   await mockHost(page, {
+    safe_copies_daily: { result: daily },
+    safe_copies_set_daily: { result: dailyAnswer("03:00") },
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
     safe_copies_status: { result: copies },
@@ -277,6 +351,50 @@ test.describe("Safe copies on Home (0.42.0)", () => {
     await expect(card.getByRole("status")).toContainText(
       "Let go of first/saves/S1.rws.",
     );
+  });
+
+  test("the game's own saves and settings show beside its repository's list (0.44.0)", async ({
+    page,
+  }) => {
+    await open(page, withGameList());
+    const card = page.getByRole("region", { name: "Safe copies" });
+    await expect(card).toContainText(
+      "The game's own files: saves and settings (listed in shared-tools)",
+    );
+    await expect(card).toContainText("saves / PG10");
+    await expect(card).toContainText("first/saves/PG9");
+    await expect(card.getByRole("button", { name: "Copy now" })).toHaveCount(2);
+    await card
+      .getByRole("button", { name: "Let go of first/saves/PG9…" })
+      .click();
+    await expect(
+      card.getByRole("group", { name: "Waiting for your yes" }),
+    ).toHaveCount(1);
+    await noViolations(page);
+  });
+
+  test("the daily run is set with a press and says when it runs (0.44.0)", async ({
+    page,
+  }) => {
+    await open(page, COPIES);
+    const daily = page.getByRole("group", { name: "Daily safe copies" });
+    await expect(daily).toContainText("The daily run is off");
+    await expect(daily).toContainText("Last run");
+    await daily.getByRole("button", { name: "Every day at 03:00" }).click();
+    await expect(daily).toContainText("Every day at 03:00, every list");
+    await expect(
+      daily.getByRole("button", { name: "Every day at 03:00" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(daily.getByRole("button", { name: "Turn off" })).toBeVisible();
+    await noViolations(page);
+  });
+
+  test("a daily run with problems says the first (0.44.0)", async ({
+    page,
+  }) => {
+    await open(page, COPIES, dailyAnswer("19:00", false));
+    const daily = page.getByRole("group", { name: "Daily safe copies" });
+    await expect(daily).toContainText("with problems, first: gone-repo");
   });
 
   test("a game that lists none says so in one line", async ({ page }) => {

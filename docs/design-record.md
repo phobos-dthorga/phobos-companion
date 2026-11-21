@@ -1077,14 +1077,24 @@ phobos-modkit's `docs/safe-copies.md` and phobos-rimworld's `docs/development/ar
 | Part | How |
 | --- | --- |
 | The tools | phobos-modkit 1.66.0's `safe-copies status`, `run` and `verify`, through `src-tauri/src/safe_copies.rs`; Copy now only while the manifest calls `run` `writes` |
-| Which repositories | Those of the game with `config/safe-copies.json`; the host checks the repository is one of them before the kit sees it |
+| Which repositories | Those of the game with `config/safe-copies.json`, and from 0.44.0 any repository on the list keeping `config/safe-copies/<game>.json`; the host checks the list is one of them before the kit sees it |
 | No confirmation step | Copy now never deletes or replaces at the source (from kit 1.68.0 it lets go only older copies beyond the number a set keeps, by the owner's word), and puts an earlier copy aside before replacing it; the owner chose automatic pushes, so a press needs no second yes (agent choice) |
-| Games | Any game whose repository lists safe copies. Checked on phobos-rimworld (its trainings, models and notes); phobos-ostranauts lists none yet, and its Home says so in one line |
+| Games | Any game whose repository lists safe copies, or whose own list a repository keeps. Checked on phobos-rimworld (its trainings, models and notes); from 0.44.0 every game's saves and settings the kit lists |
 
 **0.43.0** (the owner's go of 22 Nov 2026 for the follow-ups): a copy not sent to the repository stays said until it is sent;
 **Restore…** on each row (Windows' picker, then a yes on the card, then Replace older files offered if anything differed; a newer
 file is never replaced from here); and **Kept, no longer copied** with **Let go…** (a yes on the card first). Agent choices: the
 yes is on the card, not a dialog; Restore takes the plain-folder copy; one copy at a time is let go, never all at once from here.
+
+**0.44.0, every game** (the owner, 22 Nov 2026: "work across as many individual games and their mods from the get go, or with
+lesser follow-up at the very least"; kit 1.71.0 and the shared rule `rules/safe-copies.md`): a game's own files, its saves and
+settings, are listed once for the game in any repository on the owner's list (`config/safe-copies/<game>.json`; the kit keeps the
+owner's: RimWorld, Ostranauts, Kenshi, Project Zomboid), and that list shows on the game's Home under "The game's own files", with
+the same presses, each request naming the list (`--game`). A save that is a folder is kept and let go whole. **The daily run** is
+one Windows scheduled task of the owner's own (the kit's `safe-copies schedule`), shown at the foot of every game's card: preset
+times as buttons, Turn off, when it runs next and how the last went. It runs every list on the games list this program reads.
+What outside it notices: Task Scheduler holds one task, "D'thorga Safe Copies", and nothing else. Agent choices: the times offered
+(03:00, 09:00, 13:00, 19:00); a press sets the run with no second yes, since it only copies and is undone with Turn off.
 
 **Agent choices, owner to revise:** the card's place on Home (asked on the Decisions page, lean Home), below the records note; the
 words "Ours", "Made from a game's files" and "Not kept here"; no keys of its own; and that it shows for every game, saying "none

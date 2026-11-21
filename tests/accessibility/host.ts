@@ -97,6 +97,20 @@ export async function mockHost(
     agent_features: agentsShown,
     // Home's Safe copies card (0.42.0) reads on every visit; a test that is not about it sees a game that lists none.
     safe_copies_status: { result: [] },
+    // And its daily run (0.44.0): not set, never run.
+    safe_copies_daily: {
+      result: {
+        ok: true,
+        title: "Daily safe copies: not set",
+        refusal: null,
+        data: {
+          ok: true,
+          schedule: { set: false, supported: true },
+          next: null,
+          last: null,
+        },
+      },
+    },
     ...answers,
   };
   await page.addInitScript((given) => {

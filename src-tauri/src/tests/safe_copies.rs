@@ -5,16 +5,58 @@ use std::fs;
 #[test]
 fn every_request_names_its_repository_and_asks_for_full_paths_in_json() {
     let root = Path::new("R:/repository");
-    assert_eq!(status_arguments(root), ["safe-copies", "status", "--root", "R:/repository", "--no-redact", "--json"]);
-    assert_eq!(run_arguments(root), ["safe-copies", "run", "--root", "R:/repository", "--no-redact", "--json"]);
+    assert_eq!(
+        status_arguments(root, "first", false),
+        ["safe-copies", "status", "--root", "R:/repository", "--no-redact", "--json"]
+    );
+    assert_eq!(
+        run_arguments(root, "first", false),
+        ["safe-copies", "run", "--root", "R:/repository", "--no-redact", "--json"]
+    );
     assert_eq!(verify_arguments(root), ["safe-copies", "verify", "--root", "R:/repository", "--no-redact", "--json"]);
+}
+
+#[test]
+fn a_games_own_list_is_named_with_its_game_in_every_request() {
+    let root = Path::new("R:/kit");
+    assert_eq!(
+        status_arguments(root, "kenshi", true),
+        ["safe-copies", "status", "--root", "R:/kit", "--game=kenshi", "--no-redact", "--json"]
+    );
+    assert!(run_arguments(root, "kenshi", true).contains(&"--game=kenshi".to_owned()));
+    assert!(
+        restore_arguments(root, "kenshi", true, "saves", Some("PG11"), Path::new("D:/Back"), false)
+            .contains(&"--game=kenshi".to_owned())
+    );
+    assert!(let_go_arguments(root, "kenshi", true, "kenshi/saves/PG9").contains(&"--game=kenshi".to_owned()));
+    assert_eq!(
+        game_list_path(root, "kenshi"),
+        Path::new("R:/kit").join("config").join("safe-copies").join("kenshi.json")
+    );
+}
+
+#[test]
+fn the_daily_run_takes_a_time_of_day_and_the_games_list_this_program_reads() {
+    for good in ["00:00", "04:00", "19:30", "23:59"] {
+        assert!(daily_time(good), "{good}");
+    }
+    for bad in ["24:00", "04:60", "4:00", "04-00", "", "0400", "aa:bb", "04:00 "] {
+        assert!(!daily_time(bad), "{bad}");
+    }
+    let games = Path::new("D:/list/games.json");
+    assert_eq!(schedule_arguments(None, false, games), ["safe-copies", "schedule", "--no-redact", "--json"]);
+    assert_eq!(
+        schedule_arguments(Some("04:00"), false, games),
+        ["safe-copies", "schedule", "--at=04:00", "--games", "D:/list/games.json", "--no-redact", "--json"]
+    );
+    assert_eq!(schedule_arguments(None, true, games), ["safe-copies", "schedule", "--off", "--no-redact", "--json"]);
 }
 
 #[test]
 fn restore_and_let_go_pass_the_windows_text_as_one_argument_each() {
     let root = Path::new("R:/repository");
     assert_eq!(
-        restore_arguments(root, "lora-trainings", Some("house-v1"), Path::new("D:/Restored"), false),
+        restore_arguments(root, "first", false, "lora-trainings", Some("house-v1"), Path::new("D:/Restored"), false),
         [
             "safe-copies",
             "restore",
@@ -28,9 +70,12 @@ fn restore_and_let_go_pass_the_windows_text_as_one_argument_each() {
             "--json"
         ]
     );
-    assert!(restore_arguments(root, "saves", None, Path::new("D:/Restored"), true).contains(&"--overwrite".to_owned()));
+    assert!(
+        restore_arguments(root, "first", false, "saves", None, Path::new("D:/Restored"), true)
+            .contains(&"--overwrite".to_owned())
+    );
     assert_eq!(
-        let_go_arguments(root, "rimworld/saves/PG15.rws"),
+        let_go_arguments(root, "first", false, "rimworld/saves/PG15.rws"),
         [
             "safe-copies",
             "let-go",

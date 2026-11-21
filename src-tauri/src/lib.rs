@@ -433,9 +433,11 @@ async fn safe_copies_status(
 async fn safe_copies_copy(
     game: String,
     repository: String,
+    list: Option<bool>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<safe_copies::CopyResult, Failure> {
-    blocking(move || safe_copies::copy_now(&game, &repository, Some(&hearing(on_progress)))).await
+    let list = list.unwrap_or(false);
+    blocking(move || safe_copies::copy_now(&game, &repository, list, Some(&hearing(on_progress)))).await
 }
 
 /// Check the copies: hashes every copy again against its record (0.42.0). Only reads.
@@ -443,9 +445,26 @@ async fn safe_copies_copy(
 async fn safe_copies_check(
     game: String,
     repository: String,
+    list: Option<bool>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<safe_copies::CopyResult, Failure> {
-    blocking(move || safe_copies::check(&game, &repository, Some(&hearing(on_progress)))).await
+    let list = list.unwrap_or(false);
+    blocking(move || safe_copies::check(&game, &repository, list, Some(&hearing(on_progress)))).await
+}
+
+/// The daily run of every safe copy: whether it is set, when, and how the last went (0.44.0). Only reads.
+#[tauri::command]
+async fn safe_copies_daily(on_progress: Channel<kit::Progress>) -> Result<safe_copies::CopyResult, Failure> {
+    blocking(move || safe_copies::daily(Some(&hearing(on_progress)))).await
+}
+
+/// Sets the daily run to the time the owner pressed, or turns it off with no time (0.44.0).
+#[tauri::command]
+async fn safe_copies_set_daily(
+    at: Option<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<safe_copies::CopyResult, Failure> {
+    blocking(move || safe_copies::set_daily(at.as_deref(), Some(&hearing(on_progress)))).await
 }
 
 /// Restore: copies one set, or one training of it, into a folder the owner picked, once they confirm (0.43.0).
@@ -454,14 +473,25 @@ async fn safe_copies_check(
 async fn safe_copies_restore(
     game: String,
     repository: String,
+    list: Option<bool>,
     set: String,
     unit: Option<String>,
     to: String,
     overwrite: bool,
     on_progress: Channel<kit::Progress>,
 ) -> Result<safe_copies::CopyResult, Failure> {
+    let list = list.unwrap_or(false);
     blocking(move || {
-        safe_copies::restore(&game, &repository, &set, unit.as_deref(), &to, overwrite, Some(&hearing(on_progress)))
+        safe_copies::restore(
+            &game,
+            &repository,
+            list,
+            &set,
+            unit.as_deref(),
+            &to,
+            overwrite,
+            Some(&hearing(on_progress)),
+        )
     })
     .await
 }
@@ -471,10 +501,12 @@ async fn safe_copies_restore(
 async fn safe_copies_let_go(
     game: String,
     repository: String,
+    list: Option<bool>,
     copy: String,
     on_progress: Channel<kit::Progress>,
 ) -> Result<safe_copies::CopyResult, Failure> {
-    blocking(move || safe_copies::let_go(&game, &repository, &copy, Some(&hearing(on_progress)))).await
+    let list = list.unwrap_or(false);
+    blocking(move || safe_copies::let_go(&game, &repository, list, &copy, Some(&hearing(on_progress)))).await
 }
 
 /// Every game Steam has installed, with guesses at each one's data folder and whether the list holds it (0.31.0). Only reads.
@@ -859,6 +891,8 @@ pub fn run() {
             safe_copies_check,
             safe_copies_restore,
             safe_copies_let_go,
+            safe_copies_daily,
+            safe_copies_set_daily,
             claims_list,
             decisions_list,
             answer_decision,

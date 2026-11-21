@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.44.0] - 2026-11-22
+
+Safe copies for every game (the owner, 22 Nov 2026: "work across as many individual games and their mods from the get go"). Not yet tested on screen.
+
+### Added
+
+- **The game's own files on its Safe copies card**: its saves and settings, from the list a repository keeps for the game (the tools keep yours for RimWorld, Ostranauts, Kenshi and Project Zomboid). Copy now, Check the copies, Restore… and Let go… work on it as on any list. A save that is a folder, as in Kenshi and Ostranauts, is copied, listed and let go whole.
+- **Daily safe copies**, at the foot of the card: press **Every day at 03:00** (or 09:00, 13:00, 19:00) to run every list of every game once a day by itself, then check every copy; **Turn off** removes it. The card says when it runs next and how the last run went. It is one Windows scheduled task of your own, "D'thorga Safe Copies"; a run missed while the PC was off happens at your next sign-in.
+
+### Changed
+
+- Tools kit pin v1.70.1 to v1.71.0 (safe copies for every game, the daily run, and two shared rules: every game from the start, and what cannot be made again is listed when it is made).
+
 ## [0.43.0] - 2026-11-22
 
 Safe copies' follow-ups (the owner's go of 22 Nov 2026). Not yet tested on screen.

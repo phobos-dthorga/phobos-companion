@@ -1862,6 +1862,19 @@
     "modlist-saved-how-saved": "Lists you kept above.",
     "modlist-saved-how-kept": "A copy of the list each time the game started with a different one, noticed when the Companion next read the list.",
     "modlist-saved-how-save": "The mods each save was played with, as the save records them. Saves are only read.",
-    "modlist-saved-how-manager": "Lists RimSort kept, read where RimSort keeps them and never changed."
+    "modlist-saved-how-manager": "Lists RimSort kept, read where RimSort keeps them and never changed.",
+    "modlist-steam-subscribe": "Subscribe",
+    "modlist-steam-subscribe-all": "Subscribe to all { $count }",
+    "modlist-steam-subscribing": "Asking Steam to subscribe, then waiting while it downloads…",
+    "modlist-steam-working": "Subscribing…",
+    "modlist-steam-subscribed": "{ $count ->\n    [one] Subscribed. Downloaded and on this PC: { $installed } of 1.\n   *[other] Subscribed to { $count }. Downloaded and on this PC: { $installed } of { $count }.\n  }",
+    "modlist-steam-some-refused": "{ $count ->\n    [one] Steam did not subscribe to 1 of them; on this PC now: { $installed }.\n   *[other] Steam did not subscribe to { $count } of them; on this PC now: { $installed }.\n  }",
+    "modlist-steam-unsubscribing": "Switching them off, then asking Steam to unsubscribe…",
+    "modlist-steam-unsubscribe": "Unsubscribe…",
+    "modlist-steam-unsubscribe-confirm": "{ $count ->\n    [one] Unsubscribe from { $names }? It is switched off first (a backup of the list is kept), then Steam deletes its files. Undo brings the list back; subscribe again to get the files back.\n   *[other] Unsubscribe from these { $count }: { $names }? They are switched off first (a backup of the list is kept), then Steam deletes their files. Undo brings the list back; subscribe again to get the files back.\n  }",
+    "modlist-steam-unsubscribe-yes": "Yes, unsubscribe",
+    "modlist-steam-unsubscribed": "{ $count ->\n    [one] Unsubscribed from 1 (switched off first: { $off }).\n   *[other] Unsubscribed from { $count } (switched off first: { $off }).\n  }",
+    "modlist-steam-link": "Subscribe by Workshop link or number",
+    "modlist-steam-offer-on": "{ $name } is on this PC now."
   }
 }

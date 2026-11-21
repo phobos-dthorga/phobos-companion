@@ -27,7 +27,9 @@
     lastChange,
     stampMoment,
     steamWorthy,
+    subscribable,
   } from "./presentation";
+  import SteamSubscribe from "./SteamSubscribe.svelte";
   import type { ModFix, ModListCheck, ModListInfo } from "./types";
 
   /**
@@ -272,7 +274,7 @@
                         {problem.clue}
                       </p>
                     {/if}
-                    {#if problem.fixes.length > 0 || steamWorthy(problem)}
+                    {#if problem.fixes.length > 0 || steamWorthy(problem) || subscribable(problem)}
                       <div class="buttons">
                         {#each problem.fixes as fix (fix.action + fix.id)}
                           <button
@@ -291,6 +293,15 @@
                             onclick={() => steam(problem.workshop_id)}
                             >{t("modlist-open-steam")}</button
                           >
+                        {/if}
+                        {#if subscribable(problem)}
+                          <SteamSubscribe
+                            game={game.id}
+                            numbers={[problem.workshop_id]}
+                            label={t("modlist-steam-subscribe")}
+                            disabled={busy}
+                            ondone={() => void load()}
+                          />
                         {/if}
                       </div>
                     {/if}

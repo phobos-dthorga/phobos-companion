@@ -3,8 +3,8 @@ title: Mod list
 kind: page
 page: modlist
 go: modlist
-words: missing mod, rimsort, mod manager, load order, dependencies, requirements, workshop, removed, unsubscribed, incompatible, enable, disable, reorder, sort, sorter, drag, saved list, preset, rml
-see: task-fix-mod-list, task-edit-mod-list, task-sort-mod-list, task-saved-lists, term-load-order-rule, task-add-game
+words: missing mod, rimsort, mod manager, load order, dependencies, requirements, workshop, removed, unsubscribed, incompatible, enable, disable, reorder, sort, sorter, drag, saved list, preset, rml, subscribe, unsubscribe
+see: task-fix-mod-list, task-edit-mod-list, task-sort-mod-list, task-saved-lists, task-subscribe-mods, term-load-order-rule, task-add-game
 ---
 **What is wrong with your game's list of active mods, and why; the list itself, to switch mods on and off and move them; a sorter that explains every move; and saved lists.** RimWorld and Project Zomboid so far; any other game says so.
 
@@ -39,6 +39,11 @@ Every mod on this PC, in one scroll: **Switched on**, in load order, and **Switc
 - Lists to load: **Saved by name**, **Kept at each game start** (a copy each time the game starts with a different list), **From your saves** (the mods each save was played with) and **RimSort's history**; or **Open a file…**.
 - **Compare** shows what loading would switch on, switch off and move, and which mods are **not on this PC**, with why and **Open in Steam** or **Find on the Workshop**. **Nothing is loaded until you press Use this list.**
 - Saves and RimSort's files are only read, never changed.
+
+### Subscribing through Steam
+- **Subscribe** beside a missing mod (What's wrong, Saved lists), **Subscribe to all** in Saved lists, and **Subscribe by Workshop link or number** in Edit the list: Steam subscribes at once, and a bar shows the download.
+- **Unsubscribe…** in Edit the list asks first, switches the mods off, then Steam deletes their files.
+- Steam must be running and signed in; it shows you as playing the game for the few seconds it is asked.
 
 ### Every view
 - **Every change keeps a backup of the list first.** **Undo the last change** goes back on the latest; press it again for the one before.

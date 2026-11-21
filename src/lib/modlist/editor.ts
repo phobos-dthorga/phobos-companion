@@ -179,3 +179,14 @@ export function toggled(chosen: string[], key: string): string[] {
     ? chosen.filter((k) => k !== key)
     : [...chosen, key];
 }
+
+/** A Workshop number from a pasted link (…?id=N, CommunityFilePage/N) or the number alone; null for anything else (0.49.0). */
+export function workshopNumberIn(text: string): string | null {
+  const trimmed = text.trim();
+  const plain = /^(\d{6,20})$/.exec(trimmed);
+  if (plain) return plain[1];
+  const linked = /(?:[?&]id=|CommunityFilePage\/)(\d{6,20})(?!\d)/.exec(
+    trimmed,
+  );
+  return linked ? linked[1] : null;
+}

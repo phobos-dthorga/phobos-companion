@@ -8,7 +8,12 @@
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
   import { register } from "../shortcuts/registry";
-  import { editModList, readMods, undoEdit } from "./desktopClient";
+  import {
+    editModList,
+    readMods,
+    undoEdit,
+    unsubscribeFrom,
+  } from "./desktopClient";
   import {
     CARRY_STEPS,
     type Findable,
@@ -26,9 +31,11 @@
     toggled,
     withBlockAt,
     withList,
+    workshopNumberIn,
   } from "./editor";
   import ModFinder from "./ModFinder.svelte";
-  import type { ModRow, ModsListing } from "./types";
+  import SteamSubscribe from "./SteamSubscribe.svelte";
+  import type { ModRow, ModsListing, Subscribed } from "./types";
 
   /**
    * Edit the list (0.46.0; moving made free in 0.47.0, the owner's choices of 22 Nov 2026: carry with the keys, put beside a named
@@ -94,6 +101,16 @@
   let busy = $state(false);
   let progress = $state(started());
   let said = $state<{ text: string; refused: boolean } | null>(null);
+  /** Unsubscribe asks first (0.49.0; the owner's choice: Steam deletes the files, so a yes, and the mods are switched off). */
+  let asking = $state<{
+    side: "on" | "off";
+    numbers: string[];
+    names: string[];
+  } | null>(null);
+  let linkTyped = $state("");
+  const linked = $derived(workshopNumberIn(linkTyped));
+  /** A mod subscribed from a link and now on this PC, offered to switch on. */
+  let offered = $state<{ key: string; name: string } | null>(null);
 
   function hearing() {
     return (m: Parameters<typeof heard>[1]) => {
@@ -209,6 +226,80 @@
       refused: false,
     };
     return true;
+  }
+
+  // ------------------------------------------------------------ Steam: unsubscribe after a yes, subscribe from a link
+
+  /** The Workshop mods among these, with their numbers and names. */
+  function workshopOf(keys: string[]): { numbers: string[]; names: string[] } {
+    if (reading.state !== "ready") return { numbers: [], names: [] };
+    const mods = new Map(reading.listing.mods.map((m) => [m.key, m]));
+    const found = keys
+      .map((k) => mods.get(k))
+      .filter(
+        (m): m is ModRow =>
+          !!m && m.source === "workshop" && m.workshop_id !== "",
+      );
+    return {
+      numbers: found.map((m) => m.workshop_id),
+      names: found.map((m) => m.name),
+    };
+  }
+
+  async function unsubscribe() {
+    const chosen = asking;
+    asking = null;
+    if (!chosen || reading.state !== "ready") return;
+    said = null;
+    busy = true;
+    progress = started(t("modlist-steam-unsubscribing"));
+    const answer = await unsubscribeFrom(
+      game.id,
+      listKey,
+      chosen.numbers,
+      hearing(),
+    );
+    busy = false;
+    if (answer.state === "failed") {
+      said = {
+        text: t("modlist-steam-failed", { reason: answer.failure.detail }),
+        refused: true,
+      };
+      return;
+    }
+    if (!answer.result.ok) {
+      said = {
+        text: t("modlist-steam-failed", {
+          reason: answer.result.refusal ?? "",
+        }),
+        refused: true,
+      };
+      return;
+    }
+    const gone = (answer.result.data.results ?? []).filter(
+      (r) => r.unsubscribed,
+    ).length;
+    chosenOn = [];
+    chosenOff = [];
+    await load();
+    said = {
+      text: t("modlist-steam-unsubscribed", {
+        count: gone,
+        off: answer.result.data.switched_off?.length ?? 0,
+      }),
+      refused: gone < chosen.numbers.length,
+    };
+  }
+
+  async function subscribedFromLink(results: Subscribed[]) {
+    linkTyped = "";
+    await load();
+    const first = results.find((r) => r.installed && r.id);
+    if (!first || reading.state !== "ready") return;
+    const mod = reading.listing.mods.find((m) => m.id === first.id);
+    const listed = new Set(listKeys());
+    offered =
+      mod && !listed.has(mod.key) ? { key: mod.key, name: mod.name } : null;
   }
 
   // ------------------------------------------------------------ carrying with the keys
@@ -390,6 +481,25 @@
   });
 </script>
 
+{#snippet askUnsubscribe(chosen: { numbers: string[]; names: string[] })}
+  <div class="confirm" role="group" aria-label={t("modlist-confirm-label")}>
+    <p>
+      {t("modlist-steam-unsubscribe-confirm", {
+        count: chosen.numbers.length,
+        names: chosen.names.join(", "),
+      })}
+    </p>
+    <div class="buttons">
+      <button type="button" class="action strong" onclick={unsubscribe}
+        >{t("modlist-steam-unsubscribe-yes")}</button
+      >
+      <button type="button" class="action" onclick={() => (asking = null)}
+        >{t("modlist-cancel")}</button
+      >
+    </div>
+  </div>
+{/snippet}
+
 {#if said}
   <p class="told" class:refused={said.refused} role="status">{said.text}</p>
 {/if}
@@ -472,6 +582,35 @@
         >
       </div>
     </div>
+    <div class="row-of link">
+      <label class="find">
+        <span>{t("modlist-steam-link")}</span>
+        <input type="text" bind:value={linkTyped} autocomplete="off" />
+      </label>
+      <SteamSubscribe
+        game={game.id}
+        numbers={linked ? [linked] : []}
+        label={t("modlist-steam-subscribe")}
+        disabled={busy || !linked}
+        ondone={subscribedFromLink}
+      />
+    </div>
+    {#if offered}
+      {@const offer = offered}
+      <p class="offer">
+        {t("modlist-steam-offer-on", { name: offer.name })}
+        <button
+          type="button"
+          class="action strong"
+          disabled={locked}
+          onclick={() => {
+            const key = offer.key; // read before the offer goes: it is the offer's own value
+            offered = null;
+            void act("enable", [key], null);
+          }}>{t("modlist-edit-switch-on")}</button
+        >
+      </p>
+    {/if}
     <div class="row-of">
       <div class="buttons" role="group" aria-label={t("modlist-edit-show")}>
         <span class="muted small">{t("modlist-edit-show")}</span>
@@ -604,12 +743,22 @@
             <button
               type="button"
               class="action"
+              disabled={locked || workshopOf(chosenOn).numbers.length === 0}
+              onclick={() => (asking = { side: "on", ...workshopOf(chosenOn) })}
+              >{t("modlist-steam-unsubscribe")}</button
+            >
+            <button
+              type="button"
+              class="action"
               disabled={chosenOn.length === 0}
               onclick={() => (chosenOn = [])}>{t("modlist-edit-let-go")}</button
             >
           </div>
         {/if}
       </div>
+      {#if asking?.side === "on" && !carrying}
+        {@render askUnsubscribe(asking)}
+      {/if}
 
       {#if finding === "after" || finding === "before"}
         {@const after = finding === "after"}
@@ -733,11 +882,21 @@
           <button
             type="button"
             class="action"
+            disabled={locked || workshopOf(chosenOff).numbers.length === 0}
+            onclick={() => (asking = { side: "off", ...workshopOf(chosenOff) })}
+            >{t("modlist-steam-unsubscribe")}</button
+          >
+          <button
+            type="button"
+            class="action"
             disabled={chosenOff.length === 0}
             onclick={() => (chosenOff = [])}>{t("modlist-edit-let-go")}</button
           >
         </div>
       </div>
+      {#if asking?.side === "off"}
+        {@render askUnsubscribe(asking)}
+      {/if}
 
       {#if finding === "on-after"}
         <ModFinder
@@ -830,6 +989,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 6px 20px;
+  }
+
+  .row-of.link {
+    justify-content: flex-start;
   }
 
   .buttons {
@@ -998,6 +1161,21 @@
   .chip.gone {
     background: var(--shade-risk);
     border-color: var(--colour-risk);
+  }
+
+  .confirm {
+    margin: 8px 0;
+    padding: 10px 14px;
+    border: 2px solid var(--colour-risk);
+    background: var(--shade-risk);
+    border-radius: 4px;
+  }
+
+  .offer {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-inline-start: 3px solid var(--colour-success);
+    background: var(--shade-success);
   }
 
   .told {

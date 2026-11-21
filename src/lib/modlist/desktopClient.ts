@@ -3,6 +3,8 @@ import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
 import type {
   CompareAnswer,
+  SubscribeAnswer,
+  UnsubscribeAnswer,
   EditAnswer,
   ListsListing,
   ModListChange,
@@ -275,5 +277,36 @@ export async function findOnWorkshop(
     "mod_list_find_on_workshop",
     { game, name },
     () => ({ state: "ready" }),
+  );
+}
+
+/**
+ * Subscribes to Workshop items through the running Steam client (0.49.0); with `wait`, answers once Steam has downloaded them,
+ * saying how far it is meanwhile.
+ */
+export async function subscribeTo(
+  game: string,
+  numbers: string[],
+  wait: boolean,
+  onProgress?: OnProgress,
+): Promise<{ state: "ready"; result: SubscribeAnswer } | Failed> {
+  return ask<SubscribeAnswer, { state: "ready"; result: SubscribeAnswer }>(
+    "mod_list_subscribe",
+    { game, numbers, wait, onProgress: progressChannel(onProgress) },
+    (result) => ({ state: "ready", result }),
+  );
+}
+
+/** Switches Workshop mods off, then unsubscribes through Steam; only after the owner's yes. */
+export async function unsubscribeFrom(
+  game: string,
+  list: string,
+  numbers: string[],
+  onProgress?: OnProgress,
+): Promise<{ state: "ready"; result: UnsubscribeAnswer } | Failed> {
+  return ask<UnsubscribeAnswer, { state: "ready"; result: UnsubscribeAnswer }>(
+    "mod_list_unsubscribe",
+    { game, list, numbers, onProgress: progressChannel(onProgress) },
+    (result) => ({ state: "ready", result }),
   );
 }

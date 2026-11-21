@@ -56,6 +56,17 @@ export function findingsByList(check: ModListCheck): ListFindings[] {
 }
 
 /** Whether a finding names a Workshop item worth opening in Steam. */
+/**
+ * Whether a finding can be put right by subscribing (0.49.0): a mod not on this PC (missing, or needed and not here), or one Steam
+ * no longer keeps for you, when its Workshop number is known. Not a mod the Workshop no longer has.
+ */
+export function subscribable(problem: ModProblem): boolean {
+  if (problem.workshop_id === "") return false;
+  if (problem.kind === "missing" || problem.kind === "unsubscribed")
+    return true;
+  return problem.kind === "needs" && problem.fixes.length === 0;
+}
+
 export function steamWorthy(problem: ModProblem): boolean {
   return problem.workshop_id !== "" && STEAM_KINDS.includes(problem.kind);
 }

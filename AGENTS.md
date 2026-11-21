@@ -91,6 +91,11 @@ reads them.
   chose in the Open dialog the host showed; `save`, `forget` and `export` write only on a press, an exported file only where the
   owner chose in the Save dialog. Saves and RimSort's files are only read. **Find on the Workshop** hands the Steam client only a
   Workshop search for a missing mod's name, for the game's own app id.
+  **Subscribe and Unsubscribe** (0.49.0; `src-tauri/src/mod_list_steam.rs`) run the kit's `mod-list subscribe --apply` and
+  `unsubscribe --apply`, which borrow the game's own Steam library and speak to the Steam client already running and signed in: no
+  credentials are held. Subscribe runs on the owner's press, for any well-formed Workshop number (it only adds); **Unsubscribe only
+  after the owner's yes in the window**, only for mods the last listing or check named, and it switches them off first. **Agents
+  never press either on the owner's account**, in a test or otherwise (the Workshop rule): browser tests stand in a host.
 - **The Memory page starts a watch of the running game only on the owner's press and confirmation** (owner, 19 Nov 2026: memory
   profiling "will be done from the Companion"; `src-tauri/src/memory_page.rs`, design record "Memory"): the kit's watch, found by
   the manifest's `memory-watch` surface, attaches Microsoft's dotnet-counters to the game once unless the owner chose Windows' figures

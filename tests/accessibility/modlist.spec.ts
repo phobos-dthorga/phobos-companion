@@ -10,7 +10,9 @@ function sampleMod(key: string, name: string, source = "workshop") {
     id: key,
     name,
     source,
-    workshop_id: "",
+    // Invented Workshop numbers, one per sample mod from the Workshop.
+    workshop_id:
+      source === "workshop" ? String(1000000000 + key.charCodeAt(0)) : "",
     authors: "Sample Author",
     versions: ["1.7"],
     needs: [],
@@ -223,6 +225,44 @@ async function open(page: Page) {
       result: { ok: true, title: "kept", refusal: null, data: {} },
     },
     mod_list_find_on_workshop: { result: null },
+    mod_list_subscribe: {
+      result: {
+        ok: true,
+        title: "Mod list: subscribed to 1 of 1",
+        refusal: null,
+        data: {
+          applied: true,
+          results: [
+            {
+              workshop_id: "3820401180",
+              subscribed: true,
+              installed: true,
+              state: "installed",
+              id: "echo",
+              name: "Echo Engines",
+            },
+          ],
+        },
+      },
+    },
+    mod_list_unsubscribe: {
+      result: {
+        ok: true,
+        title: "Mod list: unsubscribed from 1 of 1",
+        refusal: null,
+        data: {
+          switched_off: ["alpha"],
+          backup: "b.list",
+          results: [
+            {
+              workshop_id: "1000000097",
+              unsubscribed: true,
+              name: "Alpha Tools",
+            },
+          ],
+        },
+      },
+    },
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
     mod_list_check: { result: check },
@@ -513,6 +553,81 @@ for (const [name, viewport] of [
             list: "active",
             name: "Before the war",
             replace: false,
+          },
+        ]);
+    });
+
+    test("unsubscribing asks first, says the files go, then switches off and unsubscribes", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("button", { name: "Edit the list", exact: true })
+        .click();
+      await page.getByRole("option", { name: /Alpha Tools/ }).click();
+      await page.getByRole("button", { name: "Unsubscribe…" }).first().click();
+      await expect(
+        page.getByText(
+          /Unsubscribe from Alpha Tools\? It is switched off first/,
+        ),
+      ).toBeVisible();
+      await shot(page, `${name}-unsubscribe`);
+      await audit(page);
+      expect(await asked(page, "mod_list_unsubscribe")).toEqual([]);
+      await page.getByRole("button", { name: "Yes, unsubscribe" }).click();
+      await expect
+        .poll(() => asked(page, "mod_list_unsubscribe"))
+        .toEqual([
+          {
+            command: "mod_list_unsubscribe",
+            game: "first",
+            list: "active",
+            numbers: ["1000000097"],
+          },
+        ]);
+    });
+
+    test("a pasted Workshop link subscribes, waits for the download, then offers to switch it on", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("button", { name: "Edit the list", exact: true })
+        .click();
+      await page
+        .getByLabel("Subscribe by Workshop link or number")
+        .fill(
+          "https://steamcommunity.com/sharedfiles/filedetails/?id=3820401180",
+        );
+      await page
+        .getByRole("button", { name: "Subscribe", exact: true })
+        .click();
+      await expect
+        .poll(() => asked(page, "mod_list_subscribe"))
+        .toEqual([
+          {
+            command: "mod_list_subscribe",
+            game: "first",
+            numbers: ["3820401180"],
+            wait: true,
+          },
+        ]);
+      const offer = page
+        .getByRole("paragraph")
+        .filter({ hasText: "Echo Engines is on this PC now." });
+      await expect(offer).toBeVisible();
+      await shot(page, `${name}-subscribed`);
+      await offer.getByRole("button", { name: "Switch on" }).click();
+      await expect
+        .poll(() => asked(page, "mod_list_edit"))
+        .toEqual([
+          {
+            command: "mod_list_edit",
+            game: "first",
+            list: "active",
+            action: "enable",
+            ids: ["echo"],
+            place: null,
           },
         ]);
     });

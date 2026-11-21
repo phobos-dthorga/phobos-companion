@@ -148,6 +148,17 @@ pub fn mods(game: &str, listener: Option<kit::Listener>) -> Result<Value, Failur
     let found = places(game)?;
     let data = kit::run_hearing(TOOL, &mods_arguments(&found), listener)?["data"].clone();
     let (ids, lists) = known_by(game, &data);
+    let numbers: Vec<String> = data["mods"]
+        .as_array()
+        .map_or(&[][..], Vec::as_slice)
+        .iter()
+        .filter_map(|m| m["workshop_id"].as_str())
+        .filter(|n| workshop_number(n))
+        .map(str::to_owned)
+        .collect();
+    if let Ok(mut known) = WORKSHOP.lock() {
+        known.extend(numbers);
+    }
     if let Ok(mut known) = KNOWN.lock() {
         known.retain(|(g, _)| g != game);
         known.extend(ids);

@@ -21,6 +21,7 @@ mod makeup_page;
 mod memory_page;
 mod mod_list_lists;
 mod mod_list_page;
+mod mod_list_steam;
 mod open_work;
 mod other_code_page;
 mod patch_targets;
@@ -980,6 +981,28 @@ async fn mod_list_find_on_workshop(game: String, name: String) -> Result<(), Fai
     blocking(move || mod_list_lists::find_on_workshop(&game, &name)).await
 }
 
+/// Subscribes to Workshop items through the running Steam client; with `wait`, answers once Steam has downloaded them (0.49.0).
+#[tauri::command]
+async fn mod_list_subscribe(
+    game: String,
+    numbers: Vec<String>,
+    wait: bool,
+    on_progress: Channel<kit::Progress>,
+) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_steam::subscribe(&game, &numbers, wait, Some(&hearing(on_progress)))).await
+}
+
+/// Switches Workshop mods off, then unsubscribes through Steam, after the owner's yes (0.49.0).
+#[tauri::command]
+async fn mod_list_unsubscribe(
+    game: String,
+    list: String,
+    numbers: Vec<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_steam::unsubscribe(&game, &list, &numbers, Some(&hearing(on_progress)))).await
+}
+
 /// Opens a mod's Workshop page in the Steam client: only a number a check named (0.45.0).
 #[tauri::command]
 async fn mod_list_open_in_steam(number: String) -> Result<(), Failure> {
@@ -1025,6 +1048,8 @@ pub fn run() {
             mod_list_forget,
             mod_list_export,
             mod_list_find_on_workshop,
+            mod_list_subscribe,
+            mod_list_unsubscribe,
             their_code,
             decompile_assembly,
             updates,

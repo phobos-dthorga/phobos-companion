@@ -223,3 +223,29 @@ export type CompareAnswer = ModListChange & {
     backup?: string;
   };
 };
+
+/** One Workshop item a subscribe asked Steam for (phobos-modkit 1.77.0), and what Steam then said. */
+export type Subscribed = {
+  workshop_id: string;
+  subscribed: boolean;
+  installed: boolean;
+  state: string;
+  id: string;
+  name: string;
+};
+
+/** What subscribing did. */
+export type SubscribeAnswer = ModListChange & {
+  data: { items?: string[]; applied?: boolean; results?: Subscribed[] };
+};
+
+/** What unsubscribing did: the mods switched off first, and each item Steam let go of. */
+export type UnsubscribeAnswer = ModListChange & {
+  data: {
+    switched_off?: string[];
+    backup?: string;
+    ids?: string[];
+    keys?: string[];
+    results?: { workshop_id: string; unsubscribed: boolean; name: string }[];
+  };
+};

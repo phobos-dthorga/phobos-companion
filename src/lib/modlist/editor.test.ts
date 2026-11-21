@@ -13,6 +13,7 @@ import {
   toggled,
   withBlockAt,
   withList,
+  workshopNumberIn,
 } from "./editor";
 import type { ModRow, ModsListing } from "./types";
 
@@ -170,5 +171,21 @@ describe("moving several mods freely (0.47.0)", () => {
   it("chooses and lets go in the order chosen", () => {
     expect(toggled(["a"], "b")).toEqual(["a", "b"]);
     expect(toggled(["a", "b"], "a")).toEqual(["b"]);
+  });
+});
+
+describe("a Workshop number from what is pasted (0.49.0)", () => {
+  it("takes links and plain numbers, nothing else", () => {
+    expect(
+      workshopNumberIn(
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3820401180&searchtext=",
+      ),
+    ).toBe("3820401180");
+    expect(workshopNumberIn("steam://url/CommunityFilePage/3820401180")).toBe(
+      "3820401180",
+    );
+    expect(workshopNumberIn(" 3820401180 ")).toBe("3820401180");
+    expect(workshopNumberIn("12345")).toBeNull();
+    expect(workshopNumberIn("https://example.com/?id=abc")).toBeNull();
   });
 });

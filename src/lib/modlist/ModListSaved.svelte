@@ -22,6 +22,7 @@
     undoEdit,
   } from "./desktopClient";
   import { LIST_SOURCES } from "./sorting";
+  import SteamSubscribe from "./SteamSubscribe.svelte";
   import type {
     CompareAnswer,
     ListInfo,
@@ -372,7 +373,21 @@
         </ul>
 
         {#if missing.length > 0}
+          {@const numbers = missing
+            .map((m) => m.workshop_id)
+            .filter((n) => n !== "")}
           <h3>{t("modlist-saved-missing-title")}</h3>
+          {#if numbers.length > 1}
+            <SteamSubscribe
+              game={game.id}
+              {numbers}
+              label={t("modlist-steam-subscribe-all", {
+                count: numbers.length,
+              })}
+              disabled={busy}
+              ondone={() => chosen && void compare(chosen)}
+            />
+          {/if}
           <ul class="missing-list">
             {#each missing as mod (mod.key)}
               <li>
@@ -380,11 +395,25 @@
                   <strong>{mod.name}</strong>
                   <span class="muted small">{mod.why}</span>
                 </div>
-                <button type="button" class="action" onclick={() => steam(mod)}
-                  >{mod.workshop_id
-                    ? t("modlist-open-steam")
-                    : t("modlist-saved-find")}</button
-                >
+                <div class="buttons">
+                  {#if mod.workshop_id}
+                    <SteamSubscribe
+                      game={game.id}
+                      numbers={[mod.workshop_id]}
+                      label={t("modlist-steam-subscribe")}
+                      disabled={busy}
+                      ondone={() => chosen && void compare(chosen)}
+                    />
+                  {/if}
+                  <button
+                    type="button"
+                    class="action"
+                    onclick={() => steam(mod)}
+                    >{mod.workshop_id
+                      ? t("modlist-open-steam")
+                      : t("modlist-saved-find")}</button
+                  >
+                </div>
               </li>
             {/each}
           </ul>

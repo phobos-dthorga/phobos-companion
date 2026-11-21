@@ -1184,6 +1184,26 @@ this over leaning on the change backups). Kit 1.76.0 adds `mod-list lists`, `com
   are `.rml`, offered under the list's name.
 - Seen on the owner's PC (read only): 46 saves and 100 RimSort lists, read in 0.2 s. Not yet tested on screen.
 
+**0.49.0, Subscribing through Steam** (step 5; the owner, 22 Nov 2026: "Start step 5, subscribing through Steam"). The owner's
+choices on question cards: **through the running Steam client, at once**, by borrowing the game's own Steam library (as RimSort
+does); **Subscribe** beside missing mods on What's wrong and in Saved lists, **a box for a Workshop link or number**, and
+**Unsubscribe** in Edit the list; unsubscribing **asks first and switches the mods off**; **a bar while Steam downloads, then an
+offer**. Kit 1.77.0 adds `mod-list subscribe` and `unsubscribe`.
+
+- What it lets the person do: get a missing mod back, or one from a pasted link, with one press and see it arrive; let go of
+  Workshop mods without opening Steam's pages; all from the keyboard.
+- What it stops: an unsubscribe without a yes; a list left naming mods whose files Steam deleted (they are switched off first);
+  a change while the game or RimSort runs (unsubscribe waits like any list change).
+- How it changes the way they work: Open in Steam stays for reading a mod's page; subscribing no longer needs it.
+- What outside notices: **Steam** (the subscription, the download, and the person shown as playing the game for the seconds a
+  press takes); the game's list file (switched off before an unsubscribe).
+- **Risk (agent's grade): moderate for Unsubscribe** (Steam deletes the files; a backup of the list and a yes first, and the files
+  come back by subscribing again), **low for Subscribe** (only adds). No setting: each is the owner's own press.
+- Agent choices, owner to revise: downloads waited for up to 15 minutes, the bar showing bytes so far; at most 500 items a press;
+  each subscribe or unsubscribe call waited for up to 30 s; success read back from Steam's own item state.
+- **Untested against a real Steam client**: agents never subscribe on the owner's account, so the Steamworks calls (checked only
+  as far as loading the game's library and binding its functions) meet Steam first on the owner's own press.
+
 **The manager's next steps** (owner's choices, 22 Nov 2026): subscribe and unsubscribe through the running Steam client, as RimSort does (Steamworks through the client's own login, no
 credentials held); then RimSort can retire. Each gets its own design record.
 

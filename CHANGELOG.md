@@ -4,6 +4,24 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.49.0] - 2026-11-22
+
+Step 5 of the program's own mod manager (the owner, 22 Nov 2026: "Start step 5, subscribing through Steam").
+
+### Added
+
+- **Mod list: subscribing through Steam.** **Subscribe** beside a missing mod on What's wrong (and a needed mod not on this PC, or
+  one Steam no longer keeps for you), beside each missing mod in Saved lists with **Subscribe to all**, and **Subscribe by Workshop
+  link or number** in Edit the list: Steam subscribes at once, a bar shows the download, then the page checks or compares again,
+  or offers **Switch on**. **Unsubscribe…** in Edit the list asks first, switches the mods off (after a backup), then Steam deletes
+  their files. Through the Steam client already running and signed in, borrowing the game's own Steam library for the seconds a
+  press takes (Steam shows you as playing the game meanwhile); no password is asked for or kept. Guide: Subscribe or unsubscribe
+  to Workshop mods without leaving the Companion. **Not yet tested on screen, nor against a real Steam client**: the first real
+  subscribe is your own press.
+
+### Changed
+
+- Tool kit pin v1.76.0 to v1.77.0.
 ## [0.48.0] - 2026-11-22
 
 Step 4 of the program's own mod manager (the owner, 22 Nov 2026: "Start step 4, saved lists").

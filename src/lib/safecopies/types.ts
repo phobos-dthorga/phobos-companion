@@ -14,7 +14,8 @@ export interface DestinationState {
 export interface SafeSet {
   set: string;
   unit: string | null;
-  kind: "own" | "game-derived";
+  /** "personal" from kit 1.67.0: the owner's own but private, such as notes about them or a game's settings. */
+  kind: "own" | "game-derived" | "personal" | string;
   why: string;
   files: number;
   bytes: number;

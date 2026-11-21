@@ -23,6 +23,20 @@ export function summarise(repositories: RepositoryCopies[]): {
   };
 }
 
+/** The words for a set's kind. A kind this program does not know yet is said to be kept private, never to be ours. */
+export function kindKey(kind: string): string {
+  switch (kind) {
+    case "own":
+      return "safe-copies-kind-own";
+    case "game-derived":
+      return "safe-copies-kind-game-derived";
+    case "personal":
+      return "safe-copies-kind-personal";
+    default:
+      return "safe-copies-kind-other";
+  }
+}
+
 /** A set's name as people read it: the set, then the training or file it stands for. */
 export function setName(set: SafeSet): string {
   return set.unit ? `${set.set} / ${set.unit}` : set.set;

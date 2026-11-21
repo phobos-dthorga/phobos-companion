@@ -4,6 +4,16 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.42.2] - 2026-11-22
+
+Safe copies name the tools' new personal kind (the owner's go of 22 Nov 2026: notes kept about them and their game settings, on a private, local folder only). Not yet tested on screen.
+
+### Changed
+
+- **Safe copies say Personal** for the owner's own but private files: the notes kept about them, a game's settings. Before this, the card would have called them Made from a game's files. A kind the card does not know yet says Kept private, never Ours.
+- The Tools game's Home now shows the notes kept about you, from the tools' own list.
+- Tools kit pin v1.66.0 to v1.67.0.
+
 ## [0.42.1] - 2026-11-21
 
 An update you have not checked no longer disappears from Since you last played (the owner, 21 Nov 2026: the Harrier update and Check what they mean for ours showed on the Mods page in the morning and were gone by the afternoon). Not yet tested on screen.

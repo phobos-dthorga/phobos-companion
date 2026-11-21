@@ -720,6 +720,8 @@
     "safe-copies-size": "Size",
     "safe-copies-kind-own": "Ours",
     "safe-copies-kind-game-derived": "Made from a game's files",
+    "safe-copies-kind-personal": "Personal",
+    "safe-copies-kind-other": "Kept private",
     "safe-copies-state-copied": "Copied { $when }",
     "safe-copies-state-changed": "{ $count ->\n    [one] One file changed since { $when }\n   *[other] { $count } files changed since { $when }\n  }",
     "safe-copies-state-never": "Never copied",

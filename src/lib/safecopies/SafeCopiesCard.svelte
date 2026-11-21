@@ -10,6 +10,7 @@
     cellKey,
     checkCounts,
     copyCounts,
+    kindKey,
     setName,
     summarise,
     wantsCopy,
@@ -193,9 +194,7 @@
               <tr class:wants={wantsCopy(set)}>
                 <th scope="row">{setName(set)}</th>
                 <td title={set.why}>
-                  {set.kind === "own"
-                    ? t("safe-copies-kind-own")
-                    : t("safe-copies-kind-game-derived")}
+                  {t(kindKey(set.kind))}
                 </td>
                 <td>{formatSize(set.bytes, LOCALE)}</td>
                 {#each destinations as destination (destination.name)}

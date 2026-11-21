@@ -3,6 +3,7 @@ import {
   cellKey,
   checkCounts,
   copyCounts,
+  kindKey,
   setName,
   summarise,
   wantsCopy,
@@ -155,5 +156,12 @@ describe("safe copies on Home", () => {
         },
       }),
     ).toEqual({ checked: 6, problems: 1, firstProblem: "x.png: missing" });
+  });
+
+  it("names each kind, and a kind it does not know yet is kept private, never ours", () => {
+    expect(kindKey("own")).toBe("safe-copies-kind-own");
+    expect(kindKey("game-derived")).toBe("safe-copies-kind-game-derived");
+    expect(kindKey("personal")).toBe("safe-copies-kind-personal");
+    expect(kindKey("something-new")).toBe("safe-copies-kind-other");
   });
 });

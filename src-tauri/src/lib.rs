@@ -448,6 +448,35 @@ async fn safe_copies_check(
     blocking(move || safe_copies::check(&game, &repository, Some(&hearing(on_progress)))).await
 }
 
+/// Restore: copies one set, or one training of it, into a folder the owner picked, once they confirm (0.43.0).
+#[tauri::command]
+#[allow(clippy::too_many_arguments)]
+async fn safe_copies_restore(
+    game: String,
+    repository: String,
+    set: String,
+    unit: Option<String>,
+    to: String,
+    overwrite: bool,
+    on_progress: Channel<kit::Progress>,
+) -> Result<safe_copies::CopyResult, Failure> {
+    blocking(move || {
+        safe_copies::restore(&game, &repository, &set, unit.as_deref(), &to, overwrite, Some(&hearing(on_progress)))
+    })
+    .await
+}
+
+/// Let go: removes one copy the tools list as no longer taken, once the owner confirms (0.43.0).
+#[tauri::command]
+async fn safe_copies_let_go(
+    game: String,
+    repository: String,
+    copy: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<safe_copies::CopyResult, Failure> {
+    blocking(move || safe_copies::let_go(&game, &repository, &copy, Some(&hearing(on_progress)))).await
+}
+
 /// Every game Steam has installed, with guesses at each one's data folder and whether the list holds it (0.31.0). Only reads.
 #[tauri::command]
 async fn steam_games(on_progress: Channel<kit::Progress>) -> Result<games_page::SteamGames, Failure> {
@@ -828,6 +857,8 @@ pub fn run() {
             safe_copies_status,
             safe_copies_copy,
             safe_copies_check,
+            safe_copies_restore,
+            safe_copies_let_go,
             claims_list,
             decisions_list,
             answer_decision,

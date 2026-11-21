@@ -4,6 +4,20 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.43.0] - 2026-11-22
+
+Safe copies' follow-ups (the owner's go of 22 Nov 2026). Not yet tested on screen.
+
+### Added
+
+- **Restore…** on each row of Safe copies: choose a folder in Windows' own picker, then **Copy it there**. Each file is checked against its fingerprint as it comes back. A different file already in the folder is left alone, and **Replace older files** is offered next; a file newer than the copy is never replaced from here. One installed style model comes back on its own.
+- **Kept, no longer copied**: copies the tools keep of files they no longer take, such as a save that left your newest pair, with their size and older copies. **Let go…** removes one after **Remove the copy**; the file it was made from is never touched.
+
+### Changed
+
+- **A copy not sent to the private repository stays said** ("2 copies are committed but not sent yet") until a later Copy now sends it, and the card is outlined meanwhile. Before, only the run that failed said so.
+- Tools kit pin v1.68.0 to v1.70.1 (not sent yet, kept copies and let-go, one file restored on its own, and the shared rule on reports to other authors).
+
 ## [0.42.4] - 2026-11-22
 
 Two small fixes to Since you last played, from the owner's screenshot of 22 Nov 2026. Not yet tested on screen.

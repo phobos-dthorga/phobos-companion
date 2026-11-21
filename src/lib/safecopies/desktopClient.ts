@@ -50,3 +50,42 @@ export async function checkCopies(
     (result) => ({ state: "done", result }),
   );
 }
+
+/** Restore one set, or one training of it, into a folder the owner picked (0.43.0). The host and the kit both check it first. */
+export async function restoreCopies(
+  game: string,
+  repository: string,
+  set: string,
+  unit: string | null,
+  to: string,
+  overwrite: boolean,
+  onProgress?: OnProgress,
+): Promise<CopyReading> {
+  return ask<CopyResult, CopyReading>(
+    "safe_copies_restore",
+    {
+      game,
+      repository,
+      set,
+      unit,
+      to,
+      overwrite,
+      onProgress: progressChannel(onProgress),
+    },
+    (result) => ({ state: "done", result }),
+  );
+}
+
+/** Let go of one copy the tools list as no longer taken (0.43.0). The kit refuses any copy still taken. */
+export async function letGoCopy(
+  game: string,
+  repository: string,
+  copy: string,
+  onProgress?: OnProgress,
+): Promise<CopyReading> {
+  return ask<CopyResult, CopyReading>(
+    "safe_copies_let_go",
+    { game, repository, copy, onProgress: progressChannel(onProgress) },
+    (result) => ({ state: "done", result }),
+  );
+}

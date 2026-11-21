@@ -151,8 +151,46 @@ async function open(page: Page, copies: unknown) {
         },
       },
     },
+    pick_path: { result: "R:\\Sample\\Restored" },
+    safe_copies_restore: {
+      result: {
+        ok: true,
+        title: "Restored 30 files",
+        refusal: null,
+        data: { restored: 30, same: 0, replaced: 0 },
+      },
+    },
+    safe_copies_let_go: {
+      result: {
+        ok: true,
+        title: "Let go of 1 copies",
+        refusal: null,
+        data: { applied: true, letGo: ["first/saves/S1.rws"] },
+      },
+    },
   });
   await page.goto("/");
+}
+
+/** The same repository, with a commit not sent yet and a save that left the newest pair (kit 1.69.0). */
+function waiting() {
+  const copies = structuredClone(COPIES);
+  const status = copies[0].status as unknown as {
+    destinations: Record<string, unknown>[];
+    keptOnly?: unknown[];
+  };
+  status.destinations[1] = { ...status.destinations[1], unsent: 2 };
+  status.keptOnly = [
+    {
+      key: "first/saves/S1.rws",
+      set: "saves",
+      why: "no longer among the newest 2",
+      bytes: 400_000_000,
+      earlier: 3,
+      earlierBytes: 1_200_000_000,
+    },
+  ];
+  return copies;
 }
 
 async function noViolations(page: Page) {
@@ -192,6 +230,53 @@ test.describe("Safe copies on Home (0.42.0)", () => {
       "All 99 copies are whole.",
     );
     await noViolations(page);
+  });
+
+  test("a copy not sent yet stays said until it is sent (0.43.0)", async ({
+    page,
+  }) => {
+    await open(page, waiting());
+    const card = page.getByRole("region", { name: "Safe copies" });
+    await expect(card).toContainText(
+      "2 copies are committed but not sent yet; Copy now tries again.",
+    );
+    await noViolations(page);
+  });
+
+  test("Restore asks for a folder, then for a yes, before copying back (0.43.0)", async ({
+    page,
+  }) => {
+    await open(page, COPIES);
+    const card = page.getByRole("region", { name: "Safe copies" });
+    await card
+      .getByRole("button", { name: "Restore trainings / sample-ours…" })
+      .click();
+    const ask = card.getByRole("group", { name: "Waiting for your yes" });
+    await expect(ask).toContainText("R:\\Sample\\Restored");
+    await noViolations(page);
+    await ask.getByRole("button", { name: "Copy it there" }).click();
+    await expect(card.getByRole("status")).toContainText(
+      "Restored 30 files into R:\\Sample\\Restored",
+    );
+  });
+
+  test("a kept save is listed, and Let go asks before removing it (0.43.0)", async ({
+    page,
+  }) => {
+    await open(page, waiting());
+    const card = page.getByRole("region", { name: "Safe copies" });
+    await expect(card).toContainText("Kept, no longer copied");
+    await expect(card).toContainText("no longer among the newest 2");
+    await card
+      .getByRole("button", { name: "Let go of first/saves/S1.rws…" })
+      .click();
+    const ask = card.getByRole("group", { name: "Waiting for your yes" });
+    await expect(ask).toContainText("its 3 older copies");
+    await expect(ask).toContainText("is not touched");
+    await ask.getByRole("button", { name: "Remove the copy" }).click();
+    await expect(card.getByRole("status")).toContainText(
+      "Let go of first/saves/S1.rws.",
+    );
   });
 
   test("a game that lists none says so in one line", async ({ page }) => {

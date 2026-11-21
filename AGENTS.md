@@ -139,7 +139,11 @@ reads them.
   runs the kit's `safe-copies run` for a repository of the game that has `config/safe-copies.json`, on the owner's press and while
   the manifest calls it `writes`: it copies into the folders the owner chose and marked, and pushes the private repository the owner
   chose; it deletes nothing at a source and lets go only older copies beyond the number a set keeps (the saves, kit 1.68.0), and the
-  kit keeps anything made from a game's or the owner's private files off every shared place. **Check the copies** only reads. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
+  kit keeps anything made from a game's or the owner's private files off every shared place. **Check the copies** only reads.
+  **Restore** (0.43.0) runs the kit's `safe-copies restore` into a folder the owner picked in Windows' own picker, and **Let go**
+  runs `safe-copies let-go --apply` for one copy the kit lists as no longer taken; each only after the owner's yes on the card, and
+  only while the manifest calls it `writes`. Restore never replaces a different file unless the owner then presses Replace older
+  files, and never a newer one; Let go never touches the file the copy was made from. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
   answer`, which appends the owner's answer to `decisions/<repository>.jsonl` in this program's folder. **The Game files page only
   reads** (the kit's `game-files report`, `src-tauri/src/game_files_page.rs`); Show in folder opens the file manager on a file
   inside a folder the last report named, and nothing else.

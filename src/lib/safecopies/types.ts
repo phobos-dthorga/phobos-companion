@@ -31,6 +31,18 @@ export interface SafeDestination {
   privateLocal: boolean;
   shared: string[];
   lastRun: { name: string; time: string | null } | null;
+  /** Kit 1.69.0, the repository's copy: commits it holds that its remote has not had yet; null when git cannot say. */
+  unsent?: number | null;
+}
+
+/** Kit 1.69.0: a copy kept of a file the list no longer takes, such as a save that left the newest pair. */
+export interface KeptOnly {
+  key: string;
+  set: string;
+  why: string;
+  bytes: number;
+  earlier: number;
+  earlierBytes: number;
 }
 
 export interface SafeStatus {
@@ -38,6 +50,7 @@ export interface SafeStatus {
   notes: string[];
   sets: SafeSet[];
   destinations: SafeDestination[];
+  keptOnly?: KeptOnly[];
 }
 
 /** One repository of the game that lists safe copies, as the host read it. */
@@ -71,6 +84,10 @@ export interface CopyResult {
       checked: number;
       problems: { path: string; problem: string }[];
     }[];
+    /** Restore (0.43.0): files copied back, files already there unchanged, files replaced. */
+    restored?: number;
+    same?: number;
+    replaced?: number;
   };
 }
 

@@ -4,6 +4,15 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.42.3] - 2026-11-22
+
+Safe copies now include your RimWorld saves (the owner's go of 22 Nov 2026): the newest pair, with five older copies of each. Not yet tested on screen.
+
+### Changed
+
+- **The card and the Guide say what may now go.** Nothing at its source is ever deleted; a set that keeps a set number of older copies, such as the saves, lets the oldest go. They said nothing was ever deleted.
+- Tools kit pin v1.67.0 to v1.68.0 (the newest few files of a set, and a set number of older copies).
+
 ## [0.42.2] - 2026-11-22
 
 Safe copies name the tools' new personal kind (the owner's go of 22 Nov 2026: notes kept about them and their game settings, on a private, local folder only). Not yet tested on screen.

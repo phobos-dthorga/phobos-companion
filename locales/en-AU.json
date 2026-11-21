@@ -709,7 +709,7 @@
     "records-note-failed": "The Companion could not copy its own records by itself at { $when }: { $reason }. It keeps trying every few minutes while it is open.",
     "records-note-go": "Back them up",
     "safe-copies-title": "Safe copies",
-    "safe-copies-body": "Copies of what cannot be made again, such as training sets and the style models made from them, in the places you chose. Anything made from a game's own files goes only to a folder marked private and local. Nothing is ever deleted.",
+    "safe-copies-body": "Copies of what cannot be made again, such as training sets and the style models made from them, in the places you chose. Anything made from a game's own files, and anything personal, goes only to a folder marked private and local. Nothing at its source is ever deleted; a set that keeps a set number of older copies, such as your saves, lets the oldest go.",
     "safe-copies-none": "No repository of this game lists safe copies yet. A repository lists what to copy in config/safe-copies.json.",
     "safe-copies-all-copied": "Everything is copied.",
     "safe-copies-never": "{ $count ->\n    [one] One set has never been copied.\n   *[other] { $count } sets have never been copied.\n  }",

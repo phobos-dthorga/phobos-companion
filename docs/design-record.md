@@ -1078,7 +1078,7 @@ phobos-modkit's `docs/safe-copies.md` and phobos-rimworld's `docs/development/ar
 | --- | --- |
 | The tools | phobos-modkit 1.66.0's `safe-copies status`, `run` and `verify`, through `src-tauri/src/safe_copies.rs`; Copy now only while the manifest calls `run` `writes` |
 | Which repositories | Those of the game with `config/safe-copies.json`; the host checks the repository is one of them before the kit sees it |
-| No confirmation step | Copy now never deletes or replaces at the source, and puts an earlier copy aside before replacing it; the owner chose automatic pushes, so a press needs no second yes (agent choice) |
+| No confirmation step | Copy now never deletes or replaces at the source (from kit 1.68.0 it lets go only older copies beyond the number a set keeps, by the owner's word), and puts an earlier copy aside before replacing it; the owner chose automatic pushes, so a press needs no second yes (agent choice) |
 | Games | Any game whose repository lists safe copies. Checked on phobos-rimworld (its trainings, models and notes); phobos-ostranauts lists none yet, and its Home says so in one line |
 
 **Agent choices, owner to revise:** the card's place on Home (asked on the Decisions page, lean Home), below the records note; the

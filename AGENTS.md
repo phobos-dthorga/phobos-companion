@@ -138,7 +138,8 @@ reads them.
   failed and why. It is the one write this program makes without a press. **Copy now** (0.42.0, `src-tauri/src/safe_copies.rs`)
   runs the kit's `safe-copies run` for a repository of the game that has `config/safe-copies.json`, on the owner's press and while
   the manifest calls it `writes`: it copies into the folders the owner chose and marked, and pushes the private repository the owner
-  chose; it never deletes, and the kit keeps anything made from a game's files off every shared place. **Check the copies** only reads. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
+  chose; it deletes nothing at a source and lets go only older copies beyond the number a set keeps (the saves, kit 1.68.0), and the
+  kit keeps anything made from a game's or the owner's private files off every shared place. **Check the copies** only reads. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
   answer`, which appends the owner's answer to `decisions/<repository>.jsonl` in this program's folder. **The Game files page only
   reads** (the kit's `game-files report`, `src-tauri/src/game_files_page.rs`); Show in folder opens the file manager on a file
   inside a folder the last report named, and nothing else.

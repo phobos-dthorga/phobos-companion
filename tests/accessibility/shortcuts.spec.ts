@@ -34,7 +34,7 @@ async function open(page: Page, saved: unknown = null) {
     settings_list: { result: sampleSettings },
     read_shortcuts: { result: saved },
     save_shortcuts: {
-      result: { format: 1, enabled: true, keys: { "page.settings": "s" } },
+      result: { format: 1, enabled: true, keys: { "page.settings": "z" } },
     },
   });
   await page.goto("/");
@@ -111,13 +111,14 @@ test.describe("Keyboard shortcuts", () => {
     await expect(editor.getByRole("status")).toContainText(
       "1 already does: Go to Home.",
     );
-    await page.keyboard.press("s");
+    // Z is free; S became Mod list's in 0.45.0.
+    await page.keyboard.press("z");
     await expect(editor.getByRole("status")).toContainText(
-      "Go to Settings is now S.",
+      "Go to Settings is now Z.",
     );
     await editor.getByRole("button", { name: "Close" }).click();
     await page.keyboard.press("1");
-    await page.keyboard.press("s");
+    await page.keyboard.press("z");
     await expect(settingsHeading(page)).toBeVisible();
   });
 

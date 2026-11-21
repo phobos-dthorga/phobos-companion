@@ -1100,6 +1100,40 @@ What outside it notices: Task Scheduler holds one task, "D'thorga Safe Copies", 
 words "Ours", "Made from a game's files" and "Not kept here"; no keys of its own; and that it shows for every game, saying "none
 listed" where a repository lists nothing.
 
+## Mod list (built 22 Nov 2026, 0.45.0)
+
+**The owner's request** (22 Nov 2026): after RimSort said only "1 missing mod" for RimMarket's Hospitality patch, which its author
+had taken off the Workshop: "We actually should have our own, third-party, mod managing", "just something like RimSort does". The
+first step of the program's own mod manager. The tool is phobos-modkit 1.72.0's `mod-list` (`docs/mod-list.md` there).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See what is wrong with each list of active mods and why: a missing mod's likeliest reason (taken off the Workshop, no longer subscribed, download unfinished, folder gone), who needs it, and a clue when another mod now does its job; needs, order, clashes, a mod listed twice, early warnings from Steam, game versions. Make the change offered with one press and a yes; undo it |
+| What does it stop them doing? | Changing a list while the game or RimSort is open (either would write over it); undoing over changes saved since; any change without a backup |
+| How does it change the way they work? | A missing-mod complaint is answered with a name and a reason in Companion, not a hunt; Home says when a list has problems, so nothing needs remembering |
+| What outside it notices? | The game's own list file (ModsConfig.xml; Project Zomboid's default.txt and each save's mods.txt), so the game and RimSort see the change; Steam's public Workshop API is asked which items still exist; the history log records each change. Nothing else |
+
+**Risk (agent's grade, owner to confirm): low.** What can be lost: one list's order or entries, never a mod's files or a save. One
+entry at a time, after a yes, with a byte-for-byte backup and Undo; refused while the game runs. So, by the shared rule, no setting
+to switch it off; it never acts unless pressed.
+
+| Part | How |
+| --- | --- |
+| The tools | `mod-list check` (with `--online` when Ask Steam too is on), `fix --apply` and `undo --apply`, through `src-tauri/src/mod_list_page.rs` |
+| What may change | Only a change the last check of that game offered, or a list it named; the window's text always one argument |
+| Games | RimWorld and Project Zomboid (kit adapters); any other game is told in words that its list is not read yet. Checked on the owner's RimWorld (407 mods; no problems on 22 Nov 2026) and Project Zomboid lists (the game not installed then, so its Workshop mods are counted "could not be looked for", never missing) |
+| Home | A note when a game's list has problems or warnings, read without Steam at most every half hour |
+
+**The manager's next steps** (owner's choices, 22 Nov 2026): switch mods on and off and reorder them; our own sorter from each mod's
+own rules, the community rules RimSort uses (read, never copied into a repository) and the owner's own, every move explained; saved
+lists; subscribe and unsubscribe through the running Steam client, as RimSort does (Steamworks through the client's own login, no
+credentials held); then RimSort can retire. Each gets its own design record.
+
+**Agent choices, owner to revise:** the page's place in the bar (after Mods) and its key (**S**); Ask Steam too on by default on
+the page (about 9 s with 400 mods) and off for Home's note; the version notes folded behind a button; the clue's minimum word length
+(5 letters) and the words it ignores ("patch", "compatibility", "framework" and the like); a missing mod never seen by a check is
+named by its id only.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

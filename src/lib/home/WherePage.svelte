@@ -19,6 +19,8 @@
   import { noteSaves } from "../notes/saves.svelte";
   import RecordsNote from "../records/RecordsNote.svelte";
   import CleanupNote from "../cleanup/CleanupNote.svelte";
+  import ModListNote from "../modlist/ModListNote.svelte";
+  import { pageServes } from "./kinds";
   import SafeCopiesCard from "../safecopies/SafeCopiesCard.svelte";
   import ClaimsPanel from "../claims/ClaimsPanel.svelte";
   import DecisionsNote from "../decisions/DecisionsNote.svelte";
@@ -220,6 +222,9 @@
 
 <RecordsNote game={game.id} />
 {#key game.id}<SafeCopiesCard game={game.id} />{/key}
+{#if pageServes(game.kind, "modlist")}
+  {#key game.id}<ModListNote game={game.id} />{/key}
+{/if}
 <CleanupNote game={game.id} />
 
 {#if agents.shown && notes && (notes.open.length > 0 || notes.dealt_count > 0)}

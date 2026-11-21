@@ -52,6 +52,7 @@
   import { agents } from "./lib/agents/state.svelte";
   import AboutPage from "./lib/about/AboutPage.svelte";
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
+  import ModListPage from "./lib/modlist/ModListPage.svelte";
   import MemoryPage from "./lib/memory/MemoryPage.svelte";
   import ExplorerPage from "./lib/explorer/ExplorerPage.svelte";
   import GuidePage from "./lib/guide/GuidePage.svelte";
@@ -106,6 +107,7 @@
     ["page.atlas", "atlas"],
     ["page.tests", "tests"],
     ["page.mods", "mods"],
+    ["page.modlist", "modlist"],
     ["page.changes", "changes"],
     ["page.timeline", "timeline"],
     ["page.codemap", "codemap"],
@@ -132,6 +134,7 @@
       pages: [
         { page: "home", key: "page-home" },
         { page: "mods", key: "page-mods" },
+        { page: "modlist", key: "page-modlist" },
         { page: "tests", key: "page-tests" },
         { page: "logs", key: "page-logs" },
         { page: "memory", key: "page-memory" },
@@ -385,6 +388,10 @@
         {#key selected.id}
           <MakeupPage game={selected} />
         {/key}
+      {:else if selected && page === "modlist"}
+        {#key selected.id}
+          <ModListPage game={selected} />
+        {/key}
       {:else if selected && page === "gamefiles"}
         {#key selected.id}
           <GameFilesPage game={selected} />
@@ -454,11 +461,13 @@
                           ? t("source-body-about")
                           : page === "gamefiles"
                             ? t("source-body-gamefiles")
-                            : page === "memory"
-                              ? t("source-body-memory")
-                              : page === "explorer"
-                                ? t("source-body-explorer")
-                                : t("source-body")}
+                            : page === "modlist"
+                              ? t("source-body-modlist")
+                              : page === "memory"
+                                ? t("source-body-memory")
+                                : page === "explorer"
+                                  ? t("source-body-explorer")
+                                  : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

@@ -11,6 +11,7 @@ export type GameKind = "game" | "tools";
  */
 export const GAME_ONLY_PAGES: readonly string[] = [
   "mods",
+  "modlist",
   "atlas",
   "logs",
   "memory",

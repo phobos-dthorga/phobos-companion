@@ -48,6 +48,12 @@ export const ACTIONS: Action[] = [
     words: "shortcut-page-mods",
   },
   {
+    id: "page.modlist",
+    scope: "everywhere",
+    defaultKey: "s",
+    words: "shortcut-page-modlist",
+  },
+  {
     id: "page.changes",
     scope: "everywhere",
     defaultKey: "6",

@@ -4,6 +4,28 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.45.0] - 2026-11-22
+
+The first step of the program's own mod manager (the owner, 22 Nov 2026: "We actually should have our own, third-party, mod
+managing", after RimSort said only "1 missing mod" for a patch its author had taken off the Workshop).
+
+### Added
+
+- **Mod list: what is wrong with a game's list of active mods, and why** (the **S** key; Guide: Mod list, and Fix a missing mod or
+  another mod list problem). For each list the game loads: problems (a mod switched on but not on this PC, with the likeliest
+  reason it went; a mod another needs that is off or missing; two that refuse each other; one listed twice), warnings (wrong
+  order; a mod the Workshop no longer has, or Steam no longer updates for you) and notes (game versions, folded away; what the
+  check could not see). A missing patch gets a clue when one of the mods it joined now names the other in its own files.
+  **Each change it offers waits for a yes on its card**, keeps a backup of the list first, and **Undo the last change** puts it
+  back; changes wait while the game or RimSort is open. **Open in Steam** opens a mod's Workshop page in Steam. **Ask Steam too**
+  checks which Workshop items still exist. RimWorld and Project Zomboid; other games are told in words. Checked with the kit on
+  RimWorld and Project Zomboid. Not yet tested on screen.
+- **Home notes a mod list with problems or warnings**, read quietly at most every half hour, leading to the page.
+
+### Changed
+
+- Tool kit pin v1.71.0 to v1.72.0 (`mod-list`).
+
 ## [0.44.0] - 2026-11-22
 
 Safe copies for every game (the owner, 22 Nov 2026: "work across as many individual games and their mods from the get go"). Not yet tested on screen.

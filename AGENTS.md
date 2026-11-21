@@ -71,6 +71,15 @@ reads them.
   manifest still calls it `writes` or `runs` (`src-tauri/src/installs_page.rs`). The host checks the repository, the move and every
   name; the kit refuses installing, going back and encoding while the game runs, and never deletes: the install it replaces becomes
   a backup.
+- **The Mod list page changes a game's list of active mods, one change at a time, only after the owner's yes on the card**
+  (0.45.0; the owner, 22 Nov 2026: "our own, third-party, mod managing", with fixes "on press + confirm, with backup and undo";
+  `src-tauri/src/mod_list_page.rs`, design record "Mod list"). The kit's `mod-list fix --apply` and `undo --apply`, only while the
+  manifest calls them `writes`, and only a change the last check of that game offered, or a list it named; the kit keeps a
+  byte-for-byte backup first, refuses while the game or a mod manager (RimSort) runs, and refuses to undo over a list changed since.
+  **Never make a change by itself.** Its check reads with Steam's public Workshop API when Ask Steam too is on (the kit's
+  `reads-online`, no account); Home's note reads without it, at most every half hour. **Open in Steam** hands the system only
+  `steam://url/CommunityFilePage/<number>`, for a Workshop number a check named in this run. Subscribing through the Steam client
+  (the owner's choice) is a later step with its own design record.
 - **The Memory page starts a watch of the running game only on the owner's press and confirmation** (owner, 19 Nov 2026: memory
   profiling "will be done from the Companion"; `src-tauri/src/memory_page.rs`, design record "Memory"): the kit's watch, found by
   the manifest's `memory-watch` surface, attaches Microsoft's dotnet-counters to the game once unless the owner chose Windows' figures

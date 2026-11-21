@@ -5,6 +5,7 @@ import type { StoodRequest } from "../timeline/types";
 export const PAGE_NAMES = [
   "home",
   "mods",
+  "modlist",
   "tests",
   "logs",
   "memory",

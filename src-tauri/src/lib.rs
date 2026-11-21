@@ -19,6 +19,7 @@ mod kit_pins;
 mod logs_page;
 mod makeup_page;
 mod memory_page;
+mod mod_list_page;
 mod open_work;
 mod other_code_page;
 mod patch_targets;
@@ -827,6 +828,45 @@ async fn updates(
     .await
 }
 
+/// A game's mod list check: what is wrong with each list of active mods and why (0.45.0). Reads; with `online`, asks Steam's
+/// public Workshop API too.
+#[tauri::command]
+async fn mod_list_check(
+    game: String,
+    online: bool,
+    on_progress: Channel<kit::Progress>,
+) -> Result<serde_json::Value, Failure> {
+    blocking(move || mod_list_page::read(&game, online, Some(&hearing(on_progress)))).await
+}
+
+/// One change the last check offered, after the owner's yes; the kit keeps a backup of the list first (0.45.0).
+#[tauri::command]
+async fn mod_list_change(
+    game: String,
+    list: String,
+    action: String,
+    id: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_page::change(&game, &list, &action, &id, Some(&hearing(on_progress)))).await
+}
+
+/// Puts a list back as it was before the latest change the tools made to it (0.45.0).
+#[tauri::command]
+async fn mod_list_undo(
+    game: String,
+    list: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_page::undo(&game, &list, Some(&hearing(on_progress)))).await
+}
+
+/// Opens a mod's Workshop page in the Steam client: only a number a check named (0.45.0).
+#[tauri::command]
+async fn mod_list_open_in_steam(number: String) -> Result<(), Failure> {
+    blocking(move || mod_list_page::open_in_steam(&number)).await
+}
+
 /// What the tools, builds and tests left behind, by group. Only reads.
 #[tauri::command]
 async fn cleanup_list(on_progress: Channel<kit::Progress>) -> Result<cleanup_page::Listing, Failure> {
@@ -849,6 +889,10 @@ pub fn run() {
             about,
             cleanup_list,
             cleanup_apply,
+            mod_list_check,
+            mod_list_change,
+            mod_list_undo,
+            mod_list_open_in_steam,
             their_code,
             decompile_assembly,
             updates,

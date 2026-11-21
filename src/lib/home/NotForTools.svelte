@@ -12,6 +12,7 @@
   /** Why each game-only page has nothing for a set of tools, written out so the words test can see every key. */
   const WHY: Record<string, string> = {
     mods: "tools-page-mods",
+    modlist: "tools-page-modlist",
     atlas: "tools-page-atlas",
     logs: "tools-page-logs",
     memory: "tools-page-memory",

@@ -861,6 +861,25 @@ async fn mod_list_undo(
     blocking(move || mod_list_page::undo(&game, &list, Some(&hearing(on_progress)))).await
 }
 
+/// Every mod on this PC and each list in order, for Edit the list (0.46.0). Only reads.
+#[tauri::command]
+async fn mod_list_mods(game: String, on_progress: Channel<kit::Progress>) -> Result<serde_json::Value, Failure> {
+    blocking(move || mod_list_page::mods(&game, Some(&hearing(on_progress)))).await
+}
+
+/// One change from Edit the list, saved at once on the owner's press: switch off, switch on or move (0.46.0).
+#[tauri::command]
+async fn mod_list_edit(
+    game: String,
+    list: String,
+    action: String,
+    id: String,
+    place: Option<u32>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_page::edit(&game, &list, &action, &id, place, Some(&hearing(on_progress)))).await
+}
+
 /// Opens a mod's Workshop page in the Steam client: only a number a check named (0.45.0).
 #[tauri::command]
 async fn mod_list_open_in_steam(number: String) -> Result<(), Failure> {
@@ -893,6 +912,8 @@ pub fn run() {
             mod_list_change,
             mod_list_undo,
             mod_list_open_in_steam,
+            mod_list_mods,
+            mod_list_edit,
             their_code,
             decompile_assembly,
             updates,

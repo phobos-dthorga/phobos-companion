@@ -16,6 +16,7 @@
     undoModList,
   } from "./desktopClient";
   import { keep } from "./latest.svelte";
+  import ModListEditor from "./ModListEditor.svelte";
   import {
     HEADING,
     MARK,
@@ -44,6 +45,8 @@
     | { kind: "undo"; list: ModListInfo; change: string };
 
   let reading = $state<Reading>({ state: "reading" });
+  /** What's wrong, or Edit the list (0.46.0): coming back to What's wrong checks again, so it follows the edits. */
+  let view = $state<"wrong" | "edit">("wrong");
   let online = $state(true);
   let busy = $state(false);
   let progress = $state(started());
@@ -73,6 +76,13 @@
         refused: true,
       };
     }
+  }
+
+  function showView(chosen: "wrong" | "edit") {
+    if (chosen === view) return;
+    view = chosen;
+    said = null;
+    if (chosen === "wrong") void load();
   }
 
   function toggleSteam() {
@@ -144,232 +154,254 @@
 <h1>{t("modlist-title", { game: game.name })}</h1>
 <p class="lead">{t("modlist-lead")}</p>
 
-{#if said}
-  <p class="told" class:refused={said.refused} role="status">{said.text}</p>
-{/if}
+<div class="buttons" role="group" aria-label={t("modlist-view-label")}>
+  <button
+    type="button"
+    class="action toggle"
+    aria-pressed={view === "wrong"}
+    onclick={() => showView("wrong")}>{t("modlist-view-wrong")}</button
+  >
+  <button
+    type="button"
+    class="action toggle"
+    aria-pressed={view === "edit"}
+    onclick={() => showView("edit")}>{t("modlist-view-edit")}</button
+  >
+</div>
 
-{#if reading.state === "reading"}
-  <ProgressBar {progress} fallback={t("modlist-reading")} />
-  <Placeholder shape="rows" />
-{:else if reading.state === "failed"}
-  <FailurePanel failure={reading.failure} onretry={load} />
+{#if view === "edit"}
+  <ModListEditor {game} />
 {:else}
-  {@const check = reading.check}
-  {@const running = check.running.length > 0}
-  <div class="buttons">
-    <button type="button" class="action" disabled={busy} onclick={load}
-      >{busy ? t("modlist-checking") : t("modlist-check-again")}</button
-    >
-    <button
-      type="button"
-      class="action toggle"
-      aria-pressed={online}
-      disabled={busy}
-      onclick={toggleSteam}>{t("modlist-ask-steam")}</button
-    >
-  </div>
-  {#if busy}
-    <ProgressBar {progress} fallback={t("modlist-reading")} />
+  {#if said}
+    <p class="told" class:refused={said.refused} role="status">{said.text}</p>
   {/if}
 
-  {#if !check.supported}
-    <section class="panel" aria-labelledby="modlist-unsupported">
-      <h2 id="modlist-unsupported">
-        {t("modlist-unsupported-title", { game: game.name })}
-      </h2>
-      {#each check.notes as note, index (index)}
-        <p>{note}</p>
-      {/each}
-    </section>
+  {#if reading.state === "reading"}
+    <ProgressBar {progress} fallback={t("modlist-reading")} />
+    <Placeholder shape="rows" />
+  {:else if reading.state === "failed"}
+    <FailurePanel failure={reading.failure} onretry={load} />
   {:else}
-    <p class="muted small">
-      {t("modlist-facts", {
-        version: check.version || "?",
-        installed: check.installed,
-        steam: check.online ? "yes" : "no",
-      })}
-    </p>
-    {#if running}
-      <p class="told refused" role="status">
-        {t("modlist-running", { names: check.running.join(", ") })}
-      </p>
-    {/if}
-    {#if check.lists.length === 0}
-      <p>{t("modlist-no-lists")}</p>
+    {@const check = reading.check}
+    {@const running = check.running.length > 0}
+    <div class="buttons">
+      <button type="button" class="action" disabled={busy} onclick={load}
+        >{busy ? t("modlist-checking") : t("modlist-check-again")}</button
+      >
+      <button
+        type="button"
+        class="action toggle"
+        aria-pressed={online}
+        disabled={busy}
+        onclick={toggleSteam}>{t("modlist-ask-steam")}</button
+      >
+    </div>
+    {#if busy}
+      <ProgressBar {progress} fallback={t("modlist-reading")} />
     {/if}
 
-    {#each findingsByList(check) as found (found.list.key)}
-      {@const change = lastChange(check, found.list.key)}
-      <section class="panel" aria-labelledby={`modlist-${found.list.key}`}>
-        <h2 id={`modlist-${found.list.key}`}>{found.list.label}</h2>
-        <p class="muted small">
-          {t("modlist-list-count", { count: found.list.count })}
-        </p>
-        {#if found.bySeverity.problem.length + found.bySeverity.warning.length === 0}
-          <p class="clean">{t("modlist-list-clean")}</p>
-        {/if}
-
-        {#each SEVERITIES as severity (severity)}
-          {#if found.bySeverity[severity].length > 0}
-            <h3>{t(HEADING[severity])}</h3>
-            <ul class="findings">
-              {#each found.bySeverity[severity] as problem, index (index)}
-                <li class={severity}>
-                  <p>
-                    <span class="mark">{t(MARK[severity])}</span>
-                    <strong>{problem.title}</strong>
-                  </p>
-                  {#if problem.why}<p>{problem.why}</p>{/if}
-                  {#if problem.clue}
-                    <p class="clue">
-                      <strong>{t("modlist-clue")}</strong>
-                      {problem.clue}
-                    </p>
-                  {/if}
-                  {#if problem.fixes.length > 0 || steamWorthy(problem)}
-                    <div class="buttons">
-                      {#each problem.fixes as fix (fix.action + fix.id)}
-                        <button
-                          type="button"
-                          class="action"
-                          disabled={busy || running || !found.list.writable}
-                          onclick={() =>
-                            (asked = { kind: "fix", fix, list: found.list })}
-                          >{fix.label}</button
-                        >
-                      {/each}
-                      {#if steamWorthy(problem)}
-                        <button
-                          type="button"
-                          class="action"
-                          onclick={() => steam(problem.workshop_id)}
-                          >{t("modlist-open-steam")}</button
-                        >
-                      {/if}
-                    </div>
-                  {/if}
-                  {#if asked?.kind === "fix" && problem.fixes.includes(asked.fix)}
-                    {@const waiting = asked}
-                    <div
-                      class="confirm"
-                      role="group"
-                      aria-label={t("modlist-confirm-label")}
-                    >
-                      <p>
-                        {t("modlist-fix-confirm", {
-                          change: waiting.fix.label,
-                          name: problem.name,
-                          list: waiting.list.label,
-                        })}
-                      </p>
-                      <div class="buttons">
-                        <button
-                          type="button"
-                          class="action"
-                          onclick={() => yes(waiting)}
-                          >{t("modlist-fix-yes")}</button
-                        >
-                        <button
-                          type="button"
-                          class="action"
-                          onclick={() => (asked = null)}
-                          >{t("modlist-cancel")}</button
-                        >
-                      </div>
-                    </div>
-                  {/if}
-                </li>
-              {/each}
-            </ul>
-          {/if}
+    {#if !check.supported}
+      <section class="panel" aria-labelledby="modlist-unsupported">
+        <h2 id="modlist-unsupported">
+          {t("modlist-unsupported-title", { game: game.name })}
+        </h2>
+        {#each check.notes as note, index (index)}
+          <p>{note}</p>
         {/each}
-
-        {#if found.versions.length > 0}
-          <h3>{t("modlist-versions-title")}</h3>
-          <p>
-            {t("modlist-versions-body", {
-              count: found.versions.length,
-              version: check.version,
-            })}
-          </p>
-          <button
-            type="button"
-            class="action toggle"
-            aria-pressed={shownVersions[found.list.key] ?? false}
-            onclick={() =>
-              (shownVersions = {
-                ...shownVersions,
-                [found.list.key]: !(shownVersions[found.list.key] ?? false),
-              })}
-            >{t("modlist-versions-show", {
-              count: found.versions.length,
-            })}</button
-          >
-          {#if shownVersions[found.list.key]}
-            <ul class="names">
-              {#each found.versions as problem, index (index)}
-                <li>{problem.title}</li>
-              {/each}
-            </ul>
-          {/if}
-        {/if}
-
-        {#if change}
-          <h3>{t("modlist-last-change-title")}</h3>
-          <p>
-            {t("modlist-last-change", {
-              change: change.why,
-              when: formatWhen(stampMoment(change.at)),
-            })}
-          </p>
-          <button
-            type="button"
-            class="action"
-            disabled={busy || running}
-            onclick={() =>
-              (asked = { kind: "undo", list: found.list, change: change.why })}
-            >{t("modlist-undo")}</button
-          >
-          {#if asked?.kind === "undo" && asked.list.key === found.list.key}
-            {@const waiting = asked}
-            <div
-              class="confirm"
-              role="group"
-              aria-label={t("modlist-confirm-label")}
-            >
-              <p>
-                {t("modlist-undo-confirm", {
-                  change: waiting.change,
-                  list: waiting.list.label,
-                })}
-              </p>
-              <div class="buttons">
-                <button
-                  type="button"
-                  class="action"
-                  onclick={() => yes(waiting)}>{t("modlist-undo-yes")}</button
-                >
-                <button
-                  type="button"
-                  class="action"
-                  onclick={() => (asked = null)}>{t("modlist-cancel")}</button
-                >
-              </div>
-            </div>
-          {/if}
-        {/if}
       </section>
-    {/each}
+    {:else}
+      <p class="muted small">
+        {t("modlist-facts", {
+          version: check.version || "?",
+          installed: check.installed,
+          steam: check.online ? "yes" : "no",
+        })}
+      </p>
+      {#if running}
+        <p class="told refused" role="status">
+          {t("modlist-running", { names: check.running.join(", ") })}
+        </p>
+      {/if}
+      {#if check.lists.length === 0}
+        <p>{t("modlist-no-lists")}</p>
+      {/if}
 
-    {#if check.notes.length > 0}
-      <section class="panel" aria-labelledby="modlist-unseen">
-        <h2 id="modlist-unseen">{t("modlist-unseen-title")}</h2>
-        <ul>
-          {#each check.notes as note, index (index)}
-            <li>{note}</li>
+      {#each findingsByList(check) as found (found.list.key)}
+        {@const change = lastChange(check, found.list.key)}
+        <section class="panel" aria-labelledby={`modlist-${found.list.key}`}>
+          <h2 id={`modlist-${found.list.key}`}>{found.list.label}</h2>
+          <p class="muted small">
+            {t("modlist-list-count", { count: found.list.count })}
+          </p>
+          {#if found.bySeverity.problem.length + found.bySeverity.warning.length === 0}
+            <p class="clean">{t("modlist-list-clean")}</p>
+          {/if}
+
+          {#each SEVERITIES as severity (severity)}
+            {#if found.bySeverity[severity].length > 0}
+              <h3>{t(HEADING[severity])}</h3>
+              <ul class="findings">
+                {#each found.bySeverity[severity] as problem, index (index)}
+                  <li class={severity}>
+                    <p>
+                      <span class="mark">{t(MARK[severity])}</span>
+                      <strong>{problem.title}</strong>
+                    </p>
+                    {#if problem.why}<p>{problem.why}</p>{/if}
+                    {#if problem.clue}
+                      <p class="clue">
+                        <strong>{t("modlist-clue")}</strong>
+                        {problem.clue}
+                      </p>
+                    {/if}
+                    {#if problem.fixes.length > 0 || steamWorthy(problem)}
+                      <div class="buttons">
+                        {#each problem.fixes as fix (fix.action + fix.id)}
+                          <button
+                            type="button"
+                            class="action"
+                            disabled={busy || running || !found.list.writable}
+                            onclick={() =>
+                              (asked = { kind: "fix", fix, list: found.list })}
+                            >{fix.label}</button
+                          >
+                        {/each}
+                        {#if steamWorthy(problem)}
+                          <button
+                            type="button"
+                            class="action"
+                            onclick={() => steam(problem.workshop_id)}
+                            >{t("modlist-open-steam")}</button
+                          >
+                        {/if}
+                      </div>
+                    {/if}
+                    {#if asked?.kind === "fix" && problem.fixes.includes(asked.fix)}
+                      {@const waiting = asked}
+                      <div
+                        class="confirm"
+                        role="group"
+                        aria-label={t("modlist-confirm-label")}
+                      >
+                        <p>
+                          {t("modlist-fix-confirm", {
+                            change: waiting.fix.label,
+                            name: problem.name,
+                            list: waiting.list.label,
+                          })}
+                        </p>
+                        <div class="buttons">
+                          <button
+                            type="button"
+                            class="action"
+                            onclick={() => yes(waiting)}
+                            >{t("modlist-fix-yes")}</button
+                          >
+                          <button
+                            type="button"
+                            class="action"
+                            onclick={() => (asked = null)}
+                            >{t("modlist-cancel")}</button
+                          >
+                        </div>
+                      </div>
+                    {/if}
+                  </li>
+                {/each}
+              </ul>
+            {/if}
           {/each}
-        </ul>
-      </section>
+
+          {#if found.versions.length > 0}
+            <h3>{t("modlist-versions-title")}</h3>
+            <p>
+              {t("modlist-versions-body", {
+                count: found.versions.length,
+                version: check.version,
+              })}
+            </p>
+            <button
+              type="button"
+              class="action toggle"
+              aria-pressed={shownVersions[found.list.key] ?? false}
+              onclick={() =>
+                (shownVersions = {
+                  ...shownVersions,
+                  [found.list.key]: !(shownVersions[found.list.key] ?? false),
+                })}
+              >{t("modlist-versions-show", {
+                count: found.versions.length,
+              })}</button
+            >
+            {#if shownVersions[found.list.key]}
+              <ul class="names">
+                {#each found.versions as problem, index (index)}
+                  <li>{problem.title}</li>
+                {/each}
+              </ul>
+            {/if}
+          {/if}
+
+          {#if change}
+            <h3>{t("modlist-last-change-title")}</h3>
+            <p>
+              {t("modlist-last-change", {
+                change: change.why,
+                when: formatWhen(stampMoment(change.at)),
+              })}
+            </p>
+            <button
+              type="button"
+              class="action"
+              disabled={busy || running}
+              onclick={() =>
+                (asked = {
+                  kind: "undo",
+                  list: found.list,
+                  change: change.why,
+                })}>{t("modlist-undo")}</button
+            >
+            {#if asked?.kind === "undo" && asked.list.key === found.list.key}
+              {@const waiting = asked}
+              <div
+                class="confirm"
+                role="group"
+                aria-label={t("modlist-confirm-label")}
+              >
+                <p>
+                  {t("modlist-undo-confirm", {
+                    change: waiting.change,
+                    list: waiting.list.label,
+                  })}
+                </p>
+                <div class="buttons">
+                  <button
+                    type="button"
+                    class="action"
+                    onclick={() => yes(waiting)}>{t("modlist-undo-yes")}</button
+                  >
+                  <button
+                    type="button"
+                    class="action"
+                    onclick={() => (asked = null)}>{t("modlist-cancel")}</button
+                  >
+                </div>
+              </div>
+            {/if}
+          {/if}
+        </section>
+      {/each}
+
+      {#if check.notes.length > 0}
+        <section class="panel" aria-labelledby="modlist-unseen">
+          <h2 id="modlist-unseen">{t("modlist-unseen-title")}</h2>
+          <ul>
+            {#each check.notes as note, index (index)}
+              <li>{note}</li>
+            {/each}
+          </ul>
+        </section>
+      {/if}
     {/if}
   {/if}
 {/if}

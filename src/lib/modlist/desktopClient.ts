@@ -1,7 +1,12 @@
 import { ask, progressChannel } from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
-import type { ModListChange, ModListCheck } from "./types";
+import type {
+  EditAnswer,
+  ModListChange,
+  ModListCheck,
+  ModsListing,
+} from "./types";
 
 type Checked = { state: "ready"; check: ModListCheck };
 type Changed = { state: "ready"; result: ModListChange };
@@ -55,5 +60,49 @@ export async function openInSteam(
     "mod_list_open_in_steam",
     { number },
     () => ({ state: "ready" }),
+  );
+}
+
+type Listed = { state: "ready"; listing: ModsListing };
+type Edited = { state: "ready"; result: EditAnswer };
+
+/** Every mod on this PC and each list in order, for Edit the list. Only reads. */
+export async function readMods(
+  game: string,
+  onProgress?: OnProgress,
+): Promise<Listed | Failed> {
+  return ask<ModsListing, Listed>(
+    "mod_list_mods",
+    { game, onProgress: progressChannel(onProgress) },
+    (listing) => ({ state: "ready", listing }),
+  );
+}
+
+/** One change from Edit the list, saved at once: remove (switch off), enable (switch on) or move; `place` counts from 1. */
+export async function editModList(
+  game: string,
+  list: string,
+  action: "remove" | "enable" | "move",
+  id: string,
+  place: number | null,
+  onProgress?: OnProgress,
+): Promise<Edited | Failed> {
+  return ask<EditAnswer, Edited>(
+    "mod_list_edit",
+    { game, list, action, id, place, onProgress: progressChannel(onProgress) },
+    (result) => ({ state: "ready", result }),
+  );
+}
+
+/** Undo from Edit the list: goes back on the latest change, and answers with the list as it now stands. */
+export async function undoEdit(
+  game: string,
+  list: string,
+  onProgress?: OnProgress,
+): Promise<Edited | Failed> {
+  return ask<EditAnswer, Edited>(
+    "mod_list_undo",
+    { game, list, onProgress: progressChannel(onProgress) },
+    (result) => ({ state: "ready", result }),
   );
 }

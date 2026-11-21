@@ -67,7 +67,7 @@ export function lastChange(
 ): ModBackup | null {
   return (
     check.backups.find(
-      (b) => b.list === listKey && b.why !== BEFORE_GOING_BACK,
+      (b) => b.list === listKey && b.why !== BEFORE_GOING_BACK && !b.undone,
     ) ?? null
   );
 }

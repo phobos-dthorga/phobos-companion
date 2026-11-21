@@ -4,6 +4,25 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.46.0] - 2026-11-22
+
+Step 2 of the program's own mod manager (the owner, 22 Nov 2026: switching mods on and off and moving them, each change saved at
+once, from the keyboard).
+
+### Added
+
+- **Mod list: Edit the list.** Every mod on this PC, **Switched on** in load order and **Switched off** by name, with **Find a mod**
+  (names, ids, authors) and **Show** and **From** filters. **Switch on**, **Switch off**, **Move up**, **Move down**, a place typed
+  then **Move to**, or **Move…** then **Put it at**: each press is saved at once, after a backup of the list. Changes wait while
+  the game or RimSort is open. The page's two views are chosen at its top: **What's wrong** and **Edit the list**; coming back to
+  What's wrong checks again. Guide: Switch a mod on or off, or move it in the load order. Checked with the kit on RimWorld and
+  Project Zomboid. Not yet tested on screen.
+
+### Changed
+
+- **Undo the last change walks back one change at a time**: pressed again, it goes back on the change before (kit 1.73.0).
+- Tool kit pin v1.72.0 to v1.73.0.
+
 ## [0.45.2] - 2026-11-22
 
 From the owner's screenshot of 22 Nov 2026: the Mods page stopped at "Matching … changelog entries to their commits" and never showed the mods. Not yet tested on screen.

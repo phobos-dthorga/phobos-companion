@@ -79,7 +79,10 @@ reads them.
   **Never make a change by itself.** Its check reads with Steam's public Workshop API when Ask Steam too is on (the kit's
   `reads-online`, no account); Home's note reads without it, at most every half hour. **Open in Steam** hands the system only
   `steam://url/CommunityFilePage/<number>`, for a Workshop number a check named in this run. Subscribing through the Steam client
-  (the owner's choice) is a later step with its own design record.
+  (the owner's choice) is a later step with its own design record. **Edit the list** (0.46.0; the owner's choice "each change
+  saved at once") runs `mod-list fix --apply` on each press of Switch on, Switch off or a move, with no second yes, only for a
+  mod and a list the last `mod-list mods` listing named and a place from 1; each still keeps a backup, and Undo walks back one
+  change at a time.
 - **The Memory page starts a watch of the running game only on the owner's press and confirmation** (owner, 19 Nov 2026: memory
   profiling "will be done from the Companion"; `src-tauri/src/memory_page.rs`, design record "Memory"): the kit's watch, found by
   the manifest's `memory-watch` surface, attaches Microsoft's dotnet-counters to the game once unless the owner chose Windows' figures

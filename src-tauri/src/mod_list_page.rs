@@ -8,6 +8,12 @@
 //! named). The kit keeps a backup of the list before every change, refuses while the game or a mod manager such as RimSort runs,
 //! and refuses to undo over a list changed since. The host checks every name before the kit sees it, and runs a change only while
 //! the kit's manifest calls it `writes`.
+//!
+//! **Edit the list** (0.46.0; the owner's choices of 22 Nov 2026: "each change saved at once", moving by buttons, a place typed and
+//! pick-then-place, a search box with filters, on the same page): the kit's `mod-list mods` lists every mod on this PC and each
+//! list in order, and each press of Switch on, Switch off or a move runs `mod-list fix --apply` at once, with no second yes; the
+//! kit keeps a backup before each, and Undo the last change walks back one change at a time. The host accepts only a mod the last
+//! listing named, a list it named, and a place from 1.
 
 use companion_core::args::Args;
 use companion_core::checks;
@@ -23,6 +29,11 @@ const TOOL: &str = "mod-list";
 const CHECK: &str = "check";
 const FIX: &str = "fix";
 const UNDO: &str = "undo";
+const MODS: &str = "mods";
+/// The editor's changes (0.46.0): switch off, switch on, move; each saved at once on the owner's press.
+pub const EDITS: [&str; 3] = ["remove", "enable", "move"];
+/// The furthest place the host passes on: far beyond any list's length; the kit keeps a place inside the list.
+pub const MAX_PLACE: u32 = 100_000;
 /// The changes the kit makes (`mod-list fix --remove`, `--remove-extra`, `--enable`).
 pub const ACTIONS: [&str; 3] = ["remove", "remove-extra", "enable"];
 /// The longest list key or mod id the host passes on: the kit's own are far shorter.
@@ -40,6 +51,8 @@ pub type Offers = (Vec<Change>, Vec<ListOf>, Vec<String>);
 static OFFERED: Mutex<BTreeSet<Change>> = Mutex::new(BTreeSet::new());
 /// Every list the last check named as one the kit changes: the only lists Undo may touch.
 static LISTS: Mutex<BTreeSet<ListOf>> = Mutex::new(BTreeSet::new());
+/// (game, mod id) of every mod the last listing named, on this PC or on a list: the only mods the editor may change.
+static KNOWN: Mutex<BTreeSet<ListOf>> = Mutex::new(BTreeSet::new());
 /// Every Workshop number a check named in this run of the program: the only pages Open in Steam opens.
 static WORKSHOP: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
 
@@ -76,6 +89,83 @@ pub fn fix_arguments(game: &GamePlaces, list: &str, action: &str, id: &str) -> V
         .flag("--apply")
         .flag("--no-redact")
         .json()
+}
+
+pub fn mods_arguments(game: &GamePlaces) -> Vec<String> {
+    named(Args::new(TOOL, MODS), game).flag("--no-redact").json()
+}
+
+pub fn edit_arguments(game: &GamePlaces, list: &str, action: &str, id: &str, place: Option<u32>) -> Vec<String> {
+    let arguments = named(Args::new(TOOL, FIX), game).given("--list", list).given(&format!("--{action}"), id);
+    let arguments = match place {
+        Some(place) => arguments.pair("--to", &place.to_string()),
+        None => arguments,
+    };
+    arguments.flag("--apply").flag("--no-redact").json()
+}
+
+/// The mods a listing names (on this PC, or on one of its lists) and the lists the kit changes.
+pub fn known_by(game: &str, data: &Value) -> (Vec<ListOf>, Vec<ListOf>) {
+    let array = |value: &Value| value.as_array().map_or(&[][..], Vec::as_slice).to_vec();
+    let mut ids: Vec<ListOf> = array(&data["mods"])
+        .iter()
+        .filter_map(|m| m["id"].as_str())
+        .map(|id| (game.to_owned(), id.to_owned()))
+        .collect();
+    let mut lists = Vec::new();
+    for list in array(&data["lists"]) {
+        ids.extend(
+            array(&list["entries"]).iter().filter_map(|e| e["id"].as_str()).map(|id| (game.to_owned(), id.to_owned())),
+        );
+        if list["writable"].as_bool() == Some(true)
+            && let Some(key) = list["key"].as_str()
+        {
+            lists.push((game.to_owned(), key.to_owned()));
+        }
+    }
+    (ids, lists)
+}
+
+/// Every mod on this PC and each list in order, for Edit the list. Only reads.
+pub fn mods(game: &str, listener: Option<kit::Listener>) -> Result<Value, Failure> {
+    let found = places(game)?;
+    let data = kit::run_hearing(TOOL, &mods_arguments(&found), listener)?["data"].clone();
+    let (ids, lists) = known_by(game, &data);
+    if let Ok(mut known) = KNOWN.lock() {
+        known.retain(|(g, _)| g != game);
+        known.extend(ids);
+    }
+    if let Ok(mut known) = LISTS.lock() {
+        known.extend(lists);
+    }
+    Ok(data)
+}
+
+/// One change from Edit the list, saved at once: switch a mod off or on, or move it to a place (1 is first).
+pub fn edit(
+    game: &str,
+    list: &str,
+    action: &str,
+    id: &str,
+    place: Option<u32>,
+    listener: Option<kit::Listener>,
+) -> Result<ChangeResult, Failure> {
+    let found = places(game)?;
+    if !EDITS.contains(&action) || !sane_text(list) || !sane_text(id) {
+        return Err(Failure::refused("that is not a change the tools make"));
+    }
+    if place.is_some_and(|place| place == 0 || place > MAX_PLACE) || (action == "move" && place.is_none()) {
+        return Err(Failure::refused("that is not a place on the list"));
+    }
+    let known_mod = KNOWN.lock().map(|known| known.contains(&(game.to_owned(), id.to_owned()))).unwrap_or(false);
+    let known_list = LISTS.lock().map(|lists| lists.contains(&(game.to_owned(), list.to_owned()))).unwrap_or(false);
+    if !known_mod || !known_list {
+        return Err(Failure::refused(
+            "only a mod and a list the last listing named can be changed: read the list again first",
+        ));
+    }
+    allowed_by_manifest(&kit::read_manifest()?, TOOL, FIX).map_err(Failure::refused)?;
+    Ok(result_of(&kit::run_hearing(TOOL, &edit_arguments(&found, list, action, id, place), listener)?))
 }
 
 pub fn undo_arguments(game: &GamePlaces, list: &str) -> Vec<String> {

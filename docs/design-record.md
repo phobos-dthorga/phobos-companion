@@ -1124,7 +1124,17 @@ to switch it off; it never acts unless pressed.
 | Games | RimWorld and Project Zomboid (kit adapters); any other game is told in words that its list is not read yet. Checked on the owner's RimWorld (407 mods; no problems on 22 Nov 2026) and Project Zomboid lists (the game not installed then, so its Workshop mods are counted "could not be looked for", never missing) |
 | Home | A note when a game's list has problems or warnings, read without Steam at most every half hour |
 
-**The manager's next steps** (owner's choices, 22 Nov 2026): switch mods on and off and reorder them; our own sorter from each mod's
+**0.46.0, Edit the list** (step 2; the owner's choices of 22 Nov 2026 on question cards: **each change saved at once**; moving by
+**Move up/Move down, a place typed, and Move… then Put it at** (both ways); **on the Mod list page**, as a second view; **a search box
+with filters**). Kit 1.73.0 adds `mod-list mods`, `--move ID --to PLACE`, `--enable ID --to PLACE`, and an undo that walks back one
+change at a time (each undo marks the change it went back on). What it lets the person do: switch any mod on or off and put it
+anywhere in the load order from the keyboard, without RimSort. What it stops: a change while the game or RimSort is open; losing
+a list (a backup before every press). How it changes the way they work: one press per change, undone one at a time; What's wrong
+reads again when they come back to it. What outside notices: the game's list file, as before. **Risk (agent's grade): low**, as
+before: one entry at a time, backed up, undone with a press. Agent choices: 40 rows a page; a switched-on mod goes just before
+the first that needs it, else last; Put it at takes the place number of the row pressed (the kit takes the moved mod out first).
+
+**The manager's next steps** (owner's choices, 22 Nov 2026): our own sorter from each mod's
 own rules, the community rules RimSort uses (read, never copied into a repository) and the owner's own, every move explained; saved
 lists; subscribe and unsubscribe through the running Steam client, as RimSort does (Steamworks through the client's own login, no
 credentials held); then RimSort can retire. Each gets its own design record.

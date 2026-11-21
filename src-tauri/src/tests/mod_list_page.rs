@@ -75,3 +75,42 @@ fn text_and_numbers_are_checked_for_shape() {
     assert!(!workshop_number("38204O1180"));
     assert_eq!(steam_page("3820401180"), "steam://url/CommunityFilePage/3820401180");
 }
+
+#[test]
+fn the_editor_lists_and_changes_with_a_place_when_one_is_given() {
+    assert_eq!(
+        mods_arguments(&zed()),
+        ["mod-list", "mods", "--name=Zed Game", "--app-id=108600", "--data", "/games/zed", "--no-redact", "--json"]
+    );
+    let moved = edit_arguments(&zed(), "default", "move", "Some Mod", Some(3));
+    assert!(moved.contains(&"--move=Some Mod".to_owned()));
+    assert!(moved.windows(2).any(|pair| pair == ["--to", "3"]));
+    assert!(moved.contains(&"--apply".to_owned()));
+    assert!(!edit_arguments(&zed(), "default", "remove", "Some Mod", None).contains(&"--to".to_owned()));
+}
+
+#[test]
+fn a_listing_names_its_mods_entries_and_the_lists_the_kit_changes() {
+    let data = json!({
+        "mods": [{"id": "example.inn"}],
+        "lists": [
+            {"key": "active", "writable": true, "entries": [{"id": "example.gone"}]},
+            {"key": "presets", "writable": false, "entries": []},
+        ]
+    });
+    let (ids, lists) = known_by("rimworld", &data);
+    assert_eq!(
+        ids,
+        [("rimworld".to_owned(), "example.inn".to_owned()), ("rimworld".to_owned(), "example.gone".to_owned())]
+    );
+    assert_eq!(lists, [("rimworld".to_owned(), "active".to_owned())]);
+}
+
+#[test]
+fn the_editor_refuses_unknown_mods_odd_places_and_other_changes() {
+    assert!(edit("rimworld", "active", "remove-extra", "x", None, None).is_err());
+    assert!(edit("rimworld", "active", "move", "x", None, None).is_err());
+    assert!(edit("rimworld", "active", "move", "x", Some(0), None).is_err());
+    assert!(edit("rimworld", "active", "move", "x", Some(MAX_PLACE + 1), None).is_err());
+    assert!(edit("rimworld", "active", "remove", "never.listed", None, None).is_err());
+}

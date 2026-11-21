@@ -200,9 +200,14 @@
       <p class="small muted">{t("since-this-launch-only")}</p>
     {/if}
     {#if summary.reach !== "launch"}
+      <!-- 0.42.4: once a check has looked, say so; the list itself stays until Mods next opens, beside the check's answers. -->
       <p class="small muted">
         {t(
-          summary.reach === "check" ? "since-reach-check" : "since-reach-week",
+          checked.state === "ready"
+            ? "since-reach-done"
+            : summary.reach === "check"
+              ? "since-reach-check"
+              : "since-reach-week",
         )}
       </p>
     {/if}

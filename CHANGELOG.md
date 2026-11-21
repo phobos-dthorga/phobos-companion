@@ -4,6 +4,15 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.42.4] - 2026-11-22
+
+Two small fixes to Since you last played, from the owner's screenshot of 22 Nov 2026. Not yet tested on screen.
+
+### Fixed
+
+- **After a check, Since you last played no longer says no check has been made.** The line under the count was decided when the card opened, so it still said "No check has been made here yet" beside the check's own answers. Once Check what they mean for ours finishes, it now says the updates it looked at leave the list the next time Mods opens; the list itself stays until then, beside the answers.
+- **The XML patches line has its space back**: "still there (7 of them only once other patches have run)" read "still there(7 …", because Fluent drops the spaces that open a variant. A test holds it.
+
 ## [0.42.3] - 2026-11-22
 
 Safe copies now include your RimWorld saves (the owner's go of 22 Nov 2026): the newest pair, with five older copies of each. Not yet tested on screen.

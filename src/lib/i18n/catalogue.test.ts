@@ -41,4 +41,14 @@ describe("the message catalogue", () => {
     );
     expect(t("pending-earlier", { count: 3 })).toBe("and 3 earlier drafts");
   });
+
+  // 0.42.4: Fluent drops the spaces that open a variant, so a variant that needs one says so with {" "}.
+  it("keeps the space before a variant that opens with one", () => {
+    expect(t("check-xml-ok", { count: 414, patched: 7 })).toBe(
+      "All 414 things our XML patches name are still there (7 of them only once other patches have run).",
+    );
+    expect(t("check-xml-ok", { count: 414, patched: 0 })).toBe(
+      "All 414 things our XML patches name are still there.",
+    );
+  });
 });

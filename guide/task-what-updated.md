@@ -7,7 +7,9 @@ see: page-gamefiles, page-mods
 ---
 1. Open **Mods** (the **5** key). **Since you last played**, in Before you play, says what updated since the session before, and whether any update changed something our mods patch.
 2. **See what changed** opens the change itself. **Keep the new builds** keeps them to compare with later.
-3. **Check what they mean for ours** asks the tools what the updates mean for our mods. It takes a couple of minutes the first time, while the tools read the new builds, and changes nothing.
+3. **Check what they mean for ours** asks the tools what the updates mean for our mods. It takes a couple of minutes the first time, while the tools read the new builds, and changes nothing. The button is always there, even when nothing is new.
+
+**An update stays listed until a check has looked at it**, even after you launch the game again. Since you last played reaches back to your last check when that is earlier than your last launch, and says so; before your first check it reaches back a week.
 
 It answers four things:
 - whether every method and field **our code** names is still there (one that is gone means our patch fails to load);

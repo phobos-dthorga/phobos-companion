@@ -4,7 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
-## [0.42.0] - 2026-11-21
+## [0.42.1] - 2026-11-21
+
+An update you have not checked no longer disappears from Since you last played (the owner, 21 Nov 2026: the Harrier update and Check what they mean for ours showed on the Mods page in the morning and were gone by the afternoon). Not yet tested on screen.
+
+### Fixed
+
+- **An update stays listed until Check what they mean for ours has looked at it.** Since you last played compared only with your last launch, so launching the game again after an update hid it, and the check with it. It now reaches back to your last check when that is earlier, and says so; before your first check it reaches back a week (agent default).
+- **Check what they mean for ours is always there**, even when nothing is new. A check marks the moment it began, so an update arriving while it runs is still listed next time.
+
+The last check is kept in the window's own storage, for each game; if that storage is cleared, the next look reaches back a week again.
+
+
 
 Safe copies on Home (the owner, 21 Nov 2026: copies of "our training sets, models, etc." within the Companion). Not yet tested on screen.
 

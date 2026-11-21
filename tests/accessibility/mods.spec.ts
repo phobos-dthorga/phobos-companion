@@ -912,4 +912,32 @@ test.describe("Since you last played (0.28.0)", () => {
       "code fits together",
     );
   });
+
+  test("with nothing new since the last launch, the check is still offered, and it says how far back it looks (0.42.1)", async ({
+    page,
+  }) => {
+    // The owner's case of 21 Nov 2026: the update came before today's launch, and no check had been made.
+    const quiet = {
+      ...gameFiles,
+      changed: { ...gameFiles.changed, workshop: [], workshopCount: 0 },
+    };
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      mod_installs: sampleInstalls(["RimWorld"]),
+      texture_status: sampleTextures(["RimWorld"]),
+      mod_settings: { result: sampleLedger },
+      game_files: { result: quiet },
+      updates: { result: kept },
+      patch_targets: { result: targets },
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Mods", exact: true }).click();
+    const since = page.getByRole("group", { name: "Since you last played" });
+    await expect(since).toContainText("reaches back a week");
+    await expect(
+      since.getByRole("button", { name: "Check what they mean for ours" }),
+    ).toBeVisible();
+    await audit(page);
+  });
 });

@@ -20,7 +20,14 @@ export type SinceSummary = {
   gameUpdated: boolean;
   /** The updated Workshop items, by title (or id), newest first. */
   updated: string[];
+  /**
+   * How far back it reaches (0.42.1): the last launch; the last check, when that is earlier; or, with no check yet, a week before
+   * now, when that is earlier. An update stays listed until Check what they mean for ours has looked at it.
+   */
+  reach: Reach;
 };
+
+export type Reach = "launch" | "check" | "week";
 
 export function summarise(files: GameFiles, running: boolean): SinceSummary {
   const changed = files.changed;
@@ -30,7 +37,39 @@ export function summarise(files: GameFiles, running: boolean): SinceSummary {
     thisLaunchOnly: running && changed.sincePrevious !== true,
     gameUpdated: changed.gameUpdated,
     updated: changed.workshop.map((item) => item.title ?? item.id),
+    reach: "launch",
   };
+}
+
+/** With no check made yet, how far back the comparison reaches (agent default, 0.42.1). */
+export const FIRST_REACH_DAYS = 7;
+const DAY_MS = 86_400_000;
+
+/** A moment the kit's `--since` reads on every Python it supports: whole seconds, and "+00:00" rather than "Z". */
+export function kitMoment(ms: number): string {
+  return new Date(Math.floor(ms / 1000) * 1000)
+    .toISOString()
+    .replace(".000Z", "+00:00");
+}
+
+/**
+ * The moment to compare with (0.42.1; the owner, 21 Nov 2026: an update seen in the morning was gone by the afternoon, once the
+ * game had been launched again): the earlier of the launch the game's files name and the last check. With no check yet, a week
+ * before now stands in for it. The launch wins when it is the earlier, as before.
+ */
+export function compareFrom(
+  launch: string,
+  checked: string | null,
+  now: Date,
+): { since: string; reach: Reach } {
+  const checkedMs = checked ? Date.parse(checked) : NaN;
+  const known = Number.isFinite(checkedMs);
+  const floor = known ? checkedMs : now.getTime() - FIRST_REACH_DAYS * DAY_MS;
+  const launchMs = Date.parse(launch);
+  if (Number.isFinite(launchMs) && launchMs <= floor) {
+    return { since: launch, reach: "launch" };
+  }
+  return { since: kitMoment(floor), reach: known ? "check" : "week" };
 }
 
 function same(a: string, b: string): boolean {

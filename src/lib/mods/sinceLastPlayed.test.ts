@@ -3,7 +3,10 @@ import type { PatchTarget } from "../connections/patches";
 import type { GameFiles } from "../gamefiles/types";
 import type { KeptFile } from "../othercode/types";
 import {
+  compareFrom,
+  FIRST_REACH_DAYS,
   GAME_FILE,
+  kitMoment,
   keptTime,
   newTypes,
   notKeptYet,
@@ -74,6 +77,54 @@ function target(
     ],
   };
 }
+
+describe("an update stays listed until it is checked (0.42.1)", () => {
+  // The owner's morning: Harrier updated at 09:15, the game was launched at 14:00, and no check was made in between.
+  const NOW = new Date("2026-11-21T22:00:00Z");
+  const UPDATED = Date.parse("2026-11-21T09:15:00Z");
+  const LAUNCH = "2026-11-21T14:00:00+00:00";
+  const listed = (since: string) => UPDATED > Date.parse(since);
+
+  it("an update before the last launch but after the last check stays listed", () => {
+    const from = compareFrom(LAUNCH, "2026-11-20T20:00:00.000Z", NOW);
+    expect(from).toEqual({
+      since: "2026-11-20T20:00:00+00:00",
+      reach: "check",
+    });
+    expect(listed(from.since)).toBe(true);
+  });
+
+  it("after a check it goes, and the last launch is compared with again", () => {
+    const from = compareFrom(LAUNCH, "2026-11-21T15:00:00.000Z", NOW);
+    expect(from).toEqual({ since: LAUNCH, reach: "launch" });
+    expect(listed(from.since)).toBe(false);
+  });
+
+  it("with no check yet it reaches back a week, unless the last launch is earlier still", () => {
+    const from = compareFrom(LAUNCH, null, NOW);
+    expect(from.reach).toBe("week");
+    expect(Date.parse(from.since)).toBe(
+      NOW.getTime() - FIRST_REACH_DAYS * 86_400_000,
+    );
+    expect(listed(from.since)).toBe(true);
+    const longAgo = "2026-11-01T00:00:00+00:00";
+    expect(compareFrom(longAgo, null, NOW)).toEqual({
+      since: longAgo,
+      reach: "launch",
+    });
+  });
+
+  it("a launch it cannot read, or a check it cannot read, falls back safely", () => {
+    expect(compareFrom("", null, NOW).reach).toBe("week");
+    expect(compareFrom(LAUNCH, "not a time", NOW).reach).toBe("week");
+  });
+
+  it("sends the kit a moment every Python it supports reads", () => {
+    expect(kitMoment(Date.parse("2026-11-21T09:15:30.750Z"))).toBe(
+      "2026-11-21T09:15:30+00:00",
+    );
+  });
+});
 
 describe("since you last played", () => {
   it("compares with the launch before while the game runs, and says when that is not known yet", () => {

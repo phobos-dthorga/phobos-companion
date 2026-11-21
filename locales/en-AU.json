@@ -497,6 +497,8 @@
     "since-label": "Since you last played",
     "since-nothing": "Nothing has updated since you last played ({ $when }).",
     "since-updated": "Since you last played ({ $when }): { $game ->\n    [yes] the game and { $count ->\n        [0] none of your mods\n        [one] one mod\n       *[other] { $count } mods\n      } updated.\n   *[no] { $count ->\n        [one] one mod updated.\n       *[other] { $count } mods updated.\n      }\n  }",
+    "since-reach-check": "This reaches back to your last check rather than your last launch, so an update stays listed until Check what they mean for ours has looked at it.",
+    "since-reach-week": "No check has been made here yet, so this reaches back a week. An update stays listed until Check what they mean for ours has looked at it.",
     "since-this-launch-only": "While the game runs this compares with the launch before, and the tools have not seen one yet: so this is since this launch only. From your next launch it compares with the one before.",
     "since-which": "{ $count ->\n    [one] Which one\n   *[other] Which { $count }\n  }",
     "since-checking": "Checking whether those updates changed what our mods patch…",

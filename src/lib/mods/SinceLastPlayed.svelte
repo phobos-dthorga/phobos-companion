@@ -17,7 +17,9 @@
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
   import { formatWhen } from "../shell/dates";
+  import { lastChecked, rememberChecked } from "./checkedMemory";
   import {
+    compareFrom,
     newTypes,
     notKeptYet,
     patchedSince,
@@ -80,7 +82,22 @@
       unread = true;
       return;
     }
-    summary = summarise(answer.files, running);
+    const byLaunch = summarise(answer.files, running);
+    // 0.42.1: an update stays listed until a check has looked at it, so reach back to the last check when that is earlier.
+    const from = compareFrom(byLaunch.since, lastChecked(game), new Date());
+    let found = byLaunch;
+    if (from.reach !== "launch") {
+      const wider = await readGameFiles(game, from.since);
+      if (wider.state === "ready") {
+        found = {
+          ...summarise(wider.files, running),
+          sincePrevious: byLaunch.sincePrevious,
+          thisLaunchOnly: byLaunch.thisLaunchOnly,
+          reach: from.reach,
+        };
+      }
+    }
+    summary = found;
     await check();
   }
 
@@ -138,6 +155,8 @@
     if (!repository || !summary) return;
     checked = { state: "running" };
     checkProgress = started();
+    // The moment it began, so an update arriving while it runs is still listed next time.
+    const began = new Date();
     const done = await checkUpdates<UpdateCheck>(
       game,
       repository,
@@ -154,6 +173,7 @@
       checked = { state: "failed", reason: done.answer.refusal ?? "" };
     } else {
       checked = { state: "ready", summary: summariseCheck(done.answer.data) };
+      rememberChecked(game, began);
     }
   }
 
@@ -178,6 +198,13 @@
     </p>
     {#if summary.thisLaunchOnly}
       <p class="small muted">{t("since-this-launch-only")}</p>
+    {/if}
+    {#if summary.reach !== "launch"}
+      <p class="small muted">
+        {t(
+          summary.reach === "check" ? "since-reach-check" : "since-reach-week",
+        )}
+      </p>
     {/if}
     {#if summary.updated.length > 0}
       <details>
@@ -239,7 +266,8 @@
     {/if}
     <p class="small" role="status" aria-live="polite">{said}</p>
 
-    {#if (summary.updated.length > 0 || summary.gameUpdated) && repositories.length > 0}
+    <!-- 0.42.1: always offered, even with nothing new (the owner's choice, 21 Nov 2026). -->
+    {#if repositories.length > 0}
       <div class="check" role="group" aria-label={t("check-label")}>
         {#if checked.state === "running"}
           <ProgressBar progress={checkProgress} fallback={t("check-running")} />

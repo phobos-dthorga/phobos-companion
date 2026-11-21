@@ -19,6 +19,33 @@
     var(--colour-success) 20%,
     var(--colour-canvas)
   );
+  /* Shades (0.47.0; the owner, 22 Nov 2026: "extra colours/shades ... as appropriate to each theme"): 14 % of a role over the
+     raised surface panels use, the share both theme checks hold words to (SHADE_SHARE). Words always say what a shade shows. */
+  --shade-accent: color-mix(
+    in srgb,
+    var(--colour-accent) 14%,
+    var(--colour-surface-raised)
+  );
+  --shade-observed: color-mix(
+    in srgb,
+    var(--colour-observed) 14%,
+    var(--colour-surface-raised)
+  );
+  --shade-comparison: color-mix(
+    in srgb,
+    var(--colour-comparison) 14%,
+    var(--colour-surface-raised)
+  );
+  --shade-success: color-mix(
+    in srgb,
+    var(--colour-success) 14%,
+    var(--colour-surface-raised)
+  );
+  --shade-risk: color-mix(
+    in srgb,
+    var(--colour-risk) 14%,
+    var(--colour-surface-raised)
+  );
   font-family: var(--font-body);
   font-size: 100%;
   line-height: 1.5;

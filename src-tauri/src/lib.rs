@@ -867,17 +867,52 @@ async fn mod_list_mods(game: String, on_progress: Channel<kit::Progress>) -> Res
     blocking(move || mod_list_page::mods(&game, Some(&hearing(on_progress)))).await
 }
 
-/// One change from Edit the list, saved at once on the owner's press: switch off, switch on or move (0.46.0).
+/// One change from Edit the list, saved at once on the owner's press: switch off, switch on or move one mod or several (0.47.0).
 #[tauri::command]
 async fn mod_list_edit(
     game: String,
     list: String,
     action: String,
-    id: String,
+    ids: Vec<String>,
     place: Option<u32>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<mod_list_page::ChangeResult, Failure> {
-    blocking(move || mod_list_page::edit(&game, &list, &action, &id, place, Some(&hearing(on_progress)))).await
+    blocking(move || mod_list_page::edit(&game, &list, &action, &ids, place, Some(&hearing(on_progress)))).await
+}
+
+/// A list sorted from every rule, each move explained; written only on Use this order (0.47.0).
+#[tauri::command]
+async fn mod_list_sort(
+    game: String,
+    list: String,
+    full: bool,
+    apply: bool,
+    on_progress: Channel<kit::Progress>,
+) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_page::sort(&game, &list, full, apply, Some(&hearing(on_progress)))).await
+}
+
+/// The owner's load-order rules and every rule set the sorter reads (0.47.0). Only reads.
+#[tauri::command]
+async fn mod_list_rules(game: String, on_progress: Channel<kit::Progress>) -> Result<serde_json::Value, Failure> {
+    blocking(move || mod_list_page::rules(&game, Some(&hearing(on_progress)))).await
+}
+
+/// Keeps one of the owner's load-order rules (0.47.0).
+#[tauri::command]
+async fn mod_list_add_rule(
+    game: String,
+    id: String,
+    kind: String,
+    other: String,
+) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_page::add_rule(&game, &id, &kind, &other)).await
+}
+
+/// Takes away one of the owner's load-order rules, by its number (0.47.0).
+#[tauri::command]
+async fn mod_list_drop_rule(game: String, number: u32) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_page::drop_rule(&game, number)).await
 }
 
 /// Opens a mod's Workshop page in the Steam client: only a number a check named (0.45.0).
@@ -914,6 +949,10 @@ pub fn run() {
             mod_list_open_in_steam,
             mod_list_mods,
             mod_list_edit,
+            mod_list_sort,
+            mod_list_rules,
+            mod_list_add_rule,
+            mod_list_drop_rule,
             their_code,
             decompile_assembly,
             updates,

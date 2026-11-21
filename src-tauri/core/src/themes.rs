@@ -64,6 +64,17 @@ pub const LINE_MIN: f64 = 1.5;
 pub const DIFF_SHARE: f64 = 0.2;
 /// The backgrounds of removed and added lines, each its role mixed into `canvas`; words must read on both, as on any surface.
 pub const DIFF_TINTS: [(&str, &str); 2] = [("diff_removed", "risk"), ("diff_added", "success")];
+/// How much of its role a shade takes, over the raised surface the page's panels use (0.47.0; the owner, 22 Nov 2026: "extra
+/// colours/shades ... as appropriate to each theme"). The window mixes the same share in `app.css` as `--shade-<role>`.
+pub const SHADE_SHARE: f64 = 0.14;
+/// The shades, each its role mixed into `surface_raised`; words must read on each, as on any surface.
+pub const SHADE_TINTS: [(&str, &str); 5] = [
+    ("shade_accent", "accent"),
+    ("shade_observed", "observed"),
+    ("shade_comparison", "comparison"),
+    ("shade_success", "success"),
+    ("shade_risk", "risk"),
+];
 
 const BUILT_INS: [&str; 3] = [
     include_str!("../../../themes/house-dthorga.json"),
@@ -238,8 +249,12 @@ pub fn contrast_problems(theme: &Theme) -> Vec<Problem> {
             }
         }
     }
-    for (on, tint) in DIFF_TINTS {
-        let background = mix(theme.colour(tint), theme.colour("canvas"), DIFF_SHARE);
+    let mixed = DIFF_TINTS
+        .iter()
+        .map(|(on, tint)| (*on, *tint, "canvas", DIFF_SHARE))
+        .chain(SHADE_TINTS.iter().map(|(on, tint)| (*on, *tint, "surface_raised", SHADE_SHARE)));
+    for (on, tint, base, share) in mixed {
+        let background = mix(theme.colour(tint), theme.colour(base), share);
         for role in READABLE {
             let ratio = contrast(theme.colour(role), &background);
             if ratio < TEXT_MIN {

@@ -82,7 +82,10 @@ reads them.
   (the owner's choice) is a later step with its own design record. **Edit the list** (0.46.0; the owner's choice "each change
   saved at once") runs `mod-list fix --apply` on each press of Switch on, Switch off or a move, with no second yes, only for a
   mod and a list the last `mod-list mods` listing named and a place from 1; each still keeps a backup, and Undo walks back one
-  change at a time.
+  change at a time. From 0.47.0 one change may name several mods (each one the listing named, at most 500), moved or switched as
+  one block. **Sort** (0.47.0) runs `mod-list sort` to show the moves and writes only on the owner's press of **Use this order**
+  (`--apply`, while the manifest calls it `writes`); **Your rules** runs `mod-list rules --apply` to keep or take away one of the
+  owner's rules, for mods the last listing named. RimSort's own files are only read. Dragging is a shortcut: every move has keys.
 - **The Memory page starts a watch of the running game only on the owner's press and confirmation** (owner, 19 Nov 2026: memory
   profiling "will be done from the Companion"; `src-tauri/src/memory_page.rs`, design record "Memory"): the kit's watch, found by
   the manifest's `memory-watch` surface, attaches Microsoft's dotnet-counters to the game once unless the owner chose Windows' figures

@@ -106,3 +106,70 @@ export type ModsListing = {
 export type EditAnswer = ModListChange & {
   data: { ids?: string[]; keys?: string[] };
 };
+
+/** Where a load-order rule comes from (phobos-modkit 1.74.0): yours, the mod's own files, what it needs, the community's, the game. */
+export type RuleSource = "yours" | "own" | "needs" | "community" | "game";
+
+/** One mod a sort moves: from and to (1 is first), and why, with whose rules. */
+export type SortMove = {
+  key: string;
+  name: string;
+  from: number;
+  to: number;
+  why: string[];
+  sources: RuleSource[];
+};
+
+/** A rule a sort set aside because it closed a loop of rules. */
+export type SetAside = {
+  rule: string;
+  source: RuleSource;
+  loop: string;
+  why: string;
+};
+
+/** A rule set the sorter reads, and where it is. */
+export type RuleSetInfo = {
+  source: RuleSource;
+  label: string;
+  where: string;
+  editable: boolean;
+  count: number;
+};
+
+/** A sort, previewed or written (`mod-list sort`): the new order, every move and why. */
+export type SortAnswer = ModListChange & {
+  data: {
+    how?: "fewest" | "full";
+    ids?: string[];
+    keys?: string[];
+    moves?: SortMove[];
+    set_aside?: SetAside[];
+    rules?: Record<"yours" | "own" | "needs" | "community", number>;
+    placings?: { top: number; bottom: number };
+    count?: number;
+    applied?: boolean;
+    sets?: RuleSetInfo[];
+  };
+};
+
+/** Where one of the owner's rules says a mod loads. */
+export type RuleKind = "after" | "before" | "top" | "bottom";
+
+/** One of the owner's rules; `number` is how Take away names it. */
+export type OwnRule = {
+  mod: string;
+  kind: RuleKind;
+  other: string;
+  added?: string;
+  number?: number;
+  note?: string;
+  words: string;
+};
+
+/** The owner's rules (kept by the tools, and RimSort's, read only) and every rule set the sorter reads. */
+export type RulesListing = {
+  rules: OwnRule[];
+  theirs: OwnRule[];
+  sets: RuleSetInfo[];
+};

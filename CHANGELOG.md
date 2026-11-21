@@ -4,6 +4,32 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.47.0] - 2026-11-22
+
+Step 3 of the program's own mod manager (the owner, 22 Nov 2026: "Start the sorter now", mods moved "more freely", the page tidied,
+and "extra colours/shades ... as appropriate to each theme").
+
+### Added
+
+- **Mod list: Sort.** **Sort: fewest moves** keeps your order and moves only the mods a rule says are in the wrong place; **Full
+  re-sort** rebuilds the whole order, as RimSort does. Each move shows from where to where, which way, and whose rule asked for it
+  (your rule, its own files, needs, community); rules that go round in a loop are named, with the one set aside. **Nothing is
+  written until Use this order**, after a backup, and Undo takes it back. **Your rules**: make one by finding the mods by name
+  (after, before, at the top, at the bottom), take one away; your RimSort rules and the community rules are read as they are.
+  Guide: Sort the mod list, and keep a rule of your own; Load-order rule. Not yet tested on screen.
+- **Edit the list moves mods freely.** Choose any number of mods with Space or a click, then **Carry (Enter)** them with Up, Down,
+  Page Up, Page Down, Home and End and put them down with Enter; or **Put after…** or **Put before…** a mod found by typing part of
+  its name; or give a **Place**; or drag them. Mods switched off can be **Switched on after…** one found by name. Several mods
+  moved together are one change. Not yet tested on screen.
+- **Shades from each theme**: chosen and carried rows, the badges for where a mod comes from and whose rule, the sort's moves and
+  What's wrong's problems and warnings take a soft shade of the theme's own colours; words always say the same. Both theme checks
+  now hold words to the shades too.
+
+### Changed
+
+- **Edit the list is tidier**: one scroll instead of pages of 40, and one bar of actions for the chosen mods instead of six buttons
+  on every row; the bar stays in view as the list scrolls.
+- Tool kit pin v1.73.0 to v1.74.0.
 ## [0.46.0] - 2026-11-22
 
 Step 2 of the program's own mod manager (the owner, 22 Nov 2026: switching mods on and off and moving them, each change saved at

@@ -1134,8 +1134,34 @@ reads again when they come back to it. What outside notices: the game's list fil
 before: one entry at a time, backed up, undone with a press. Agent choices: 40 rows a page; a switched-on mod goes just before
 the first that needs it, else last; Put it at takes the place number of the row pressed (the kit takes the moved mod out first).
 
-**The manager's next steps** (owner's choices, 22 Nov 2026): our own sorter from each mod's
-own rules, the community rules RimSort uses (read, never copied into a repository) and the owner's own, every move explained; saved
+**0.47.0, Sort, and moving freely** (step 3; the owner, 22 Nov 2026: "Start the sorter now and we also need to have the ability
+to move mods around more freely, right now it's too restrictive and asks too much of the user ... neaten/tidy things up ... some
+extra colours/shades ... as appropriate to each theme"). The owner's choices on question cards: moving by **carrying with the keys,
+putting beside a mod found by name, several at once, and dragging too**; the sorter **both ways, chosen at the press** (fewest
+moves, or a full re-sort); **your rules from RimSort read as they are, plus new ones kept by the tools**; **shades worked out from
+each theme**, not new theme roles. Kit 1.74.0 adds `mod-list sort`, `mod-list rules` and changes to several mods at once.
+
+- What it lets the person do: put any number of mods anywhere in a few keys (Enter, arrows, Enter) or by typing a neighbour's name;
+  sort the list without RimSort, seeing every move and whose rule asked for it first; keep rules of their own without RimSort's
+  mouse-heavy editor.
+- What it stops: a sort written unseen (only **Use this order** writes); a loop of rules stopping the sort (its weakest rule is set
+  aside and named, where RimSort refuses); RimSort's files being changed (only read).
+- How it changes the way they work: the list is one scroll, chosen mods stay chosen across moves, and the row buttons of 0.46.0
+  give way to one bar of actions for the chosen; several mods moved together are one change and one undo.
+- What outside notices: the game's list file, as before, and the tools' own `rules.json`; RimSort keeps its own rules untouched.
+- **Risk (agent's grade): low.** A sort can move many mods at once, but nothing is written before the press, a backup comes first,
+  and one Undo restores the whole list. No setting: the owner chose each change by its own press.
+- Agent choices, owner to revise: strength order for loops (yours, own, needs, community); "at the top" never above the game's own
+  unless a rule puts it there; the full re-sort puts the game's own first, then by name; the first 60 moves shown, the rest behind
+  a button; at most 500 mods in one change; shades at 14 % of a role over the raised surface (both theme checks hold words to them;
+  every built-in theme reads at 4.85:1 or better); the carry keys are the list's own (Up, Down, Page Up, Page Down, Home, End,
+  Enter, Escape, Space), not new page shortcuts, since nearly every single key is taken; filters wait while mods are carried, so
+  the whole list shows.
+- Seen on the owner's list (read only): the fewest-moves sort finds 2 moves on a list RimSort sorted, both "load at the top" rules
+  RimSort reads more loosely (XML Extensions up to just after the expansions; Vehicle Framework up to just after the Vanilla
+  Expanded Framework). Not yet tested on screen.
+
+**The manager's next steps** (owner's choices, 22 Nov 2026): saved
 lists; subscribe and unsubscribe through the running Steam client, as RimSort does (Steamworks through the client's own login, no
 credentials held); then RimSort can retire. Each gets its own design record.
 

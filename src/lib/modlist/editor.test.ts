@@ -1,5 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { fits, nameOf, offRows, onRows, placeFrom, withList } from "./editor";
+import {
+  CARRY_STEPS,
+  blockPlace,
+  fits,
+  matching,
+  nameOf,
+  nudged,
+  offRows,
+  onRows,
+  placeBeside,
+  placeFrom,
+  toggled,
+  withBlockAt,
+  withList,
+} from "./editor";
 import type { ModRow, ModsListing } from "./types";
 
 function mod(key: string, name: string, extra: Partial<ModRow> = {}): ModRow {
@@ -100,5 +114,61 @@ describe("Edit the list", () => {
     expect(after.lists[0].count).toBe(2);
     expect(after.changes.active).toBe(1);
     expect(withList(after, "active", [], [], -1).changes.active).toBe(0);
+  });
+});
+
+describe("moving several mods freely (0.47.0)", () => {
+  const keys = ["a", "b", "c", "d", "e"];
+
+  it("puts a block at a place counted without it, in list order", () => {
+    expect(withBlockAt(keys, new Set(["d", "b"]), 1)).toEqual([
+      "b",
+      "d",
+      "a",
+      "c",
+      "e",
+    ]);
+    expect(withBlockAt(keys, new Set(["a"]), 99)).toEqual([
+      "b",
+      "c",
+      "d",
+      "e",
+      "a",
+    ]);
+  });
+
+  it("knows where a block starts and where beside a mod puts it", () => {
+    const chosen = new Set(["c", "d"]);
+    expect(blockPlace(keys, chosen)).toBe(3);
+    expect(placeBeside(keys, chosen, "a", true)).toBe(2);
+    expect(placeBeside(keys, chosen, "e", false)).toBe(3);
+    expect(placeBeside(keys, chosen, "c", true)).toBeNull();
+    expect(placeBeside(keys, chosen, "zz", true)).toBeNull();
+    expect(
+      withBlockAt(keys, chosen, placeBeside(keys, chosen, "a", false) ?? 0),
+    ).toEqual(["c", "d", "a", "b", "e"]);
+  });
+
+  it("carries a block one place, ten, or to either end, never past them", () => {
+    expect(nudged(3, CARRY_STEPS.ArrowUp, 4)).toBe(2);
+    expect(nudged(3, CARRY_STEPS.PageDown, 4)).toBe(5);
+    expect(nudged(3, CARRY_STEPS.Home, 4)).toBe(1);
+    expect(nudged(1, CARRY_STEPS.ArrowUp, 4)).toBe(1);
+  });
+
+  it("offers names that start with the words first, then names and ids that hold them", () => {
+    const mods = [
+      { key: "x", name: "Vanilla Furniture", id: "vfe.furniture" },
+      { key: "y", name: "Furniture Plus", id: "f.plus" },
+      { key: "z", name: "Other", id: "someone.furniture.patch" },
+    ];
+    expect(matching(mods, "furn").map((m) => m.key)).toEqual(["y", "x", "z"]);
+    expect(matching(mods, "  ")).toEqual([]);
+    expect(matching(mods, "furn", 1).map((m) => m.key)).toEqual(["y"]);
+  });
+
+  it("chooses and lets go in the order chosen", () => {
+    expect(toggled(["a"], "b")).toEqual(["a", "b"]);
+    expect(toggled(["a", "b"], "a")).toEqual(["b"]);
   });
 });

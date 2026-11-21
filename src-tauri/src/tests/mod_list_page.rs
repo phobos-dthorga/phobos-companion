@@ -82,11 +82,36 @@ fn the_editor_lists_and_changes_with_a_place_when_one_is_given() {
         mods_arguments(&zed()),
         ["mod-list", "mods", "--name=Zed Game", "--app-id=108600", "--data", "/games/zed", "--no-redact", "--json"]
     );
-    let moved = edit_arguments(&zed(), "default", "move", "Some Mod", Some(3));
+    let moved = edit_arguments(&zed(), "default", "move", &["Some Mod".to_owned(), "Other".to_owned()], Some(3));
     assert!(moved.contains(&"--move=Some Mod".to_owned()));
+    assert!(moved.contains(&"--move=Other".to_owned()));
     assert!(moved.windows(2).any(|pair| pair == ["--to", "3"]));
     assert!(moved.contains(&"--apply".to_owned()));
-    assert!(!edit_arguments(&zed(), "default", "remove", "Some Mod", None).contains(&"--to".to_owned()));
+    assert!(!edit_arguments(&zed(), "default", "remove", &["Some Mod".to_owned()], None).contains(&"--to".to_owned()));
+}
+
+#[test]
+fn the_sort_writes_only_when_asked_and_rules_keep_the_window_s_text_one_argument() {
+    let preview = sort_arguments(&zed(), "default", false, false);
+    assert!(!preview.contains(&"--apply".to_owned()) && !preview.contains(&"--full".to_owned()));
+    let written = sort_arguments(&zed(), "default", true, true);
+    assert!(written.contains(&"--apply".to_owned()) && written.contains(&"--full".to_owned()));
+    let after = add_rule_arguments(&zed(), "Some Mod", "after", "--drop 1");
+    assert!(after.contains(&"--mod=Some Mod".to_owned()));
+    assert!(after.contains(&"--after=--drop 1".to_owned()));
+    let top = add_rule_arguments(&zed(), "x", "top", "");
+    assert!(top.contains(&"--top".to_owned()) && top.contains(&"--apply".to_owned()));
+    assert!(drop_rule_arguments(&zed(), 2).windows(2).any(|pair| pair == ["--drop", "2"]));
+}
+
+#[test]
+fn several_mods_at_once_are_checked_for_shape() {
+    let two = ["a".to_owned(), "b".to_owned()];
+    assert!(sane_ids(&two));
+    assert!(!sane_ids(&[]));
+    assert!(!sane_ids(&["a".to_owned(), "a".to_owned()]));
+    let many: Vec<String> = (0..=MAX_TOGETHER).map(|n| format!("m{n}")).collect();
+    assert!(!sane_ids(&many));
 }
 
 #[test]
@@ -108,9 +133,19 @@ fn a_listing_names_its_mods_entries_and_the_lists_the_kit_changes() {
 
 #[test]
 fn the_editor_refuses_unknown_mods_odd_places_and_other_changes() {
-    assert!(edit("rimworld", "active", "remove-extra", "x", None, None).is_err());
-    assert!(edit("rimworld", "active", "move", "x", None, None).is_err());
-    assert!(edit("rimworld", "active", "move", "x", Some(0), None).is_err());
-    assert!(edit("rimworld", "active", "move", "x", Some(MAX_PLACE + 1), None).is_err());
-    assert!(edit("rimworld", "active", "remove", "never.listed", None, None).is_err());
+    let x = ["x".to_owned()];
+    assert!(edit("rimworld", "active", "remove-extra", &x, None, None).is_err());
+    assert!(edit("rimworld", "active", "move", &x, None, None).is_err());
+    assert!(edit("rimworld", "active", "move", &x, Some(0), None).is_err());
+    assert!(edit("rimworld", "active", "move", &x, Some(MAX_PLACE + 1), None).is_err());
+    assert!(edit("rimworld", "active", "remove", &["never.listed".to_owned()], None, None).is_err());
+}
+
+#[test]
+fn the_sort_and_rules_refuse_unknown_lists_mods_kinds_and_numbers() {
+    assert!(sort("rimworld", "never.listed", false, true, None).is_err());
+    assert!(add_rule("rimworld", "x", "sideways", "y").is_err());
+    assert!(add_rule("rimworld", "never.listed", "after", "also.never").is_err());
+    assert!(drop_rule("rimworld", 0).is_err());
+    assert!(drop_rule("rimworld", MAX_RULE + 1).is_err());
 }

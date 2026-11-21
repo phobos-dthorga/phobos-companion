@@ -62,13 +62,32 @@ fn mixing_is_css_color_mix_in_srgb() {
 }
 
 #[test]
-fn words_must_read_on_removed_and_added_lines_too() {
-    // Muted words that read on every plain surface (4.55:1 on the softest) but not on a changed line's tinted background.
+fn words_must_read_on_removed_and_added_lines_and_the_shades_too() {
+    // Muted words that read on every plain surface (4.55:1 on the softest) but not on a changed line's tinted background, nor on
+    // the shades a page lays under chosen rows and badges (0.47.0).
     let muted = mine("muted.theme").replace("\"text_muted\": \"#C9BEC8\"", "\"text_muted\": \"#8C8C8C\"");
     let problems = contrast_problems(&parse(&muted, false).unwrap());
-    assert!(problems.iter().all(|p| p.role == "text_muted" && p.on.starts_with("diff_")), "{problems:?}");
+    assert!(problems.iter().all(|p| p.role == "text_muted"), "{problems:?}");
     let on: Vec<&str> = problems.iter().map(|p| p.on.as_str()).collect();
-    assert_eq!(on, ["diff_removed", "diff_added"]);
+    assert_eq!(
+        on,
+        [
+            "diff_removed",
+            "diff_added",
+            "shade_accent",
+            "shade_observed",
+            "shade_comparison",
+            "shade_success",
+            "shade_risk"
+        ]
+    );
+}
+
+#[test]
+fn every_built_in_theme_reads_on_every_shade() {
+    for theme in built_ins() {
+        assert!(contrast_problems(&theme).is_empty(), "{}: {:?}", theme.name, contrast_problems(&theme));
+    }
 }
 
 #[test]

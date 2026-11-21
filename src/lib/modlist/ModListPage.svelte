@@ -17,6 +17,7 @@
   } from "./desktopClient";
   import { keep } from "./latest.svelte";
   import ModListEditor from "./ModListEditor.svelte";
+  import ModListSort from "./ModListSort.svelte";
   import {
     HEADING,
     MARK,
@@ -45,8 +46,8 @@
     | { kind: "undo"; list: ModListInfo; change: string };
 
   let reading = $state<Reading>({ state: "reading" });
-  /** What's wrong, or Edit the list (0.46.0): coming back to What's wrong checks again, so it follows the edits. */
-  let view = $state<"wrong" | "edit">("wrong");
+  /** What's wrong, Edit the list (0.46.0) or Sort (0.47.0): coming back to What's wrong checks again, so it follows the edits. */
+  let view = $state<"wrong" | "edit" | "sort">("wrong");
   let online = $state(true);
   let busy = $state(false);
   let progress = $state(started());
@@ -78,7 +79,7 @@
     }
   }
 
-  function showView(chosen: "wrong" | "edit") {
+  function showView(chosen: "wrong" | "edit" | "sort") {
     if (chosen === view) return;
     view = chosen;
     said = null;
@@ -167,10 +168,18 @@
     aria-pressed={view === "edit"}
     onclick={() => showView("edit")}>{t("modlist-view-edit")}</button
   >
+  <button
+    type="button"
+    class="action toggle"
+    aria-pressed={view === "sort"}
+    onclick={() => showView("sort")}>{t("modlist-view-sort")}</button
+  >
 </div>
 
 {#if view === "edit"}
   <ModListEditor {game} />
+{:else if view === "sort"}
+  <ModListSort {game} />
 {:else}
   {#if said}
     <p class="told" class:refused={said.refused} role="status">{said.text}</p>
@@ -450,10 +459,12 @@
 
   .findings li.problem {
     border-inline-start-color: var(--colour-risk);
+    background: var(--shade-risk);
   }
 
   .findings li.warning {
     border-inline-start-color: var(--colour-accent);
+    background: var(--shade-accent);
   }
 
   .findings p {

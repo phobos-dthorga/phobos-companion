@@ -14,6 +14,11 @@
 //! list in order, and each press of Switch on, Switch off or a move runs `mod-list fix --apply` at once, with no second yes; the
 //! kit keeps a backup before each, and Undo the last change walks back one change at a time. The host accepts only a mod the last
 //! listing named, a list it named, and a place from 1.
+//!
+//! **Sort and rules** (0.47.0; the owner's choices of 22 Nov 2026: both sorts, chosen at the press; RimSort's rules read as they
+//! are, plus the owner's own kept by the tools; several mods moved together): `mod-list sort` shows the moves and why, and writes
+//! only on **Use this order**; `mod-list rules` lists the rules and keeps or takes away one of the owner's. A change may name
+//! several mods at once, each one the last listing named.
 
 use companion_core::args::Args;
 use companion_core::checks;
@@ -30,8 +35,17 @@ const CHECK: &str = "check";
 const FIX: &str = "fix";
 const UNDO: &str = "undo";
 const MODS: &str = "mods";
+const SORT: &str = "sort";
+const RULES: &str = "rules";
 /// The editor's changes (0.46.0): switch off, switch on, move; each saved at once on the owner's press.
 pub const EDITS: [&str; 3] = ["remove", "enable", "move"];
+/// The most mods one press changes together (0.47.0): every mod a list could sensibly hold, and short of the system's longest
+/// command line at the kit's longest ids.
+pub const MAX_TOGETHER: usize = 500;
+/// Where one of the owner's rules says a mod loads (the kit's `mod-list rules`).
+pub const RULE_KINDS: [&str; 4] = ["after", "before", "top", "bottom"];
+/// The highest rule number the host passes on: far beyond any owner's list of rules.
+pub const MAX_RULE: u32 = 10_000;
 /// The furthest place the host passes on: far beyond any list's length; the kit keeps a place inside the list.
 pub const MAX_PLACE: u32 = 100_000;
 /// The changes the kit makes (`mod-list fix --remove`, `--remove-extra`, `--enable`).
@@ -95,8 +109,11 @@ pub fn mods_arguments(game: &GamePlaces) -> Vec<String> {
     named(Args::new(TOOL, MODS), game).flag("--no-redact").json()
 }
 
-pub fn edit_arguments(game: &GamePlaces, list: &str, action: &str, id: &str, place: Option<u32>) -> Vec<String> {
-    let arguments = named(Args::new(TOOL, FIX), game).given("--list", list).given(&format!("--{action}"), id);
+pub fn edit_arguments(game: &GamePlaces, list: &str, action: &str, ids: &[String], place: Option<u32>) -> Vec<String> {
+    let mut arguments = named(Args::new(TOOL, FIX), game).given("--list", list);
+    for id in ids {
+        arguments = arguments.given(&format!("--{action}"), id);
+    }
     let arguments = match place {
         Some(place) => arguments.pair("--to", &place.to_string()),
         None => arguments,
@@ -141,31 +158,117 @@ pub fn mods(game: &str, listener: Option<kit::Listener>) -> Result<Value, Failur
     Ok(data)
 }
 
-/// One change from Edit the list, saved at once: switch a mod off or on, or move it to a place (1 is first).
+fn known_mod(game: &str, id: &str) -> bool {
+    KNOWN.lock().map(|known| known.contains(&(game.to_owned(), id.to_owned()))).unwrap_or(false)
+}
+
+fn known_list(game: &str, list: &str) -> bool {
+    sane_text(list) && LISTS.lock().map(|lists| lists.contains(&(game.to_owned(), list.to_owned()))).unwrap_or(false)
+}
+
+/// Several mods named at once: each a sane id the last listing named, none twice, and not too many.
+pub fn sane_ids(ids: &[String]) -> bool {
+    let unique: BTreeSet<&String> = ids.iter().collect();
+    !ids.is_empty() && ids.len() <= MAX_TOGETHER && unique.len() == ids.len() && ids.iter().all(|id| sane_text(id))
+}
+
+/// One change from Edit the list, saved at once: switch mods off or on, or move them to a place (1 is first); several mods
+/// named together move or switch as one block (0.47.0).
 pub fn edit(
     game: &str,
     list: &str,
     action: &str,
-    id: &str,
+    ids: &[String],
     place: Option<u32>,
     listener: Option<kit::Listener>,
 ) -> Result<ChangeResult, Failure> {
     let found = places(game)?;
-    if !EDITS.contains(&action) || !sane_text(list) || !sane_text(id) {
+    if !EDITS.contains(&action) || !sane_text(list) || !sane_ids(ids) {
         return Err(Failure::refused("that is not a change the tools make"));
     }
     if place.is_some_and(|place| place == 0 || place > MAX_PLACE) || (action == "move" && place.is_none()) {
         return Err(Failure::refused("that is not a place on the list"));
     }
-    let known_mod = KNOWN.lock().map(|known| known.contains(&(game.to_owned(), id.to_owned()))).unwrap_or(false);
-    let known_list = LISTS.lock().map(|lists| lists.contains(&(game.to_owned(), list.to_owned()))).unwrap_or(false);
-    if !known_mod || !known_list {
+    if !ids.iter().all(|id| known_mod(game, id)) || !known_list(game, list) {
         return Err(Failure::refused(
             "only a mod and a list the last listing named can be changed: read the list again first",
         ));
     }
     allowed_by_manifest(&kit::read_manifest()?, TOOL, FIX).map_err(Failure::refused)?;
-    Ok(result_of(&kit::run_hearing(TOOL, &edit_arguments(&found, list, action, id, place), listener)?))
+    Ok(result_of(&kit::run_hearing(TOOL, &edit_arguments(&found, list, action, ids, place), listener)?))
+}
+
+pub fn sort_arguments(game: &GamePlaces, list: &str, full: bool, apply: bool) -> Vec<String> {
+    let arguments = named(Args::new(TOOL, SORT), game).given("--list", list);
+    let arguments = if full { arguments.flag("--full") } else { arguments };
+    let arguments = if apply { arguments.flag("--apply") } else { arguments };
+    arguments.flag("--no-redact").json()
+}
+
+/// A list sorted from every rule, each move explained (0.47.0): the fewest moves, or a full re-sort. Written only when `apply`
+/// (the owner's press of Use this order), after a backup, like every change.
+pub fn sort(
+    game: &str,
+    list: &str,
+    full: bool,
+    apply: bool,
+    listener: Option<kit::Listener>,
+) -> Result<ChangeResult, Failure> {
+    let found = places(game)?;
+    if !known_list(game, list) {
+        return Err(Failure::refused("only a list the last listing named can be sorted: read the list again first"));
+    }
+    if apply {
+        allowed_by_manifest(&kit::read_manifest()?, TOOL, SORT).map_err(Failure::refused)?;
+    }
+    Ok(result_of(&kit::run_hearing(TOOL, &sort_arguments(&found, list, full, apply), listener)?))
+}
+
+pub fn rules_arguments(game: &GamePlaces) -> Vec<String> {
+    named(Args::new(TOOL, RULES), game).flag("--no-redact").json()
+}
+
+pub fn add_rule_arguments(game: &GamePlaces, id: &str, kind: &str, other: &str) -> Vec<String> {
+    let arguments = named(Args::new(TOOL, RULES), game).given("--mod", id);
+    let arguments = match kind {
+        "after" | "before" => arguments.given(&format!("--{kind}"), other),
+        _ => arguments.flag(&format!("--{kind}")),
+    };
+    arguments.flag("--apply").flag("--no-redact").json()
+}
+
+pub fn drop_rule_arguments(game: &GamePlaces, number: u32) -> Vec<String> {
+    named(Args::new(TOOL, RULES), game).pair("--drop", &number.to_string()).flag("--apply").flag("--no-redact").json()
+}
+
+/// The owner's rules (kept by the tools, and RimSort's, read only) and every rule set the sorter reads. Only reads.
+pub fn rules(game: &str, listener: Option<kit::Listener>) -> Result<Value, Failure> {
+    let found = places(game)?;
+    Ok(kit::run_hearing(TOOL, &rules_arguments(&found), listener)?["data"].clone())
+}
+
+/// Keeps one of the owner's rules: a mod the last listing named loads after or before another it named, or at the top or bottom.
+pub fn add_rule(game: &str, id: &str, kind: &str, other: &str) -> Result<ChangeResult, Failure> {
+    let found = places(game)?;
+    let paired = matches!(kind, "after" | "before");
+    if !RULE_KINDS.contains(&kind) || !sane_text(id) || (paired && !sane_text(other)) {
+        return Err(Failure::refused("that is not a rule the tools keep"));
+    }
+    if !known_mod(game, id) || (paired && !known_mod(game, other)) {
+        return Err(Failure::refused("only mods the last listing named can have rules: read the list again first"));
+    }
+    allowed_by_manifest(&kit::read_manifest()?, TOOL, RULES).map_err(Failure::refused)?;
+    Ok(result_of(&kit::run_hearing(TOOL, &add_rule_arguments(&found, id, kind, other), None)?))
+}
+
+/// Takes away the owner's rule at this number (1 is the first the rules listing gave).
+pub fn drop_rule(game: &str, number: u32) -> Result<ChangeResult, Failure> {
+    let found = places(game)?;
+    if number == 0 || number > MAX_RULE {
+        return Err(Failure::refused("that is not one of your rules"));
+    }
+    allowed_by_manifest(&kit::read_manifest()?, TOOL, RULES).map_err(Failure::refused)?;
+    Ok(result_of(&kit::run_hearing(TOOL, &drop_rule_arguments(&found, number), None)?))
 }
 
 pub fn undo_arguments(game: &GamePlaces, list: &str) -> Vec<String> {

@@ -77,6 +77,11 @@
     ...Object.fromEntries(GROUPS.flatMap((g) => g.roles)),
     diff_removed: "themes-role-diff-removed",
     diff_added: "themes-role-diff-added",
+    shade_accent: "themes-role-shade-accent",
+    shade_observed: "themes-role-shade-observed",
+    shade_comparison: "themes-role-shade-comparison",
+    shade_success: "themes-role-shade-success",
+    shade_risk: "themes-role-shade-risk",
   };
 
   // svelte-ignore state_referenced_locally

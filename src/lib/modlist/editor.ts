@@ -91,3 +91,91 @@ export function withList(
     },
   };
 }
+
+/**
+ * The keys with the chosen ones taken out and put back as one block, in their list order, starting at `place` (1 is first,
+ * counted without them), as the kit's `--move ... --to PLACE` does (0.47.0).
+ */
+export function withBlockAt(
+  keys: string[],
+  chosen: ReadonlySet<string>,
+  place: number,
+): string[] {
+  const block = keys.filter((k) => chosen.has(k));
+  const rest = keys.filter((k) => !chosen.has(k));
+  const at = Math.max(0, Math.min(place - 1, rest.length));
+  return [...rest.slice(0, at), ...block, ...rest.slice(at)];
+}
+
+/** Where the chosen block starts now, counted without it (1 is first): the mods not chosen before the first chosen, plus one. */
+export function blockPlace(
+  keys: string[],
+  chosen: ReadonlySet<string>,
+): number {
+  const first = keys.findIndex((k) => chosen.has(k));
+  if (first < 0) return 1;
+  return keys.slice(0, first).filter((k) => !chosen.has(k)).length + 1;
+}
+
+/** The place (counted without the block) that puts it just after or just before a mod; null for a mod in the block or not listed. */
+export function placeBeside(
+  keys: string[],
+  chosen: ReadonlySet<string>,
+  target: string,
+  after: boolean,
+): number | null {
+  if (chosen.has(target)) return null;
+  const rest = keys.filter((k) => !chosen.has(k));
+  const at = rest.indexOf(target);
+  if (at < 0) return null;
+  return at + (after ? 2 : 1);
+}
+
+/** The keys that carry a block, and how far each moves it: one place, ten, or to either end (0.47.0). */
+export const CARRY_STEPS: Record<string, number> = {
+  ArrowUp: -1,
+  ArrowDown: 1,
+  PageUp: -10,
+  PageDown: 10,
+  Home: -Infinity,
+  End: Infinity,
+};
+
+/** A carried block's place moved by a step, kept between the first place and the last (the list without it, plus one). */
+export function nudged(place: number, step: number, others: number): number {
+  return Math.max(1, Math.min(place + step, others + 1));
+}
+
+/** A mod the finder can offer: its key, its name, its id, and (when on the list) its place. */
+export type Findable = {
+  key: string;
+  name: string;
+  id: string;
+  place?: number;
+};
+
+/** The mods whose name or id holds the words, names that start with them first, at most `most` (the finder's offers). */
+export function matching(
+  mods: Findable[],
+  search: string,
+  most = 8,
+): Findable[] {
+  const wanted = search.trim().toLowerCase();
+  if (wanted === "") return [];
+  const starts: Findable[] = [];
+  const holds: Findable[] = [];
+  for (const mod of mods) {
+    const name = mod.name.toLowerCase();
+    if (name.startsWith(wanted)) starts.push(mod);
+    else if (name.includes(wanted) || mod.id.toLowerCase().includes(wanted))
+      holds.push(mod);
+  }
+  return [...starts, ...holds].slice(0, most);
+}
+
+/** Choosing a mod: ticked again, it is let go; the order kept is the order chosen. */
+export function toggled(chosen: string[], key: string): string[] {
+  return chosen.includes(key)
+    ? chosen.filter((k) => k !== key)
+    : [...chosen, key];
+}

@@ -6,6 +6,9 @@ import type {
   ModListChange,
   ModListCheck,
   ModsListing,
+  RuleKind,
+  RulesListing,
+  SortAnswer,
 } from "./types";
 
 type Checked = { state: "ready"; check: ModListCheck };
@@ -78,18 +81,77 @@ export async function readMods(
   );
 }
 
-/** One change from Edit the list, saved at once: remove (switch off), enable (switch on) or move; `place` counts from 1. */
+/**
+ * One change from Edit the list, saved at once: remove (switch off), enable (switch on) or move one mod or several (0.47.0);
+ * `place` counts from 1, and several mods go there as one block.
+ */
 export async function editModList(
   game: string,
   list: string,
   action: "remove" | "enable" | "move",
-  id: string,
+  ids: string[],
   place: number | null,
   onProgress?: OnProgress,
 ): Promise<Edited | Failed> {
   return ask<EditAnswer, Edited>(
     "mod_list_edit",
-    { game, list, action, id, place, onProgress: progressChannel(onProgress) },
+    { game, list, action, ids, place, onProgress: progressChannel(onProgress) },
+    (result) => ({ state: "ready", result }),
+  );
+}
+
+type Sorted = { state: "ready"; result: SortAnswer };
+type Ruled = { state: "ready"; listing: RulesListing };
+
+/** A list sorted from every rule, each move explained (0.47.0): `full` rebuilds the order; written only when `apply`. */
+export async function sortModList(
+  game: string,
+  list: string,
+  full: boolean,
+  apply: boolean,
+  onProgress?: OnProgress,
+): Promise<Sorted | Failed> {
+  return ask<SortAnswer, Sorted>(
+    "mod_list_sort",
+    { game, list, full, apply, onProgress: progressChannel(onProgress) },
+    (result) => ({ state: "ready", result }),
+  );
+}
+
+/** The owner's load-order rules and every rule set the sorter reads. Only reads. */
+export async function readRules(
+  game: string,
+  onProgress?: OnProgress,
+): Promise<Ruled | Failed> {
+  return ask<RulesListing, Ruled>(
+    "mod_list_rules",
+    { game, onProgress: progressChannel(onProgress) },
+    (listing) => ({ state: "ready", listing }),
+  );
+}
+
+/** Keeps one of the owner's rules; `other` is empty for the top or the bottom. */
+export async function addRule(
+  game: string,
+  id: string,
+  kind: RuleKind,
+  other: string,
+): Promise<Changed | Failed> {
+  return ask<ModListChange, Changed>(
+    "mod_list_add_rule",
+    { game, id, kind, other },
+    (result) => ({ state: "ready", result }),
+  );
+}
+
+/** Takes away the owner's rule with this number. */
+export async function dropRule(
+  game: string,
+  number: number,
+): Promise<Changed | Failed> {
+  return ask<ModListChange, Changed>(
+    "mod_list_drop_rule",
+    { game, number },
     (result) => ({ state: "ready", result }),
   );
 }

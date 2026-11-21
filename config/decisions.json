@@ -247,6 +247,32 @@
       "why": "It keeps the first answer small, as you asked, without a choice to make first",
       "from": "docs/search.md, What the page shows",
       "asked": "2026-11-21"
+    },
+    {
+      "id": "safe-copies-place",
+      "question": "Where should the Safe copies card live?",
+      "context": "Safe copies (0.42.0) show each training set and style model, whether it is copied, changed since its copy or never copied, with Copy now and Check the copies. The hand-off's question 4 was not asked, so it went to Home, below the records note.",
+      "options": [
+        {
+          "id": "home",
+          "label": "A card on Home",
+          "detail": "Where you already look first; it is outlined when something has never been copied or has changed since"
+        },
+        {
+          "id": "mods",
+          "label": "A card on the Mods page",
+          "detail": "Beside the install backups; Home would show nothing about it"
+        },
+        {
+          "id": "own-page",
+          "label": "A page of its own",
+          "detail": "Room for a history of runs and a restore button later; Home would keep a one-line note when something waits"
+        }
+      ],
+      "lean": "home",
+      "why": "A warning that a training was never copied belongs where you look first, and the card is small",
+      "from": "docs/design-record.md, Safe copies on Home",
+      "asked": "2026-11-21"
     }
   ]
 }

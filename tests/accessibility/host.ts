@@ -95,6 +95,8 @@ export async function mockHost(
   // Features for agent sessions are shown unless a test says otherwise (0.37.0): most tests were written with them in view.
   const withDefaults: Record<string, Answer> = {
     agent_features: agentsShown,
+    // Home's Safe copies card (0.42.0) reads on every visit; a test that is not about it sees a game that lists none.
+    safe_copies_status: { result: [] },
     ...answers,
   };
   await page.addInitScript((given) => {

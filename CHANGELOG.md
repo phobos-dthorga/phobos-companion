@@ -4,6 +4,25 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.42.0] - 2026-11-21
+
+Safe copies on Home (the owner, 21 Nov 2026: copies of "our training sets, models, etc." within the Companion). Not yet tested on screen.
+
+### Added
+
+- **Safe copies, a card on Home**: for each of the game's repositories that lists what cannot be made again (training sets, the style models made from them, the notes on which picture was picked), each set's kind and whether it is copied, changed since its copy, or never copied, at each place copies go (a folder, a private repository). The card is outlined when a set was never copied or has changed since.
+- **Copy now** copies whatever changed and sends the repository's copy at once; **Check the copies** reads every copy again and says if one is missing or damaged. A bar shows the work, and the card reads itself again afterwards.
+- **Made from a game's files** marks a set that goes only to a folder marked private and local; "Not kept here" shows where it may not go. Nothing is ever deleted.
+- A game whose repositories list no safe copies says so in one line.
+- The Guide: Keep safe copies of what cannot be made again, and the word Safe copy; Home's entry names the card.
+- On the Decisions page: where the card should live (lean: Home, where it is now).
+
+### Changed
+
+- Tools kit pin v1.65.1 to v1.66.0 (its safe-copies command).
+
+Checked with the tools on phobos-rimworld, whose trainings, models and notes are listed; phobos-ostranauts lists none yet.
+
 ## [0.41.1] - 2026-11-21
 
 Removed code stands out (the owner, 21 Nov 2026: its contrast in the compare and view tools was "not nearly high enough"). Not yet tested on screen.

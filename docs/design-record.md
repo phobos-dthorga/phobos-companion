@@ -1060,6 +1060,31 @@ the Guide, lets the snapshot go; trail steps name an object by a token and the s
 it is shown to everyone, not hidden as an agent feature. **First real use** (21 Nov 2026, with the kit's command line): 453 MB of every mod's patch XML kept alive, read back by
 Vanilla Expanded Framework's settings code after the game had let it go.
 
+## Safe copies on Home (built 21 Nov 2026, 0.42.0)
+
+**The owner's request** (21 Nov 2026: "backup functionality for our training sets, models, etc. ... within Companion"), after the
+first style model of their own art took 158 minutes of the graphics card. The tool, its rules and the owner's answers (the name
+"safe copies", the places: a local disk and a private repository; files made from a game's own on the local disk only) are in
+phobos-modkit's `docs/safe-copies.md` and phobos-rimworld's `docs/development/art-backups-handoff.md`.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See at a glance whether what cannot be made again is copied, changed since its copy, or never copied, at each place copies go; copy it now; check every copy is whole |
+| What does it stop them doing? | Losing a training to a failed drive without knowing it was never copied; sending anything made from a game's files to a shared place (the kit refuses, and the card says "Not kept here") |
+| How does it change the way they work? | Copies happen after every night of art work by themselves; Home says when something waits, and one press catches up at any time, even mid-game (no graphics card) |
+| What outside it notices? | Copy now pushes to the private repository the owner chose, and reads and writes the disks. Nothing else |
+
+| Part | How |
+| --- | --- |
+| The tools | phobos-modkit 1.66.0's `safe-copies status`, `run` and `verify`, through `src-tauri/src/safe_copies.rs`; Copy now only while the manifest calls `run` `writes` |
+| Which repositories | Those of the game with `config/safe-copies.json`; the host checks the repository is one of them before the kit sees it |
+| No confirmation step | Copy now never deletes or replaces at the source, and puts an earlier copy aside before replacing it; the owner chose automatic pushes, so a press needs no second yes (agent choice) |
+| Games | Any game whose repository lists safe copies. Checked on phobos-rimworld (its trainings, models and notes); phobos-ostranauts lists none yet, and its Home says so in one line |
+
+**Agent choices, owner to revise:** the card's place on Home (asked on the Decisions page, lean Home), below the records note; the
+words "Ours", "Made from a game's files" and "Not kept here"; no keys of its own; and that it shows for every game, saying "none
+listed" where a repository lists nothing.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

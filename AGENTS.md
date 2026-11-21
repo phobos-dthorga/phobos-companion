@@ -135,7 +135,10 @@ reads them.
   calls it `writes`; it never deletes a copy. **It also runs by itself** (0.29.0; owner, 20 Nov 2026: "every few hours when it's
   open, and if the schedule is missed, the soonest next opportunity"): a timer in the host makes a copy when the kit's `records
   status --every-hours` says one is due, as `records backup --automatic`, under the same manifest check, and Home says when one
-  failed and why. It is the one write this program makes without a press. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
+  failed and why. It is the one write this program makes without a press. **Copy now** (0.42.0, `src-tauri/src/safe_copies.rs`)
+  runs the kit's `safe-copies run` for a repository of the game that has `config/safe-copies.json`, on the owner's press and while
+  the manifest calls it `writes`: it copies into the folders the owner chose and marked, and pushes the private repository the owner
+  chose; it never deletes, and the kit keeps anything made from a game's files off every shared place. **Check the copies** only reads. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
   answer`, which appends the owner's answer to `decisions/<repository>.jsonl` in this program's folder. **The Game files page only
   reads** (the kit's `game-files report`, `src-tauri/src/game_files_page.rs`); Show in folder opens the file manager on a file
   inside a folder the last report named, and nothing else.

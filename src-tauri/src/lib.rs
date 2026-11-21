@@ -27,6 +27,7 @@ mod pick;
 mod pictures;
 mod records_backup;
 mod reports;
+mod safe_copies;
 mod screen_notes;
 mod settings_ledger;
 mod settings_page;
@@ -418,6 +419,35 @@ async fn backup_records() -> Result<records_backup::BackupResult, Failure> {
     blocking(records_backup::backup).await
 }
 
+/// Each of a game's repositories that lists safe copies: what is copied, changed since, or never copied (0.42.0). Only reads.
+#[tauri::command]
+async fn safe_copies_status(
+    game: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<Vec<safe_copies::RepositoryCopies>, Failure> {
+    blocking(move || safe_copies::read(&game, Some(&hearing(on_progress)))).await
+}
+
+/// Copy now: copies what changed and pushes the repository's copy, once the owner presses it (0.42.0).
+#[tauri::command]
+async fn safe_copies_copy(
+    game: String,
+    repository: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<safe_copies::CopyResult, Failure> {
+    blocking(move || safe_copies::copy_now(&game, &repository, Some(&hearing(on_progress)))).await
+}
+
+/// Check the copies: hashes every copy again against its record (0.42.0). Only reads.
+#[tauri::command]
+async fn safe_copies_check(
+    game: String,
+    repository: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<safe_copies::CopyResult, Failure> {
+    blocking(move || safe_copies::check(&game, &repository, Some(&hearing(on_progress)))).await
+}
+
 /// Every game Steam has installed, with guesses at each one's data folder and whether the list holds it (0.31.0). Only reads.
 #[tauri::command]
 async fn steam_games(on_progress: Channel<kit::Progress>) -> Result<games_page::SteamGames, Failure> {
@@ -795,6 +825,9 @@ pub fn run() {
             show_screen_note,
             records_status,
             backup_records,
+            safe_copies_status,
+            safe_copies_copy,
+            safe_copies_check,
             claims_list,
             decisions_list,
             answer_decision,

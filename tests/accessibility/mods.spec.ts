@@ -133,6 +133,17 @@ function sampleInstalls(running: string[]) {
                   before: null,
                   after: "True",
                 },
+                // The same setting's name in a second settings class of the same mod, as D'thorga Medical's radiation settings
+                // are (22 Nov 2026): keyed by name alone, the page stopped drawing (0.45.2).
+                {
+                  mod: "SampleMod",
+                  class: "Sample.MoreSettings",
+                  key: "Sample_Sails",
+                  label: "Boats have sails, again",
+                  what: "added",
+                  before: null,
+                  after: "True",
+                },
               ],
               settingsNote: null,
               lookOut: [{ id: "12", title: "Boats float", version: "1.3.0" }],
@@ -440,6 +451,9 @@ for (const [name, viewport] of [
       await expect(card).toContainText("Needs a build");
       await expect(card).toContainText(
         "New: Boats have sails (starts as True)",
+      );
+      await expect(card).toContainText(
+        "New: Boats have sails, again (starts as True)",
       );
       await expect(card).toContainText("One thing to look out for in play");
       await card.getByRole("button", { name: "Show the files" }).click();

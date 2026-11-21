@@ -4,6 +4,14 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.45.2] - 2026-11-22
+
+From the owner's screenshot of 22 Nov 2026: the Mods page stopped at "Matching … changelog entries to their commits" and never showed the mods. Not yet tested on screen.
+
+### Fixed
+
+- **The Mods page shows the mods again when one mod names a setting in two settings classes**, as D'thorga Medical now does for its three radiation settings. The page told each setting apart by its name alone, met the same name twice, and stopped drawing while the tools had long finished; it now tells them apart by class and name. Found by feeding your own Mods answers into the page; a test now holds a setting named twice.
+
 ## [0.45.1] - 2026-11-22
 
 ### Fixed

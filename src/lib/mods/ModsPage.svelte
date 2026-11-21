@@ -796,7 +796,8 @@
     {#if mod.settings && mod.settings.length > 0}
       <h5>{t("mods-settings", { count: mod.settings.length })}</h5>
       <ul class="entries">
-        {#each mod.settings as change (change.key)}
+        <!-- One mod may name a setting in two settings classes (D'thorga Medical's radiation, 22 Nov 2026), so the class keys it too. -->
+        {#each mod.settings as change (`${change.class}/${change.key}/${change.what}`)}
           <li>
             {t(SETTING_WORDS[change.what], {
               label: change.label ?? change.key,

@@ -134,3 +134,16 @@ fn says_when_a_folder_has_no_history() {
     fs::remove_dir_all(&folder).unwrap();
     assert_eq!(failure.problem, RepositoryProblem::NotARepository);
 }
+
+#[test]
+fn a_file_is_read_as_a_revision_holds_it_and_a_large_one_refused() {
+    let repository = TempRepository::new();
+    repository.commit("boat.png", "first");
+    repository.commit("boat.png", "second, longer");
+    let path = &repository.0;
+    assert_eq!(file_at(path, "HEAD", "boat.png", 1024).unwrap(), Some(b"second, longer".to_vec()));
+    assert_eq!(file_at(path, "HEAD^", "boat.png", 1024).unwrap(), Some(b"first".to_vec()));
+    assert_eq!(file_at(path, "HEAD", "oar.png", 1024).unwrap(), None);
+    assert_eq!(file_at(path, "HEAD^^", "boat.png", 1024).unwrap(), None);
+    assert!(file_at(path, "HEAD", "boat.png", 4).is_err());
+}

@@ -215,6 +215,24 @@ export const ACTIONS: Action[] = [
     words: "shortcut-code-previous-file",
   },
   {
+    id: "code.flick",
+    scope: "code",
+    defaultKey: "z",
+    words: "shortcut-code-flick",
+  },
+  {
+    id: "code.play",
+    scope: "code",
+    defaultKey: "y",
+    words: "shortcut-code-play",
+  },
+  {
+    id: "code.zoom",
+    scope: "code",
+    defaultKey: "=",
+    words: "shortcut-code-zoom",
+  },
+  {
     id: "connections.around",
     scope: "connections",
     defaultKey: "a",

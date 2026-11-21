@@ -56,7 +56,24 @@ export type FileChange = {
   deletions: number;
   hunks: Hunk[];
   truncated: boolean;
+  /** What a file that isn't text is (phobos-modkit 1.78.0); null for text, absent from an older kit. */
+  media?: MediaKind | null;
+  /** Its bytes before and after the change; null on the side where it did not exist. */
+  sizeBefore?: number | null;
+  sizeAfter?: number | null;
 };
+
+export type MediaKind =
+  | "picture"
+  | "texture"
+  | "sound"
+  | "video"
+  | "model"
+  | "font"
+  | "document"
+  | "archive"
+  | "program"
+  | "other";
 
 /** The code behind one changelog entry (phobos-modkit `changes entry`, kit 1.24.0). */
 export type EntryCodeData = {

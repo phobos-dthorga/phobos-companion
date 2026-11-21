@@ -110,7 +110,13 @@ reads them.
   leaving the page, when the program closes, or after ten minutes (the owner's choice). Each request's kind is from a fixed list,
   and its type name, address, words and numbers are checked for shape and size before the kit sees them.
 - **The Changes page and the code viewer only read**: the kit's `changes`, through `src-tauri/src/changes_page.rs`, which checks
-  the repository is one of the game's and the changelog a plain path inside it before the kit sees either.
+  the repository is one of the game's and the changelog a plain path inside it before the kit sees either. **The code viewer's
+  pictures and sounds** (0.50.0; the owner, 22 Nov 2026: "display multimedia in parts like this", with Save a copy and Open with its
+  own program) go through `src-tauri/src/changed_files.rs`: it hands over a side's bytes only for a binary file the kit's last answer
+  for that repository and commit named, read with git, at most 64 MB. **Save a copy** writes only where the owner chose in Windows'
+  Save dialog; **Open with its own program** writes a copy into `opened-copies` in this program's own folder and asks the system to
+  open it, only for a kind the kit named as media, never a program or a kind it did not know, so a press can never run something.
+  Both only on a press.
 - **The Timeline page only reads**: the kit's `history`, through `src-tauri/src/history_page.rs`, which checks the repository is one
   of the game's, the changelog a plain path inside it, and the commit or moment plain text of the right shape. The history log it
   shows is written by the tools as they work, never by this program.

@@ -99,6 +99,7 @@ pub fn entry_code(
     }
     .map_err(Failure::refused)?;
     let answer = kit::run_hearing(TOOL, &arguments, listener)?;
+    crate::changed_files::remember(&found.path, &answer["data"]);
     Ok(result_of(&answer, repository))
 }
 

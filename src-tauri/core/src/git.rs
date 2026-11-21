@@ -80,6 +80,31 @@ pub fn text(path: &Path, args: &[&str]) -> Option<String> {
     output.status.success().then(|| String::from_utf8_lossy(&output.stdout).trim().to_owned())
 }
 
+/// A file's bytes as a revision holds it (0.50.0: the code viewer's pictures and sounds), or None when that revision has no such
+/// file. Refused, in words, when it is larger than `largest` bytes; git is asked its size before any bytes are read.
+pub fn file_at(path: &Path, revision: &str, file: &str, largest: u64) -> Result<Option<Vec<u8>>, ReadFailure> {
+    let object = format!("{revision}:{file}");
+    let size = git(path, &["cat-file", "-s", &object])?;
+    if !size.status.success() {
+        return Ok(None);
+    }
+    let bytes = String::from_utf8_lossy(&size.stdout).trim().parse::<u64>().unwrap_or(u64::MAX);
+    if bytes > largest {
+        return Err(ReadFailure {
+            problem: RepositoryProblem::GitFailed,
+            detail: format!("{file} is {} MB, more than this program reads at once", bytes / (1024 * 1024)),
+        });
+    }
+    let blob = git(path, &["cat-file", "blob", &object])?;
+    if !blob.status.success() {
+        return Err(ReadFailure {
+            problem: RepositoryProblem::GitFailed,
+            detail: String::from_utf8_lossy(&blob.stderr).into_owned(),
+        });
+    }
+    Ok(Some(blob.stdout))
+}
+
 /// Runs git so that reading takes no locks and starts no background watcher.
 fn git(path: &Path, args: &[&str]) -> Result<Output, ReadFailure> {
     let mut command = Command::new("git");

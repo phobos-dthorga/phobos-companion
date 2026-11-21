@@ -130,3 +130,17 @@ fn an_address_is_hexadecimal_after_0x() {
     assert!(!memory_address("0x12g4"));
     assert!(!memory_address("0x12 "));
 }
+
+#[test]
+fn a_repository_file_stays_inside_its_repository() {
+    assert!(repository_file("mods/PhobosVehicles/Textures/Tipper_ArmouredCab_north.png"));
+    assert!(repository_file("assets/phobos-audio/washer motor/a.wav"));
+    assert!(!repository_file(""));
+    assert!(!repository_file("../elsewhere/a.png"));
+    assert!(!repository_file("/a.png"));
+    assert!(!repository_file("C:/a.png"));
+    assert!(!repository_file("HEAD:a.png"));
+    assert!(!repository_file("mods\\a.png"));
+    assert!(!repository_file("--output=a.png"));
+    assert!(!repository_file(&"x".repeat(MAX_PATH + 1)));
+}

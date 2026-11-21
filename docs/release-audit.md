@@ -62,6 +62,16 @@ to everything revolving around the Companion." The rule that follows from it is 
 | A4 | **The installer carries the kit's compiled tools ready-built** (kit 1.62.0's `programs bundle`): the XML indexer, so reading a save needs no Rust, and the assembly reader, needing only the .NET 10 runtime. The installed kit finds them before building anything | The .NET 10 runtime is not carried: the Code map's C# links and the patch pages need it installed (B7 says so) |
 | B7 | **One answer to "what else is needed?"**: kit 1.62.0's `programs status` (git, the two compiled tools, .NET 10, the diagnostics tools, ilspycmd, Steam, a game's own), on Reports and from a button on About; a Guide entry lists which page needs what | Each tool's own refusal already names what it lacks; none was reworded |
 
+## Added in 0.50.0: pictures and sounds in the code viewer
+
+What it adds to what stands between the Companion and another person, all small, and none of it needing anything installed:
+
+| What | Why it is safe enough | Left |
+| --- | --- | --- |
+| **The window's content policy allows `media-src 'self' blob:`**, so it can play a sound it decoded itself | Only addresses the window made from bytes the host handed it; nothing from the network | None |
+| **Open with its own program** writes a copy into the program's own folder (`opened-copies`) and asks the system to open it | Only for a kind the kit named as media (never a program or an unknown kind), only on a press; copies are let go after a day | On Linux and macOS it uses `xdg-open` and `open`, unchecked |
+| **Save a copy** writes one file where the person chose in the system's Save dialog | The host writes only the path the dialog gave | None |
+
 ## Already right
 
 Much of the foundation already suits others, and should be kept so:

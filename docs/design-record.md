@@ -1212,6 +1212,40 @@ the page (about 9 s with 400 mods) and off for Home's note; the version notes fo
 (5 letters) and the words it ignores ("patch", "compatibility", "framework" and the like); a missing mod never seen by a check is
 named by its id only.
 
+## Pictures and sounds in the code viewer (built 22 Nov 2026, 0.50.0)
+
+**The owner's request** (22 Nov 2026, of the code behind Vehicles 0.105.2, whose whole point was thin stray lines taken off truck
+armour pictures, shown only as "a picture ... nothing to show line by line"): "We should support the ability to display multimedia
+in parts like this". **The owner's choices on question cards:** pictures, sounds **and DDS textures** in the first version; all four
+ways to compare a picture (side by side, flicking, what changed marked, zoom and backdrop buttons); for a sound, players,
+spectrograms, waveform and loudness, **and the "whine alone" copy**; for anything else, its kind and sizes in words, **Save a copy of
+either side** and **Open with its own program**.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See a changed picture or texture before and after, flick between them in one place, see every changed pixel marked and counted, at a zoom and on a ground of their choosing; play a changed sound's two versions and see each one's spectrogram, waveform, loudness, peak, highs and any steady whine, and hear that whine moved down to where ears hear well; save either version of any file, or open it with its own program |
+| What does it stop them doing? | Opening a program, or a kind the kit does not know, with its own program (it could run something); drawing a picture larger than 8,192 pixels a side |
+| How does it change the way they work? | A change to art or sound is checked in the viewer that shows its code, instead of digging both versions out of git by hand. A sound is judged by sight as well as by ear, which matters to anyone who cannot hear the highest frequencies |
+| What outside it notices? | Save a copy writes one file where the person chose in Windows' Save dialog. Open with its own program writes a copy into this program's own folder (`opened-copies`, let go after a day) and asks the system to open it |
+
+| Part | How |
+| --- | --- |
+| The tools | phobos-modkit 1.78.0's `changes entry` names each binary file's `media` kind and its `sizeBefore` and `sizeAfter`; the kit never decodes anything |
+| The host | `src-tauri/src/changed_files.rs`: remembers the binary files each answer named, by repository and commit, and hands over a side's bytes only for one of them, read with git (`git cat-file`, no lock) from the commit or its parent, or for changes in no commit yet, the last commit and the file on disk; at most 64 MB. Opens a copy only for a kind the kit named as media |
+| Pictures | The window decodes PNG, JPEG, GIF, WebP, BMP, ICO, AVIF and SVG (through an image element, so an SVG's scripts never run); `dds.ts` decodes DDS: BC1 to BC5 (DXT1 to DXT5, ATI1, ATI2), BC7 and plain 8-bit kinds; BC6H and the rest are named, not drawn |
+| DDS checks | Bit-exact with Pillow 12.3 on random blocks of every kind (all eight BC7 modes), on 60 of Workers & Resources' DXT1 and DXT5 textures and on 10 of the owner's installed BC7 RimWorld textures. BC7's partition and anchor tables were derived from Pillow's decoder by encoding one block a partition, not typed from memory; `dds.test.ts` holds known rows and Pillow's answers for six blocks |
+| Comparing | `pixels.ts`: two pixels both wholly see-through count as the same whatever colour they hide; pictures of different sizes are compared from their top-left corners. Changed pixels are drawn solid in the theme's accent colour and the rest dimmed grey, with a box round them and a count in words |
+| Sounds | The browser decodes OGG, Opus, WAV, MP3, FLAC, M4A and AAC at 48 kHz; `sound.ts` measures as phobos-rimworld's sound review tool does: BS.1770 integrated loudness (libebur128's K-weighting for any rate; -27.5 LUFS on an Ostranauts loop, as ffmpeg's ebur128 reads it), sample peak, the band above 4 kHz, and the whine search (bands 4 to 20 kHz, a line fitted against log frequency, 12 dB). The whine alone is made with Web Audio: twice band-passed, shifted down to 1 kHz by multiplying with a tone, low-passed, levelled to -20 LUFS with its peak under -6 dBFS |
+| Keys | **Z** flicks a picture or chooses the other sound, **Y** plays or stops the chosen sound, **=** steps the zoom |
+| Games | Any repository with a changelog: checked with the kit on phobos-rimworld (30 pictures in one commit) and phobos-ostranauts (4 sounds). Workers & Resources keeps 208 DDS files but no changelog, so its textures wait for the viewer to reach a repository without one |
+
+**Agent choices, owner to revise:** the three keys; the dimmed level (30 %) and the accent colour for marks; checks as the first
+backdrop; the 8,192-pixel limit; 48 kHz for measuring; the spectrogram's linear frequency scale, 90 dB range and theme-made ramp,
+with marks at 4 kHz and 15 kHz; a day before an opened copy is let go; **a band more than 80 dB under the sound's loudest part is
+held at that floor in the whine search** (a sound with nothing above 4 kHz showed a false whine 60 dB proud; holding silent bands at a
+floor, as ffmpeg's -91 dB does for the review tool, finds the same 13.5 kHz whine the review tool finds in Ostranauts' washer pump
+loop, at 14.1 dB to its 12.8). The window's content policy now lets it play sounds it made itself (`media-src 'self' blob:`).
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

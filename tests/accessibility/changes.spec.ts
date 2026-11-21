@@ -158,6 +158,75 @@ const picture = {
   hunks: [],
 };
 
+/** Two made-up pictures 8 x 4 pixels: before has a stray white line down its right edge, as the truck kits had; after has not. */
+const BEFORE_PNG = Array.from(
+  Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAECAYAAACzzX7wAAAAIUlEQVR4nGNsaGj4z4AEGhoaGGHs/////2dClsQGKFcAAIUbCARc/+k8AAAAAElFTkSuQmCC",
+    "base64",
+  ),
+);
+const AFTER_PNG = Array.from(
+  Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAECAYAAACzzX7wAAAAHElEQVR4nGNsaGj4z4AEGhoaGJH5TMgcbIByBQDwkwQIPakIVQAAAABJRU5ErkJggg==",
+    "base64",
+  ),
+);
+
+/** A made-up tone a quarter of a second long, as a 16-bit mono WAV at 8 kHz. */
+function toneWav(hz: number, amplitude: number): number[] {
+  const rate = 8000;
+  const frames = 2000;
+  const bytes = Buffer.alloc(44 + frames * 2);
+  bytes.write("RIFF", 0);
+  bytes.writeUInt32LE(36 + frames * 2, 4);
+  bytes.write("WAVEfmt ", 8);
+  bytes.writeUInt32LE(16, 16);
+  bytes.writeUInt16LE(1, 20);
+  bytes.writeUInt16LE(1, 22);
+  bytes.writeUInt32LE(rate, 24);
+  bytes.writeUInt32LE(rate * 2, 28);
+  bytes.writeUInt16LE(2, 32);
+  bytes.writeUInt16LE(16, 34);
+  bytes.write("data", 36);
+  bytes.writeUInt32LE(frames * 2, 40);
+  for (let i = 0; i < frames; i++)
+    bytes.writeInt16LE(
+      Math.round(amplitude * 32767 * Math.sin((2 * Math.PI * hz * i) / rate)),
+      44 + i * 2,
+    );
+  return Array.from(bytes);
+}
+
+const armour = {
+  path: "mods/Sample Mod/Textures/Armour.png",
+  oldPath: null,
+  change: "changed",
+  kind: "other",
+  language: "plain",
+  binary: true,
+  additions: 0,
+  deletions: 0,
+  truncated: false,
+  hunks: [],
+  media: "picture",
+  sizeBefore: 120,
+  sizeAfter: 110,
+};
+
+const horn = {
+  ...armour,
+  path: "mods/Sample Mod/Sounds/Horn.wav",
+  media: "sound",
+  sizeBefore: 4044,
+  sizeAfter: 4044,
+};
+
+function mediaCode(file: typeof armour) {
+  const code = sampleCode();
+  code.result.code.files = [file];
+  return code;
+}
+
 function sampleCode(pauseMs = 0) {
   return {
     pauseMs,
@@ -179,7 +248,7 @@ function sampleCode(pauseMs = 0) {
           subject: "Sample Mod 1.3.0: boats",
         },
         writtenWith: ["**Sample wheels turn.** At last."],
-        files: [boat, wheel, defs, picture],
+        files: [boat, wheel, defs, picture] as Record<string, unknown>[],
         filesLeftOut: 0,
         additions: 8,
         deletions: 1,
@@ -188,8 +257,13 @@ function sampleCode(pauseMs = 0) {
   };
 }
 
-async function open(page: Page, code: unknown = sampleCode()) {
+async function open(
+  page: Page,
+  code: unknown = sampleCode(),
+  more: Record<string, { result: unknown }> = {},
+) {
   await mockHost(page, {
+    ...more,
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
     changes_list: sampleChanges,
@@ -469,6 +543,66 @@ for (const [name, viewport] of [
           name: "Show the code behind: Sample lamps glow.",
         }),
       ).toHaveText("Show the code for this version");
+    });
+
+    test("draws a changed picture, flicks it and marks what changed", async ({
+      page,
+    }) => {
+      await open(page, mediaCode(armour), {
+        "changed_file:before": { result: BEFORE_PNG },
+        "changed_file:after": { result: AFTER_PNG },
+      });
+      await page
+        .getByRole("button", {
+          name: "Show the code behind: Sample boats float.",
+        })
+        .click();
+      const viewer = page.getByRole("dialog");
+      await expect(viewer).toContainText("A picture");
+      await expect(viewer).toContainText("120 B before, 110 B after");
+      await expect(
+        viewer.getByRole("img", { name: "The picture, After" }),
+      ).toBeVisible();
+      await viewer.getByRole("button", { name: "Show what changed" }).click();
+      await expect(viewer).toContainText("4 pixels changed (12.5 %");
+      await expect(viewer).toContainText(
+        "All within 1 × 4 pixels, from 7 across and 0 down.",
+      );
+      await audit(page);
+      await page.keyboard.press("z");
+      await expect(viewer).toContainText("Showing: Before");
+      await page.keyboard.press("=");
+      await expect(viewer.getByRole("button", { name: "1×" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await expect(
+        viewer.getByRole("button", { name: "Open after with its own program" }),
+      ).toBeVisible();
+    });
+
+    test("plays and measures a changed sound", async ({ page }) => {
+      await open(page, mediaCode(horn), {
+        "changed_file:before": { result: toneWav(440, 0.5) },
+        "changed_file:after": { result: toneWav(440, 0.25) },
+      });
+      await page
+        .getByRole("button", {
+          name: "Show the code behind: Sample boats float.",
+        })
+        .click();
+      const viewer = page.getByRole("dialog");
+      await expect(viewer).toContainText("A sound");
+      await expect(
+        viewer.getByRole("region", { name: "Before" }),
+      ).toContainText("LUFS");
+      await expect(
+        viewer.getByRole("img", { name: /The spectrogram, After/ }),
+      ).toBeVisible();
+      await expect(viewer).toContainText(
+        "Nothing above 4 kHz loud enough to hold one.",
+      );
+      await audit(page);
     });
   });
 }

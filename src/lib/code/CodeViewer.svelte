@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { t } from "../i18n/runtime";
+  import { LOCALE, t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import RichText from "../shell/RichText.svelte";
@@ -10,6 +10,8 @@
   import { plainText } from "../shell/inline";
   import { heard, started } from "../shell/progress";
   import { readEntryCode } from "./desktopClient";
+  import MediaPane from "./media/MediaPane.svelte";
+  import { formatSize } from "../shell/sizes";
   import { highlightLines } from "./highlightCore";
   import {
     byKind,
@@ -240,7 +242,14 @@
                       </span>
                       <span class="file-facts">
                         <span class="file-folder muted">{where.folder}</span>
-                        {#if !candidate.binary}
+                        {#if candidate.binary && (candidate.sizeAfter ?? candidate.sizeBefore) != null}
+                          <span class="muted"
+                            >{formatSize(
+                              (candidate.sizeAfter ?? candidate.sizeBefore)!,
+                              LOCALE,
+                            )}</span
+                          >
+                        {:else if !candidate.binary}
                           <span class="plus"
                             >{t("code-added-count", {
                               count: candidate.additions,
@@ -274,7 +283,16 @@
                 </p>
               {/if}
               {#if file.binary}
-                <p class="note">{t("code-binary")}</p>
+                {#if file.media === undefined}
+                  <p class="note">{t("code-binary")}</p>
+                {:else}
+                  <MediaPane
+                    {game}
+                    repository={request.repository}
+                    commit={code.commit?.hash ?? null}
+                    {file}
+                  />
+                {/if}
               {:else if file.hunks.length === 0}
                 <p class="note">{t("code-no-lines")}</p>
               {/if}

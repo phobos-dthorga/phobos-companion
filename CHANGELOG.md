@@ -4,6 +4,28 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.50.0] - 2026-11-22
+
+Pictures and sounds in the code viewer (the owner, 22 Nov 2026: "We should support the ability to display multimedia in parts like
+this", of the code behind Vehicles 0.105.2, which could only say a changed picture "isn't text").
+
+### Added
+
+- **The code viewer draws changed pictures and textures and plays changed sounds.** A picture: **Side by side**, **Flick between
+  them** (**Z**), and **Show what changed** (every changed pixel marked in the accent colour, boxed and counted), at **Fit** to
+  **8×** (**=**) on **Checks**, **Dark** or **Light**. DDS textures are decoded in the window: BC1 to BC5 (DXT1 to DXT5) and BC7,
+  bit-exact with Pillow on every block kind, 60 Workers & Resources textures and 10 of your installed BC7 RimWorld textures. A sound:
+  a player for each version (**Z** chooses, **Y** plays), its loudness (BS.1770, as ffmpeg reads it), peak, highs above 4 kHz and
+  any steady whine (your sound review tool's search), its waveform and its spectrogram with 4 kHz and 15 kHz marked, and **the band
+  alone, moved down** to 1 kHz at a steady loudness. Any other file shows its kind and its size before and after. Guide: Compare a
+  changed picture or sound. **Not yet tested on screen.**
+- **Save a copy of before or after**, for any file that isn't text, where you choose; **Open with its own program** for pictures,
+  sounds, models, fonts, documents and archives (a copy, let go after a day), never for a program.
+
+### Changed
+
+- Tool kit pin v1.77.0 to v1.78.0 (each binary file's kind and sizes). The window may now play sounds it decoded itself
+  (`media-src 'self' blob:` in its content policy).
 ## [0.49.0] - 2026-11-22
 
 Step 5 of the program's own mod manager (the owner, 22 Nov 2026: "Start step 5, subscribing through Steam").

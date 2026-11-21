@@ -4,6 +4,7 @@
 //! request checks, failures. This file holds the Tauri commands, each one line of delegation on a worker thread.
 
 mod about_page;
+mod changed_files;
 mod changes_page;
 mod claims_board;
 mod cleanup_page;
@@ -205,6 +206,49 @@ async fn entry_code(
         changes_page::entry_code(&game, &repository, &changelog, &text, commit.as_deref(), Some(&hearing(on_progress)))
     })
     .await
+}
+
+/// One side of a file that isn't text, which the code viewer listed: its bytes, for the window to draw or play (0.50.0). Only reads.
+#[tauri::command]
+async fn changed_file(
+    game: String,
+    repository: String,
+    commit: Option<String>,
+    path: String,
+    side: String,
+) -> Result<tauri::ipc::Response, Failure> {
+    blocking(move || {
+        changed_files::bytes(&game, &repository, commit.as_deref(), &path, &side).map(tauri::ipc::Response::new)
+    })
+    .await
+}
+
+/// Saves one side of a listed file where the person chooses in the Save dialog, on their press (0.50.0).
+#[tauri::command]
+async fn save_changed_file(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    commit: Option<String>,
+    path: String,
+    side: String,
+    title: String,
+) -> Result<Option<String>, Failure> {
+    blocking(move || changed_files::save(&app, &game, &repository, commit.as_deref(), &path, &side, &title)).await
+}
+
+/// Opens a copy of one side of a listed file with the system's program for its kind, on the person's press (0.50.0).
+#[tauri::command]
+async fn open_changed_file(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    commit: Option<String>,
+    path: String,
+    side: String,
+) -> Result<String, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || changed_files::open(&data, &game, &repository, commit.as_deref(), &path, &side)).await
 }
 
 /// Every fact about a game's products over time: from git, and from this PC's history log.
@@ -1068,6 +1112,9 @@ pub fn run() {
             encode_textures,
             changes_list,
             entry_code,
+            changed_file,
+            save_changed_file,
+            open_changed_file,
             timeline,
             as_it_stood,
             settings_list,

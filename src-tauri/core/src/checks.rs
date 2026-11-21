@@ -19,6 +19,16 @@ pub fn changelog_path(path: &str) -> bool {
         && path.rsplit('/').next() == Some(CHANGELOG_NAME)
 }
 
+/// A file's path inside a repository, as git names it (0.50.0): relative, forward slashes, no step upwards, nothing that could
+/// read as an option or a revision.
+pub fn repository_file(path: &str) -> bool {
+    !path.is_empty()
+        && path.len() <= MAX_PATH
+        && !path.starts_with(['/', '-'])
+        && !path.contains(['\\', ':', '\0', '\n', '\r'])
+        && path.split('/').all(|part| !part.is_empty() && part != "." && part != "..")
+}
+
 /// A commit's hash: 7 to 40 lower-case hexadecimal characters.
 pub fn commit_hash(text: &str) -> bool {
     (7..=40).contains(&text.len()) && text.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))

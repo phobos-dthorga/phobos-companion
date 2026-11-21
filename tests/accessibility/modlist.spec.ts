@@ -155,8 +155,74 @@ const rules = {
   },
 };
 
+const savedLists = {
+  result: {
+    sources: {
+      saved: [
+        {
+          source: "saved",
+          ref: "Quiet",
+          label: "Quiet",
+          when: "2026-11-21T20:00:00+00:00",
+          count: 4,
+          version: "1.7",
+          note: "",
+        },
+      ],
+      kept: [],
+      save: [
+        {
+          source: "save",
+          ref: "Colony.rws",
+          label: "Colony",
+          when: "2026-11-21T21:00:00+00:00",
+          count: 6,
+          version: "1.7",
+          note: "",
+        },
+      ],
+      manager: [],
+    },
+    files: true,
+    suffix: ".rml",
+  },
+};
+
+const compared = {
+  result: {
+    ok: true,
+    title: "Mod list: loading Colony (preview)",
+    refusal: null,
+    data: {
+      label: "Colony",
+      same: false,
+      on: [{ key: "echo", name: "Echo Engines" }],
+      off: [{ key: "delta", name: "Delta Doors" }],
+      moved: 1,
+      missing: [
+        {
+          id: "gone.mod",
+          key: "gone.mod",
+          name: "Smart Medicine",
+          workshop_id: "",
+          why: "It is not on this PC, and this list did not record where it came from: look for it on the Workshop by its name.",
+        },
+      ],
+      count: 5,
+      now: 5,
+      applied: false,
+    },
+  },
+};
+
 async function open(page: Page) {
   await mockHost(page, {
+    mod_list_lists: savedLists,
+    mod_list_compare: compared,
+    mod_list_save: {
+      result: { ok: true, title: "kept", refusal: null, data: {} },
+    },
+    mod_list_find_on_workshop: { result: null },
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
     mod_list_check: { result: check },
@@ -381,6 +447,72 @@ for (const [name, viewport] of [
             id: "bravo",
             kind: "before",
             other: "charlie",
+          },
+        ]);
+    });
+
+    test("a save's list is compared first, names what is missing, and loads only on Use this list", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("button", { name: "Saved lists", exact: true })
+        .click();
+      await expect(
+        page.getByRole("heading", { name: "From your saves (1)" }),
+      ).toBeVisible();
+      await page
+        .getByRole("listitem")
+        .filter({ hasText: "Colony" })
+        .getByRole("button", { name: "Compare" })
+        .click();
+      await expect(
+        page.getByRole("heading", { name: "Loading Colony" }),
+      ).toBeVisible();
+      await expect(page.getByText("1 not on this PC")).toBeVisible();
+      await shot(page, `${name}-saved`);
+      await audit(page);
+      await page.getByRole("button", { name: "Find on the Workshop" }).click();
+      await expect
+        .poll(() => asked(page, "mod_list_find_on_workshop"))
+        .toEqual([
+          {
+            command: "mod_list_find_on_workshop",
+            game: "first",
+            name: "Smart Medicine",
+          },
+        ]);
+      await page.getByRole("button", { name: "Use this list" }).click();
+      await expect
+        .poll(async () =>
+          (await asked(page, "mod_list_compare")).map((a) => [
+            a.source,
+            a.reference,
+            a.apply,
+          ]),
+        )
+        .toEqual([
+          ["save", "Colony.rws", false],
+          ["save", "Colony.rws", true],
+        ]);
+    });
+
+    test("the list is kept by the name typed", async ({ page }) => {
+      await open(page);
+      await page
+        .getByRole("button", { name: "Saved lists", exact: true })
+        .click();
+      await page.getByLabel("Name", { exact: true }).fill("Before the war");
+      await page.keyboard.press("Enter");
+      await expect
+        .poll(() => asked(page, "mod_list_save"))
+        .toEqual([
+          {
+            command: "mod_list_save",
+            game: "first",
+            list: "active",
+            name: "Before the war",
+            replace: false,
           },
         ]);
     });

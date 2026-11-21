@@ -173,3 +173,53 @@ export type RulesListing = {
   theirs: OwnRule[];
   sets: RuleSetInfo[];
 };
+
+/** Where a saved list comes from (phobos-modkit 1.76.0): saved by name, kept at a game start, a save's own, RimSort's history. */
+export type ListSource = "saved" | "kept" | "save" | "manager";
+
+/** One saved list on offer; `ref` names it again (with its source). */
+export type ListInfo = {
+  source: ListSource;
+  ref: string;
+  label: string;
+  when: string;
+  count: number;
+  version: string;
+  note: string;
+};
+
+/** Every saved list on offer, by source; `files` says whether list files can be opened and written for this game. */
+export type ListsListing = {
+  sources: Record<ListSource, ListInfo[]>;
+  files: boolean;
+  suffix: string;
+};
+
+/** A mod named in a comparison. */
+export type NamedMod = { key: string; name: string };
+
+/** A mod a list names that is not on this PC: left out, with why it is gone. */
+export type MissingMod = {
+  id: string;
+  key: string;
+  name: string;
+  workshop_id: string;
+  why: string;
+};
+
+/** What loading a list would change (`compare`), or did (`load`). */
+export type CompareAnswer = ModListChange & {
+  data: {
+    label?: string;
+    when?: string;
+    same?: boolean;
+    on?: NamedMod[];
+    off?: NamedMod[];
+    moved?: number;
+    missing?: MissingMod[];
+    count?: number;
+    now?: number;
+    applied?: boolean;
+    backup?: string;
+  };
+};

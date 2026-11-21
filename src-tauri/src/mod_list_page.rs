@@ -30,7 +30,7 @@ use serde_json::Value;
 use std::collections::BTreeSet;
 use std::sync::Mutex;
 
-const TOOL: &str = "mod-list";
+pub(crate) const TOOL: &str = "mod-list";
 const CHECK: &str = "check";
 const FIX: &str = "fix";
 const UNDO: &str = "undo";
@@ -68,7 +68,7 @@ static LISTS: Mutex<BTreeSet<ListOf>> = Mutex::new(BTreeSet::new());
 /// (game, mod id) of every mod the last listing named, on this PC or on a list: the only mods the editor may change.
 static KNOWN: Mutex<BTreeSet<ListOf>> = Mutex::new(BTreeSet::new());
 /// Every Workshop number a check named in this run of the program: the only pages Open in Steam opens.
-static WORKSHOP: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
+pub(crate) static WORKSHOP: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
 
 /// What a change or an undo did, or why the kit refused.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -79,7 +79,7 @@ pub struct ChangeResult {
     pub data: Value,
 }
 
-fn named(arguments: Args, game: &GamePlaces) -> Args {
+pub(crate) fn named(arguments: Args, game: &GamePlaces) -> Args {
     let mut arguments = arguments.given("--name", &game.name);
     if let Some(app_id) = game.steam_app_id {
         arguments = arguments.given("--app-id", &app_id.to_string());
@@ -162,7 +162,7 @@ fn known_mod(game: &str, id: &str) -> bool {
     KNOWN.lock().map(|known| known.contains(&(game.to_owned(), id.to_owned()))).unwrap_or(false)
 }
 
-fn known_list(game: &str, list: &str) -> bool {
+pub(crate) fn known_list(game: &str, list: &str) -> bool {
     sane_text(list) && LISTS.lock().map(|lists| lists.contains(&(game.to_owned(), list.to_owned()))).unwrap_or(false)
 }
 
@@ -312,7 +312,7 @@ pub fn offered_by(game: &str, data: &Value) -> Offers {
     (changes, lists, numbers)
 }
 
-fn places(game: &str) -> Result<GamePlaces, Failure> {
+pub(crate) fn places(game: &str) -> Result<GamePlaces, Failure> {
     if !checks::plain_name(game) {
         return Err(Failure::refused("that is not a game's id"));
     }
@@ -339,7 +339,7 @@ pub fn read(game: &str, online: bool, listener: Option<kit::Listener>) -> Result
     Ok(data)
 }
 
-fn result_of(answer: &Value) -> ChangeResult {
+pub(crate) fn result_of(answer: &Value) -> ChangeResult {
     let outcome = Outcome::of(answer);
     ChangeResult {
         ok: outcome.ok,
@@ -397,13 +397,17 @@ pub fn open_in_steam(number: &str) -> Result<(), Failure> {
     if !workshop_number(number) || !known {
         return Err(Failure::refused("only a Workshop page the check named can be opened"));
     }
-    let address = steam_page(number);
+    hand_to_steam(&steam_page(number))
+}
+
+/// Hands a `steam://` address to the system, which passes it to the Steam client.
+pub(crate) fn hand_to_steam(address: &str) -> Result<(), Failure> {
     #[cfg(target_os = "windows")]
-    let started = std::process::Command::new("explorer").arg(&address).spawn();
+    let started = std::process::Command::new("explorer").arg(address).spawn();
     #[cfg(target_os = "macos")]
-    let started = std::process::Command::new("open").arg(&address).spawn();
+    let started = std::process::Command::new("open").arg(address).spawn();
     #[cfg(not(any(target_os = "windows", target_os = "macos")))]
-    let started = std::process::Command::new("xdg-open").arg(&address).spawn();
+    let started = std::process::Command::new("xdg-open").arg(address).spawn();
     started
         .map(|_| ())
         .map_err(|problem| Failure::refused(format!("Steam could not be asked to open the page: {problem}")))

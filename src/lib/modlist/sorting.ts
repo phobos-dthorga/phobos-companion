@@ -1,4 +1,10 @@
-import type { ModsListing, RuleKind, RuleSource, SortMove } from "./types";
+import type {
+  ListSource,
+  ModsListing,
+  RuleKind,
+  RuleSource,
+  SortMove,
+} from "./types";
 
 /** Whose rule, in words (0.47.0): the keys are written out so the catalogue check can find them. */
 export const SOURCE_WORDS: Record<RuleSource, string> = {
@@ -45,3 +51,27 @@ export function namesOf(listing: ModsListing): Map<string, string> {
   }
   return names;
 }
+
+/** The saved lists' sources in the order the page shows them (0.48.0), each with its title and how it came to be. */
+export const LIST_SOURCES: { id: ListSource; title: string; how: string }[] = [
+  {
+    id: "saved",
+    title: "modlist-saved-source-saved",
+    how: "modlist-saved-how-saved",
+  },
+  {
+    id: "kept",
+    title: "modlist-saved-source-kept",
+    how: "modlist-saved-how-kept",
+  },
+  {
+    id: "save",
+    title: "modlist-saved-source-save",
+    how: "modlist-saved-how-save",
+  },
+  {
+    id: "manager",
+    title: "modlist-saved-source-manager",
+    how: "modlist-saved-how-manager",
+  },
+];

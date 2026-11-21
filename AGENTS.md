@@ -86,6 +86,11 @@ reads them.
   one block. **Sort** (0.47.0) runs `mod-list sort` to show the moves and writes only on the owner's press of **Use this order**
   (`--apply`, while the manifest calls it `writes`); **Your rules** runs `mod-list rules --apply` to keep or take away one of the
   owner's rules, for mods the last listing named. RimSort's own files are only read. Dragging is a shortcut: every move has keys.
+  **Saved lists** (0.48.0; `src-tauri/src/mod_list_lists.rs`) run `mod-list compare` to show what loading a list would change and
+  `load --apply` only on the owner's press of **Use this list**, for a list the last `mod-list lists` named or a file the owner
+  chose in the Open dialog the host showed; `save`, `forget` and `export` write only on a press, an exported file only where the
+  owner chose in the Save dialog. Saves and RimSort's files are only read. **Find on the Workshop** hands the Steam client only a
+  Workshop search for a missing mod's name, for the game's own app id.
 - **The Memory page starts a watch of the running game only on the owner's press and confirmation** (owner, 19 Nov 2026: memory
   profiling "will be done from the Companion"; `src-tauri/src/memory_page.rs`, design record "Memory"): the kit's watch, found by
   the manifest's `memory-watch` surface, attaches Microsoft's dotnet-counters to the game once unless the owner chose Windows' figures

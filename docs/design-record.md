@@ -1161,8 +1161,30 @@ each theme**, not new theme roles. Kit 1.74.0 adds `mod-list sort`, `mod-list ru
   RimSort reads more loosely (XML Extensions up to just after the expansions; Vehicle Framework up to just after the Vanilla
   Expanded Framework). Not yet tested on screen.
 
-**The manager's next steps** (owner's choices, 22 Nov 2026): saved
-lists; subscribe and unsubscribe through the running Steam client, as RimSort does (Steamworks through the client's own login, no
+**0.48.0, Saved lists** (step 4; the owner, 22 Nov 2026: "Start step 4, saved lists"). The owner's choices on question cards:
+lists **saved by name, from each save's own mods, RimSort's history and files**; loading **shows the difference, then a yes**;
+mods not on this PC are **left out, named with why, and offered in Steam**; and a copy **kept at each game start** (the owner chose
+this over leaning on the change backups). Kit 1.76.0 adds `mod-list lists`, `compare`, `load`, `save`, `forget` and `export`.
+
+- What it lets the person do: keep lists by name and go back to any of them, to the list any save was played with, or to any of
+  RimSort's; share a list as the game's own `.rml`; see before loading what would switch on, off and move, and what is missing.
+- What it stops: a list loaded unseen (only **Use this list** writes); a list half-loaded with mods that are not there (they are
+  left out and named); a save or RimSort's files being changed (only read).
+- How it changes the way they work: setting up a colony's mods again is one press after a look, not a rebuild in RimSort; a
+  missing mod leads straight to Steam, and loading again after subscribing adds it.
+- What outside notices: the game's list file, as before; the tools' own `lists/` and `kept/` folders; a written `.rml` the game's
+  own mod menu reads.
+- **Risk (agent's grade): low.** A load can change the whole list at once, but nothing is written before the press, a backup comes
+  first, and one Undo restores it. No setting: each load is the owner's own press. The copy kept at each start writes only into the
+  Companion's own folder.
+- Agent choices, owner to revise: a game start is RimWorld's log's `Started:` line (else the Logs folder's time), and the copy
+  is kept only when the list is unchanged more than two minutes after the game last wrote its log; kept copies are never deleted
+  (about 15 KB each); 8 lists shown per source, the rest behind a button; a save's Steam numbers are taken only for Workshop items
+  (the game records only expansions' app ids, so missing mods from saves offer **Find on the Workshop** by name); exported files
+  are `.rml`, offered under the list's name.
+- Seen on the owner's PC (read only): 46 saves and 100 RimSort lists, read in 0.2 s. Not yet tested on screen.
+
+**The manager's next steps** (owner's choices, 22 Nov 2026): subscribe and unsubscribe through the running Steam client, as RimSort does (Steamworks through the client's own login, no
 credentials held); then RimSort can retire. Each gets its own design record.
 
 **Agent choices, owner to revise:** the page's place in the bar (after Mods) and its key (**S**); Ask Steam too on by default on

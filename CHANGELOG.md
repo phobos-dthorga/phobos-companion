@@ -4,6 +4,23 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-11-22
+
+Step 4 of the program's own mod manager (the owner, 22 Nov 2026: "Start step 4, saved lists").
+
+### Added
+
+- **Mod list: Saved lists.** **Save the list** keeps the game's list by name. Lists to load: **Saved by name**, **Kept at each game
+  start** (a copy each time the game starts with a different list, noticed the next time the Companion reads it), **From your
+  saves** (the mods each save was played with) and **RimSort's history**, or **Open a file…** (the game's own `.rml`, a save, an
+  exported RimSort list). **Compare** shows how many mods would switch on, switch off and move, and names each mod not on this PC
+  with why, with **Open in Steam** or **Find on the Workshop**; **Use this list** loads it, leaving those out, after a backup, and
+  Undo takes it back. **Save as a file…** writes any list as the game's own `.rml`, which the game's mod menu loads too. Saves and
+  RimSort's files are only read. Guide: Save a mod list, or load one from a save, RimSort or a file. Not yet tested on screen.
+
+### Changed
+
+- Tool kit pin v1.74.0 to v1.76.0.
 ## [0.47.0] - 2026-11-22
 
 Step 3 of the program's own mod manager (the owner, 22 Nov 2026: "Start the sorter now", mods moved "more freely", the page tidied,

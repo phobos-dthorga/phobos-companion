@@ -17,6 +17,7 @@
   } from "./desktopClient";
   import { keep } from "./latest.svelte";
   import ModListEditor from "./ModListEditor.svelte";
+  import ModListSaved from "./ModListSaved.svelte";
   import ModListSort from "./ModListSort.svelte";
   import {
     HEADING,
@@ -47,7 +48,7 @@
 
   let reading = $state<Reading>({ state: "reading" });
   /** What's wrong, Edit the list (0.46.0) or Sort (0.47.0): coming back to What's wrong checks again, so it follows the edits. */
-  let view = $state<"wrong" | "edit" | "sort">("wrong");
+  let view = $state<"wrong" | "edit" | "sort" | "saved">("wrong");
   let online = $state(true);
   let busy = $state(false);
   let progress = $state(started());
@@ -79,7 +80,7 @@
     }
   }
 
-  function showView(chosen: "wrong" | "edit" | "sort") {
+  function showView(chosen: "wrong" | "edit" | "sort" | "saved") {
     if (chosen === view) return;
     view = chosen;
     said = null;
@@ -174,12 +175,20 @@
     aria-pressed={view === "sort"}
     onclick={() => showView("sort")}>{t("modlist-view-sort")}</button
   >
+  <button
+    type="button"
+    class="action toggle"
+    aria-pressed={view === "saved"}
+    onclick={() => showView("saved")}>{t("modlist-view-saved")}</button
+  >
 </div>
 
 {#if view === "edit"}
   <ModListEditor {game} />
 {:else if view === "sort"}
   <ModListSort {game} />
+{:else if view === "saved"}
+  <ModListSaved {game} />
 {:else}
   {#if said}
     <p class="told" class:refused={said.refused} role="status">{said.text}</p>

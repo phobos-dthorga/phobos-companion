@@ -2,7 +2,9 @@ import { ask, progressChannel } from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
 import type {
+  CompareAnswer,
   EditAnswer,
+  ListsListing,
   ModListChange,
   ModListCheck,
   ModsListing,
@@ -166,5 +168,112 @@ export async function undoEdit(
     "mod_list_undo",
     { game, list, onProgress: progressChannel(onProgress) },
     (result) => ({ state: "ready", result }),
+  );
+}
+
+type Lists = { state: "ready"; listing: ListsListing };
+type Compared = { state: "ready"; result: CompareAnswer };
+
+/** Every saved list on offer, by source (0.48.0). Only reads. */
+export async function readLists(
+  game: string,
+  onProgress?: OnProgress,
+): Promise<Lists | Failed> {
+  return ask<ListsListing, Lists>(
+    "mod_list_lists",
+    { game, onProgress: progressChannel(onProgress) },
+    (listing) => ({ state: "ready", listing }),
+  );
+}
+
+/** What loading a list would change; with `apply`, loads it after a backup. `source` "file" names a file chosen in Open a file. */
+export async function compareList(
+  game: string,
+  list: string,
+  source: string,
+  reference: string,
+  apply: boolean,
+  onProgress?: OnProgress,
+): Promise<Compared | Failed> {
+  return ask<CompareAnswer, Compared>(
+    "mod_list_compare",
+    {
+      game,
+      list,
+      source,
+      reference,
+      apply,
+      onProgress: progressChannel(onProgress),
+    },
+    (result) => ({ state: "ready", result }),
+  );
+}
+
+/** The Open dialog for a list file; the path chosen, or null when it was closed. */
+export async function openListFile(
+  game: string,
+  title: string,
+): Promise<{ state: "ready"; path: string | null } | Failed> {
+  return ask<string | null, { state: "ready"; path: string | null }>(
+    "mod_list_open_file",
+    { game, title },
+    (path) => ({ state: "ready", path }),
+  );
+}
+
+/** Keeps the game's list as it stands, by name; `replace` replaces a list kept by that name. */
+export async function saveList(
+  game: string,
+  list: string,
+  name: string,
+  replace: boolean,
+): Promise<Changed | Failed> {
+  return ask<ModListChange, Changed>(
+    "mod_list_save",
+    { game, list, name, replace },
+    (result) => ({ state: "ready", result }),
+  );
+}
+
+/** Takes away a list saved by name. */
+export async function forgetList(
+  game: string,
+  reference: string,
+): Promise<Changed | Failed> {
+  return ask<ModListChange, Changed>(
+    "mod_list_forget",
+    { game, reference },
+    (result) => ({ state: "ready", result }),
+  );
+}
+
+/** Writes a list (the game's own when `source` is null) as the game's own list file, where the Save dialog says; null when closed. */
+export async function exportList(
+  game: string,
+  list: string,
+  source: string | null,
+  reference: string | null,
+  label: string,
+  title: string,
+): Promise<{ state: "ready"; result: ModListChange | null } | Failed> {
+  return ask<
+    ModListChange | null,
+    { state: "ready"; result: ModListChange | null }
+  >(
+    "mod_list_export",
+    { game, list, source, reference, label, title },
+    (result) => ({ state: "ready", result }),
+  );
+}
+
+/** Opens the Steam client's Workshop search for a missing mod's name. */
+export async function findOnWorkshop(
+  game: string,
+  name: string,
+): Promise<{ state: "ready" } | Failed> {
+  return ask<null, { state: "ready" }>(
+    "mod_list_find_on_workshop",
+    { game, name },
+    () => ({ state: "ready" }),
   );
 }

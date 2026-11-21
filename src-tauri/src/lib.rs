@@ -19,6 +19,7 @@ mod kit_pins;
 mod logs_page;
 mod makeup_page;
 mod memory_page;
+mod mod_list_lists;
 mod mod_list_page;
 mod open_work;
 mod other_code_page;
@@ -915,6 +916,70 @@ async fn mod_list_drop_rule(game: String, number: u32) -> Result<mod_list_page::
     blocking(move || mod_list_page::drop_rule(&game, number)).await
 }
 
+/// Every saved list of a game's mods, by source (0.48.0). Only reads.
+#[tauri::command]
+async fn mod_list_lists(game: String, on_progress: Channel<kit::Progress>) -> Result<serde_json::Value, Failure> {
+    blocking(move || mod_list_lists::lists(&game, Some(&hearing(on_progress)))).await
+}
+
+/// What loading a saved list would change; with `apply` (the owner's press of Use this list), loads it after a backup (0.48.0).
+#[tauri::command]
+async fn mod_list_compare(
+    game: String,
+    list: String,
+    source: String,
+    reference: String,
+    apply: bool,
+    on_progress: Channel<kit::Progress>,
+) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_lists::compare(&game, &list, &source, &reference, apply, Some(&hearing(on_progress))))
+        .await
+}
+
+/// The Open dialog for a mod list file (0.48.0).
+#[tauri::command]
+async fn mod_list_open_file(app: tauri::AppHandle, game: String, title: String) -> Result<Option<String>, Failure> {
+    blocking(move || mod_list_lists::open_file(&app, &game, &title)).await
+}
+
+/// Keeps the game's list as it stands, by name (0.48.0).
+#[tauri::command]
+async fn mod_list_save(
+    game: String,
+    list: String,
+    name: String,
+    replace: bool,
+) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_lists::save(&game, &list, &name, replace)).await
+}
+
+/// Takes away a list saved by name (0.48.0).
+#[tauri::command]
+async fn mod_list_forget(game: String, reference: String) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_lists::forget(&game, &reference)).await
+}
+
+/// Writes a list as the game's own list file, where the owner chooses in the Save dialog (0.48.0).
+#[tauri::command]
+async fn mod_list_export(
+    app: tauri::AppHandle,
+    game: String,
+    list: String,
+    source: Option<String>,
+    reference: Option<String>,
+    label: String,
+    title: String,
+) -> Result<Option<mod_list_page::ChangeResult>, Failure> {
+    let chosen = source.zip(reference);
+    blocking(move || mod_list_lists::export(&app, &game, &list, chosen, &label, &title)).await
+}
+
+/// Opens the Steam client's Workshop search for a missing mod's name (0.48.0).
+#[tauri::command]
+async fn mod_list_find_on_workshop(game: String, name: String) -> Result<(), Failure> {
+    blocking(move || mod_list_lists::find_on_workshop(&game, &name)).await
+}
+
 /// Opens a mod's Workshop page in the Steam client: only a number a check named (0.45.0).
 #[tauri::command]
 async fn mod_list_open_in_steam(number: String) -> Result<(), Failure> {
@@ -953,6 +1018,13 @@ pub fn run() {
             mod_list_rules,
             mod_list_add_rule,
             mod_list_drop_rule,
+            mod_list_lists,
+            mod_list_compare,
+            mod_list_open_file,
+            mod_list_save,
+            mod_list_forget,
+            mod_list_export,
+            mod_list_find_on_workshop,
             their_code,
             decompile_assembly,
             updates,

@@ -169,6 +169,63 @@ for (const [name, viewport] of [
       });
     });
 
+    // 0.67.0: the page list's numbers come from scans made in the background, each a reading a page already makes.
+    test("numbers the mod list's faults and sort moves, and the log's new errors", async ({
+      page,
+    }) => {
+      await mockHost(page, {
+        home_status: { result: sampleHome() },
+        kit_status: healthyKit,
+        mod_list_check: {
+          result: {
+            game: "first",
+            name: "First Sample",
+            supported: true,
+            version: "1.0",
+            online: false,
+            notes: [],
+            installed: 3,
+            running: [],
+            lists: [
+              {
+                key: "active",
+                label: "Your active mods",
+                path: "ModsConfig.xml",
+                count: 3,
+                writable: true,
+              },
+            ],
+            problems: [],
+            counts: { problem: 1, warning: 0, note: 5 },
+            backups: [],
+            since: { active: { verdict: "new-errors", new_errors: 2 } },
+          },
+        },
+        mod_list_sort: {
+          result: {
+            ok: true,
+            title: "sorted",
+            refusal: null,
+            data: { moves: [{}, {}, {}], applied: false },
+          },
+        },
+      });
+      await page.goto("/");
+      const pages = page.getByRole("navigation", { name: "Pages" });
+      // One fault and three mods a sort would move; notes are not counted.
+      await expect(
+        pages.getByRole("button", { name: "Mod list", exact: true }),
+      ).toHaveAccessibleDescription("4 waiting on you");
+      await expect(
+        pages.getByRole("button", { name: "Logs", exact: true }),
+      ).toHaveAccessibleDescription("2 waiting on you");
+      // A page whose scan found nothing, or could not be read, has no number.
+      await expect(
+        pages.getByRole("button", { name: "Mods", exact: true }),
+      ).toHaveAccessibleDescription("");
+      await audit(page);
+    });
+
     test("no list yet says what to do", async ({ page }) => {
       await mockHost(page, {
         home_status: { result: { list_found: false, games: [] } },

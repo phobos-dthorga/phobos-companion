@@ -4,6 +4,27 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.67.0] - 2026-11-23
+
+Scans in the background, for the page list's numbers (the owner, 23 Nov 2026: "a scan after updating to see if a sort is needed
+and then ... some sort of sign/figure next to Mod List", with every other scan chosen by card).
+
+### Added
+
+- **A number beside Mod list**: the problems and warnings its check finds (a mod missing, listed twice, needing another, clashing,
+  in the wrong order) plus how many mods a sort would move. No number means the list is sound and sorted.
+- **A number beside Logs**: new errors the game's first run showed after your last change to the mod list.
+- **Mods counts more**: what Before you play lists as to do (a build, changes not installed, textures to encode) and updates since
+  you last played that changed a method your mods patch, added to the settings to look at.
+- **A mark beside About** when a newer version of the Companion waits in its repository.
+- **The scans run by themselves, and only read**: when the Companion starts, for each game you look at, on **Look again**, and when
+  you come back to its window once the last scan is five minutes old, which is when an update may have arrived. A number already
+  shown stays until its new answer arrives. On the owner's list the mod list check takes about 4 seconds and the sort preview
+  about 2.
+- **Guide**: Home's entry says what each number counts and when the scans run.
+
+Not yet tested on screen.
+
 ## [0.66.1] - 2026-11-23
 
 ### Fixed

@@ -1,37 +1,23 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { t } from "../i18n/runtime";
-  import {
-    forgetPatchTargets,
-    patchTargetsOf,
-    type PatchTarget,
-  } from "../connections/patches";
-  import { readGameFiles } from "../gamefiles/desktopClient";
-  import {
-    askUpdates,
-    checkUpdates,
-    keepBuilds,
-  } from "../othercode/desktopClient";
+  import { forgetPatchTargets } from "../connections/patches";
+  import { checkUpdates, keepBuilds } from "../othercode/desktopClient";
   import { openUpdate } from "../othercode/navigation";
-  import type { KeptFile, KeptFiles } from "../othercode/types";
+  import type { KeptFile } from "../othercode/types";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
   import { formatWhen } from "../shell/dates";
-  import { lastChecked, rememberChecked } from "./checkedMemory";
+  import { rememberChecked } from "./checkedMemory";
   import {
-    compareFrom,
     newTypes,
-    notKeptYet,
-    patchedSince,
-    summarise,
     summariseCheck,
-    tiedUpdates,
     updateSize,
     type CheckSummary,
-    type PatchedChange,
     type SinceSummary,
     type UpdateCheck,
   } from "./sinceLastPlayed";
+  import { readPatches, readSince, type Patches } from "./sinceReading";
 
   /**
    * Since you last played (0.28.0; the owner's go-ahead, 20 Nov 2026), in Before you play: what updated since the session before
@@ -49,17 +35,6 @@
     running,
   }: { game: string; repositories: string[]; running: boolean } = $props();
 
-  type Patches =
-    | { state: "idle" }
-    | { state: "checking" }
-    | { state: "none" }
-    | {
-        state: "ready";
-        patched: PatchedChange[];
-        tied: KeptFile[];
-        notKept: KeptFile[];
-      };
-
   let summary = $state<SinceSummary | null>(null);
   let unread = $state(false);
   let patches = $state<Patches>({ state: "idle" });
@@ -76,26 +51,12 @@
   let checked = $state<Check>({ state: "idle" });
   let checkProgress = $state(started());
 
+  // The readings themselves are in sinceReading.ts (0.67.0), which the page list's scan asks too.
   async function read() {
-    const answer = await readGameFiles(game, running ? "previous" : null);
-    if (answer.state !== "ready") {
+    const found = await readSince(game, running);
+    if (!found) {
       unread = true;
       return;
-    }
-    const byLaunch = summarise(answer.files, running);
-    // 0.42.1: an update stays listed until a check has looked at it, so reach back to the last check when that is earlier.
-    const from = compareFrom(byLaunch.since, lastChecked(game), new Date());
-    let found = byLaunch;
-    if (from.reach !== "launch") {
-      const wider = await readGameFiles(game, from.since);
-      if (wider.state === "ready") {
-        found = {
-          ...summarise(wider.files, running),
-          sincePrevious: byLaunch.sincePrevious,
-          thisLaunchOnly: byLaunch.thisLaunchOnly,
-          reach: from.reach,
-        };
-      }
     }
     summary = found;
     await check();
@@ -106,27 +67,7 @@
     const now = summary;
     if (!now || (now.updated.length === 0 && !now.gameUpdated)) return;
     patches = { state: "checking" };
-    const listed = await askUpdates<KeptFiles>(game, null, null, null);
-    const kept =
-      listed.state === "ready" && listed.answer.available
-        ? (listed.answer.data?.files ?? [])
-        : [];
-    const tied = tiedUpdates(kept, now);
-    if (tied.length === 0) {
-      patches = { state: "none" };
-      return;
-    }
-    const targets: PatchTarget[] = [];
-    for (const repository of repositories) {
-      const found = await patchTargetsOf(game, repository);
-      targets.push(...(found.data?.targets ?? []));
-    }
-    patches = {
-      state: "ready",
-      patched: patchedSince(targets, now),
-      tied,
-      notKept: notKeptYet(tied, now.since),
-    };
+    patches = await readPatches(game, repositories, now);
   }
 
   async function keep() {

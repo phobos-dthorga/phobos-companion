@@ -23,7 +23,14 @@ see: task-first-steps, term-repository, task-repository-ready, task-agent-featur
 The very first time, with no games listed yet, Home shows [First steps](task-first-steps) instead. If **git** isn't installed, a line at the top of every page says so, with where to get it.
 
 ### Around the window
-- **The pages are listed down the left**, under Play, Code and Tools, each with its key beside it. A number beside a page says how many things there wait on you: [decisions](term-decision) and picks to answer, test rows seen working that nobody has judged, and mod settings to look at. No number means nothing waits.
+- **The pages are listed down the left**, under Play, Code and Tools, each with its key beside it. A number beside a page says how many things there wait on you. No number means nothing waits.
+  - **Mod list:** problems and warnings in your list of active mods, plus how many mods a sort would move.
+  - **Logs:** new errors the game's first run showed after your last change to the mod list.
+  - **Mods:** things to do before you play (a build, changes not installed, textures to encode), updates that changed a method your mods patch, and mod settings to look at.
+  - **Tests:** rows the game saw working that nobody has judged.
+  - **Decisions** and **Picks:** those waiting for your answer.
+  - **About** shows a mark, not a number, when a newer version of the Companion waits.
+- **The numbers come from scans made by themselves**, which only read: when the Companion starts, on **Look again**, and when you come back to its window after five minutes or more away, such as after an update.
 - **The game you are looking at is at the top**: press it to choose another, each with when you last worked on it.
 - **Settings, Mods and About are in tabs**, one part at a time; a tab says when something in it needs you.
 

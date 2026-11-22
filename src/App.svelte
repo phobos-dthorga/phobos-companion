@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import CodeViewer from "./lib/code/CodeViewer.svelte";
   import AsItStood from "./lib/timeline/AsItStood.svelte";
   import PictureViewer from "./lib/gamefiles/PictureViewer.svelte";
@@ -29,6 +29,7 @@
   import GamePicker from "./lib/home/GamePicker.svelte";
   import PageRail from "./lib/shell/PageRail.svelte";
   import { readWaiting, waiting } from "./lib/shell/waiting.svelte";
+  import { scanIsStale } from "./lib/shell/waiting";
   import WherePage from "./lib/home/WherePage.svelte";
   import NotForTools from "./lib/home/NotForTools.svelte";
   import { pageServes } from "./lib/home/kinds";
@@ -101,16 +102,27 @@
     lookedAgain += 1;
   }
 
-  /** What waits on you, beside each page (0.66.0): read again for each game, each Look again, and when agent features change. */
+  /**
+   * What waits on you, beside each page (0.66.0): scanned for each game, on each Look again, when agent features change, and
+   * (0.67.0) on coming back to the window once the last scan is five minutes old, which is when an update may have arrived.
+   */
   let lookedAgain = $state(0);
   $effect(() => {
     void lookedAgain;
     void agents.shown;
-    if (selected) readWaiting(selected);
+    const game = selected;
+    // The scan writes what it finds as it goes: untracked, so its own writes never start it again.
+    if (game) untrack(() => readWaiting(game));
   });
   const counts = $derived(
     selected && waiting.game === selected.id ? waiting.counts : {},
   );
+  const marks = $derived(
+    selected && waiting.game === selected.id ? waiting.marks : {},
+  );
+  function scanIfStale() {
+    if (selected && scanIsStale(waiting.at, Date.now())) readWaiting(selected);
+  }
 
   let helpOpen = $state(false);
   let goToOpen = $state(false);
@@ -195,6 +207,7 @@
       }
     };
     window.addEventListener("mouseup", sideButtons);
+    window.addEventListener("focus", scanIfStale);
     const listen = (event: KeyboardEvent) =>
       dispatch(
         event,
@@ -206,6 +219,7 @@
       unregister();
       unregisterInDialog();
       window.removeEventListener("mouseup", sideButtons);
+      window.removeEventListener("focus", scanIfStale);
       window.removeEventListener("keydown", listen);
     };
   });
@@ -285,6 +299,7 @@
         {page}
         kind={selected?.kind}
         {counts}
+        {marks}
         onchoose={(next) => goPage(next)}
       />
       {#if games.length === 0 && home.state !== "reading"}

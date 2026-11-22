@@ -1395,6 +1395,32 @@ column (where the page's information comes from, the colours' key, the tools fou
 but nobody asked for it to go; the page list 224 px wide. **The list's 40 px rows** are the owner's choice, below the 44 px rule
 for a control; AGENTS.md says so beside the rule. **Risk (agent's grade): none**: nothing is written.
 
+## Scans for the page list's numbers (built 23 Nov 2026, 0.67.0)
+
+**The owner's request** (23 Nov 2026, on seeing 0.66.0): "do a scan after updating to see if a sort is needed and then, perhaps
+display some sort of sign/figure next to Mod List on the left? If there are other scans we need to do as well you can think of,
+then feel free to suggest them!" **Owner's choices, by card:** Mod list counts faults plus sort moves; and all four scans offered:
+Mods' things to do, Logs' new errors, Mods' updates that touch ours, and a mark beside About for a newer version.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See from any page that the mod list wants sorting or has a fault, that the last change brought new errors, that something is to do before playing, or that a newer Companion waits |
+| What does it stop them doing? | Nothing: the scans only read, and no number is ever a reason anything is refused |
+| How does it change the way they work? | No need to open a page to learn whether it has anything for them; after an update, coming back to the window is enough |
+| What outside the thing notices? | Nothing: no file is written. The activity strip shows each reading while it runs |
+
+| Part | How |
+| --- | --- |
+| The scans | `src/lib/shell/waiting.svelte.ts`: each a reading a page already makes (`readModList` then a `sortModList` preview, never applied; `readInstalls`, `readTextures` and `preflight`; `readSince` and `readPatches`; `readAbout`). A page's number is its parts added up (`waiting.ts`: `withPart`, `counted`); a part that could not be read adds nothing |
+| When | For each game looked at, each Look again, a change of agent features, and the window's `focus` once the last scan is `SCAN_STALE_MS` old (five minutes) |
+| Shared reading | Since you last played's readings moved to `src/lib/mods/sinceReading.ts`, asked by the Mods page and the scan alike; the mod list check is kept in `modlist/latest.svelte.ts`, so Home's note and the Mod list page see the scan's answer |
+| A mark, not a number | `waiting.marks`: a page with something to say that is not a count (About). The page list draws a diamond, and its words are the button's description |
+| Games | Game-free: each scan runs only where the game's page can serve (`pageServes`), and a game the tools cannot check yet shows no number |
+
+**Agent choices, owner to revise:** the five minutes; the first list a check names is the one a sort is previewed for; the Mod list
+check is asked without Steam (no call to the internet); a scan's readings show in the activity strip like any other. **Risk
+(agent's grade): none**: nothing is written.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

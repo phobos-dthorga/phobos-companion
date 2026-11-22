@@ -102,6 +102,12 @@ test.describe("About", () => {
     page,
   }) => {
     await open(page, true);
+    // The page list marks About before it is opened (0.67.0).
+    await expect(
+      page
+        .getByRole("navigation", { name: "Pages" })
+        .getByRole("button", { name: "About", exact: true }),
+    ).toHaveAccessibleDescription("A newer version is waiting");
     await page.keyboard.press("i");
     await expect(
       page.getByRole("heading", {

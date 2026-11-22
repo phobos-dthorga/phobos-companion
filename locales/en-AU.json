@@ -6,6 +6,7 @@
     "page-home": "Home",
     "pages-label": "Pages",
     "pages-waiting-label": "{ $count } waiting on you",
+    "pages-mark-newer": "A newer version is waiting",
     "observation-label": "What you are looking at",
     "observation-looking-at": "Looking at",
     "observation-nothing": "Nothing yet",

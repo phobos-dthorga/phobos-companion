@@ -15,11 +15,14 @@
     page,
     kind,
     counts,
+    marks = {},
     onchoose,
   }: {
     page: PageName;
     kind: GameKind | undefined;
     counts: Partial<Record<PageName, number>>;
+    /** Pages marked without a number (0.67.0), each with the words for why, as a message key. */
+    marks?: Partial<Record<PageName, string>>;
     onchoose: (page: PageName) => void;
   } = $props();
 
@@ -44,6 +47,11 @@
     picks: "page-picks",
     about: "page-about",
     guide: "page-guide",
+  };
+
+  /** Why a page is marked, as a message key (written out, so the catalogue check finds each). */
+  const MARK_WORDS: Record<string, string> = {
+    "pages-mark-newer": "pages-mark-newer",
   };
 
   /** The groups of 0.22.0, in the same order. */
@@ -83,22 +91,26 @@
       {#each group.pages.filter((p) => agents.shown || !FOR_AGENTS_PAGES.includes(p)) as next (next)}
         {@const key = keyFor(`page.${next}`)}
         {@const count = counts[next]}
+        {@const mark = count ? undefined : marks[next]}
         <button
           type="button"
           class="page"
           class:elsewhere={!pageServes(kind, next)}
           aria-current={page === next ? "page" : undefined}
-          aria-describedby={count ? `pages-waiting-${next}` : undefined}
+          aria-describedby={count || mark ? `pages-waiting-${next}` : undefined}
           onclick={() => onchoose(next)}
         >
           <span class="here" aria-hidden="true">◆</span>
           <span class="words">{t(PAGE_WORDS[next])}</span>
-          {#if count}<span class="count" aria-hidden="true">{count}</span>{/if}
+          {#if count}<span class="count" aria-hidden="true">{count}</span
+            >{:else if mark}<span class="count" aria-hidden="true">◆</span>{/if}
           {#if key}<kbd aria-hidden="true">{keyWords(key)}</kbd>{/if}
         </button>
         <!-- The count, read out as the page's description: its name stays the page's own, whatever waits (0.66.0). -->
         {#if count}<span class="unseen" id={`pages-waiting-${next}`}
             >{t("pages-waiting-label", { count })}</span
+          >{:else if mark}<span class="unseen" id={`pages-waiting-${next}`}
+            >{t(MARK_WORDS[mark] ?? "pages-mark-newer")}</span
           >{/if}
       {/each}
     </div>

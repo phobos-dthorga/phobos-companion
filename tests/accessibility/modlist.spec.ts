@@ -606,6 +606,29 @@ for (const [name, viewport] of [
       await audit(page);
     });
 
+    test("a full re-sort with no rule move says nothing is gained, and gives each group move its reason", async ({
+      page,
+    }) => {
+      const cosmetic = structuredClone(fullSorted);
+      cosmetic.result.data.moves = cosmetic.result.data.moves.filter(
+        (move) => move.kind !== "rule",
+      );
+      await open(page, { mod_list_sort: cosmetic });
+      await page.getByRole("button", { name: "Sort", exact: true }).click();
+      await page.getByRole("button", { name: "Full re-sort" }).click();
+      await expect(
+        page.getByText(/^No rule needs any of these moves/),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: /Moved because a rule asks/ }),
+      ).toHaveCount(0);
+      await page.getByText(/^1 more moved into its group/).click();
+      await expect(
+        page.getByText("Alpha Tools: it is a framework or loads at the top."),
+      ).toBeVisible();
+      await audit(page);
+    });
+
     test("a rule of your own is made by finding the mods by name", async ({
       page,
     }) => {

@@ -4,6 +4,22 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.60.0] - 2026-11-23
+
+After the owner's first full re-sort preview with 0.59.0 (23 Nov 2026: "What are your thoughts here?"): all 146 moves on their list
+were group or name-order moves, with no rule broken. Kit pin v1.86.0 to v1.88.0.
+
+### Changed
+
+- **When no rule needs any move, Sort says so**: "No rule needs any of these moves: your order already obeys every rule", with
+  nothing to gain from using the order, in place of an empty list of rule moves. Not yet tested on screen.
+- **Each group move shows its own reason** when the fold is opened ("a known framework, so it goes in the frameworks' group", or
+  which mod loads after it), from kit 1.88.0, one to a line.
+- **A mod others' code builds on is no longer pulled up with the frameworks** in a full re-sort (kit 1.88.0, the owner's choice of
+  23 Nov 2026), and a mod whose place number stays is no longer listed as moved. On the owner's list a full re-sort now moves 134
+  mods (5 into their group, 129 for names, none for a rule), with Vanilla Expanded Framework 13th, Combat Extended 18th and
+  Vehicle Framework 21st, and Vanilla Vehicles Expanded, Dubs Bad Hygiene and Rimefeller no longer lifted.
+
 ## [0.59.0] - 2026-11-23
 
 The Mod list's Sort after the RimSort study (the owner's choices on question cards of 23 Nov 2026: a full re-sort's moves

@@ -2086,6 +2086,7 @@
     "modlist-sort-full-caution": "A full re-sort rebuilds the whole order and moves { $count } of your { $total } mods. Mods that lean on another without saying so can break; Sort: fewest moves only moves what a rule says is out of place.",
     "modlist-sort-explained-title": "{ $count ->\n    [one] Moved because a rule asks (1)\n   *[other] Moved because a rule asks ({ $count })\n  }",
     "modlist-sort-grouped-title": "{ $count ->\n    [one] 1 more moved into its group: the game's own and frameworks (with what they need) first, \"bottom\" mods last\n   *[other] { $count } more moved into their group: the game's own and frameworks (with what they need) first, \"bottom\" mods last\n  }",
-    "modlist-sort-ordered-title": "{ $count ->\n    [one] 1 more moved only to put names in order\n   *[other] { $count } more moved only to put names in order\n  }"
+    "modlist-sort-ordered-title": "{ $count ->\n    [one] 1 more moved only to put names in order\n   *[other] { $count } more moved only to put names in order\n  }",
+    "modlist-sort-none-needed": "No rule needs any of these moves: your order already obeys every rule. They only put mods into their groups and names in order, so there is nothing to gain from using this order."
   }
 }

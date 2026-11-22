@@ -32,7 +32,7 @@ Every mod on this PC, in one scroll: **Switched on**, in load order, and **Switc
 ### Sort
 - **Sort: fewest moves** keeps your order and moves only the mods a rule says are in the wrong place. **Full re-sort** rebuilds the whole order, as RimSort does.
 - Every move a rule asks for shows from where to where, which way, and **whose rule** (your rule, its code, its own files, needs, community, Workshop page). Rules that go round in a loop are named, with the one set aside (Workshop pages give way first).
-- **Groups, as in RimSort:** the game's own and its loaders first, then frameworks and "top" mods (each with what it needs first), then the rest, then "bottom" mods. Mods moved only into their group, and in a full re-sort only to put names in order, are **folded below**: open them to see each one.
+- **Groups, as in RimSort:** the game's own and its loaders first, then frameworks and "top" mods (each with what it needs first), then the rest, then "bottom" mods. Mods moved only into their group, and in a full re-sort only to put names in order, are **folded below**: open them to see each one, and each group move's reason ("a known framework", or which mod loads after it). **When no rule needs any move, the page says so**: your order already obeys every rule, and a full re-sort would only regroup and alphabetise.
 - **Nothing is written until you press Use this order.**
 - **Your rules**: make one by finding the mods by name; **Take away** removes it. Your RimSort rules are read too, never changed.
 

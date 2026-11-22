@@ -320,59 +320,65 @@
 
         {#if moves.length > 0}
           {@const kinds = movesByKind(moves)}
-          {#if kinds.explained.length > 0}
+          {#if kinds.explained.length === 0}
+            <p class="none-needed">{t("modlist-sort-none-needed")}</p>
+          {:else}
             <h3>
               {t("modlist-sort-explained-title", {
                 count: kinds.explained.length,
               })}
             </h3>
           {/if}
-          <ol class="moves">
-            {#each showAll ? kinds.explained : kinds.explained.slice(0, SHOWN) as move (move.key)}
-              {@const by = movedBy(move)}
-              <li class={by.direction}>
-                <div class="line">
-                  <span class="from-to">{move.from} → {move.to}</span>
-                  <strong>{move.name}</strong>
-                  <span class="direction"
-                    >{t(
-                      by.direction === "up"
-                        ? "modlist-sort-up"
-                        : "modlist-sort-down",
-                      { count: by.places },
-                    )}</span
-                  >
-                  {#each move.sources as source (source)}
-                    <span class="chip {source}">{t(SOURCE_WORDS[source])}</span>
-                  {/each}
-                </div>
-                <ul class="why">
-                  {#each move.why as reason, index (index)}
-                    <li>{reason}</li>
-                  {/each}
-                </ul>
-              </li>
-            {/each}
-          </ol>
-          {#if kinds.explained.length > SHOWN && !showAll}
-            <button
-              type="button"
-              class="action"
-              onclick={() => (showAll = true)}
-              >{t("modlist-sort-show-all", {
-                count: kinds.explained.length,
-              })}</button
-            >
+          {#if kinds.explained.length > 0}
+            <ol class="moves">
+              {#each showAll ? kinds.explained : kinds.explained.slice(0, SHOWN) as move (move.key)}
+                {@const by = movedBy(move)}
+                <li class={by.direction}>
+                  <div class="line">
+                    <span class="from-to">{move.from} → {move.to}</span>
+                    <strong>{move.name}</strong>
+                    <span class="direction"
+                      >{t(
+                        by.direction === "up"
+                          ? "modlist-sort-up"
+                          : "modlist-sort-down",
+                        { count: by.places },
+                      )}</span
+                    >
+                    {#each move.sources as source (source)}
+                      <span class="chip {source}"
+                        >{t(SOURCE_WORDS[source])}</span
+                      >
+                    {/each}
+                  </div>
+                  <ul class="why">
+                    {#each move.why as reason, index (index)}
+                      <li>{reason}</li>
+                    {/each}
+                  </ul>
+                </li>
+              {/each}
+            </ol>
+            {#if kinds.explained.length > SHOWN && !showAll}
+              <button
+                type="button"
+                class="action"
+                onclick={() => (showAll = true)}
+                >{t("modlist-sort-show-all", {
+                  count: kinds.explained.length,
+                })}</button
+              >
+            {/if}
           {/if}
-          {#each [{ list: kinds.grouped, words: "modlist-sort-grouped-title" }, { list: kinds.ordered, words: "modlist-sort-ordered-title" }] as fold (fold.words)}
+          {#each [{ list: kinds.grouped, words: "modlist-sort-grouped-title", reasons: true }, { list: kinds.ordered, words: "modlist-sort-ordered-title", reasons: false }] as fold (fold.words)}
             {#if fold.list.length > 0}
               <details class="folded">
                 <summary>{t(fold.words, { count: fold.list.length })}</summary>
-                <ul class="compact">
+                <ul class="compact" class:reasons={fold.reasons}>
                   {#each fold.list as move (move.key)}
                     <li>
                       <span class="from-to">{move.from} → {move.to}</span>
-                      {move.name}
+                      {fold.reasons ? (move.why[0] ?? move.name) : move.name}
                     </li>
                   {/each}
                 </ul>
@@ -656,6 +662,17 @@
     padding: 0;
     list-style: none;
     font-size: var(--type-small);
+  }
+
+  .compact.reasons {
+    columns: 1;
+  }
+
+  .none-needed {
+    margin: 8px 0;
+    padding: 10px 12px;
+    border-left: 4px solid var(--good, currentColor);
+    font-weight: 600;
   }
 
   .compact li {

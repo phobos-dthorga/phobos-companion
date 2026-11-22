@@ -23,6 +23,7 @@
   import AddGamePanel from "../games/AddGamePanel.svelte";
   import ThemesPanel from "../theme/ThemesPanel.svelte";
   import AgentsPanel from "../agents/AgentsPanel.svelte";
+  import OnlinePanel from "../online/OnlinePanel.svelte";
   import type { Setting, SettingsReading } from "./types";
 
   /**
@@ -171,6 +172,8 @@
     if (focusPanel === "themes") untrack(() => void reveal("settings-themes"));
     if (focusPanel === "games") untrack(() => void reveal("settings-games"));
     if (focusPanel === "agents") untrack(() => void reveal("settings-agents"));
+    // Home's gate lights and About lead to Going online (0.61.0).
+    if (focusPanel === "online") untrack(() => void reveal("settings-online"));
   });
   $effect(() => {
     if (focusKey && reading.state === "ready")
@@ -191,6 +194,7 @@
 </section>
 <ThemesPanel />
 <AgentsPanel />
+<OnlinePanel />
 <RecordsPanel
   {saved}
   onbrowse={(key) => void browseKey(key)}

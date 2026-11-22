@@ -223,6 +223,24 @@ pub fn allowed_by_manifest(manifest: &Value, command: &str, report: &str) -> Res
     }
 }
 
+/// The kit's manifest still says this report goes online and only reads (`reads-online`): checked before the program passes a
+/// report the flag that takes it online (0.61.0, `docs/online.md`), so a report that came to write is never run as a reading.
+pub fn reads_online(manifest: &Value, command: &str, report: &str) -> Result<(), String> {
+    let commands = manifest["data"]["commands"].as_array().map_or(&[][..], Vec::as_slice);
+    let effect = commands
+        .iter()
+        .find(|c| c["name"].as_str() == Some(command))
+        .and_then(|c| c["reports"].as_array())
+        .and_then(|reports| reports.iter().find(|r| r["name"].as_str() == Some(report)))
+        .map(|r| r["effect"].as_str().unwrap_or_default().to_owned())
+        .ok_or_else(|| format!("the tool kit has no {command} {report}"))?;
+    if effect == "reads-online" {
+        Ok(())
+    } else {
+        Err(format!("the tool kit says {command} {report} is {effect:?}, not a reading that goes online"))
+    }
+}
+
 /// Where a game's tools offer a report a page needs, found by what it does (its surface), never by a tool's name (0.26.0).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Offered {

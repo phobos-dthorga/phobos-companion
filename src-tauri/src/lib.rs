@@ -31,6 +31,7 @@ mod pick;
 mod picks_page;
 mod pictures;
 mod records_backup;
+mod repo_status;
 mod reports;
 mod safe_copies;
 mod screen_notes;
@@ -717,6 +718,37 @@ async fn choose_agent_features(
     .await
 }
 
+/// Which kinds of online call the program may make by itself, each with what it contacts (0.61.0, `docs/online.md`).
+#[tauri::command]
+async fn online_status(app: tauri::AppHandle) -> Result<companion_core::online::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || Ok(companion_core::online::status(&data))).await
+}
+
+/// Keeps the person's choice for one kind of online call: on or off.
+#[tauri::command]
+async fn choose_online(
+    app: tauri::AppHandle,
+    kind: String,
+    on: bool,
+) -> Result<companion_core::online::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || companion_core::online::choose(&data, &kind, on)).await
+}
+
+/// Home's gate lights: each of a game's repositories with its remote, and GitHub's checks while the switch is on. `pressed` is
+/// Look now; Home's own look is automatic (0.61.0).
+#[tauri::command]
+async fn repo_status(
+    app: tauri::AppHandle,
+    game: String,
+    pressed: bool,
+    on_progress: Channel<kit::Progress>,
+) -> Result<serde_json::Value, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || repo_status::read(&data, &game, pressed, Some(&hearing(on_progress)))).await
+}
+
 /// Uses a theme on offer from now on, on the owner's press.
 #[tauri::command]
 async fn choose_theme(app: tauri::AppHandle, id: String) -> Result<companion_core::themes::Status, Failure> {
@@ -1230,7 +1262,10 @@ pub fn run() {
             export_theme_draft,
             start_games_list,
             agent_features,
-            choose_agent_features
+            choose_agent_features,
+            online_status,
+            choose_online,
+            repo_status
         ])
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {

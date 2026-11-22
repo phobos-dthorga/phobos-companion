@@ -11,6 +11,7 @@
   import { readAbout } from "./desktopClient";
   import { listedWith, standing } from "./presentation";
   import type { AboutReading } from "./types";
+  import AboutOnline from "../online/AboutOnline.svelte";
 
   /**
    * About (0.25.0; the owner: "I keep forgetting which version I have installed"): the version running, what it was built from
@@ -111,6 +112,8 @@
       >
     {/if}
   </section>
+
+  <AboutOnline />
 
   <section aria-labelledby="about-where">
     <h2 id="about-where">{t("about-where-title")}</h2>

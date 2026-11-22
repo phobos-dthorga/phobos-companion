@@ -43,7 +43,7 @@ to everything revolving around the Companion." The rule that follows from it is 
 | --- | --- | --- | --- |
 | C1 | **One language**: the interface's words are in one catalogue (Australian English) built to be translated; the Guide is English only | Language folders for the catalogue and the Guide, falling back to English entry by entry; a language choice in Settings | Medium |
 | C2 | **Built and checked on Windows only**, though Tauri and most of the kit run elsewhere and the owner prefers Linux | A Linux build next, after the first Windows release | Medium to large |
-| C3 | **Privacy is not stated anywhere a person would read it** | Say it in About and the Guide: the Companion itself makes no network calls (as read for this audit: no web client in the host or the window); the kit reads Steam's public pages only when a report asks; nothing is sent anywhere | Small |
+| C3 | **Privacy is not stated anywhere a person would read it** | **Built in 0.61.0**: About lists every kind of call to the internet, the address each contacts and whether it is on, beside the Mod list's Steam calls, and the Guide has "Choose what the Companion asks the internet". From 0.61.0 the Companion does go online by itself (gate lights, `docs/online.md`), keyless, reading public pages only; nothing is sent about the person | Small |
 | C4 | **Licences of what would be bundled** | MIT for the code and the art clause for the crest are in `LICENSE`; add Python, the kit and the built tools to `THIRD_PARTY_NOTICES.md` when they are bundled | Small |
 | C5 | **Something's off goes to agent sessions only** | For others: an opt-in way to turn a note into a report they send themselves, showing exactly what would be sent | Medium |
 

@@ -4,6 +4,27 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.61.0] - 2026-11-23
+
+The first slice of going online (`docs/online.md`, O4's gate lights; the owner's go-ahead and answers of 23 Nov 2026). Kit pin
+v1.88.0 to v1.89.0.
+
+### Added
+
+- **Checks on GitHub, on Home**: for each of the game's repositories, commits not pushed, files changed, and whether its last
+  push passed its checks on GitHub (passed, failed with which check, still running, no run yet for the last push, no checks), each
+  with a mark as well as a colour, and any nightly run that has not run for two days. Home's own look asks GitHub only what may
+  have changed since (after a push, while a check runs, or once a day); **Look now** asks at once. When GitHub can't be reached,
+  the lights are its last answer, and Home says from when. Under it, how many of the hour's 60 keyless GitHub calls are left,
+  shared by every tool. Not yet tested on screen.
+- **Going online, in Settings**: every kind of call the Companion makes to the internet by itself, the address it contacts, and
+  its switch, **on by default for the repositories on your list** (the owner's choice). Switching off one whose loss is severe
+  first says what stops working, with **Switch it off** or **Keep it on**. Off means off: no call of that kind, by itself or on a
+  press. The first kind is **Gate lights** (api.github.com). Not yet tested on screen.
+- **What the Companion asks the internet, on About** (the release audit's C3): the same kinds, with whether each is on, and the
+  Steam calls the Mod list makes. Not yet tested on screen.
+- **Guide**: "Choose what the Companion asks the internet", and Home, Settings and About name the new parts.
+
 ## [0.60.0] - 2026-11-23
 
 After the owner's first full re-sort preview with 0.59.0 (23 Nov 2026: "What are your thoughts here?"): all 146 moves on their list

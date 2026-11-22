@@ -1,9 +1,18 @@
 # Going online: gate lights, report links, the nightly watch and data feeds (O2 to O4)
 
-**Status (23 Nov 2026):** designed, not built. The owner asked for O2 to O4 of [later.md](later.md#going-online) together, "since
-they might share a few things in common", and answered four questions by card the same day (below). Built in the order under
-[Build order](#build-order); each slice moves its part of this record into `design-record.md` when it lands. Agent choices are
-labelled so the owner can revise them.
+**Status (23 Nov 2026):** **slice 1 built** in Companion 0.61.0 with phobos-modkit 1.89.0 (gate lights, the switches, About's
+list; not yet tested on screen); slices 2 to 4 designed, not built. The owner asked for O2 to O4 of [later.md](later.md#going-online)
+together, "since they might share a few things in common", and answered four questions by card the same day (below). Built in the
+order under [Build order](#build-order). Agent choices are labelled so the owner can revise them.
+
+**Learnt while building slice 1:**
+
+- **For a keyless client, GitHub counts a "not modified" (304) answer as a call** (measured on the owner's PC: two such answers
+  and one new one took the allowance from 57 to 54). So calls are saved only by deciding when to ask, which the gate lights do:
+  after a push, while a check runs, or once a day.
+- **Off means off** (agent's reading of "a setting to disable"): a kind switched off makes no call even on a press, so a person
+  who switched it off is never surprised by one. The S2 line below said a press still might; this replaces it.
+- **The "as of" line (S6) lives in the gate lights for now**; it moves to `src/lib/shell/` when a second panel needs it (slice 2).
 
 ## Read this first (gotchas)
 

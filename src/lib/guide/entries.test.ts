@@ -38,7 +38,7 @@ const FOCUS_KEYS: Partial<Record<PageName, string[]>> = {
   guide: ["entry"],
 };
 const PANELS: Partial<Record<PageName, string[]>> = {
-  settings: ["records", "cleanup", "themes", "games", "agents"],
+  settings: ["records", "cleanup", "themes", "games", "agents", "online"],
   mods: ["settings"],
 };
 

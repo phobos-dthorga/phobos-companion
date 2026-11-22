@@ -26,6 +26,7 @@
   import DecisionsNote from "../decisions/DecisionsNote.svelte";
   import PicksNote from "../picks/PicksNote.svelte";
   import { agents } from "../agents/state.svelte";
+  import GateLights from "../online/GateLights.svelte";
 
   const PENDING_SHOWN = 6;
   const OPEN_SHOWN = 6;
@@ -299,6 +300,8 @@
     <p class="muted small more">{t("notes-how")}</p>
   </section>
 {/if}
+
+<GateLights game={game.id} />
 
 {#if agents.shown}
   <ClaimsPanel />

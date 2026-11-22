@@ -1321,6 +1321,29 @@ Tools after Decisions, shown with the features for agent sessions; the next wait
 **Agent choices, owner to revise:** marks offered everywhere a picture is compared, not only on Picks; one accent colour for every
 kind of mark, the kinds told apart by the counts in words.
 
+## Going online, slice 1: gate lights and the switches (built 23 Nov 2026, 0.61.0)
+
+**The owner's request** (23 Nov 2026): O2 to O4 of `later.md` together, designed in [online.md](online.md) with their four answers;
+calls "on for listed repositories with a setting to disable otherwise, with applicable warnings of severe loss of functionality".
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See on Home whether each repository's last push passed its checks on GitHub, with commits not pushed and files changed; see a nightly run that stopped; switch each kind of online call off, told first what it costs |
+| What does it stop them doing? | Nothing; a switch off stops only that kind of call |
+| How does it change the way they work? | A failed check is seen at the next look at Home, not days later on GitHub |
+| What outside the thing notices? | Nobody: GitHub sees a keyless request naming a public repository |
+
+| Part | How |
+| --- | --- |
+| The switches | `companion_core::online`: `KINDS` (id, address, severe or small loss), `online.json` in the program's folder, on unless chosen off |
+| The lights | `src-tauri/src/repo_status.rs` runs the kit's `repos status` (1.89.0) for the game's repositories: `--online` only while Gate lights is on and the manifest still calls it `reads-online`; `--automatic` unless Look now |
+| The window | `src/lib/online/`: `GateLights.svelte` on Home, `OnlinePanel.svelte` in Settings (asks before switching off a severe one), `AboutOnline.svelte` on About; words and marks in `presentation.ts` |
+| Games | Every game: it reads any repository with a GitHub remote, and says "not on GitHub" for one without |
+
+**Agent choices, owner to revise:** the panel's name "Checks on GitHub"; the kind's name "Gate lights"; a nightly run counted late
+after two days; a press asking again after a minute; off meaning no call even on a press. **Risk (agent's grade): low**; nothing
+of the person's is changed or sent.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

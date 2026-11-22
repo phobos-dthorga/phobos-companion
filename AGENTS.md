@@ -163,6 +163,16 @@ reads them.
   finds sessions at work (a listed repository's `AGENTS.md`, `CLAUDE.md`, `.claude` or `config/decisions.json`, or notes and
   answers already kept). A new feature for agent sessions joins that switch, its key carries `forAgents`, its page joins
   `FOR_AGENTS_PAGES` and its Guide entries `for: agents`. The choice is kept in `features.json` in the program's own folder.
+- **Every kind of call to the internet has its own switch, on for the repositories on the games list** (0.61.0; the owner, 23 Nov
+  2026: "On for listed repositories with a setting to disable otherwise, with applicable warnings of severe loss of functionality";
+  `docs/online.md`). `companion_core::online::KINDS` lists each kind, the address it contacts and whether losing it is severe; the
+  person's choices are kept in `online.json` in the program's own folder, and Settings → Going online and About show the same list.
+  **Off means off**: the host makes no call of that kind, on a press or by itself. Before passing a report the flag that takes it
+  online, the host checks the kit's manifest still calls it `reads-online` (`kit::reads_online`). A look the program makes by
+  itself is `--automatic`, so the kit keeps the hour's last keyless GitHub calls for a press. **Nothing is ever sent about the
+  person**: calls only read public pages, keyless. A new kind joins `KINDS`, the window's words (`src/lib/online/presentation.ts`)
+  and the Guide's Going online entry in one change. Gate lights (`src-tauri/src/repo_status.rs`, the kit's `repos status`) is the
+  first.
 - **Otherwise read-only towards games, saves and repositories.** The only other things the program writes are the owner's test verdicts and, since
   0.9.0, their word on notes no row names ("make a row" or "no row needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks),
   each appended to its own data folder (`test-verdicts/<repository>.jsonl` and `test-key-decisions/<repository>.jsonl`,

@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.51.0] - 2026-11-23
+
+### Added
+
+- **Sort reads the Workshop's required items** (the owner, 23 Nov 2026: "add RimSort's Workshop database as a source"): a mod
+  loads after each item its Workshop page lists as required, read from RimSort's Steam Workshop Database, which catches needs a mod
+  never wrote into its own files. A new badge, **Its Workshop page**, names those rules, and the count of them shows beside the
+  others. In a loop of rules they give way before needs, a mod's own and yours, after the community rules. Guide: Load-order rule.
+  Not yet tested on screen.
+
+### Changed
+
+- Tool kit pin v1.78.0 to 1.79.0 (commit 665a602).
 ## [0.50.0] - 2026-11-22
 
 Pictures and sounds in the code viewer (the owner, 22 Nov 2026: "We should support the ability to display multimedia in parts like

@@ -11,6 +11,7 @@ export const SOURCE_WORDS: Record<RuleSource, string> = {
   yours: "modlist-source-yours",
   own: "modlist-source-own",
   needs: "modlist-source-needs",
+  workshop: "modlist-source-workshop",
   community: "modlist-source-community",
   game: "modlist-source-game",
 };

@@ -108,7 +108,8 @@ export type EditAnswer = ModListChange & {
 };
 
 /** Where a load-order rule comes from (phobos-modkit 1.74.0): yours, the mod's own files, what it needs, the community's, the game. */
-export type RuleSource = "yours" | "own" | "needs" | "community" | "game";
+export type RuleSource =
+  "yours" | "own" | "needs" | "workshop" | "community" | "game";
 
 /** One mod a sort moves: from and to (1 is first), and why, with whose rules. */
 export type SortMove = {
@@ -145,7 +146,10 @@ export type SortAnswer = ModListChange & {
     keys?: string[];
     moves?: SortMove[];
     set_aside?: SetAside[];
-    rules?: Record<"yours" | "own" | "needs" | "community", number>;
+    rules?: Record<
+      "yours" | "own" | "needs" | "workshop" | "community",
+      number
+    >;
     placings?: { top: number; bottom: number };
     count?: number;
     applied?: boolean;

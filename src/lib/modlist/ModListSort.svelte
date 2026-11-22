@@ -288,6 +288,9 @@
             <li class="chip needs">
               {t("modlist-sort-read-needs", { count: used.needs })}
             </li>
+            <li class="chip workshop">
+              {t("modlist-sort-read-workshop", { count: used.workshop ?? 0 })}
+            </li>
             <li class="chip community">
               {t("modlist-sort-read-community", { count: used.community })}
             </li>
@@ -660,6 +663,12 @@
   .chip.needs {
     background: var(--shade-comparison);
     border-color: var(--colour-comparison);
+  }
+
+  /* A Workshop page's required items are needs too: the needs shade, with a dashed edge to tell them apart. */
+  .chip.workshop {
+    background: var(--shade-comparison);
+    border: 1px dashed var(--colour-comparison);
   }
 
   .chip.community {

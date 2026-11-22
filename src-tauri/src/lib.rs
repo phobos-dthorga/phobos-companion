@@ -974,11 +974,13 @@ async fn updates(
 /// public Workshop API too.
 #[tauri::command]
 async fn mod_list_check(
+    app: tauri::AppHandle,
     game: String,
     online: bool,
     on_progress: Channel<kit::Progress>,
 ) -> Result<serde_json::Value, Failure> {
-    blocking(move || mod_list_page::read(&game, online, Some(&hearing(on_progress)))).await
+    let data = data_folder(&app)?;
+    blocking(move || mod_list_page::read(&data, &game, online, Some(&hearing(on_progress)))).await
 }
 
 /// One change the last check offered, after the owner's yes; the kit keeps a backup of the list first (0.45.0).

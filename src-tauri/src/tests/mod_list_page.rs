@@ -12,7 +12,7 @@ fn zed() -> GamePlaces {
 #[test]
 fn the_check_passes_the_name_the_id_the_data_folder_and_steam_only_when_asked() {
     assert_eq!(
-        check_arguments(&zed(), true),
+        check_arguments(&zed(), true, false),
         [
             "mod-list",
             "check",
@@ -26,7 +26,20 @@ fn the_check_passes_the_name_the_id_the_data_folder_and_steam_only_when_asked() 
         ]
     );
     let bare = GamePlaces { name: "Ar".to_owned(), ..GamePlaces::default() };
-    assert_eq!(check_arguments(&bare, false), ["mod-list", "check", "--name=Ar", "--no-redact", "--json"]);
+    assert_eq!(check_arguments(&bare, false, false), ["mod-list", "check", "--name=Ar", "--no-redact", "--json"]);
+}
+
+#[test]
+fn known_problems_are_asked_for_only_while_the_switch_is_on() {
+    let bare = GamePlaces { name: "Ar".to_owned(), ..GamePlaces::default() };
+    assert_eq!(
+        check_arguments(&bare, false, true),
+        ["mod-list", "check", "--name=Ar", "--known", "--no-redact", "--json"]
+    );
+    assert_eq!(
+        known_feed_arguments(&[PathBuf::from("first")]),
+        ["feeds", "read", "--root", "first", "--from", "published", "--json"]
+    );
 }
 
 #[test]

@@ -4,6 +4,23 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.64.0] - 2026-11-23
+
+The third slice of going online (`docs/online.md`, O2: known problems; the owner's choice of "public, facts and links"). Kit pin
+v1.92.0 to v1.93.0.
+
+### Added
+
+- **Known problems on the Mod list**: What's wrong warns when mods on your list are known to go wrong together, with what goes
+  wrong, what to do, and when and against what it was checked, read from the known-problems feeds your repositories publish.
+  phobos-rimworld publishes three (23 Nov 2026), each checked against the authors' newest source or Workshop build first:
+  Adaptive Storage's empty Chunk A, Chunk B or Bundle D on 1.7; Mounted Weapons with Combat Extended's autoloaders; and UI
+  Rethemed - Colonist Card's Tab buttons with Dubs Mint Menus. On the owner's list two show; the Colonist Card one shows though
+  its setting is already off, since the check can't read a mod's settings. Not yet tested on screen.
+- **Known problems, in Settings → Going online**: its own switch, **on by default** (the owner's choice), contacting
+  raw.githubusercontent.com at most every six hours. Switching it off asks first. Not yet tested on screen.
+- **Guide**: the Mod list and "Choose what the Companion asks the internet" name known problems.
+
 ## [0.63.0] - 2026-11-23
 
 The second slice of going online (`docs/online.md`, O3's nightly watch). Kit pin v1.91.0 to v1.92.0.

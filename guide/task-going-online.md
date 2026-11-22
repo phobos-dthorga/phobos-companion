@@ -11,6 +11,8 @@ see: page-settings, page-home, page-about
 2. Each kind says what it does and the address it contacts. Press **On** or **Off**.
 3. Switching off a kind you would miss a lot asks first, and says what stops working. Press **Switch it off** or **Keep it on**.
 
+**Known problems**: the Mod list's What's wrong warns when mods on your list are known to go wrong together, with what goes wrong and what to do. The problems come from the feeds your repositories publish (a `feeds` folder), each checked against the authors' own work before it was published. The Companion reads them at most every six hours, without using any of GitHub's hourly calls, and uses the last copy it has when GitHub can't be reached.
+
 **Nightly watch**: each night GitHub's own machine looks through the public source of the mods yours patch, for commits that touch a method your code names. Home's **Their code changed** lists what it found, before those authors' updates reach you. The Companion reads each repository's results at most every six hours, without using any of GitHub's hourly calls. A repository needs its own nightly run to have results; one without simply shows nothing.
 
 **Gate lights**: Home shows whether each repository's last push passed its checks on GitHub, and whether its nightly runs still run. It asks GitHub once for each repository, then again only after you push, or while a check is still running. **Look now** on Home asks at once.

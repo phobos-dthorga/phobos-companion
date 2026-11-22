@@ -2,7 +2,9 @@
 
 **Status (23 Nov 2026):** **slice 1 built** in Companion 0.61.0 with phobos-modkit 1.89.0 (gate lights, the switches, About's
 list); **slice 2 built** in Companion 0.63.0 with phobos-modkit 1.90.0 to 1.92.0 (the feed format, the reusable nightly workflow,
-phobos-rimworld's nightly run, Home's Their code changed); neither tested on screen yet. Slices 3 and 4 designed, not built. The owner asked for O2 to O4 of [later.md](later.md#going-online)
+phobos-rimworld's nightly run, Home's Their code changed); **slice 3's known problems built** in Companion 0.64.0 with
+phobos-modkit 1.93.0 (sort rules, Guide entries and themes as feeds not yet); none tested on screen yet. Slice 4 (report links,
+the owner's choice: the Logs page only) designed, not built. The owner asked for O2 to O4 of [later.md](later.md#going-online)
 together, "since they might share a few things in common", and answered four questions by card the same day (below). Built in the
 order under [Build order](#build-order). Agent choices are labelled so the owner can revise them.
 
@@ -24,6 +26,16 @@ order under [Build order](#build-order). Agent choices are labelled so the owner
   `env`, which GitHub refuses before a run starts.
 - **First real run** (phobos-rimworld, 23 Nov 2026, manual start): 56 seconds, 24 fresh clones, 16 findings, published to
   `companion-results` and read back keyless. Its fresh clones found two more than the owner's local ones, which were older.
+
+**Learnt while building slice 3:**
+
+- **Of five clashes in the agent's notes, three were still true** when checked on 23 Nov 2026 (the reports rule): Harmony's
+  lost-patches issue was closed on 17 Nov and fixed in 3.0.4.0, and RimPacts had updated since its clash was found (our own
+  Patches mod works round it), so both stayed out. Mounted Weapons updated on 18 Nov; the entry says that build is not yet checked.
+- **A clash that depends on a mod's setting still shows when the setting is already right**: the kit can't read other mods'
+  settings. The Colonist Card entry says what to switch, so for the owner it reads as a reminder.
+- **Known problems come from each listed repository's own `feeds/` folder**, so a stranger with no repository of ours gets none
+  yet. A built-in list of D'thorga's feeds belongs with the first public release (O1), when there is someone to read it.
 
 ## Read this first (gotchas)
 

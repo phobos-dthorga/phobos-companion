@@ -34,10 +34,12 @@ pub struct Kind {
 }
 
 /// Every kind, in the order the panel lists them. A new kind joins here, in the locale file and in the Guide in one change.
-pub const KINDS: [Kind; 2] = [
+pub const KINDS: [Kind; 3] = [
     Kind { id: "gate-lights", contacts: "api.github.com", loss: Loss::Severe },
     // The nightly watch's findings, read from each repository's results branch (0.63.0, `docs/online.md` O3).
     Kind { id: "nightly-watch", contacts: "raw.githubusercontent.com", loss: Loss::Severe },
+    // Known problems between mods, read from each repository's published feeds/ for the Mod list check (0.64.0, O2).
+    Kind { id: "known-problems", contacts: "raw.githubusercontent.com", loss: Loss::Severe },
 ];
 
 /// One kind as it stands: on or off, and whether that is the person's choice or the default.

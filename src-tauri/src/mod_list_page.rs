@@ -28,6 +28,7 @@ use companion_core::kit::{self, Outcome, allowed_by_manifest};
 use serde::Serialize;
 use serde_json::Value;
 use std::collections::BTreeSet;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 pub(crate) const TOOL: &str = "mod-list";
@@ -90,10 +91,33 @@ pub(crate) fn named(arguments: Args, game: &GamePlaces) -> Args {
     arguments
 }
 
-pub fn check_arguments(game: &GamePlaces, online: bool) -> Vec<String> {
+pub fn check_arguments(game: &GamePlaces, online: bool, known: bool) -> Vec<String> {
     let arguments = named(Args::new(TOOL, CHECK), game);
     let arguments = if online { arguments.flag("--online") } else { arguments };
+    let arguments = if known { arguments.flag("--known") } else { arguments };
     arguments.flag("--no-redact").json()
+}
+
+/// The switch for known problems in Settings → Going online (0.64.0, `docs/online.md` O2).
+pub const KNOWN_KIND: &str = "known-problems";
+
+/// The arguments that read each repository's own published feed (its `feeds/` folder), where known problems are kept.
+pub fn known_feed_arguments(roots: &[PathBuf]) -> Vec<String> {
+    Args::new("feeds", "read").roots(roots.iter().map(PathBuf::as_path)).pair("--from", "published").json()
+}
+
+/// Brings the kit's copies of the game's repositories' known-problems feeds up to date, best effort: GitHub's raw files, read at
+/// most every six hours by the kit itself. A failure leaves the last good copies, which the check reads; it is never an error here.
+fn refresh_known(game: &str) {
+    let Ok(repositories) = games::repositories_of(game) else { return };
+    let roots: Vec<PathBuf> = repositories.into_iter().map(|r| r.path).filter(|p| p.is_dir()).collect();
+    if roots.is_empty() {
+        return;
+    }
+    let allowed = kit::read_manifest().ok().is_some_and(|m| kit::reads_online(&m, "feeds", "read").is_ok());
+    if allowed {
+        let _ = kit::run("feeds", &known_feed_arguments(&roots));
+    }
 }
 
 pub fn fix_arguments(game: &GamePlaces, list: &str, action: &str, id: &str) -> Vec<String> {
@@ -332,10 +356,15 @@ pub(crate) fn places(game: &str) -> Result<GamePlaces, Failure> {
 }
 
 /// A game's check: every problem with each of its lists, and the changes offered. `online` also asks Steam which Workshop items
-/// still exist (the kit's `reads-online`).
-pub fn read(game: &str, online: bool, listener: Option<kit::Listener>) -> Result<Value, Failure> {
+/// still exist (the kit's `reads-online`). While Known problems is on (`data` is the program's own folder, where the switch is
+/// kept), the game's repositories' published feeds are read first and the check warns of each known problem a list has (0.64.0).
+pub fn read(data_folder: &Path, game: &str, online: bool, listener: Option<kit::Listener>) -> Result<Value, Failure> {
     let found = places(game)?;
-    let data = kit::run_hearing(TOOL, &check_arguments(&found, online), listener)?["data"].clone();
+    let known = companion_core::online::is_on(data_folder, KNOWN_KIND);
+    if known {
+        refresh_known(game);
+    }
+    let data = kit::run_hearing(TOOL, &check_arguments(&found, online, known), listener)?["data"].clone();
     let (changes, lists, numbers) = offered_by(game, &data);
     if let Ok(mut offered) = OFFERED.lock() {
         offered.retain(|(g, ..)| g != game);

@@ -2141,6 +2141,9 @@
     "nightly-ours": "Your code that names it: { $where }",
     "nightly-more": "{ $count ->\n    [one] And 1 more.\n   *[other] And { $count } more.\n  }",
     "nightly-as-of": "GitHub could not be asked just now, so this is the watch's last answer as read { $when }.",
-    "nightly-limit": "Matched by name: read the commit before acting on it. Public source can differ from the Workshop build, so this is an early warning; the check after an update stays the real one."
+    "nightly-limit": "Matched by name: read the commit before acting on it. Public source can differ from the Workshop build, so this is an early warning; the check after an update stays the real one.",
+    "online-known-problems-name": "Known problems",
+    "online-known-problems-body": "The Mod list's What's wrong warns when mods on your list are known to go wrong together, with what to do. It reads the known-problems feeds your repositories publish, at most every six hours, without counting against GitHub's hourly calls.",
+    "online-known-problems-loss": "The Mod list will no longer warn of mods known to go wrong together. It still finds missing mods, needs and order faults."
   }
 }

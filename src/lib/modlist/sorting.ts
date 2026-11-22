@@ -44,6 +44,24 @@ export function movedBy(move: SortMove): {
   };
 }
 
+/**
+ * A sort's moves told apart (0.59.0; the owner's choice of 23 Nov 2026): those a rule asks for, each shown with its reason, and
+ * those only a group or the order of names places, shown folded. A move from an older kit, with no kind, counts as a rule's.
+ */
+export function movesByKind(moves: SortMove[]): {
+  explained: SortMove[];
+  grouped: SortMove[];
+  ordered: SortMove[];
+} {
+  return {
+    explained: moves.filter(
+      (m) => !m.kind || m.kind === "rule" || m.kind === "room",
+    ),
+    grouped: moves.filter((m) => m.kind === "group"),
+    ordered: moves.filter((m) => m.kind === "order"),
+  };
+}
+
 /** Every mod's name by its id and its key, without case, for showing rules that name mods by id. */
 export function namesOf(listing: ModsListing): Map<string, string> {
   const names = new Map<string, string>();

@@ -13,4 +13,6 @@ Something that says one mod must load after another, or as near the top or the b
 - **Its Workshop page**: a mod loads after the items its Workshop page lists as required (RimWorld only), read from RimSort's Workshop database. It catches needs a mod never wrote into its own files.
 - **Community**: the rules RimSort's users share (RimWorld only), read where RimSort keeps them.
 
-Strength matters only when rules go round in a loop: the weakest is set aside, and the page says which. **At the top** never goes above the game's own unless a rule puts it there.
+Strength matters only when rules go round in a loop: the weakest is set aside, and the page says which. Workshop pages are the weakest.
+
+**At the top** and **at the bottom** mean a group, as in RimSort: the game's own and its loaders first, then frameworks and "top" mods (each with what it needs), then the rest, then "bottom" mods. A mod already in its group is not moved higher.

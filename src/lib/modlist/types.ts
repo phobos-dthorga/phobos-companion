@@ -152,6 +152,8 @@ export type SortMove = {
   to: number;
   why: string[];
   sources: RuleSource[];
+  /** What kind of move (phobos-modkit 1.86.0): a rule asks for it, its group places it, names put in order, or room made. */
+  kind?: "rule" | "group" | "order" | "room";
 };
 
 /** A rule a sort set aside because it closed a loop of rules. */

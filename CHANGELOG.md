@@ -4,6 +4,24 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.59.0] - 2026-11-23
+
+The Mod list's Sort after the RimSort study (the owner's choices on question cards of 23 Nov 2026: a full re-sort's moves
+grouped, and the sorter's groups as RimSort's tiers). Kit pin v1.85.0 to v1.86.0.
+
+### Changed
+
+- **A full re-sort's moves are told apart**: moves a rule asks for are listed first, each with its reason, as before; mods moved
+  only into their group, and those moved only to put names in order, are folded below in compact rows (from, to and name), to
+  open when wanted. On the owner's list that was 146 moves: 23 into their group and 123 for names. A move from an older kit
+  counts as a rule's. Not yet tested on screen.
+- **The sorter sorts in groups, as RimSort does** (kit 1.86.0): the game's own and its loaders first, then frameworks and "load at
+  the top" mods (each with what it must load after), then the rest, then "load at the bottom" mods. "Top" and "bottom" now mean
+  the group, as in RimSort; frameworks' needs make no order rule; Workshop pages are the weakest rule. On the owner's list fewest
+  moves finds none, and a full re-sort keeps Vanilla Expanded Framework 20th, Combat Extended 25th and Vehicle Framework 33rd.
+  The Guide's Mod list page, Sort the mod list and Load order rule say so, and the loop words name Workshop pages as giving way
+  first.
+
 ## [0.58.0] - 2026-11-23
 
 ### Changed

@@ -1970,7 +1970,7 @@
     "modlist-sort-read-needs": "{ $count ->\n    [one] 1 from what a mod needs\n   *[other] { $count } from what mods need\n  }",
     "modlist-sort-read-community": "{ $count ->\n    [one] 1 community rule\n   *[other] { $count } community rules\n  }",
     "modlist-sort-aside-title": "Rules set aside",
-    "modlist-sort-aside-why": "These rules go round in a loop, so not all of them can be kept. The weakest of each loop was set aside: community first, then Workshop pages, then needs, then a mod's own, then what its code builds on, and yours last.",
+    "modlist-sort-aside-why": "These rules go round in a loop, so not all of them can be kept. The weakest of each loop was set aside: Workshop pages first, then community, then needs, then a mod's own, then what its code builds on, and yours last.",
     "modlist-sort-aside-loop": "The loop: { $loop }",
     "modlist-sort-up": "{ $count ->\n    [one] up 1 place\n   *[other] up { $count } places\n  }",
     "modlist-sort-down": "{ $count ->\n    [one] down 1 place\n   *[other] down { $count } places\n  }",
@@ -2083,6 +2083,9 @@
     "modlist-saved-ran-errors": "{ $count ->\n    [one] 1 new error\n   *[other] { $count } new errors\n  }",
     "modlist-saved-last-clean": "Go back to the last list that ran clean",
     "modlist-saved-no-clean": "None has yet: a list is marked once the game has run on it and closed without new errors.",
-    "modlist-sort-full-caution": "A full re-sort rebuilds the whole order and moves { $count } of your { $total } mods. Mods that lean on another without saying so can break; Sort: fewest moves only moves what a rule says is out of place."
+    "modlist-sort-full-caution": "A full re-sort rebuilds the whole order and moves { $count } of your { $total } mods. Mods that lean on another without saying so can break; Sort: fewest moves only moves what a rule says is out of place.",
+    "modlist-sort-explained-title": "{ $count ->\n    [one] Moved because a rule asks (1)\n   *[other] Moved because a rule asks ({ $count })\n  }",
+    "modlist-sort-grouped-title": "{ $count ->\n    [one] 1 more moved into its group: the game's own and frameworks (with what they need) first, \"bottom\" mods last\n   *[other] { $count } more moved into their group: the game's own and frameworks (with what they need) first, \"bottom\" mods last\n  }",
+    "modlist-sort-ordered-title": "{ $count ->\n    [one] 1 more moved only to put names in order\n   *[other] { $count } more moved only to put names in order\n  }"
   }
 }

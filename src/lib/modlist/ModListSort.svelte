@@ -23,6 +23,7 @@
     RULE_WORDS,
     SOURCE_WORDS,
     movedBy,
+    movesByKind,
     namesOf,
   } from "./sorting";
   import type {
@@ -318,8 +319,16 @@
         {/if}
 
         {#if moves.length > 0}
+          {@const kinds = movesByKind(moves)}
+          {#if kinds.explained.length > 0}
+            <h3>
+              {t("modlist-sort-explained-title", {
+                count: kinds.explained.length,
+              })}
+            </h3>
+          {/if}
           <ol class="moves">
-            {#each showAll ? moves : moves.slice(0, SHOWN) as move (move.key)}
+            {#each showAll ? kinds.explained : kinds.explained.slice(0, SHOWN) as move (move.key)}
               {@const by = movedBy(move)}
               <li class={by.direction}>
                 <div class="line">
@@ -345,14 +354,31 @@
               </li>
             {/each}
           </ol>
-          {#if moves.length > SHOWN && !showAll}
+          {#if kinds.explained.length > SHOWN && !showAll}
             <button
               type="button"
               class="action"
               onclick={() => (showAll = true)}
-              >{t("modlist-sort-show-all", { count: moves.length })}</button
+              >{t("modlist-sort-show-all", {
+                count: kinds.explained.length,
+              })}</button
             >
           {/if}
+          {#each [{ list: kinds.grouped, words: "modlist-sort-grouped-title" }, { list: kinds.ordered, words: "modlist-sort-ordered-title" }] as fold (fold.words)}
+            {#if fold.list.length > 0}
+              <details class="folded">
+                <summary>{t(fold.words, { count: fold.list.length })}</summary>
+                <ul class="compact">
+                  {#each fold.list as move (move.key)}
+                    <li>
+                      <span class="from-to">{move.from} → {move.to}</span>
+                      {move.name}
+                    </li>
+                  {/each}
+                </ul>
+              </details>
+            {/if}
+          {/each}
           <div class="confirm">
             {#if full}
               <p class="caution">
@@ -611,6 +637,30 @@
     border-inline-start: 3px solid var(--colour-accent);
     background: var(--shade-accent);
     border-radius: 4px;
+  }
+
+  .folded {
+    margin: 8px 0;
+  }
+
+  .folded summary {
+    min-height: var(--control-min);
+    padding-block: 10px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .compact {
+    columns: 2 20em;
+    margin: 4px 0 8px;
+    padding: 0;
+    list-style: none;
+    font-size: var(--type-small);
+  }
+
+  .compact li {
+    break-inside: avoid;
+    padding: 2px 0;
   }
 
   .caution {

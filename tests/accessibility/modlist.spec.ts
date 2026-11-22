@@ -157,6 +157,59 @@ const sorted = {
   },
 };
 
+// A full re-sort's moves of each kind (phobos-modkit 1.86.0): a rule's, a group's and one only for the order of names.
+const fullSorted = {
+  result: {
+    ok: true,
+    title: "Mod list: re-sort the whole list: 3 moved (preview)",
+    refusal: null,
+    data: {
+      how: "full",
+      ids: ["core", "alpha", "delta", "bravo", "charlie"],
+      keys: ["core", "alpha", "delta", "bravo", "charlie"],
+      moves: [
+        {
+          key: "delta",
+          name: "Delta Doors",
+          from: 5,
+          to: 3,
+          why: [
+            "Bravo Beds loads after Delta Doors (Bravo Beds: its own files)",
+          ],
+          sources: ["own"],
+          kind: "rule",
+        },
+        {
+          key: "alpha",
+          name: "Alpha Tools",
+          from: 3,
+          to: 2,
+          why: ["Alpha Tools: it is a framework or loads at the top."],
+          sources: [],
+          kind: "group",
+        },
+        {
+          key: "bravo",
+          name: "Bravo Beds",
+          from: 2,
+          to: 4,
+          why: [
+            "No rule places it: a full re-sort puts such mods in order of their names.",
+          ],
+          sources: [],
+          kind: "order",
+        },
+      ],
+      set_aside: [],
+      rules: { yours: 1, own: 4, needs: 2, community: 3 },
+      placings: { top: 0, bottom: 0 },
+      count: 5,
+      applied: false,
+      sets: [],
+    },
+  },
+};
+
 const rules = {
   result: {
     rules: [
@@ -271,7 +324,7 @@ const compared = {
   },
 };
 
-async function open(page: Page) {
+async function open(page: Page, replies: Record<string, unknown> = {}) {
   await mockHost(page, {
     mod_list_undo: {
       result: {
@@ -336,6 +389,7 @@ async function open(page: Page) {
     mod_list_add_rule: {
       result: { ok: true, title: "kept", refusal: null, data: {} },
     },
+    ...replies,
   });
   await page.goto("/");
   // What the page asks the host, as plain data, for the checks below.
@@ -523,6 +577,33 @@ for (const [name, viewport] of [
           (await asked(page, "mod_list_sort")).map((a) => a.apply),
         )
         .toEqual([false, true]);
+    });
+
+    test("a full re-sort lists the rule moves and folds those only a group or the names place", async ({
+      page,
+    }) => {
+      await open(page, { mod_list_sort: fullSorted });
+      await page.getByRole("button", { name: "Sort", exact: true }).click();
+      await page.getByRole("button", { name: "Full re-sort" }).click();
+      await expect(
+        page.getByRole("heading", { name: "Moved because a rule asks (1)" }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(
+          "Bravo Beds loads after Delta Doors (Bravo Beds: its own files)",
+        ),
+      ).toBeVisible();
+      const grouped = page.getByText(/^1 more moved into its group/);
+      const ordered = page.getByText("1 more moved only to put names in order");
+      await expect(grouped).toBeVisible();
+      await expect(ordered).toBeVisible();
+      await expect(page.getByText("3 → 2")).toBeHidden();
+      await grouped.click();
+      await ordered.click();
+      await expect(page.getByText("3 → 2")).toBeVisible();
+      await expect(page.getByText("2 → 4")).toBeVisible();
+      await shot(page, `${name}-sort-full`);
+      await audit(page);
     });
 
     test("a rule of your own is made by finding the mods by name", async ({

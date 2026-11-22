@@ -1,6 +1,6 @@
 /**
- * A picture of the page to share (the owner's request, 19 Nov 2026): the whole page, the parts scrolled out of view included,
- * drawn into a PNG by html-to-image. Only the page itself is drawn, never the bars around it.
+ * A picture of the window to share (the owner's request, 19 Nov 2026): the whole window since 0.68.0 (the bar, the page list, the
+ * page and its details), the page's parts scrolled out of view included, drawn into a PNG by html-to-image.
  */
 
 /** Room below the page in the picture, for text that draws a touch taller in a picture than on screen. */

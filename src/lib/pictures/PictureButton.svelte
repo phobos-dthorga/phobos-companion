@@ -13,9 +13,10 @@
   import { savePicture, showPicture } from "./desktopClient";
 
   /**
-   * Save a picture: the whole page, scrolled parts included, saved into the Companion's folder in the owner's Pictures and copied,
-   * ready to paste into a message (the owner's request, 19 Nov 2026, to share with Hiddensoul and friends). It says where it went,
-   * with a button to show it in its folder.
+   * Save a picture: the whole window, the page's scrolled parts included, saved into the Companion's folder in the owner's Pictures
+   * and copied, ready to paste into a message (the owner's request, 19 Nov 2026, to share with Hiddensoul and friends). It says
+   * where it went, with a button to show it in its folder. Until 0.68.0 it drew only the page; the owner chose the whole window
+   * (23 Nov 2026), once the pages had moved to the left side, so a picture shows the bar, the page list and the details too.
    */
   let { game, page }: { game: string; page: string } = $props();
 
@@ -32,9 +33,16 @@
   const LOOK_MS = 250;
   let looking: ReturnType<typeof setInterval> | null = null;
 
+  /** The page itself, which says whether it is still loading. */
   function pageElement(): HTMLElement | null {
     const main = document.querySelector("main");
     return main instanceof HTMLElement ? main : null;
+  }
+
+  /** What the picture shows: the whole window (0.68.0). */
+  function windowElement(): HTMLElement | null {
+    const shell = document.querySelector(".shell");
+    return shell instanceof HTMLElement ? shell : null;
   }
 
   function stopLooking() {
@@ -50,7 +58,7 @@
     if (result.state === "drawing" || result.state === "waiting") return;
     const main = pageElement();
     if (!main) return;
-    if (!stillLoading(main)) return void draw(main);
+    if (!stillLoading(main)) return void draw();
     result = { state: "waiting" };
     const askedOn = page;
     let looks = 0;
@@ -64,15 +72,14 @@
       looks = settledLooks(looks, stillLoading(now));
       if (looks >= SETTLED_LOOKS) {
         stopLooking();
-        void draw(now);
+        void draw();
       }
     }, LOOK_MS);
   }
 
   function takeNow() {
     stopLooking();
-    const main = pageElement();
-    if (main) void draw(main);
+    void draw();
   }
 
   function dismiss() {
@@ -82,10 +89,12 @@
 
   onDestroy(stopLooking);
 
-  async function draw(main: HTMLElement) {
+  async function draw() {
+    const whole = windowElement();
+    if (!whole) return;
     result = { state: "drawing" };
     try {
-      const bytes = await capture(main);
+      const bytes = await capture(whole);
       const copied = await copyPicture(bytes);
       const saved = await savePicture(
         bytes,

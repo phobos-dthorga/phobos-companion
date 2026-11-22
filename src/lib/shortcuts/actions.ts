@@ -193,6 +193,74 @@ export const ACTIONS: Action[] = [
     defaultKey: ",",
     words: "shortcut-nav-back",
   },
+  // A page's tabs (0.66.0; the owner's choice of 23 Nov 2026: ; and ' to step, Alt + a number to jump). They work while a page
+  // with tabs is on screen.
+  {
+    id: "tab.previous",
+    scope: "everywhere",
+    defaultKey: ";",
+    words: "shortcut-tab-previous",
+  },
+  {
+    id: "tab.next",
+    scope: "everywhere",
+    defaultKey: "'",
+    words: "shortcut-tab-next",
+  },
+  {
+    id: "tab.1",
+    scope: "everywhere",
+    defaultKey: "Alt+1",
+    words: "shortcut-tab-1",
+  },
+  {
+    id: "tab.2",
+    scope: "everywhere",
+    defaultKey: "Alt+2",
+    words: "shortcut-tab-2",
+  },
+  {
+    id: "tab.3",
+    scope: "everywhere",
+    defaultKey: "Alt+3",
+    words: "shortcut-tab-3",
+  },
+  {
+    id: "tab.4",
+    scope: "everywhere",
+    defaultKey: "Alt+4",
+    words: "shortcut-tab-4",
+  },
+  {
+    id: "tab.5",
+    scope: "everywhere",
+    defaultKey: "Alt+5",
+    words: "shortcut-tab-5",
+  },
+  {
+    id: "tab.6",
+    scope: "everywhere",
+    defaultKey: "Alt+6",
+    words: "shortcut-tab-6",
+  },
+  {
+    id: "tab.7",
+    scope: "everywhere",
+    defaultKey: "Alt+7",
+    words: "shortcut-tab-7",
+  },
+  {
+    id: "tab.8",
+    scope: "everywhere",
+    defaultKey: "Alt+8",
+    words: "shortcut-tab-8",
+  },
+  {
+    id: "tab.9",
+    scope: "everywhere",
+    defaultKey: "Alt+9",
+    words: "shortcut-tab-9",
+  },
   {
     id: "nav.forward",
     scope: "everywhere",

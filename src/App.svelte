@@ -26,13 +26,15 @@
   import GoTo from "./lib/navigation/GoTo.svelte";
   import { register, dispatch } from "./lib/shortcuts/registry";
   import { loadShortcuts, shortcuts } from "./lib/shortcuts/state.svelte";
-  import GamesNavigator from "./lib/home/GamesNavigator.svelte";
+  import GamePicker from "./lib/home/GamePicker.svelte";
+  import PageRail from "./lib/shell/PageRail.svelte";
+  import { readWaiting, waiting } from "./lib/shell/waiting.svelte";
   import WherePage from "./lib/home/WherePage.svelte";
   import NotForTools from "./lib/home/NotForTools.svelte";
   import { pageServes } from "./lib/home/kinds";
   import { VERSION } from "./lib/about/version";
   import { readHome } from "./lib/home/desktopClient";
-  import { formatTime, formatUnixDate } from "./lib/home/presentation";
+  import { formatTime } from "./lib/home/presentation";
   import type { HomeReading } from "./lib/home/types";
   import { t } from "./lib/i18n/runtime";
   import AtlasPage from "./lib/atlas/AtlasPage.svelte";
@@ -96,7 +98,19 @@
     home = nextHome;
     now = new Date();
     looking = false;
+    lookedAgain += 1;
   }
+
+  /** What waits on you, beside each page (0.66.0): read again for each game, each Look again, and when agent features change. */
+  let lookedAgain = $state(0);
+  $effect(() => {
+    void lookedAgain;
+    void agents.shown;
+    if (selected) readWaiting(selected);
+  });
+  const counts = $derived(
+    selected && waiting.game === selected.id ? waiting.counts : {},
+  );
 
   let helpOpen = $state(false);
   let goToOpen = $state(false);
@@ -122,51 +136,6 @@
     ["page.memory", "memory"],
     ["page.explorer", "explorer"],
     ["page.guide", "guide"],
-  ];
-
-  /** The page bar's groups (0.22.0): what you play with, the code behind it, and the tools' own pages. */
-  const PAGE_GROUPS: {
-    id: string;
-    key: string;
-    pages: { page: Page; key: string }[];
-  }[] = [
-    {
-      id: "play",
-      key: "pages-group-play",
-      pages: [
-        { page: "home", key: "page-home" },
-        { page: "mods", key: "page-mods" },
-        { page: "modlist", key: "page-modlist" },
-        { page: "tests", key: "page-tests" },
-        { page: "logs", key: "page-logs" },
-        { page: "memory", key: "page-memory" },
-        { page: "gamefiles", key: "page-gamefiles" },
-        { page: "explorer", key: "page-explorer" },
-        { page: "atlas", key: "page-atlas" },
-      ],
-    },
-    {
-      id: "code",
-      key: "pages-group-code",
-      pages: [
-        { page: "changes", key: "page-changes" },
-        { page: "timeline", key: "page-timeline" },
-        { page: "codemap", key: "page-codemap" },
-        { page: "makeup", key: "page-makeup" },
-      ],
-    },
-    {
-      id: "tools",
-      key: "pages-group-tools",
-      pages: [
-        { page: "reports", key: "page-reports" },
-        { page: "settings", key: "page-settings" },
-        { page: "decisions", key: "page-decisions" },
-        { page: "picks", key: "page-picks" },
-        { page: "about", key: "page-about" },
-        { page: "guide", key: "page-guide" },
-      ],
-    },
   ];
 
   /** Moves to the game before or after the one shown, in the list's order. */
@@ -243,7 +212,9 @@
 </script>
 
 <div class="shell">
-  <header class="command-bar">
+  <!-- One bar on top (0.66.0; the owner's choice of 23 Nov 2026): the brand, the game looked at, and the trail. The pages moved
+       to the left side; the games into the picker. -->
+  <header class="command-bar" aria-label={t("observation-label")}>
     <div class="brand">
       <Crest />
       <div>
@@ -251,41 +222,13 @@
         <div class="name">{t("brand-name")}</div>
       </div>
     </div>
-    <nav class="pages" aria-label={t("pages-label")}>
-      {#each PAGE_GROUPS as group (group.id)}
-        <div
-          class="page-group"
-          role="group"
-          aria-labelledby={`pages-${group.id}`}
-        >
-          <span class="group-name" id={`pages-${group.id}`}>{t(group.key)}</span
-          >
-          {#each group.pages.filter((p) => agents.shown || !FOR_AGENTS_PAGES.includes(p.page)) as next (next.page)}
-            <button
-              type="button"
-              class="page"
-              class:current={page === next.page}
-              class:elsewhere={!pageServes(selected?.kind, next.page)}
-              aria-current={page === next.page ? "page" : undefined}
-              onclick={() => goPage(next.page)}>{t(next.key)}</button
-            >
-          {/each}
-        </div>
-      {/each}
-    </nav>
-  </header>
-
-  <section class="observation-bar" aria-label={t("observation-label")}>
-    <span>
-      <span class="muted">{t("observation-looking-at")}</span>
-      <strong>{selected ? selected.name : t("observation-nothing")}</strong>
-    </span>
-    {#if selected?.last_worked != null}
-      <span>
-        <span class="muted">{t("observation-last-worked")}</span>
-        <strong class="read">{formatUnixDate(selected.last_worked)}</strong>
-      </span>
-    {/if}
+    <GamePicker
+      {games}
+      {selected}
+      {now}
+      reading={home.state === "reading"}
+      onselect={(id) => goGame(id)}
+    />
     <span class="trail" role="group" aria-label={t("trail-label")}>
       <button
         type="button"
@@ -332,26 +275,22 @@
         <ProgressBar progress={started()} fallback={t("action-looking-bar")} />
       </div>
     {/if}
-  </section>
+  </header>
 
   <ActivityStrip />
 
   <div class="workspace">
-    <nav class="navigator" aria-label={t("games-label")}>
-      <h2 class="eyebrow muted">{t("games-label")}</h2>
-      {#if games.length > 0}
-        <GamesNavigator
-          {games}
-          selectedId={selected?.id ?? null}
-          {now}
-          onselect={(id) => goGame(id)}
-        />
-      {:else if home.state === "reading"}
-        <p class="muted">{t("games-reading")}</p>
-      {:else}
-        <p class="muted">{t("games-empty")}</p>
+    <div class="navigator">
+      <PageRail
+        {page}
+        kind={selected?.kind}
+        {counts}
+        onchoose={(next) => goPage(next)}
+      />
+      {#if games.length === 0 && home.state !== "reading"}
+        <p class="muted small">{t("games-empty")}</p>
       {/if}
-    </nav>
+    </div>
 
     <main class="canvas">
       {#if home.state === "ready" && home.home.git_found === false}
@@ -422,7 +361,7 @@
           <AtlasPage game={selected} />
         {/key}
       {:else if selected}
-        <WherePage game={selected} {now} />
+        <WherePage game={selected} {games} {now} />
       {:else if home.state === "reading"}
         <div class="eyebrow accent">{t("home-kicker")}</div>
         <h1>{t("home-reading")}</h1>
@@ -563,17 +502,16 @@
 </div>
 
 <style>
-  /* Header, what is looked at, the activity strip, the workspace (the one row that stretches) and the status bar. The strip had
-     no row of its own from 0.21.0 to 0.23.0, so it took the stretching row: a short page, such as one still loading, had an empty
-     band above it as tall as the space left over. */
+  /* The bar on top, the activity strip, the workspace (the one row that stretches) and the status bar. The strip had no row of its
+     own from 0.21.0 to 0.23.0, so it took the stretching row: a short page, such as one still loading, had an empty band above it
+     as tall as the space left over. The bar was two bands until 0.66.0. */
   .shell {
     min-height: 100vh;
     display: grid;
-    grid-template-rows: auto auto auto 1fr auto;
+    grid-template-rows: auto auto 1fr auto;
   }
 
   .command-bar,
-  .observation-bar,
   /* The version, always in sight (0.25.0: the owner could not find one anywhere); it opens About. */
   .footer-end {
     display: inline-flex;
@@ -606,7 +544,9 @@
   }
 
   .command-bar {
-    padding-block: 12px;
+    gap: 8px 16px;
+    padding: 10px 24px;
+    font-size: var(--type-small);
     background: var(--colour-surface);
     border-bottom: 1px solid var(--colour-line);
   }
@@ -614,7 +554,8 @@
   .brand {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
+    margin-inline-end: 8px;
   }
 
   .house {
@@ -627,15 +568,9 @@
 
   .name {
     font-family: var(--font-display);
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
     line-height: 1.15;
-  }
-
-  .pages {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
   }
 
   .no-git {
@@ -643,58 +578,6 @@
     padding: 8px 12px;
     border-inline-start: 3px solid var(--colour-risk);
     background: var(--colour-surface-raised);
-  }
-
-  .page-group {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    padding-inline-end: 12px;
-    border-inline-end: 1px solid var(--colour-line);
-  }
-
-  .page-group:last-child {
-    border-inline-end: none;
-  }
-
-  .group-name {
-    font-size: var(--type-small);
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--colour-text-muted);
-  }
-
-  .page {
-    min-height: var(--control-min);
-    padding-inline: 18px;
-    font: inherit;
-    color: var(--colour-text-muted);
-    background: transparent;
-    border: 1px solid var(--colour-line);
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  /* A page with nothing for the entry looked at (a set of tools has no saves or log, 0.24.0): a dashed edge, and the page says
-     why when opened. */
-  .page.elsewhere {
-    border-style: dashed;
-  }
-
-  .page.current {
-    font-weight: 600;
-    color: var(--colour-text);
-    background: var(--colour-surface-soft);
-    border: 2px solid var(--colour-accent);
-  }
-
-  .observation-bar {
-    padding-block: 10px;
-    font-size: var(--type-small);
-    background: var(--colour-canvas);
-    border-bottom: 1px solid var(--colour-line);
   }
 
   .looking-bar {
@@ -717,20 +600,11 @@
     margin-inline-start: auto;
   }
 
-  strong {
-    font-weight: 600;
-  }
-
-  .read {
-    color: var(--colour-observed);
-  }
-
+  /* The pages' list, the page, and the details beside it. The list's column is narrower than the games column it replaced
+     (0.66.0), so no page lost width. */
   .workspace {
     display: grid;
-    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr) minmax(
-        240px,
-        320px
-      );
+    grid-template-columns: 224px minmax(0, 1fr) minmax(240px, 320px);
   }
 
   .navigator,
@@ -740,15 +614,12 @@
   }
 
   .navigator {
+    padding: 16px 10px;
     border-right: 1px solid var(--colour-line);
   }
 
   .inspector {
     border-left: 1px solid var(--colour-line);
-  }
-
-  .navigator .eyebrow {
-    margin-bottom: 10px;
   }
 
   .canvas {

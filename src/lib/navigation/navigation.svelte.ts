@@ -39,6 +39,17 @@ export function goGame(game: string) {
   go({ page: here().page, game, focus: {}, dialog: null });
 }
 
+/**
+ * Another tab of the page where you are (0.66.0): a step of the trail, so Back returns to the tab left. Whatever else the page had
+ * chosen stays; an older `panel` choice is let go, since the tab now says where you are.
+ */
+export function goTab(tab: string) {
+  const kept = Object.fromEntries(
+    Object.entries(here().focus).filter(([key]) => key !== "panel"),
+  );
+  go({ ...here(), focus: { ...kept, tab }, dialog: null });
+}
+
 /** A choice made on the page where you are: it becomes part of the place, without a new step. */
 export function setFocus(focus: Record<string, string>) {
   nav.trail = trails.amend(nav.trail, { focus: { ...here().focus, ...focus } });

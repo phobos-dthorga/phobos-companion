@@ -6,12 +6,14 @@ go: mods
 words: install, update, backup, go back, restore, build, encode, textures, version
 see: task-before-playing, task-go-back, task-back-up-mod, term-backup, term-changelog-entry, term-build, term-textures
 ---
-**Your installed mods, beside what installing from the repository would bring.** The page for updating, going back and backups.
+**Your installed mods, beside what installing from the repository would bring.** The page for updating, going back and backups, in three tabs. A tab says when something waits in it.
 
-### At the top: Before you play
+### Before you play
 Whether anything needs building, installing or encoding, with a button for each: **Build now**, **Install everything that changed** and **Encode their textures**. A mod in the repository that was never installed is named on a line of its own, with **Install for the first time**: it is there for you to choose, so **Ready to play** still shows beside it. It also says what updated [since you last played](task-what-updated), with **Check what they mean for ours** to see whether those updates touch our mods, and [Settings to look at](task-new-settings) lists every mod setting added, removed or given a new default.
 
-### Each mod
+### Installed and backups
+Each mod, under its repository:
+
 - **Installed now** and **After installing**, side by side: the [changelog entries](term-changelog-entry) each copy has, the files that would change, settings, and in-game tests to look out for.
 - **Install from the repository** and **Back up the installed copy**. Each asks first, in words.
 - **Backups**, newest first. **What going back changes** shows what you would gain and lose; **Go back to this** does it.
@@ -21,7 +23,11 @@ Whether anything needs building, installing or encoding, with a button for each:
 - **Compare pictures with their encoded textures** on a mod (where the game's tools pair them): each picture beside the texture the
   game loads in its place, turned the right way up. **Stale** ones show an old picture in game.
 
+### Textures
+The active mods whose [textures](term-textures) want encoding, each with how many would show an old picture, how many were never encoded, and how many a picture-loading mod unpacked. **Encode their textures** is on Before you play.
+
 **Installing, going back and encoding wait until the game is closed.** Building does not.
 
 ### Keys
 - **5** opens Mods.
+- **;** and **'** step to the tab before or after; **Alt + 1** to **Alt + 9** jump to a tab by its place. **Left** and **Right** move along the tabs when one has the keyboard. Each tab is a step of the trail, so **Back** returns to the tab you left.

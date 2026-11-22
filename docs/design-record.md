@@ -1365,6 +1365,36 @@ of the person's is changed or sent.
 **Agent choices, owner to revise:** the panel's name "Their code changed"; ten findings shown before "and N more"; 30 days looked
 back; 16:17 UTC. **Risk (agent's grade): low.**
 
+## The pages down the left, and tabs (built 23 Nov 2026, 0.66.0)
+
+**The owner's request** (23 Nov 2026): "clean-up the settings page and perhaps others too, where there's just a huuuuuuuge vertical
+trail of information", with tabs proposed, and "the main-menu at the top, which I also want to declutter somehow". Shown first as a
+mock-up (a private claude.ai page). **Owner's choices, by card:** the pages down the left, the games as a picker in the top bar;
+tabs across the page; Settings, Mods and About this round (Home's two columns not chosen); ; and ' to step and Alt + a number to
+jump; counts only for what waits on you; the list's rows 40 px; each game's last worked date in the picker and on Home.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Find a page in one list, each with its key; see from the list what waits on them; reach one part of Settings, Mods or About without scrolling past the rest, by press, key or address |
+| What does it stop them doing? | Seeing every part of those pages in one scroll: a part is one press away. The games column, always in sight until now, is one press away in the picker, and on Home |
+| How does it change the way they work? | One bar on top where there were two; a part of a page is a place of its own, so Back, Go to anything and a copied address reach it |
+| What outside the thing notices? | Nothing outside the window: it only moves what is shown |
+
+| Part | How |
+| --- | --- |
+| The page list | `src/lib/shell/PageRail.svelte`, the groups of 0.22.0; each page's key from `keyFor` (`src/lib/shortcuts/state.svelte.ts`) |
+| Counts | `src/lib/shell/waiting.svelte.ts` reads, for the game looked at, the decisions and picks waiting (only while agent features show), test rows on the Tests page's "seen" shelf, and mod settings to look at; `counted` keeps only counts above nought, so unknown shows nothing. Read again for each game and each Look again |
+| The game picker | `src/lib/home/GamePicker.svelte`; Home's `GamesPanel.svelte` lists every game with its date and **Look at this** |
+| Tabs | `src/lib/shell/Tabs.svelte` draws any page's row; `src/lib/shell/tabs.ts` holds `PAGE_TABS` (every page's tabs, the one list the pages and Go to anything read) and the rules: the place's `tab` focus key, else the tab holding an older `panel`, else one a focus key names. `goTab` (`navigation.svelte.ts`) makes each change a trail step |
+| Keys | `tab.previous` (;), `tab.next` ('), `tab.1` to `tab.9` (Alt + 1 to 9), in `actions.ts`, offered while a tab row is on screen |
+| Settings | Six tabs; the settings as one line each that opens (kit 1.95.0 gives each a short `name`), with All, Every game, each game, and Needs you |
+| Games | Game-free: the list, the picker and the tabs name no game, and a game's own pages keep their places. A tools entry shows the game-only pages dashed, as before |
+
+**Agent choices, owner to revise:** the tabs' names and order; which counts the Tests page gives (the "seen" shelf only); the right
+column (where the page's information comes from, the colours' key, the tools found) kept as it was, since the mock-up left it out
+but nobody asked for it to go; the page list 224 px wide. **The list's 40 px rows** are the owner's choice, below the 44 px rule
+for a control; AGENTS.md says so beside the rule. **Risk (agent's grade): none**: nothing is written.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

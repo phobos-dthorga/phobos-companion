@@ -12,4 +12,4 @@ The first time the Companion opens on a PC, Home shows **First steps**. Two step
 
 That's all: the Companion comes with everything it needs (its own Python and [tools](term-tool-kit)), except **git**, which reads your projects' history. If git is missing, every page says so, with where to get it.
 
-Add more games any time from **Settings**, at **Games on the list**: see [add a game](task-add-game).
+Add more games any time from **Settings**, on the **Games** tab: see [add a game](task-add-game).

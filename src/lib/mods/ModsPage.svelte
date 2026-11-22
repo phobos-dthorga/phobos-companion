@@ -32,6 +32,8 @@
     texturePairsOffered,
   } from "./desktopClient";
   import TexturePairs from "./TexturePairs.svelte";
+  import Tabs from "../shell/Tabs.svelte";
+  import { tabsOf } from "../shell/tabs";
   import {
     blockedBy,
     changedMods,
@@ -149,6 +151,26 @@
     reading.state === "ready"
       ? preflight(repositories, textures, game.name)
       : [],
+  );
+
+  /** Mods whose textures want encoding, for the Textures tab and its mark. */
+  const toEncode = $derived(
+    textures.state === "ready" ? encodeTargets(textures.status.mods) : [],
+  );
+
+  /**
+   * The page's parts as tabs (0.66.0; the owner's choice of 23 Nov 2026). Home's count of settings to look at leads to Before you
+   * play; a link naming a mod (by its folder, its changelog or a moment before) to Installed and backups.
+   */
+  const todo = $derived(checks.filter((check) => check.kind === "todo").length);
+  const tabs = $derived(
+    tabsOf("mods", {
+      before: todo > 0 ? t("mods-tab-todo", { count: todo }) : null,
+      textures:
+        toEncode.length > 0
+          ? t("mods-tab-encode", { count: toEncode.length })
+          : null,
+    }),
   );
 
   /** Reads again. A quiet read keeps what is on screen until the answer arrives. */
@@ -884,6 +906,21 @@
   <p class="lead">{t("mods-none", { game: game.name })}</p>
   <GuideLink entry="task-repository-ready" words={t("guide-ready-link")} />
 {:else}
+  <Tabs {tabs} id="mods" label={t("mods-tabs-label")}>
+    {#snippet children(tab)}
+      {#if tab === "installed"}
+        {@render installed()}
+      {:else if tab === "textures"}
+        {@render texturesPart()}
+      {:else}
+        {@render beforePart()}
+      {/if}
+    {/snippet}
+  </Tabs>
+  <p class="muted how">{t("mods-how")}</p>
+{/if}
+
+{#snippet beforePart()}
   <section class="strip" aria-labelledby="before-you-play">
     <h2 id="before-you-play">{t("mods-pre-heading")}</h2>
     <ul class="checks">
@@ -966,7 +1003,9 @@
   </section>
 
   <SettingsToLook game={game.id} />
+{/snippet}
 
+{#snippet installed()}
   {#each repositories as repository (repository.repository)}
     {#if repositories.length > 1}
       <h2 class="repository">{repository.repository}</h2>
@@ -1205,8 +1244,19 @@
       </div>
     {/if}
   {/each}
+{/snippet}
 
-  {#if textures.state === "ready" && encodeTargets(textures.status.mods).length > 0}
+{#snippet texturesPart()}
+  {#if textures.state === "reading"}
+    <ProgressBar
+      progress={textureProgress}
+      fallback={t("mods-pre-textures-reading")}
+    />
+  {:else if textures.state !== "ready"}
+    <p class="muted">{t("mods-textures-unread")}</p>
+  {:else if toEncode.length === 0}
+    <p class="muted">{t("mods-textures-none")}</p>
+  {:else}
     <section class="textures" aria-labelledby="textures-heading">
       <h2 id="textures-heading">{t("mods-textures-heading")}</h2>
       <p class="small">
@@ -1216,7 +1266,7 @@
         {/if}
       </p>
       <ul class="entries">
-        {#each encodeTargets(textures.status.mods) as found (found.folderName)}
+        {#each toEncode as found (found.folderName)}
           <li>
             <strong>{found.name}</strong>
             <span class="muted">({found.source})</span>
@@ -1239,8 +1289,7 @@
       </ul>
     </section>
   {/if}
-  <p class="muted how">{t("mods-how")}</p>
-{/if}
+{/snippet}
 
 <style>
   h2 {

@@ -170,7 +170,7 @@ test.describe("a picture of a page still loading", () => {
       page.locator("main [data-picture-wait]").first(),
     ).toBeVisible();
     // A short page starts right under the bars: no empty band where the activity strip once took the spare height.
-    const bars = await page.locator(".observation-bar").boundingBox();
+    const bars = await page.locator(".command-bar").boundingBox();
     const work = await page.locator(".workspace").boundingBox();
     expect(
       (work?.y ?? 0) - ((bars?.y ?? 0) + (bars?.height ?? 0)),

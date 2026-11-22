@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, openTab, sampleHome } from "./host";
 
 const CONTROL_MIN_PX = 44;
 
@@ -34,7 +34,7 @@ async function open(page: Page, saved: unknown = null) {
     settings_list: { result: sampleSettings },
     read_shortcuts: { result: saved },
     save_shortcuts: {
-      result: { format: 1, enabled: true, keys: { "page.settings": ";" } },
+      result: { format: 1, enabled: true, keys: { "page.settings": "`" } },
     },
   });
   await page.goto("/");
@@ -75,6 +75,8 @@ test.describe("Keyboard shortcuts", () => {
   test("never acts while typing in a box", async ({ page }) => {
     await open(page);
     await page.keyboard.press("9");
+    await openTab(page, "Folders and files");
+    await page.locator("#setting-historyPath .line").click();
     await page
       .getByRole("button", { name: "Type a path for historyPath" })
       .click();
@@ -89,6 +91,7 @@ test.describe("Keyboard shortcuts", () => {
   }) => {
     await open(page);
     await page.keyboard.press("9");
+    await openTab(page, "Look and keys");
     await page
       .getByRole("button", { name: "Change keyboard shortcuts" })
       .click();
@@ -111,15 +114,35 @@ test.describe("Keyboard shortcuts", () => {
     await expect(editor.getByRole("status")).toContainText(
       "1 already does: Go to Home.",
     );
-    // ; is free; S became Mod list's in 0.45.0, and Z the code viewer's flick in 0.50.0.
-    await page.keyboard.press(";");
+    // ` is free; S became Mod list's in 0.45.0, Z the code viewer's flick in 0.50.0, and ; the tab before in 0.66.0.
+    await page.keyboard.press("`");
     await expect(editor.getByRole("status")).toContainText(
-      "Go to Settings is now ;.",
+      "Go to Settings is now `.",
     );
     await editor.getByRole("button", { name: "Close" }).click();
     await page.keyboard.press("1");
-    await page.keyboard.press(";");
+    await page.keyboard.press("`");
     await expect(settingsHeading(page)).toBeVisible();
+  });
+
+  // 0.66.0: ; and ' step along a page's tabs, Alt + a number jumps, and each tab is a step Back returns from.
+  test("steps and jumps along a page's tabs, and Back returns to the tab left", async ({
+    page,
+  }) => {
+    await open(page);
+    await page.keyboard.press("9");
+    const selected = page.getByRole("tab", { selected: true });
+    await expect(selected).toHaveAccessibleName(/^Look and keys/);
+    await page.keyboard.press("'");
+    await expect(selected).toHaveAccessibleName(/^Games/);
+    await page.keyboard.press("Alt+5");
+    await expect(selected).toHaveAccessibleName(/^Backups and space/);
+    await page.keyboard.press(";");
+    await expect(selected).toHaveAccessibleName(/^Going online/);
+    await page.keyboard.press(",");
+    await expect(selected).toHaveAccessibleName(/^Backups and space/);
+    await page.keyboard.press(",");
+    await expect(selected).toHaveAccessibleName(/^Games/);
   });
 
   test("does nothing when the owner turned them off", async ({ page }) => {

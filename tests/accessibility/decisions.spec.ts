@@ -141,7 +141,7 @@ test.describe("Decisions", () => {
     ]) {
       await expect(
         bar.getByRole("group", { name: group }).getByRole("button").first(),
-      ).toHaveText(first);
+      ).toHaveAccessibleName(first);
     }
     await audit(page);
   });

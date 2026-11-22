@@ -28,11 +28,16 @@
   import { agents } from "../agents/state.svelte";
   import GateLights from "../online/GateLights.svelte";
   import TheirCodeChanged from "../online/TheirCodeChanged.svelte";
+  import GamesPanel from "./GamesPanel.svelte";
 
   const PENDING_SHOWN = 6;
   const OPEN_SHOWN = 6;
 
-  let { game, now }: { game: GameHome; now: Date } = $props();
+  let {
+    game,
+    games = [],
+    now,
+  }: { game: GameHome; games?: GameHome[]; now: Date } = $props();
 
   const headline = $derived(headlineWords(game, now));
   const last = $derived(game.latest[0]);
@@ -116,6 +121,8 @@
     {t("home-never-body")}
   {/if}
 </p>
+
+<GamesPanel {games} selected={game.id} {now} />
 
 {#if game.unfinished.length > 0}
   <section class="panel attention">

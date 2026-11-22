@@ -70,13 +70,13 @@ build differs from its proposal.
 | Code map | `repository`, `node` (a thing's id, `cs:...`, `def:...`, `lua:...`, `py:...`); `their` (another author's type or member, 0.26.0); `update` (a kept file, such as `Vehicles.dll`), `owner` (its mod's id) and `member` (one declaration's change), 0.26.0 |
 | Timeline | `day` (YYYY-MM-DD) |
 | Tests | `repository`, `row` |
-| Settings | `key`; `panel` brings a panel into view: `records`, `cleanup`, `themes`, `games`, `agents` (0.37.0) |
-| Mods | `repository`, and `mod` or `changelog`; `before` (a moment) marks the newest backup from before it; `panel=settings` brings the settings to look at into view (0.21.0) |
+| Settings | `tab` (0.66.0): `look`, `games`, `folders`, `online`, `backups`, `agents`; `key` opens that setting on `folders`; `show` (`all`, `every`, `needs` or a game's id) chooses which settings `folders` lists; `panel` still lands on the tab holding it and brings it into view: `records`, `cleanup`, `themes`, `games`, `agents`, `online` (0.37.0) |
+| Mods | `tab` (0.66.0): `before`, `installed`, `textures`; `repository`, and `mod` or `changelog` (on `installed`); `before` (a moment) marks the newest backup from before it; `panel=settings` lands on `before` and brings the settings to look at into view (0.21.0) |
 | Logs | `signature` |
 | Memory | `watch` (a kept watch's name, such as `20261119-205419-reload-test-2`; 0.23.0) |
 | Explorer | `view` (`kind` or `object`; none for the overview), `kind` (a type's full name, such as `Verse.Pawn`), with `match` (a word filter), `largest` (`yes`) and `page`; `object` (a token such as `o7`, never a memory address) with `snapshot` (the snapshot's number in this run of the program): a step back to an object from a snapshot let go says it is gone and offers the overview; `start` (`yes`: asks at once whether to take a snapshot, as Go to anything's **Look inside the running game** does) |
 | Reports | `command`, `report` |
-| About | none (0.25.0) |
+| About | `tab` (0.66.0): `version`, `where`, `online`, `built` |
 | Guide | `entry` (an entry's id, such as `task-go-back`; 0.34.0). Each entry opened is a step |
 
 ## Proposed order

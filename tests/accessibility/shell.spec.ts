@@ -5,6 +5,8 @@ import { healthyKit, mockHost, sampleHome } from "./host";
 
 const TYPE_FLOOR_PX = 12;
 const CONTROL_MIN_PX = 44;
+/** The page list's rows: the owner's choice of 23 Nov 2026 (0.66.0), the one exception to the 44 px rule. */
+const PAGE_ROW_MIN_PX = 40;
 
 async function audit(page: Page) {
   const results = await new AxeBuilder({ page })
@@ -35,13 +37,15 @@ for (const [name, viewport] of [
   test.describe(name, () => {
     test.use({ viewport });
 
-    test("browser preview: has all five bands and says what it is", async ({
+    // One bar on top since 0.66.0, where there were two, and the pages listed down the left.
+    test("browser preview: has the bar, the page list, the page and its details, and says what it is", async ({
       page,
     }) => {
       await page.goto("/");
       await expect(page.locator(".command-bar")).toBeVisible();
-      await expect(page.locator(".observation-bar")).toBeVisible();
-      await expect(page.locator(".navigator")).toBeVisible();
+      await expect(
+        page.getByRole("navigation", { name: "Pages" }),
+      ).toBeVisible();
       await expect(page.locator("main.canvas")).toBeVisible();
       await expect(page.locator(".inspector")).toBeVisible();
       await expect(page.locator(".inspector")).toContainText("browser preview");
@@ -91,25 +95,62 @@ for (const [name, viewport] of [
 
       test("keeps every control big enough", async ({ page }) => {
         const heights = await page
-          .getByRole("button")
+          .locator("button:not(.rail .page)")
           .evaluateAll((buttons) =>
             buttons.map((b) => b.getBoundingClientRect().height),
           );
         expect(Math.min(...heights)).toBeGreaterThanOrEqual(CONTROL_MIN_PX);
+        const rows = await page
+          .getByRole("navigation", { name: "Pages" })
+          .getByRole("button")
+          .evaluateAll((buttons) =>
+            buttons.map((b) => b.getBoundingClientRect().height),
+          );
+        expect(rows.length).toBeGreaterThan(10);
+        expect(Math.min(...rows)).toBeGreaterThanOrEqual(PAGE_ROW_MIN_PX);
       });
 
+      // The games are a picker in the top bar since 0.66.0: it opens on the game looked at, and the arrows move along the list.
       test("changes game from the keyboard", async ({ page }) => {
-        await page.getByRole("button", { name: /Second Sample/ }).focus();
+        const picker = page.getByRole("button", { name: /Looking at/ });
+        await picker.focus();
+        await page.keyboard.press("Enter");
+        await expect(picker).toHaveAttribute("aria-expanded", "true");
+        await page.keyboard.press("ArrowDown");
         await page.keyboard.press("Enter");
         await expect(page.getByRole("heading", { level: 1 })).toContainText(
           "You left Second Sample 40 days ago.",
         );
-        await expect(
-          page.getByRole("button", { name: /Second Sample/ }),
-        ).toHaveAttribute("aria-pressed", "true");
+        await expect(picker).toContainText("Second Sample");
+        await expect(picker).toHaveAttribute("aria-expanded", "false");
         await expect(page.locator(".canvas")).not.toContainText(
           "Left unfinished",
         );
+      });
+
+      test("lists your games on Home, each with when you last worked on it", async ({
+        page,
+      }) => {
+        const panel = page.getByRole("region", { name: "Your games" });
+        await expect(panel).toContainText("Second Sample");
+        await panel
+          .getByRole("button", { name: "Look at Second Sample" })
+          .click();
+        await expect(page.getByRole("heading", { level: 1 })).toContainText(
+          "You left Second Sample 40 days ago.",
+        );
+      });
+
+      test("Escape closes the games without changing game", async ({
+        page,
+      }) => {
+        const picker = page.getByRole("button", { name: /Looking at/ });
+        await picker.click();
+        await expect(page.locator("#game-picker-list")).toBeVisible();
+        await page.keyboard.press("Escape");
+        await expect(page.locator("#game-picker-list")).toHaveCount(0);
+        await expect(picker).toBeFocused();
+        await expect(picker).toContainText("First Sample");
       });
 
       test("says so when a game has no history", async ({ page }) => {
@@ -121,7 +162,7 @@ for (const [name, viewport] of [
 
       test("looks again and says when", async ({ page }) => {
         await page.getByRole("button", { name: "Look again" }).click();
-        await expect(page.locator(".observation-bar")).toContainText("Read at");
+        await expect(page.locator(".command-bar")).toContainText("Read at");
         await expect(
           page.getByRole("button", { name: "Look again" }),
         ).toBeEnabled();

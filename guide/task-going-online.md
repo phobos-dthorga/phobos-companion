@@ -7,7 +7,7 @@ see: page-settings, page-home, page-about, page-logs, page-modlist
 ---
 **The Companion asks the internet only for what Settings lists under Going online**, and only reads public pages: nothing about you is sent. Each kind is **on** for the repositories on your list, and you can switch any of them off.
 
-1. Open **Settings** (the **9** key), at **Going online**.
+1. Open **Settings** (the **9** key), on the **Going online** tab.
 2. Each kind says what it does and the address it contacts. Press **On** or **Off**.
 3. Switching off a kind you would miss a lot asks first, and says what stops working. Press **Switch it off** or **Keep it on**.
 

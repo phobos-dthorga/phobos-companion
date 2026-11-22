@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, openTab, sampleHome } from "./host";
 
 const RECORDS = [
   {
@@ -131,6 +131,7 @@ test.describe("Records backup", () => {
   }) => {
     await open(page, status({ folder: null, folderExists: false }));
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await openTab(page, "Backups and space");
     const panel = page.getByRole("region", { name: "Back up your records" });
     await expect(panel).toContainText("No folder chosen yet");
     await expect(
@@ -178,6 +179,7 @@ test.describe("Records backup", () => {
     );
     await page.reload();
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await openTab(page, "Backups and space");
     const panel = page.getByRole("region", { name: "Back up your records" });
     await panel.getByRole("button", { name: "Type a folder instead" }).click();
     const box = page.locator("#setting-input-recordsBackupPath");
@@ -187,6 +189,8 @@ test.describe("Records backup", () => {
       () => (window as unknown as { sentValues: string[] }).sentValues,
     );
     expect(sent).toEqual(["N:\\Backups\\Companion"]);
+    // The box is on Folders and files (0.66.0); Back returns to the records panel.
+    await page.getByRole("button", { name: "Back", exact: true }).click();
     await expect(
       panel.getByRole("button", { name: "Back up now" }),
     ).toBeEnabled();
@@ -234,6 +238,7 @@ test.describe("Records backup", () => {
     );
     await page.reload();
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await openTab(page, "Backups and space");
     const panel = page.getByRole("region", { name: "Back up your records" });
     await panel.getByRole("button", { name: "Choose the folder" }).click();
     await expect(page.locator("main")).toContainText(
@@ -273,6 +278,8 @@ test.describe("Records backup", () => {
       pick_path: { result: null },
     });
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await openTab(page, "Folders and files");
+    await page.locator("#setting-recordsBackupPath .line").click();
     await page
       .getByRole("button", {
         name: "Choose recordsBackupPath with Windows' picker",

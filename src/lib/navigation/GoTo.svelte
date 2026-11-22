@@ -23,6 +23,7 @@
     fromGuide,
     fromPages,
     fromReports,
+    fromTabs,
     fromWatches,
     fromSettings,
     fromTests,
@@ -95,6 +96,7 @@
       (page) => t(`page-${page}`),
       agents.shown ? [] : FOR_AGENTS_PAGES,
     ),
+    ...fromTabs(game?.id ?? null, (page) => t(`page-${page}`), t),
     ...fromActions(
       game?.id ?? null,
       game && pageServes(game.kind, "explorer")

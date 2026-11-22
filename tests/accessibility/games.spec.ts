@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, openTab, sampleHome } from "./host";
 
 /** Add a game from Steam (0.31.0). Invented games and folders, for the audit only. */
 const steam = {
@@ -82,6 +82,7 @@ async function open(page: Page, added: Record<string, unknown>) {
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await openTab(page, "Games");
 }
 
 async function audit(page: Page) {

@@ -176,3 +176,17 @@ export const SAMPLE_PNG = Array.from(
     "base64",
   ),
 );
+
+/** Chooses a game from the picker in the top bar (0.66.0: the games left the side column for it). */
+export async function chooseGame(page: Page, name: string) {
+  await page.getByRole("button", { name: /Looking at/ }).click();
+  await page
+    .locator("#game-picker-list")
+    .getByRole("button", { name: new RegExp(name) })
+    .click();
+}
+
+/** Opens a tab of the page shown (0.66.0), by the words it starts with: a tab with something waiting adds them to its name. */
+export async function openTab(page: Page, name: string) {
+  await page.getByRole("tab", { name: new RegExp(`^${name}`) }).click();
+}

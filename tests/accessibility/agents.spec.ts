@@ -1,7 +1,13 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { agentsHidden, healthyKit, mockHost, sampleHome } from "./host";
+import {
+  agentsHidden,
+  healthyKit,
+  mockHost,
+  openTab,
+  sampleHome,
+} from "./host";
 
 /** Features for AI agent sessions (0.37.0): hidden unless switched on, or found in a repository. Invented data, for the audit only. */
 async function open(page: Page) {
@@ -56,6 +62,7 @@ test.describe("Features for agent sessions", () => {
   }) => {
     await open(page);
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await openTab(page, "Agent sessions");
     const panel = page.locator("#settings-agents");
     await expect(panel).toContainText("Hidden now.");
     await expect(panel).toContainText("Nothing on this PC shows");

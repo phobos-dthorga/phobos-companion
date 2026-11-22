@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, openTab, sampleHome } from "./host";
 
 /** Themes (0.33.0): the Companion's own three, read from their files, as the host would offer them. */
 const own = (file: string) =>
@@ -53,6 +53,7 @@ async function open(page: Page, more: Record<string, unknown> = {}) {
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await openTab(page, "Look and keys");
 }
 
 async function audit(page: Page) {

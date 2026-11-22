@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { chooseGame, healthyKit, mockHost, sampleHome } from "./host";
 
 const CONTROL_MIN_PX = 44;
 
@@ -155,8 +155,9 @@ for (const [name, viewport] of [
         });
 
         test("keeps every control big enough", async ({ page }) => {
+          // The page list's 40 px rows are the owner's one exception (0.66.0; shell.spec.ts checks them).
           const heights = await page
-            .getByRole("button")
+            .locator("button:not(.rail .page)")
             .evaluateAll((all) =>
               all.map((b) => b.getBoundingClientRect().height),
             );
@@ -207,7 +208,7 @@ for (const [name, viewport] of [
       test("changing game goes back to that game's list", async ({ page }) => {
         await page.getByRole("button", { name: "What's in my save?" }).click();
         await expect(page.locator("table")).toBeVisible();
-        await page.getByRole("button", { name: /Second Sample/ }).click();
+        await chooseGame(page, "Second Sample");
         await expect(page.getByRole("heading", { level: 1 })).toContainText(
           "What do you want to know about Second Sample?",
         );

@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, openTab, sampleHome } from "./host";
 
 const GB = 1024 ** 3;
 
@@ -111,6 +111,7 @@ test.describe("Clean up (0.27.0)", () => {
   }) => {
     await open(page);
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await openTab(page, "Backups and space");
     const panel = page.getByRole("region", { name: "Clean up", exact: true });
     await expect(
       panel.getByRole("button", { name: /^Install backups/ }),

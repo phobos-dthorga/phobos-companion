@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { byGame, cleanPath, otherRepositories, sendable } from "./presentation";
+import {
+  byGame,
+  cleanPath,
+  otherRepositories,
+  sendable,
+  settingName,
+  shown,
+} from "./presentation";
 import type { Setting } from "./types";
 
 function setting(
@@ -59,6 +66,30 @@ describe("the settings page", () => {
     expect(otherRepositories(found)).toEqual([
       { repository: "two", value: "L:/art" },
     ]);
+  });
+});
+
+describe("one line for each setting (0.66.0)", () => {
+  const list = [
+    setting("historyPath", null, { name: "Record of what happened" }),
+    setting("rimworldPath", "rimworld", { value: "D:/Gone", exists: false }),
+    setting("kenshiDataPath", "kenshi", { value: "D:/Kenshi", exists: true }),
+  ];
+
+  it("names a setting by its few words, else its sentence", () => {
+    expect(list.map(settingName)).toEqual([
+      "Record of what happened",
+      "rimworldPath",
+      "kenshiDataPath",
+    ]);
+  });
+
+  it("shows all, every game's, one game's, or only those that need you", () => {
+    const keys = (show: string) => shown(list, show).map((s) => s.key);
+    expect(keys("all")).toHaveLength(3);
+    expect(keys("every")).toEqual(["historyPath"]);
+    expect(keys("kenshi")).toEqual(["kenshiDataPath"]);
+    expect(keys("needs")).toEqual(["rimworldPath"]);
   });
 });
 

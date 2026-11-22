@@ -5,6 +5,7 @@ import {
   fromChanges,
   fromCode,
   fromPages,
+  fromTabs,
   fromTests,
   rank,
   type Candidate,
@@ -103,6 +104,18 @@ describe("go to anything", () => {
       }),
     );
     expect(fromPages("sample", (p) => p)).toHaveLength(PAGE_NAMES.length);
+  });
+
+  it("lists each tab of a page as a place of its own (0.66.0)", () => {
+    const tabs = fromTabs(
+      "sample",
+      (p) => p,
+      (key) => key,
+    );
+    expect(
+      tabs.find((c) => c.label === "settings › settings-tab-folders")?.place,
+    ).toEqual(place("settings", "sample", { tab: "folders" }));
+    expect(tabs.every((c) => c.kind === "page")).toBe(true);
   });
 
   it("matches every word, best first, a few of each kind", () => {

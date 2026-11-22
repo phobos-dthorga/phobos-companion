@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, openTab, sampleHome } from "./host";
 
 const { version } = JSON.parse(
   readFileSync(new URL("../../package.json", import.meta.url), "utf-8"),
@@ -66,6 +66,7 @@ test.describe("About", () => {
   }) => {
     await open(page, false);
     await page.keyboard.press("i");
+    await openTab(page, "Where it lives");
     await page
       .getByRole("button", {
         name: "Which other programs do the tools use, and are they here?",
@@ -92,6 +93,7 @@ test.describe("About", () => {
     );
     await expect(page.getByRole("main")).toContainText("Up to date");
     await expect(page.getByRole("main")).toContainText("abc1234");
+    await openTab(page, "Built with");
     await expect(page.getByRole("main")).toContainText("Tauri");
     await audit(page);
   });

@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, openTab, sampleHome } from "./host";
 
 const CONTROL_MIN_PX = 44;
 
@@ -37,6 +37,7 @@ const sampleSettings = {
       "historyPath",
       "Where the record of what happened on this PC is kept",
       {
+        name: "Record of what happened",
         value: "K:\\sample\\history",
         layer: "central",
         central: "K:\\sample\\history",
@@ -77,6 +78,12 @@ async function open(
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Where the tools keep and find things",
   );
+  await openTab(page, "Folders and files");
+}
+
+/** Opens one setting's line (0.66.0: each setting is one line until pressed). */
+async function openSetting(page: Page, key: string) {
+  await page.locator(`#setting-${key} .line`).click();
 }
 
 async function audit(page: Page) {
@@ -109,10 +116,24 @@ for (const [name, viewport] of [
       await expect(page.locator("main")).toContainText(
         "first-mods's own settings",
       );
+      // One line each (0.66.0): the few words when a setting has them, its sentence when not, and the detail on a press.
+      await expect(page.locator("#setting-historyPath .line")).toContainText(
+        "Record of what happened",
+      );
+      await expect(
+        page.getByRole("tab", { name: /^Folders and files/ }),
+      ).toContainText("1 needs you");
+      await expect(page.locator("main")).not.toContainText(
+        "second-mods's own settings name",
+      );
+      await openSetting(page, "sampleGamePath");
       await expect(page.locator("main")).toContainText(
         "second-mods's own settings name D:\\Games\\Sample",
       );
       await audit(page);
+      await page.getByRole("button", { name: /^Needs you/ }).click();
+      await expect(page.locator("#setting-historyPath")).toHaveCount(0);
+      await expect(page.locator("#setting-sampleGamePath")).toBeVisible();
       const small = await page
         .locator("main")
         .evaluate(
@@ -135,6 +156,7 @@ for (const [name, viewport] of [
       page,
     }) => {
       await open(page);
+      await openSetting(page, "historyPath");
       await page
         .getByRole("button", { name: "Type a path for historyPath" })
         .click();
@@ -158,6 +180,7 @@ for (const [name, viewport] of [
         refusal: "A setting's value is a full path.",
         central_file: null,
       });
+      await openSetting(page, "historyPath");
       await page
         .getByRole("button", { name: "Use the default for historyPath" })
         .click();

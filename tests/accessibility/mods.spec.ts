@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, SAMPLE_PNG, sampleHome } from "./host";
+import { healthyKit, mockHost, openTab, SAMPLE_PNG, sampleHome } from "./host";
 
 const CONTROL_MIN_PX = 44;
 
@@ -424,8 +424,8 @@ for (const [name, viewport] of [
       page,
     }) => {
       await open(page, [], true);
-      const card = page.getByRole("article", { name: "Sample Mod" });
-      await expect(card).toBeVisible({ timeout: 10_000 });
+      const strip = page.getByRole("region", { name: "Before you play" });
+      await expect(strip).toBeVisible({ timeout: 10_000 });
       await page
         .getByRole("button", { name: "Read again", exact: true })
         .click();
@@ -433,18 +433,24 @@ for (const [name, viewport] of [
       await expect(
         page.getByRole("button", { name: "Reading…", exact: true }),
       ).toBeDisabled();
-      await expect(card).toBeVisible();
+      // A read again keeps what is on screen: the strip, and each mod on its tab.
+      await expect(strip).toBeVisible();
       await audit(page);
       await expect(
         page.getByRole("button", { name: "Read again", exact: true }),
       ).toBeEnabled({ timeout: 10_000 });
       await expect(page.getByRole("progressbar")).toHaveCount(0);
+      await openTab(page, "Installed and backups");
+      await expect(
+        page.getByRole("article", { name: "Sample Mod" }),
+      ).toBeVisible();
     });
 
     test("shows what installing would give, save notes first, and passes the audit", async ({
       page,
     }) => {
       await open(page);
+      await openTab(page, "Installed and backups");
       const card = page.getByRole("article", { name: "Sample Mod" });
       await expect(card).toContainText("The repository has more");
       await expect(card).toContainText("give you 11 entries");
@@ -488,6 +494,7 @@ for (const [name, viewport] of [
           unlistedWhy: { "0.5.0": "uncommitted" },
         });
       });
+      await openTab(page, "Installed and backups");
       const card = page.getByRole("article", { name: "Other Sample" });
       await expect(card).toContainText(
         "Installed copy has entries the repository's changelog does not hold now",
@@ -505,6 +512,7 @@ for (const [name, viewport] of [
 
     test("asks before a move, and says what it did", async ({ page }) => {
       await open(page);
+      await openTab(page, "Installed and backups");
       const card = page.getByRole("article", { name: "Sample Mod" });
       await card
         .getByRole("button", { name: "Back up the installed copy" })
@@ -527,6 +535,7 @@ for (const [name, viewport] of [
       await expect(
         page.getByRole("region", { name: "Before you play" }),
       ).toContainText("First Sample is running");
+      await openTab(page, "Installed and backups");
       const card = page.getByRole("article", { name: "Sample Mod" });
       await card.locator("details.backups > summary").click();
       await card
@@ -702,6 +711,7 @@ for (const [name, viewport] of [
       page,
     }) => {
       await open(page);
+      await openTab(page, "Installed and backups");
       const repeats = page.locator(".repeats");
       await expect(repeats).toContainText(
         "One backup repeats the one before it",
@@ -725,6 +735,7 @@ for (const [name, viewport] of [
 
     test("an entry opens the code behind it", async ({ page }) => {
       await open(page);
+      await openTab(page, "Installed and backups");
       await page
         .getByRole("article", { name: "Sample Mod" })
         .getByRole("button", {
@@ -999,6 +1010,7 @@ test.describe("Since you last played (0.28.0)", () => {
         },
       },
     );
+    await openTab(page, "Installed and backups");
     await page.getByRole("button", { name: "Show the files" }).first().click();
     await page
       .getByRole("button", {

@@ -7,6 +7,8 @@ export type Layer = "environment" | "repository" | "central" | "default";
 export type Setting = {
   key: string;
   env: string | null;
+  /** A few words to list it by on one line (kit 1.95.0); null from an older kit, or a repository's setting that gives none. */
+  name?: string | null;
   description: string;
   kind: "folder" | "file";
   /** The game it belongs to, as the tools name it; null for every game. */

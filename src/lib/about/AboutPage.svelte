@@ -10,8 +10,10 @@
   import type { KitReading } from "../shell/types";
   import { readAbout } from "./desktopClient";
   import { listedWith, standing } from "./presentation";
-  import type { AboutReading } from "./types";
+  import type { About, AboutReading } from "./types";
   import AboutOnline from "../online/AboutOnline.svelte";
+  import Tabs from "../shell/Tabs.svelte";
+  import { tabsOf } from "../shell/tabs";
 
   /**
    * About (0.25.0; the owner: "I keep forgetting which version I have installed"): the version running, what it was built from
@@ -46,6 +48,13 @@
     });
   }
 
+  /** The page's parts as tabs (0.66.0; the owner's choice of 23 Nov 2026). This version says so when a newer one waits. */
+  const tabs = $derived(
+    tabsOf("about", {
+      version: stands?.kind === "newer" ? t("about-tab-newer") : null,
+    }),
+  );
+
   onMount(load);
 </script>
 
@@ -62,6 +71,31 @@
       : t("about-built-unknown")}
   </p>
 
+  <Tabs {tabs} id="about" label={t("about-tabs-label")}>
+    {#snippet children(tab)}
+      {#if tab === "where"}
+        {@render where(about)}
+      {:else if tab === "online"}
+        <AboutOnline />
+      {:else if tab === "built"}
+        {@render builtWith(about)}
+      {:else}
+        {@render version(about)}
+      {/if}
+    {/snippet}
+  </Tabs>
+{:else}
+  <h1>{t("about-title-plain")}</h1>
+  {#if reading.state === "reading"}
+    <Placeholder shape="rows" rows={4} />
+  {:else if reading.state === "browser"}
+    <p class="muted">{t("about-browser")}</p>
+  {:else}
+    <FailurePanel failure={reading.failure} onretry={load} />
+  {/if}
+{/if}
+
+{#snippet version(about: About)}
   {#if stands?.kind === "newer"}
     <section class="standing newer" aria-labelledby="about-newer">
       <h2 id="about-newer">
@@ -112,9 +146,9 @@
       >
     {/if}
   </section>
+{/snippet}
 
-  <AboutOnline />
-
+{#snippet where(about: About)}
   <section aria-labelledby="about-where">
     <h2 id="about-where">{t("about-where-title")}</h2>
     <dl>
@@ -170,7 +204,9 @@
       {/if}
     </dl>
   </section>
+{/snippet}
 
+{#snippet builtWith(about: About)}
   {#if about.libraries.length > 0}
     <section aria-labelledby="about-built-with">
       <h2 id="about-built-with">{t("about-built-with-title")}</h2>
@@ -186,16 +222,7 @@
   {/if}
 
   <p class="how">{t("about-licence")}</p>
-{:else}
-  <h1>{t("about-title-plain")}</h1>
-  {#if reading.state === "reading"}
-    <Placeholder shape="rows" rows={4} />
-  {:else if reading.state === "browser"}
-    <p class="muted">{t("about-browser")}</p>
-  {:else}
-    <FailurePanel failure={reading.failure} onretry={load} />
-  {/if}
-{/if}
+{/snippet}
 
 <style>
   section {

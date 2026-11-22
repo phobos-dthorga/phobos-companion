@@ -233,7 +233,12 @@ reads them.
   and Save dialogs itself, and falls back to House D'thorga, saying why, when the chosen theme is missing or fails. The window sets
   only `--colour-<role>` from it. A new role is added to the format, every theme file, both checks and the maker in one change.
 - **Controls are at least 44 px**, nothing needs a drag or appears only on hover, everything is reachable from the keyboard, and
-  the type floor is 12 px.
+  the type floor is 12 px. **The page list down the left is the one exception: its rows are 40 px** (the owner's choice of 23 Nov
+  2026, so every page shows without scrolling in a window about 940 px high).
+- **A page too long to read in one scroll is divided into tabs** (0.66.0; the owner, 23 Nov 2026: "a huuuuuuuge vertical trail of
+  information"): `src/lib/shell/Tabs.svelte`, its tabs listed once in `PAGE_TABS` (`src/lib/shell/tabs.ts`), each a step of the
+  trail with its own address, and a tab with something waiting says so in words. A new page with tabs adds its row there, its
+  `tab` values to `docs/cross-links.md`, and says so in its Guide entry.
 - **Failures say what happened, what stayed safe and what to do**, then the technical detail folded away.
 - **Charts come from the tools, drawn by one component.** The kit sends a chart block with roles, never colours;
   `src/lib/charts/CompanionChart.svelte` is the only component that draws, and `echartsCore.ts` the only module that imports

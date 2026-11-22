@@ -4,6 +4,42 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.66.0] - 2026-11-23
+
+A tidier window (the owner's choices of 23 Nov 2026, made on a mock-up first): the pages down the left, and Settings, Mods and
+About in tabs. Kit pin v1.94.0 to v1.95.0.
+
+### Changed
+
+- **The pages are a list down the left side**, in place of the bar across the top that wrapped onto several lines: still grouped
+  as Play, Code and Tools, each with its key beside it. **A number beside a page says how many things there wait on you**:
+  decisions and picks to answer (while features for agent sessions show), test rows seen working that nobody has judged, and mod
+  settings to look at. No number means nothing waits. Its rows are 40 px, so every page shows without scrolling.
+- **One bar on top** where there were two: the brand, **the game you are looking at**, which opens your games with when you last
+  worked on each, and Back, Forward, Go to anything and the rest. **[** and **]** still step through the games.
+- **Settings is in six tabs**: Look and keys, Games, Folders and files, Going online, Backups and space, and Agent sessions.
+  **Folders and files lists each setting on one line**, with its short name, its value and where the value comes from; press a
+  line to open it. Buttons above choose every setting, those for every game, one game's, or **Needs you** (naming something not on
+  this PC), and the tab says how many need you.
+- **Mods is in three tabs**: Before you play (with Since you last played and Settings to look at), Installed and backups, and
+  Textures. Before you play says how many things are to do; Textures how many mods want encoding.
+- **About is in four tabs**: This version (marked when a newer one waits), Where it lives, What it asks the internet, and Built with.
+- **Every tab is a place of its own**: a step of the trail, so Back returns to the tab you left, with its own address, and listed in
+  Go to anything ("Settings › Folders and files"). Links that led to a part of these pages before (Home's notes, the Guide's Take
+  me there) open its tab. Go to anything names each setting by its short name.
+
+### Added
+
+- **Keys for tabs**: **;** and **'** step to the tab before or after, and **Alt + 1** to **Alt + 9** jump to a tab, on any page with
+  tabs. Each can be changed in Settings, on Look and keys.
+- **Your games, on Home**: every game with when you last worked on it, and **Look at this** to switch.
+- **Guide**: Home's entry explains the page list, the counts and the picker; Settings, Mods and About describe their tabs and keys;
+  every How do I…? that leads to them names its tab.
+
+Checked with the kit's `settings list` on phobos-rimworld's and phobos-ostranauts' repositories: every setting the kit reads has
+its short name; a repository's own settings without one (phobos-rimworld's five art and AI tool folders) show their full sentence.
+Not yet tested on screen.
+
 ## [0.65.0] - 2026-11-23
 
 The fourth slice of going online (`docs/online.md`, O4: report links; the owner's choice of the Logs page only). Kit pin

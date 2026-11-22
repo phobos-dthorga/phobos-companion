@@ -6,6 +6,7 @@ import { plainText } from "../shell/inline";
 import type { TestList } from "../tests/types";
 import type { Fact } from "../timeline/types";
 import { dayOf } from "../shell/dates";
+import { PAGE_TABS } from "../shell/tabs";
 import { place, placeOf, PAGE_NAMES, type PageName, type Place } from "./place";
 
 /**
@@ -62,6 +63,22 @@ export function fromPages(
     detail: "",
     place: place(page, game),
   }));
+}
+
+/** Each tab of a page that has them (0.66.0), as "Settings › Folders and files": a place of its own, like a page. */
+export function fromTabs(
+  game: string | null,
+  pageWords: (page: PageName) => string,
+  words: (key: string) => string,
+): Candidate[] {
+  return (Object.keys(PAGE_TABS) as PageName[]).flatMap((page) =>
+    (PAGE_TABS[page] ?? []).map((tab) => ({
+      kind: "page" as const,
+      label: `${pageWords(page)} › ${words(tab.words)}`,
+      detail: "",
+      place: place(page, game, { tab: tab.id }),
+    })),
+  );
 }
 
 /**
@@ -187,8 +204,8 @@ export function fromTimeline(game: string, facts: Fact[]): Candidate[] {
 export function fromSettings(settings: Setting[]): Candidate[] {
   return settings.map((s) => ({
     kind: "setting" as const,
-    label: s.description,
-    detail: s.key,
+    label: s.name || s.description,
+    detail: s.name ? `${s.description} · ${s.key}` : s.key,
     place: place("settings", null, { key: s.key }),
   }));
 }

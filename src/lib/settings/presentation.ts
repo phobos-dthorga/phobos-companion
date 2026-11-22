@@ -34,6 +34,27 @@ export function sendable(value: string): boolean {
   return trimmed.length > 0 && !/[\r\n]/.test(trimmed);
 }
 
+/** What a setting's one line is called (0.66.0): its few words, else its sentence. */
+export function settingName(setting: Setting): string {
+  return setting.name || setting.description;
+}
+
+/** A setting that needs you (0.66.0): it names a folder or file that is not on this PC. */
+export function needsYou(setting: Setting): boolean {
+  return setting.value !== null && setting.exists === false;
+}
+
+/**
+ * Which settings to show (0.66.0): all of them, those of every game ("every"), those that need you ("needs"), or one game's,
+ * by the tools' name for it.
+ */
+export function shown(settings: Setting[], show: string): Setting[] {
+  if (show === "all") return settings;
+  if (show === "needs") return settings.filter(needsYou);
+  if (show === "every") return settings.filter((s) => s.game === null);
+  return settings.filter((s) => s.game === show);
+}
+
 /** The repositories whose own file sets a value other than the one in force: there, a central value would not apply. */
 export function otherRepositories(setting: Setting) {
   return setting.overridden.filter(

@@ -107,13 +107,13 @@ describe("the owner's keys", () => {
     expect(refusal("page.timeline", "Tab", NOTHING_SAVED)).toEqual({
       reason: "reserved",
     });
-    expect(refusal("page.timeline", ";", NOTHING_SAVED)).toBeNull();
+    expect(refusal("page.timeline", "`", NOTHING_SAVED)).toBeNull();
   });
 
   it("stores only what differs from the defaults", () => {
-    let saved = withKey(NOTHING_SAVED, "page.timeline", ";");
-    expect(saved.keys).toEqual({ "page.timeline": ";" });
-    expect(actionFor(";", saved, new Set(["everywhere"]))).toBe(
+    let saved = withKey(NOTHING_SAVED, "page.timeline", "`");
+    expect(saved.keys).toEqual({ "page.timeline": "`" });
+    expect(actionFor("`", saved, new Set(["everywhere"]))).toBe(
       "page.timeline",
     );
     expect(actionFor("7", saved, new Set(["everywhere"]))).toBeNull();

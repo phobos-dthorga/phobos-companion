@@ -3,8 +3,10 @@
 **Status (23 Nov 2026):** **slice 1 built** in Companion 0.61.0 with phobos-modkit 1.89.0 (gate lights, the switches, About's
 list); **slice 2 built** in Companion 0.63.0 with phobos-modkit 1.90.0 to 1.92.0 (the feed format, the reusable nightly workflow,
 phobos-rimworld's nightly run, Home's Their code changed); **slice 3's known problems built** in Companion 0.64.0 with
-phobos-modkit 1.93.0 (sort rules, Guide entries and themes as feeds not yet); none tested on screen yet. Slice 4 (report links,
-the owner's choice: the Logs page only) designed, not built. The owner asked for O2 to O4 of [later.md](later.md#going-online)
+phobos-modkit 1.93.0 (sort rules, Guide entries and themes as feeds not yet); **slice 4 built** in Companion 0.65.0 with
+phobos-modkit 1.94.0 (report links on the Logs page, the owner's choice); none tested on screen yet. **Still to come:** sort
+rules, Guide entries and themes as feeds, and a built-in list of D'thorga's feeds for strangers (with O1, the first public
+release). The owner asked for O2 to O4 of [later.md](later.md#going-online)
 together, "since they might share a few things in common", and answered four questions by card the same day (below). Built in the
 order under [Build order](#build-order). Agent choices are labelled so the owner can revise them.
 

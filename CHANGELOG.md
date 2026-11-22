@@ -4,6 +4,28 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.65.0] - 2026-11-23
+
+The fourth slice of going online (`docs/online.md`, O4: report links; the owner's choice of the Logs page only). Kit pin
+v1.93.0 to v1.94.0.
+
+### Added
+
+- **Report links on the Logs page**: under the mods a fault points at, for a mod of yours on GitHub, **Report this on GitHub**
+  opens your repository's new-issue form in your browser, filled in with the fault, how often and when, the game version, the
+  stack and the lines as written (a report too long for the address goes on your clipboard to paste). For another author's mod
+  whose public source is known, **Their reports** lists their issues, those naming the fault's words first, and **Their
+  new-issue form** opens it blank, as the reports rule asks. **The Companion never posts anything.** On the owner's PC, D'thorga
+  Framework reads as yours; Vehicle Framework, Combat Extended and Adaptive Storage Framework as theirs. Not yet tested on
+  screen.
+- **Their reports, in Settings → Going online**: its own switch, on by default, contacting api.github.com only on a press.
+- **Guide**: the Logs page and "Choose what the Companion asks the internet" name report links.
+
+### Changed
+
+- **One place hands an address to the system** (`companion_core::process::open_address`): the Mod list's Steam pages and the
+  report links both use it.
+
 ## [0.64.0] - 2026-11-23
 
 The third slice of going online (`docs/online.md`, O2: known problems; the owner's choice of "public, facts and links"). Kit pin

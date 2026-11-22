@@ -117,3 +117,21 @@ export type Feed = {
 };
 
 export type NightlyAnswer = { feeds: Feed[]; switchedOn: boolean };
+
+/** Where a mod a fault names is reported (0.65.0): ours, theirs or unknown, with its repository on GitHub. */
+export type ReportPlace = {
+  mod: string;
+  id: string;
+  whose: "ours" | "theirs" | "unknown";
+  repository: string | null;
+};
+
+/** One of an author's issues, as the kit lists them: those naming every word of the fault first. */
+export type TheirIssue = {
+  number: number;
+  title: string;
+  state: string;
+  updated: string | null;
+  url: string;
+  matches: boolean;
+};

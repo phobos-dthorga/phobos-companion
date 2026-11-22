@@ -2144,6 +2144,23 @@
     "nightly-limit": "Matched by name: read the commit before acting on it. Public source can differ from the Workshop build, so this is an early warning; the check after an update stays the real one.",
     "online-known-problems-name": "Known problems",
     "online-known-problems-body": "The Mod list's What's wrong warns when mods on your list are known to go wrong together, with what to do. It reads the known-problems feeds your repositories publish, at most every six hours, without counting against GitHub's hourly calls.",
-    "online-known-problems-loss": "The Mod list will no longer warn of mods known to go wrong together. It still finds missing mods, needs and order faults."
+    "online-known-problems-loss": "The Mod list will no longer warn of mods known to go wrong together. It still finds missing mods, needs and order faults.",
+    "online-their-reports-name": "Their reports",
+    "online-their-reports-body": "On the Logs page, Their reports lists another author's existing issues for a fault in their mod, those naming the fault's words first, so you don't report what is already reported. It asks GitHub only when you press it, from the hour's shared calls.",
+    "online-their-reports-loss": "The Logs page will no longer list other authors' existing issues; their new-issue form still opens.",
+    "report-ours": "{ $mod } is yours ({ $repository }).",
+    "report-ours-button": "Report this on GitHub",
+    "report-theirs": "{ $mod } is { $repository }'s.",
+    "report-theirs-list": "Their reports",
+    "report-theirs-form": "Their new-issue form",
+    "report-theirs-none": "They have no issues yet.",
+    "report-open": "open",
+    "report-closed": "closed",
+    "report-matches": "names this fault's words",
+    "report-opened": "GitHub's form is open in your browser, filled in. Read it, attach anything you want, and press Submit there.",
+    "report-opened-paste": "GitHub's form is open in your browser. The report was too long for the address, so it's on your clipboard: paste it into the form, read it, and press Submit there.",
+    "report-opened-no-clipboard": "GitHub's form is open, but the report could not be put on the clipboard. Copy the lines from As written in the log instead.",
+    "report-failed": "That didn't work: { $reason }",
+    "report-never-posts": "The Companion never posts anything: you read each report in your browser and send it yourself. For another author's mod, look through their reports first; a draft of your own is best written outside first."
   }
 }

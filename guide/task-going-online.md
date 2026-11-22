@@ -3,13 +3,15 @@ title: Choose what the Companion asks the internet
 kind: task
 go: settings?panel=online
 words: online, internet, GitHub, network, privacy, gate lights, checks, switch off, offline
-see: page-settings, page-home, page-about
+see: page-settings, page-home, page-about, page-logs, page-modlist
 ---
 **The Companion asks the internet only for what Settings lists under Going online**, and only reads public pages: nothing about you is sent. Each kind is **on** for the repositories on your list, and you can switch any of them off.
 
 1. Open **Settings** (the **9** key), at **Going online**.
 2. Each kind says what it does and the address it contacts. Press **On** or **Off**.
 3. Switching off a kind you would miss a lot asks first, and says what stops working. Press **Switch it off** or **Keep it on**.
+
+**Their reports**: on the [Logs](page-logs) page, lists another author's existing issues for a fault in their mod, only when you press it. Opening a new-issue form is your browser's own visit, so it has no switch.
 
 **Known problems**: the Mod list's What's wrong warns when mods on your list are known to go wrong together, with what goes wrong and what to do. The problems come from the feeds your repositories publish (a `feeds` folder), each checked against the authors' own work before it was published. The Companion reads them at most every six hours, without using any of GitHub's hourly calls, and uses the last copy it has when GitHub can't be reached.
 

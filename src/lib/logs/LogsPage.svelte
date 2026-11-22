@@ -21,6 +21,9 @@
     shownSignatures,
   } from "./presentation";
   import type { Frame, LogPageReading, Signature } from "./types";
+  import ReportLinks from "../online/ReportLinks.svelte";
+  import { readReportPlaces } from "../online/desktopClient";
+  import type { ReportPlace } from "../online/types";
 
   /**
    * The Logs page (cross-links L1): the game's log as its tools group it, compared with the run before, and each message's stack
@@ -39,12 +42,33 @@
     Record<string, "searching" | "outside" | { failed: string }>
   >({});
 
+  /** Where each mod the log names is reported: ours, theirs or unknown (0.65.0, report links). Empty until asked. */
+  let places = $state<ReportPlace[]>([]);
+
   async function read() {
     reading = { state: "reading" };
     progress = started();
+    places = [];
     reading = await readLog(game.id, (message) => {
       progress = heard(progress, message);
     });
+    if (reading.state === "ready" && reading.reading.data) {
+      const mods = [
+        ...new Set(
+          reading.reading.data.groups.flatMap((group) =>
+            pointsAt(group)
+              .map((clue) => clue.mod)
+              .filter(Boolean),
+          ),
+        ),
+      ].slice(0, 60);
+      if (mods.length > 0) {
+        const asked = game.id;
+        const answer = await readReportPlaces(asked, mods);
+        if (answer.state === "ready" && asked === game.id)
+          places = answer.places;
+      }
+    }
   }
 
   void read();
@@ -309,6 +333,7 @@
                 <strong>{t("logs-points-at")}</strong>
                 {clueWords(signature)}
               </p>
+              <ReportLinks game={game.id} {signature} {places} log={data.log} />
             {/if}
             {#if (signature.frames ?? []).length > 0}
               <h3>{t("logs-stack-title")}</h3>

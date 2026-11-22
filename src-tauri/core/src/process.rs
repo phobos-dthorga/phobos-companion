@@ -13,6 +13,19 @@ pub fn hide_console(command: &mut Command) {
 #[cfg(not(windows))]
 pub fn hide_console(_command: &mut Command) {}
 
+/// Hands an address to the system, which opens it with the program it keeps for that kind (a `steam://` address in the Steam
+/// client, an `https://` one in the browser). Callers check the address first: only one built from what the tools named (0.65.0,
+/// shared by the Mod list's Steam pages and the Logs page's report links).
+pub fn open_address(address: &str) -> std::io::Result<()> {
+    #[cfg(target_os = "windows")]
+    let started = Command::new("explorer").arg(address).spawn();
+    #[cfg(target_os = "macos")]
+    let started = Command::new("open").arg(address).spawn();
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    let started = Command::new("xdg-open").arg(address).spawn();
+    started.map(|_| ())
+}
+
 /// Ends a process and every process it started. A kit command that holds something (a snapshot of a running game) may have
 /// started a helper of its own, which ending the kit's Python alone would leave running until it noticed. On Windows that is
 /// Windows' own `taskkill` from the system folder, with no console; elsewhere the process alone.

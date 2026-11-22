@@ -443,14 +443,7 @@ pub fn open_in_steam(number: &str) -> Result<(), Failure> {
 
 /// Hands a `steam://` address to the system, which passes it to the Steam client.
 pub(crate) fn hand_to_steam(address: &str) -> Result<(), Failure> {
-    #[cfg(target_os = "windows")]
-    let started = std::process::Command::new("explorer").arg(address).spawn();
-    #[cfg(target_os = "macos")]
-    let started = std::process::Command::new("open").arg(address).spawn();
-    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
-    let started = std::process::Command::new("xdg-open").arg(address).spawn();
-    started
-        .map(|_| ())
+    companion_core::process::open_address(address)
         .map_err(|problem| Failure::refused(format!("Steam could not be asked to open the page: {problem}")))
 }
 

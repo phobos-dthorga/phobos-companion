@@ -33,6 +33,7 @@ mod picks_page;
 mod pictures;
 mod records_backup;
 mod repo_status;
+mod report_links;
 mod reports;
 mod safe_copies;
 mod screen_notes;
@@ -719,6 +720,49 @@ async fn choose_agent_features(
     .await
 }
 
+/// Ours, theirs or unknown for each mod the Logs page names, with its repository on GitHub (0.65.0, report links).
+#[tauri::command]
+async fn report_places(game: String, mods: Vec<String>) -> Result<serde_json::Value, Failure> {
+    blocking(move || report_links::places(&game, mods)).await
+}
+
+/// Opens one of our own repositories' new-issue form, filled in; a text too long for an address comes back for the clipboard.
+#[tauri::command]
+async fn report_ours(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    title: String,
+    body: String,
+) -> Result<serde_json::Value, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || report_links::report_ours(&data, &game, &repository, &title, &body)).await
+}
+
+/// Opens another author's blank new-issue form.
+#[tauri::command]
+async fn report_their_form(game: String, repository: String) -> Result<(), Failure> {
+    blocking(move || report_links::their_form(&game, &repository)).await
+}
+
+/// Opens one issue of a repository the Logs page named.
+#[tauri::command]
+async fn report_open_issue(game: String, repository: String, number: u64) -> Result<(), Failure> {
+    blocking(move || report_links::open_issue(&game, &repository, number)).await
+}
+
+/// Another author's issues, those naming the fault's words first, on a press, while Their reports is on.
+#[tauri::command]
+async fn report_theirs(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    words: String,
+) -> Result<serde_json::Value, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || report_links::their_reports(&data, &game, &repository, &words)).await
+}
+
 /// What the nightly watch found in the public source of mods a game's repositories patch, while the switch is on (0.63.0).
 #[tauri::command]
 async fn nightly_watch(
@@ -1280,7 +1324,12 @@ pub fn run() {
             online_status,
             choose_online,
             repo_status,
-            nightly_watch
+            nightly_watch,
+            report_places,
+            report_ours,
+            report_their_form,
+            report_open_issue,
+            report_theirs
         ])
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {

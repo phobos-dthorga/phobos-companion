@@ -282,6 +282,9 @@
             <li class="chip yours">
               {t("modlist-sort-read-yours", { count: used.yours })}
             </li>
+            <li class="chip code">
+              {t("modlist-sort-read-code", { count: used.code ?? 0 })}
+            </li>
             <li class="chip own">
               {t("modlist-sort-read-own", { count: used.own })}
             </li>
@@ -653,6 +656,12 @@
   .chip.yours {
     background: var(--shade-accent);
     border-color: var(--colour-accent);
+  }
+
+  /* What a mod's code builds on: read from its assemblies, the shade of what is read from files, with a double edge. */
+  .chip.code {
+    background: var(--shade-observed);
+    border: 3px double var(--colour-observed);
   }
 
   .chip.own {

@@ -4,6 +4,24 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.54.0] - 2026-11-23
+
+From the owner's log of 23 Nov 2026: after a Full re-sort, I Am Mother's compat code failed to load and a save's mechs went
+missing, because the re-sort put Vanilla Expanded Framework and other frameworks far below mods that build on them without saying
+so. Undo the last change put the list back; nothing was saved in between.
+
+### Added
+
+- **Sort reads what each mod's code builds on** (kit 1.84.0): a mod loads after any mod whose classes its own code builds on,
+  read from the mods' assemblies, which catches what neither mod's files say. A new badge, **Its code**, names those rules, and
+  their count shows beside the others; in a loop they give way only to yours. **What's wrong** shows a mod loading before what its
+  code builds on as a problem. Guide: Load-order rule. Not yet tested on screen.
+
+### Changed
+
+- **Full re-sort puts libraries first** (kit 1.84.0): after the game's own, the mods others depend on come first, the most used
+  first, then the rest by name, so frameworks stay near the top. Fewest moves is unchanged. Not yet tested on screen.
+- Tool kit pin v1.82.0 to v1.84.0.
 ### Changed
 
 - **The picks page's design has your answers** (`docs/picks-page.md`): picks listed from a file each repository keeps, a pick kept

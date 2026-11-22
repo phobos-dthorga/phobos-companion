@@ -9,6 +9,7 @@ import type {
 /** Whose rule, in words (0.47.0): the keys are written out so the catalogue check can find them. */
 export const SOURCE_WORDS: Record<RuleSource, string> = {
   yours: "modlist-source-yours",
+  code: "modlist-source-code",
   own: "modlist-source-own",
   needs: "modlist-source-needs",
   workshop: "modlist-source-workshop",

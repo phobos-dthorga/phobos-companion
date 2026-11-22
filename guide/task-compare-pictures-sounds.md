@@ -23,7 +23,7 @@ see: task-code-behind, page-changes, page-mods, task-see-screenshots
 - **Mark loose specks and fringes** paints what the edge check finds in the accent colour: crumbs, loose strokes, pale paper left
   round a cut-out and haze, counted beside the picture.
 - The view, the zoom, the ground, the tolerance and the marks stay as you left them when you move to the next file, pick or
-  screenshot, each place keeping its own.
+  screenshot, and the next time you open the Companion, each place keeping its own.
 - DDS textures are drawn too: BC1 to BC5 (DXT1 to DXT5) and BC7. Others are named, not drawn.
 
 ### A sound

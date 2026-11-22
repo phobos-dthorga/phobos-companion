@@ -4,6 +4,14 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.58.0] - 2026-11-23
+
+### Changed
+
+- **The zoom, the ground, the view, the tolerance, the side flicked to and the marks are kept between runs too** (the owner,
+  23 Nov 2026: "save the view settings between sessions too"), each place its own, in the window's own storage. Every value is
+  checked as it is read back, so one this version does not offer starts that place afresh. Not yet tested on screen.
+
 ## [0.57.0] - 2026-11-23
 
 Picks made easier to compare (the owner, 23 Nov 2026: "the remembered image size, background colour, etc. should be remembered

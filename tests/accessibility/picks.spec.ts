@@ -150,6 +150,17 @@ for (const [name, viewport] of [
       await expect(
         page.getByRole("button", { name: "Mark loose specks and fringes" }),
       ).toHaveAttribute("aria-pressed", "true");
+      // 0.58.0: kept between runs too.
+      await page.reload();
+      await page.keyboard.press("Shift+P");
+      await expect(page.getByRole("button", { name: "2×" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await expect(page.getByRole("button", { name: "Soil" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
     });
   });
 }

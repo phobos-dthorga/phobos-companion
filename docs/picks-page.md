@@ -1,7 +1,7 @@
 # The picks page: picture and sound picks inside the Companion
 
-**Status (23 Nov 2026): a design, nothing built.** The owner chose "design first" on 23 Nov 2026, when asked where else the code
-viewer's pictures and sounds could go. Three questions below wait on the owner's word; the agent's lean is marked on each.
+**Status (23 Nov 2026): a design, nothing built; the owner has answered its three questions** (below). The owner chose "design
+first" on 23 Nov 2026, when asked where else the code viewer's pictures and sounds could go. Building waits for the owner's go.
 
 ## Why
 
@@ -41,7 +41,16 @@ What outside it notices: the repository's art records, once a session applies th
 | An answer | Kept in this program's own folder, `picks/<repository>.jsonl`, as the test verdicts and the decisions are; a session or a kit tool applies it (moves the try into place, writes the art record) |
 | Grounds | A game's own grounds (RimWorld: soil and dark stone, as the cards use) come from the repository's pick file as colours, so the page names no game |
 
-## Questions for the owner
+## The owner's answers (23 Nov 2026, on question cards)
+
+- **P1, where picks come from: a file each repository keeps** (`config/picks.json`, written by the art tools), as leaned.
+- **P2, what a pick does: kept as an answer** in this program's own folder, applied by the next session or a kit tool, as leaned.
+- **P3, keys: both** ("repeat where never together (while trying to prevent confusion) and just using Shift, Ctrl, Alt, keys"):
+  a key may do different things in places never on screen at once, chosen so the same key means a like move in each; and keys held
+  with Shift, Ctrl or Alt are allowed. The shortcut rule in `AGENTS.md` now says so; the shortcut check that refuses any key used
+  twice anywhere changes when the picks page is built.
+
+## The questions as asked
 
 | # | Question | Options | Agent's lean |
 | --- | --- | --- | --- |

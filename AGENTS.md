@@ -242,10 +242,13 @@ reads them.
   answer first, numbered steps, **bold** for what to press, the key beside it, and the button's words exactly as the page shows
   them. `src/lib/guide/entries.test.ts` refuses a page with no entry, a link or See also to no entry, a Take me there a page cannot
   show, and an entry nothing links to.
-- **A page's common moves have keyboard shortcuts** (owner, 19 Nov 2026): one key each, never two held together, listed once in
-  `src/lib/shortcuts/actions.ts` with its default, and offered by the view while it is on screen (`register` in
-  `src/lib/shortcuts/registry.ts`). They never act in a text box or a part that takes keys itself, and every one can be changed or
-  turned off in Settings. A new page adds its moves there in the same change.
+- **A page's common moves have keyboard shortcuts** (owner, 19 Nov 2026), listed once in `src/lib/shortcuts/actions.ts` with its
+  default, and offered by the view while it is on screen (`register` in `src/lib/shortcuts/registry.ts`). They never act in a text
+  box or a part that takes keys itself, and every one can be changed or turned off in Settings. A new page adds its moves there in
+  the same change. **Once every letter was taken** (all 26 since 0.50.0), the owner allowed two more ways (23 Nov 2026: "repeat
+  where never together (while trying to prevent confusion) and just using Shift, Ctrl, Alt, keys"): **a key may repeat in places
+  never on screen together**, given a like move in each (J and K step through items wherever they appear), and **a key may be held
+  with Shift, Ctrl or Alt**. A single key stays first where one is free.
 - **Dark first.**
 - **A new library has to earn it**: a real need now, less upkeep than a small local version, one place it can be replaced from,
   tests that fit, and safe behaviour when it fails. Record it in `THIRD_PARTY_NOTICES.md`.

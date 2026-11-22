@@ -4,6 +4,12 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+### Changed
+
+- **The picks page's design has your answers** (`docs/picks-page.md`): picks listed from a file each repository keeps, a pick kept
+  as an answer for the next session to apply, and keys that may repeat where never on screen together or be held with Shift, Ctrl or
+  Alt, now the shortcut rule in `AGENTS.md`. Nothing is built yet.
+
 ## [0.53.0] - 2026-11-23
 
 Pictures and sounds beyond the code viewer (the owner, 23 Nov 2026: "Can we introduce these new features anywhere else?", choosing

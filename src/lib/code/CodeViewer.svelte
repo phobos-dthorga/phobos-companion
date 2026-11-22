@@ -10,7 +10,7 @@
   import { plainText } from "../shell/inline";
   import { heard, started } from "../shell/progress";
   import { readEntryCode } from "./desktopClient";
-  import MediaPane from "./media/MediaPane.svelte";
+  import ChangedFile from "./ChangedFile.svelte";
   import { formatSize } from "../shell/sizes";
   import { highlightLines } from "./highlightCore";
   import {
@@ -286,7 +286,7 @@
                 {#if file.media === undefined}
                   <p class="note">{t("code-binary")}</p>
                 {:else}
-                  <MediaPane
+                  <ChangedFile
                     {game}
                     repository={request.repository}
                     commit={code.commit?.hash ?? null}

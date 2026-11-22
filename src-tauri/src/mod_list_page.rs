@@ -147,6 +147,7 @@ pub fn known_by(game: &str, data: &Value) -> (Vec<ListOf>, Vec<ListOf>) {
 pub fn mods(game: &str, listener: Option<kit::Listener>) -> Result<Value, Failure> {
     let found = places(game)?;
     let data = kit::run_hearing(TOOL, &mods_arguments(&found), listener)?["data"].clone();
+    crate::viewable::remember(crate::viewable::in_mod_list(&data));
     let (ids, lists) = known_by(game, &data);
     let numbers: Vec<String> = data["mods"]
         .as_array()

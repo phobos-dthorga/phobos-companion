@@ -4,6 +4,38 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.53.0] - 2026-11-23
+
+Pictures and sounds beyond the code viewer (the owner, 23 Nov 2026: "Can we introduce these new features anywhere else?", choosing
+all four smaller places, the encoded texture check and the picks page as a design first, in one batch).
+
+### Added
+
+- **Mods page: Compare a changed picture or sound before installing or going back.** **Compare** beside each picture, texture or
+  sound in **Show the files**: installed now against **In the repository**, or against one of the five newest backups, with the code
+  viewer's views. Guide: the Mods page. Not yet tested on screen.
+- **Mods page: Compare pictures with their encoded textures** on each mod: every picture beside the texture the game loads in its
+  place, turned the right way up (RimSort's preset stores it upside down), with the stale, never-encoded and left-over ones picked
+  out; What changed starts at 16 levels, since encoding shifts most pixels a little. RimWorld's tools pair them (563 for D'thorga
+  Vehicles). Not yet tested on screen.
+- **Changes: a repository with no changelog lists its commits**, twenty a page, each with **Show the code**, pictures and textures
+  included: Workers & Resources' buildings (45 commits, 208 DDS textures) can be seen for the first time. Not yet tested on screen.
+- **Mod list: The mod in focus** on Edit the list shows the picture of the mod last moved to or pressed, as the game's mod menu
+  shows it (399 of your 407 RimWorld mods have one). Not yet tested on screen.
+- **Screenshots: zoom, grounds, and Compare with the one before or after**, flicked with **Z** or with what changed marked. Not yet
+  tested on screen.
+- **What changed lets small differences pass**: **Exact**, **4**, **16** and **64 levels**, everywhere it is shown. Your screenshot
+  of 23 Nov showed why: tanks exported again marked 92,971 pixels for a pale line round their edges.
+- **The picks page, designed** ([docs/picks-page.md](docs/picks-page.md)): picture and sound picks inside the Companion. Three
+  questions wait for you; nothing is built.
+
+### Changed
+
+- Tool kit pin v1.78.0 to v1.82.0. The installs read is unredacted, for each copy's folder.
+
+### Seen working on screen
+
+- **Show what changed** in the code viewer (0.50.0), at 1×: your screenshot of 23 Nov 2026.
 ## [0.52.0] - 2026-11-23
 
 ### Changed

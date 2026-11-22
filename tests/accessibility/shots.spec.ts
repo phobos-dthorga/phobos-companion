@@ -103,6 +103,15 @@ test.describe("Screenshots on the Timeline", () => {
     await expect(viewer.getByRole("status")).toContainText(
       "evening-raid.png is selected in the file manager.",
     );
+    // 0.53.0: compared with the screenshot taken before it.
+    await viewer
+      .getByRole("button", { name: /^Compare with the one before/ })
+      .click();
+    await expect(viewer.getByRole("img")).toHaveCount(2);
+    await viewer.getByRole("button", { name: "Show what changed" }).click();
+    await expect(viewer.getByText("No pixel changed")).toBeVisible();
+    await viewer.getByRole("button", { name: "Stop comparing" }).click();
+    await expect(viewer.getByRole("img")).toHaveCount(1);
     await audit(page);
     await viewer.getByRole("button", { name: "Close", exact: true }).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);

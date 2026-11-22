@@ -23,6 +23,8 @@ const TOOL: &str = "installs";
 const STATUS: &str = "status";
 const ENCODE: &str = "encode";
 const TEXTURES_SURFACE: &str = "textures";
+const PAIRS: &str = "pairs";
+const PAIRS_SURFACE: &str = "texture-pairs";
 const CONFIG: [&str; 2] = ["config", "installs.json"];
 const MOVES: [&str; 5] = ["build", "install", "backup", "restore", "dedupe"];
 const MAX_MODS: usize = 400;
@@ -64,6 +66,7 @@ pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<Vec<Repositor
     for repository in with_installs(game)? {
         let answer = kit::run_hearing(TOOL, &status_arguments(&repository.path), listener)?;
         Outcome::required(&answer)?;
+        crate::viewable::remember(crate::viewable::in_installs(&answer["data"]));
         found.push(RepositoryInstalls {
             status: answer["data"].clone(),
             command_line: format!("python scripts/installs.py status   (in {})", repository.name),
@@ -73,8 +76,9 @@ pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<Vec<Repositor
     Ok(found)
 }
 
+/// Unredacted (0.53.0): each copy's folder is where the window's pictures and sounds are read from.
 fn status_arguments(root: &Path) -> Vec<String> {
-    Args::new(TOOL, STATUS).root(root).json()
+    Args::new(TOOL, STATUS).root(root).flag("--no-redact").json()
 }
 
 /// Makes one move the owner asked for, after the checks above. `mods` names the mods (none for a build, one for a backup or going
@@ -144,6 +148,11 @@ fn result_of(answer: &Value) -> MoveResult {
 /// The kit command that checks this game's textures: the one whose game is this game and whose status report has the textures
 /// surface. The core never names a game; the manifest does.
 pub fn textures_command(manifest: &Value, game: &str) -> Option<String> {
+    reading_command(manifest, game, STATUS, TEXTURES_SURFACE)
+}
+
+/// The kit command of this game whose report `report` reads and carries `surface`.
+fn reading_command(manifest: &Value, game: &str, report: &str, surface: &str) -> Option<String> {
     let commands = manifest["data"]["commands"].as_array()?;
     commands
         .iter()
@@ -151,13 +160,36 @@ pub fn textures_command(manifest: &Value, game: &str) -> Option<String> {
         .find(|c| {
             c["reports"].as_array().is_some_and(|reports| {
                 reports.iter().any(|r| {
-                    r["name"].as_str() == Some(STATUS)
-                        && r["surface"].as_str() == Some(TEXTURES_SURFACE)
+                    r["name"].as_str() == Some(report)
+                        && r["surface"].as_str() == Some(surface)
                         && r["effect"].as_str() == Some("reads")
                 })
             })
         })
         .and_then(|c| c["name"].as_str().map(str::to_owned))
+}
+
+/// Whether this game's tools pair each picture with its encoded texture (0.53.0): the Mods page offers the comparison only then.
+pub fn has_texture_pairs(game: &str) -> Result<bool, Failure> {
+    Ok(reading_command(&kit::read_manifest()?, game, PAIRS, PAIRS_SURFACE).is_some())
+}
+
+/// One active mod's pictures, each beside the encoded texture the game loads in its place (0.53.0; the owner's choice of 23 Nov
+/// 2026, the encoded texture check). Only reads; every picture and texture it names may then be shown.
+pub fn texture_pairs(game: &str, name: &str, listener: Option<kit::Listener>) -> Result<Value, Failure> {
+    if !plain_name(name) {
+        return Err(Failure::refused(format!("{name:?} is not a mod's folder name or package ID")));
+    }
+    let manifest = kit::read_manifest()?;
+    let Some(command) = reading_command(&manifest, game, PAIRS, PAIRS_SURFACE) else {
+        return Err(Failure::refused("this game's tools do not pair pictures with encoded textures"));
+    };
+    let mut arguments = vec![command.clone(), PAIRS.to_owned(), format!("--mod={name}"), "--no-redact".to_owned()];
+    arguments = with_settings(arguments, settings_file(game)?);
+    let answer = kit::run_hearing(&command, &arguments, listener)?;
+    Outcome::required(&answer)?;
+    crate::viewable::remember(crate::viewable::in_pairs(&answer["data"]));
+    Ok(answer["data"].clone())
 }
 
 /// A settings file one of the game's opted-in repositories names, for the game's paths; none when no repository names one.

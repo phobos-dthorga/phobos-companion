@@ -1,15 +1,19 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { t } from "../i18n/runtime";
+  import MediaCompare from "../media/MediaCompare.svelte";
+  import type { MediaSide, MediaSource } from "../media/source";
   import { formatUnixDate, formatTime } from "../shell/dates";
   import WindowDialog from "../shell/WindowDialog.svelte";
   import { showGameFile } from "./desktopClient";
-  import { readScreenshots, readShot } from "./shots";
+  import { readScreenshots, readShot, type Shot } from "./shots";
 
   /**
    * One screenshot whole, over the window (0.32.0), drawn by the App from the trail like the code viewer, so Back closes it and its
    * address reopens it. The host hands over only a picture a list in this run named; opened from an address in a new run, the
-   * viewer asks for the game's list first. Show in folder opens the file manager on it.
+   * viewer asks for the game's list first. Show in folder opens the file manager on it. Since 0.53.0 (the owner's choice of 23 Nov
+   * 2026) it has the code viewer's zoom and grounds, and compares with the screenshot taken before or after it: flicked, side by
+   * side, or what changed marked, to see how a place changed between two days.
    */
   let {
     game,
@@ -25,25 +29,48 @@
     onclose: () => void;
   } = $props();
 
-  let source = $state<string | null>(null);
+  let ready = $state(false);
   let failure = $state<string | null>(null);
   let said = $state<string | null>(null);
+  /** The game's screenshots, oldest first, for the ones taken either side of this one. */
+  let shots = $state<Shot[]>([]);
+  let other = $state<Shot | null>(null);
 
-  const when = $derived(
-    `${formatUnixDate(taken)} ${formatTime(new Date(taken * 1000))}`,
+  function whenOf(unix: number): string {
+    return `${formatUnixDate(unix)} ${formatTime(new Date(unix * 1000))}`;
+  }
+
+  const when = $derived(whenOf(taken));
+  const at = $derived(shots.findIndex((s) => s.path === path));
+  const earlier = $derived(at > 0 ? shots[at - 1] : null);
+  const later = $derived(
+    at >= 0 && at < shots.length - 1 ? shots[at + 1] : null,
   );
 
+  function sideOf(shot: { path: string }, label: string): MediaSide {
+    return { label, path: shot.path, read: () => readShot(shot.path) };
+  }
+
+  const source = $derived<MediaSource>({
+    key: `${path}/${other?.path ?? ""}`,
+    before: other
+      ? sideOf(other, t("shots-compare-label", { when: whenOf(other.taken) }))
+      : null,
+    after: sideOf({ path }, t("shots-compare-label", { when })),
+    tolerance: 0,
+  });
+
   async function load() {
-    let answer = await readShot(path);
-    if (answer.state !== "ready") {
-      await readScreenshots(game);
-      answer = await readShot(path);
-    }
+    // The list names every picture the host may hand over, this one included, in this run.
+    const listed = await readScreenshots(game);
+    if (listed.state === "ready")
+      shots = [...listed.shots.list].sort((a, b) => a.taken - b.taken);
+    const answer = await readShot(path);
     if (answer.state !== "ready") {
       failure = answer.failure.detail;
       return;
     }
-    source = URL.createObjectURL(new Blob([answer.bytes as BlobPart]));
+    ready = true;
   }
 
   async function show() {
@@ -56,9 +83,6 @@
 
   onMount(() => {
     void load();
-    return () => {
-      if (source) URL.revokeObjectURL(source);
-    };
   });
 </script>
 
@@ -75,13 +99,36 @@
       <button type="button" class="action" onclick={show}
         >{t("shots-show-folder")}</button
       >
+      {#if earlier}
+        <button
+          type="button"
+          class="toggle"
+          aria-pressed={other?.path === earlier.path}
+          onclick={() => (other = earlier)}
+          >{t("shots-compare-earlier", { when: whenOf(earlier.taken) })}</button
+        >
+      {/if}
+      {#if later}
+        <button
+          type="button"
+          class="toggle"
+          aria-pressed={other?.path === later.path}
+          onclick={() => (other = later)}
+          >{t("shots-compare-later", { when: whenOf(later.taken) })}</button
+        >
+      {/if}
+      {#if other}
+        <button type="button" class="action" onclick={() => (other = null)}
+          >{t("shots-compare-stop")}</button
+        >
+      {/if}
     </div>
     <div aria-live="polite">
       {#if said}<p class="small" role="status">{said}</p>{/if}
     </div>
   {/snippet}
-  {#if source}
-    <img class="whole" src={source} alt={t("shots-alt", { name, when })} />
+  {#if ready}
+    <MediaCompare {source} />
   {:else if failure}
     <p class="refused-line">{t("shots-whole-failed", { reason: failure })}</p>
   {:else}
@@ -90,20 +137,13 @@
 </WindowDialog>
 
 <style>
-  .whole {
-    display: block;
-    max-width: 100%;
-    max-height: 78vh;
-    margin: 0 auto;
-    object-fit: contain;
-  }
-
   .path {
     overflow-wrap: anywhere;
   }
 
   .actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 6px;
   }

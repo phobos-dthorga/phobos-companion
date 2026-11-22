@@ -1251,6 +1251,35 @@ not yet tested on screen. **That screenshot showed Fit fitting the width alone**
 **0.52.0** fits the whole picture in its frame (the owner's yes on a card): no taller than half the window (agent default), enlarged
 by a whole number when small so pixels stay even squares, shrunk when large (`fitScale` in `viewing.ts`).
 
+## Pictures and sounds beyond the code viewer (built 23 Nov 2026, 0.53.0)
+
+**The owner's request** (23 Nov 2026): "Can we introduce these new features anywhere else?" **The owner's choices on question
+cards:** all four smaller places (the Mods page before installing, repositories with no changelog, the Mod list's previews,
+screenshots), the encoded texture check, the picks page as a design first ([picks-page.md](picks-page.md)), one batch and one
+version.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Compare a changed picture or sound installed now with the repository's copy or a backup before installing or going back; compare each of a mod's pictures with the encoded texture the game loads; reach the commits, textures and models of a repository that keeps no changelog; know a mod by its picture on Edit the list; compare two screenshots, flicked or with what changed marked |
+| What does it stop them doing? | Nothing they could do before. A picture or sound is handed over only when a page's own answer named it |
+| How does it change the way they work? | Art changes are judged where the install is decided, and encoding is checked by eye rather than by date alone. Workers & Resources' 208 DDS textures can be seen for the first time |
+| What outside it notices? | Nothing: everything only reads |
+
+| Part | How |
+| --- | --- |
+| The tools | phobos-modkit 1.82.0: `installs` names each copy's folder; `changes commits` and `entry --commit` with no changelog; `mod-list mods` names each mod's `preview`; `rimworld-textures pairs` (surface `texture-pairs`) pairs pictures with encoded textures and says they are stored upside down |
+| The host | `src-tauri/src/viewable.rs`: the files a kit answer named (each changed file in every copy, each preview, each pair), of a kind the window draws or plays, at most 64 MB, handed over on request; the screenshots keep their own list (0.32.0). `installs status` is now read unredacted, for the folders |
+| The window | `src/lib/media/`: `MediaCompare.svelte` takes two named sides, each with its own read, and shows them as the code viewer does (`source.ts`); the code viewer's `ChangedFile.svelte`, the Mods page's `ModFileCompare.svelte` and `TexturePairs.svelte`, the Mod list's `ModPreview.svelte`, the screenshot viewer and the Changes page's `RepositoryCommits.svelte` each build one |
+| Tolerance | **Exact**, **4**, **16**, **64 levels**: how far a pixel may differ before What changed marks it (`TOLERANCES` in `viewing.ts`). Exact in the code viewer, the Mods page and screenshots; 16 for encoded textures: on the owner's armour kits 66 to 80 % of pixels differ after encoding, 0.5 % by more than 16 levels, 0.1 % by more than 32. The owner's screenshot of 23 Nov showed the need in the code viewer too: tanks exported again marked 92,971 pixels for a pale line round their edges |
+| Games | The Mods page and texture pairs: RimWorld, the game with install and texture adapters. Commits: any repository (checked on Workers & Resources, 45 commits). Previews: RimWorld (399 of 407 mods) and Project Zomboid (`mod.info`'s poster; made-up files only, the game is not installed). Screenshots: any game with a Steam screenshots folder |
+
+**Agent choices, owner to revise:** five newest backups offered to compare with; twelve texture pairs a page and twenty commits a
+page; 16 levels to start for encoded textures; **The mod in focus** always shown at one height above the lists (it first appeared
+only once a mod had focus, which moved the list between a press and its release so the click landed on another mod, found by the
+browser tests); compare with the screenshot just before or after, not any one.
+
+**Seen on screen (the owner's screenshot, 23 Nov 2026):** What changed marking the Bulk Tanker's re-exported tanks at 1×.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

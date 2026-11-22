@@ -87,5 +87,5 @@ fn a_refusal_comes_back_in_words() {
 
 #[test]
 fn status_reads_the_repository_it_is_given() {
-    assert_eq!(status_arguments(Path::new("repo")), ["installs", "status", "--root", "repo", "--json"]);
+    assert_eq!(status_arguments(Path::new("repo")), ["installs", "status", "--root", "repo", "--no-redact", "--json"]);
 }

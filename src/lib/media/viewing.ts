@@ -14,6 +14,13 @@ export const VIEWS: { id: PictureView; words: string }[] = [
 export type Zoom = "fit" | 1 | 2 | 4 | 8;
 export const ZOOMS: Zoom[] = ["fit", 1, 2, 4, 8];
 
+/**
+ * How far a pixel may differ, in levels of 255 on any channel, before What changed marks it (0.53.0): exact for a change to a
+ * picture; more for one exported again or encoded, which shifts most pixels a little (the owner's armour kits: 66 to 80 % of pixels
+ * differ after encoding, 0.5 % by more than 16 levels, 0.1 % by more than 32). Preset steps, never a slider.
+ */
+export const TOLERANCES = [0, 4, 16, 64] as const;
+
 /** What shows through a picture's see-through parts: stray specks hide on the wrong ground. */
 export type Backdrop = "checks" | "dark" | "light";
 

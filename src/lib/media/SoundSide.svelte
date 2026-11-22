@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
-  import { LOCALE, t } from "../../i18n/runtime";
+  import { LOCALE, t } from "../i18n/runtime";
   import { themeColour, whineAlone } from "./decode";
   import { rgbOf } from "./pixels";
   import {

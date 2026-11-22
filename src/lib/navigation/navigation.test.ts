@@ -116,6 +116,25 @@ describe("addresses", () => {
         node: "cs:Phobos.Framework.TopUp.Seen.Note",
       }),
       { ...place("timeline", "rimworld"), dialog: code },
+      // A commit of a repository with no changelog (0.53.0): named by its commit alone.
+      {
+        ...place("changes", "workers", { commits: "buildings" }),
+        dialog: {
+          kind: "code",
+          request: {
+            repository: "buildings",
+            changelog: "",
+            product: "buildings",
+            entry: {
+              version: "",
+              section: "",
+              text: "Heating works",
+              lead: "Heating works",
+            },
+            commit: "e24199d28bb5",
+          },
+        },
+      },
       place("settings"),
       {
         ...place("timeline", "rimworld", { day: "2026-11-20" }),

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { LOCALE, t } from "../../i18n/runtime";
-  import { register } from "../../shortcuts/registry";
+  import { LOCALE, t } from "../i18n/runtime";
+  import { register } from "../shortcuts/registry";
   import { themeColour } from "./decode";
   import {
     changedShare,
@@ -15,6 +15,7 @@
     backdropStyle,
     FIT_HEIGHT_SHARE,
     fitScale,
+    TOLERANCES,
     VIEWS,
     ZOOMS,
     type Backdrop,
@@ -25,21 +26,41 @@
   /**
    * A changed picture, before and after (0.50.0; the owner's choice of 22 Nov 2026: all four ways): side by side, flicking between
    * them in one place, or what changed marked on a dimmed copy, at a zoom and on a ground the person picks. Z flicks, = steps the
-   * zoom. A picture added or removed has one side, shown alone.
+   * zoom. A picture added or removed has one side, shown alone. Since 0.53.0 each side has its own name ("Installed now", "What the
+   * game loads"), and What changed lets small differences pass (a picture exported again, or encoded, shifts most pixels a little).
    */
-  let { before, after }: { before: Raster | null; after: Raster | null } =
-    $props();
+  let {
+    before,
+    after,
+    labels,
+    startTolerance = 0,
+    alone,
+  }: {
+    before: Raster | null;
+    after: Raster | null;
+    labels: { before: string; after: string };
+    /** How far a pixel may differ before it is marked, at first. */
+    startTolerance?: number;
+    /** Words above a picture with one side only. */
+    alone?: string;
+  } = $props();
 
   let view = $state<PictureView>("side");
   let zoom = $state<Zoom>("fit");
   let backdrop = $state<Backdrop>("checks");
   let flicked = $state<"before" | "after">("after");
+  let tolerance = $state(0);
+  $effect.pre(() => {
+    tolerance = startTolerance;
+  });
   /** The frame's inside width, measured, and the window's height: the room a fitted picture has. */
   let roomWidth = $state(0);
   let windowHeight = $state(0);
 
   const both = $derived(before !== null && after !== null);
-  const difference = $derived(before && after ? compare(before, after) : null);
+  const difference = $derived(
+    before && after ? compare(before, after, tolerance) : null,
+  );
   const marked = $derived.by((): Raster | null => {
     if (!before || !after || !difference) return null;
     return {
@@ -193,37 +214,51 @@
 </div>
 
 {#if !both}
+  {#if alone}
+    <p class="small">{alone}</p>
+  {/if}
   {#if before}
-    <p class="small">{t("media-only-before")}</p>
-    {@render picture(before, t("media-side-before"))}
+    {@render picture(before, labels.before)}
   {:else if after}
-    <p class="small">{t("media-only-after")}</p>
-    {@render picture(after, t("media-side-after"))}
+    {@render picture(after, labels.after)}
   {/if}
 {:else if view === "side" && before && after}
   <div class="pair">
-    {@render picture(before, t("media-side-before"))}
-    {@render picture(after, t("media-side-after"))}
+    {@render picture(before, labels.before)}
+    {@render picture(after, labels.after)}
   </div>
 {:else if view === "flick" && shown}
   <div class="flick">
     <button type="button" class="flick-button" onclick={flick}>
-      {flicked === "before"
-        ? t("media-flick-to-after")
-        : t("media-flick-to-before")}
+      {t("media-flick-to", {
+        side: flicked === "before" ? labels.after : labels.before,
+      })}
     </button>
     <p class="small" aria-live="polite">
       {t("media-flick-showing", {
-        side:
-          flicked === "before" ? t("media-side-before") : t("media-side-after"),
+        side: flicked === "before" ? labels.before : labels.after,
       })}
     </p>
   </div>
-  {@render picture(
-    shown,
-    flicked === "before" ? t("media-side-before") : t("media-side-after"),
-  )}
+  {@render picture(shown, flicked === "before" ? labels.before : labels.after)}
 {:else if view === "changed" && marked && difference}
+  <div
+    class="toggles tolerance"
+    role="group"
+    aria-label={t("media-tolerance-label")}
+  >
+    {#each TOLERANCES as choice (choice)}
+      <button
+        type="button"
+        class="toggle"
+        aria-pressed={tolerance === choice}
+        onclick={() => (tolerance = choice)}
+        >{choice === 0
+          ? t("media-tolerance-exact")
+          : t("media-tolerance-levels", { levels: choice })}</button
+      >
+    {/each}
+  </div>
   <p class="small" aria-live="polite">
     {#if difference.changed === 0}
       {t("media-changed-none")}
@@ -373,6 +408,10 @@
 
   .small {
     margin: 0 12px 6px;
+  }
+
+  .tolerance {
+    margin: 0 12px 8px;
   }
 
   @media (max-width: 900px) {

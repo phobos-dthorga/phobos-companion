@@ -168,3 +168,11 @@ export const agentsShown: Answer = {
 export const agentsHidden: Answer = {
   result: { choice: "found", shown: false, signs: [] },
 };
+
+/** A made-up picture 8 x 4 pixels (0.53.0), handed over wherever a page reads a picture. */
+export const SAMPLE_PNG = Array.from(
+  Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAECAYAAACzzX7wAAAAHElEQVR4nGNsaGj4z4AEGhoaGJH5TMgcbIByBQDwkwQIPakIVQAAAABJRU5ErkJggg==",
+    "base64",
+  ),
+);

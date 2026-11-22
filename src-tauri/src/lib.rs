@@ -38,6 +38,7 @@ mod settings_page;
 mod shortcuts;
 mod tests_page;
 mod themes_page;
+mod viewable;
 
 use companion_core::failure::{Failure, FailureCode};
 use companion_core::kit;
@@ -249,6 +250,39 @@ async fn open_changed_file(
 ) -> Result<String, Failure> {
     let data = data_folder(&app)?;
     blocking(move || changed_files::open(&data, &game, &repository, commit.as_deref(), &path, &side)).await
+}
+
+/// A picture or a sound a page listed, raw, for the window to draw or play (0.53.0). Only reads.
+#[tauri::command]
+async fn viewable_file(path: String) -> Result<tauri::ipc::Response, Failure> {
+    blocking(move || viewable::bytes(&path).map(tauri::ipc::Response::new)).await
+}
+
+/// Whether this game's tools pair pictures with encoded textures (0.53.0). Only reads.
+#[tauri::command]
+async fn texture_pairs_offered(game: String) -> Result<bool, Failure> {
+    blocking(move || installs_page::has_texture_pairs(&game)).await
+}
+
+/// One active mod's pictures beside their encoded textures (0.53.0). Only reads.
+#[tauri::command]
+async fn texture_pairs(
+    game: String,
+    name: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<serde_json::Value, Failure> {
+    blocking(move || installs_page::texture_pairs(&game, &name, Some(&hearing(on_progress)))).await
+}
+
+/// A repository's commits a page at a time, for one with no changelog (0.53.0). Only reads.
+#[tauri::command]
+async fn repository_commits(
+    game: String,
+    repository: String,
+    skip: u32,
+    on_progress: Channel<kit::Progress>,
+) -> Result<serde_json::Value, Failure> {
+    blocking(move || changes_page::commits(&game, &repository, skip, Some(&hearing(on_progress)))).await
 }
 
 /// Every fact about a game's products over time: from git, and from this PC's history log.
@@ -1113,6 +1147,10 @@ pub fn run() {
             changes_list,
             entry_code,
             changed_file,
+            viewable_file,
+            texture_pairs_offered,
+            texture_pairs,
+            repository_commits,
             save_changed_file,
             open_changed_file,
             timeline,

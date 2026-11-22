@@ -263,7 +263,6 @@ async function open(
   more: Record<string, { result: unknown }> = {},
 ) {
   await mockHost(page, {
-    ...more,
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
     changes_list: sampleChanges,
@@ -357,6 +356,8 @@ async function open(
         },
       },
     },
+    // Last, so a test's own answer stands in for the sample's (0.53.0).
+    ...more,
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Changes", exact: true }).click();
@@ -613,6 +614,51 @@ for (const [name, viewport] of [
         "Nothing above 4 kHz loud enough to hold one.",
       );
       await audit(page);
+    });
+    test("lists the commits of a repository with no changelog, and shows one's code (0.53.0)", async ({
+      page,
+    }) => {
+      await open(page, sampleCode(), {
+        changes_list: {
+          result: [
+            ...(sampleChanges.result as unknown[]),
+            { repository: "first-buildings", changelogs: [] },
+          ],
+        },
+        repository_commits: {
+          result: {
+            repository: "first-buildings",
+            total: 45,
+            skip: 0,
+            commits: [
+              {
+                hash: "e24199d28bb563783bd36b99c56fc8257314196c",
+                time: "2026-09-12T15:45:36+00:00",
+                author: "Sample Author",
+                subject: "Sample heating works with eight outlets",
+                files: 26,
+                binary: 5,
+              },
+            ],
+          },
+        },
+      });
+      await page
+        .getByRole("button", { name: "first-buildings: commits" })
+        .click();
+      await expect(page.locator("main")).toContainText(
+        "first-buildings keeps no changelog",
+      );
+      await expect(page.locator("main")).toContainText(
+        "26 files changed, 5 not text",
+      );
+      await audit(page);
+      await page
+        .getByRole("button", {
+          name: "Show the code behind: Sample heating works with eight outlets",
+        })
+        .click();
+      await expect(page.getByRole("dialog")).toContainText("Written by commit");
     });
   });
 }

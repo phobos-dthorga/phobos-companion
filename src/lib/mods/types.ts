@@ -45,6 +45,8 @@ export type Direction = "newer" | "older" | "same" | "unknown";
 export type Copy = {
   kind: "repository" | "installed" | "backup";
   name: string;
+  /** Where the copy is on this PC (kit 1.82.0), for showing its pictures and sounds. */
+  folder?: string;
   version: string;
   record: InstallRecord | null;
   backup: string | null;

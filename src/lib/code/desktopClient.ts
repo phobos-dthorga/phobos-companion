@@ -94,3 +94,35 @@ export async function openChangedFile(
     (path) => ({ state: "ready", path }),
   );
 }
+
+/** A repository's commits, newest first (phobos-modkit 1.82.0 `changes commits`), for one with no changelog. */
+export type CommitsPage = {
+  repository: string;
+  total: number;
+  skip: number;
+  commits: {
+    hash: string;
+    time: string | null;
+    author: string;
+    subject: string;
+    files: number;
+    binary: number;
+  }[];
+};
+
+/** Commits listed a page by the host (0.53.0). */
+export const COMMITS_PER_PAGE = 20;
+
+/** One page of a repository's commits, from `skip` on. */
+export async function readCommits(
+  game: string,
+  repository: string,
+  skip: number,
+  onProgress?: OnProgress,
+): Promise<{ state: "ready"; found: CommitsPage } | Failed> {
+  return ask<CommitsPage, { state: "ready"; found: CommitsPage }>(
+    "repository_commits",
+    { game, repository, skip, onProgress: progressChannel(onProgress) },
+    (found) => ({ state: "ready", found }),
+  );
+}

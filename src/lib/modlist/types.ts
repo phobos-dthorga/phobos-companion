@@ -76,6 +76,8 @@ export type ModRow = {
   authors: string;
   versions: string[];
   needs: string[];
+  /** Its own picture on this PC (phobos-modkit 1.82.0); null when it has none. */
+  preview?: string | null;
 };
 
 /** One entry of a list, in order. `remembered` is the name a check once saw, for a mod no longer here. */

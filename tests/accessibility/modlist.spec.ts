@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, SAMPLE_PNG, sampleHome } from "./host";
 
 /** Invented mods, for the audit only. The program itself never shows sample data. */
 function sampleMod(key: string, name: string, source = "workshop") {
@@ -34,13 +34,15 @@ const listing = {
   name: "First Sample",
   supported: true,
   version: "1.7",
-  mods: Object.entries(NAMES).map(([key, name]) =>
-    sampleMod(
+  mods: Object.entries(NAMES).map(([key, name]) => ({
+    ...sampleMod(
       key,
       name,
       key === "core" ? "game" : key === "delta" ? "local" : "workshop",
     ),
-  ),
+    // 0.53.0: one mod with its own picture, the rest without.
+    preview: key === "delta" ? "C:/Mods/Delta/About/Preview.png" : null,
+  })),
   lists: [
     {
       key: "active",
@@ -267,6 +269,7 @@ async function open(page: Page) {
     kit_status: healthyKit,
     mod_list_check: { result: check },
     mod_list_mods: { result: listing },
+    viewable_file: { result: SAMPLE_PNG },
     mod_list_edit: changed(ON),
     mod_list_sort: sorted,
     mod_list_rules: rules,
@@ -630,6 +633,21 @@ for (const [name, viewport] of [
             place: null,
           },
         ]);
+    });
+    test("shows the picture of the mod in focus (0.53.0)", async ({ page }) => {
+      await open(page);
+      await page
+        .getByRole("button", { name: "Edit the list", exact: true })
+        .click();
+      const panel = page.getByRole("region", { name: "The mod in focus" });
+      await expect(panel).toContainText("Choose a mod in either list");
+      await page.getByRole("option", { name: /Delta Doors/ }).click();
+      await expect(
+        panel.getByRole("img", { name: "Delta Doors's own picture" }),
+      ).toBeVisible();
+      await page.getByRole("option", { name: /Alpha Tools/ }).click();
+      await expect(panel).toContainText("This mod has no picture of its own.");
+      await audit(page);
     });
   });
 }

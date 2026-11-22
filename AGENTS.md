@@ -116,7 +116,10 @@ reads them.
   for that repository and commit named, read with git, at most 64 MB. **Save a copy** writes only where the owner chose in Windows'
   Save dialog; **Open with its own program** writes a copy into `opened-copies` in this program's own folder and asks the system to
   open it, only for a kind the kit named as media, never a program or a kind it did not know, so a press can never run something.
-  Both only on a press.
+  Both only on a press. **Pictures and sounds elsewhere** (0.53.0; the owner's choice of 23 Nov 2026: the Mods page, encoded
+  textures, the Mod list's previews) only read, through `src-tauri/src/viewable.rs`: a file a kit answer named in this run (each
+  changed file in every copy of a mod, each preview, each picture and encoded texture of a pair), of a kind the window draws or
+  plays, at most 64 MB.
 - **The Timeline page only reads**: the kit's `history`, through `src-tauri/src/history_page.rs`, which checks the repository is one
   of the game's, the changelog a plain path inside it, and the commit or moment plain text of the right shape. The history log it
   shows is written by the tools as they work, never by this program.

@@ -16,6 +16,11 @@ Whether anything needs building, installing or encoding, with a button for each:
 - **Install from the repository** and **Back up the installed copy**. Each asks first, in words.
 - **Backups**, newest first. **What going back changes** shows what you would gain and lose; **Go back to this** does it.
 
+- **Compare** beside a changed picture or sound in **Show the files**: installed now against **In the repository**, or against a
+  backup, with the same views as the code viewer. See [Compare a changed picture or sound](task-compare-pictures-sounds).
+- **Compare pictures with their encoded textures** on a mod (where the game's tools pair them): each picture beside the texture the
+  game loads in its place, turned the right way up. **Stale** ones show an old picture in game.
+
 **Installing, going back and encoding wait until the game is closed.** Building does not.
 
 ### Keys

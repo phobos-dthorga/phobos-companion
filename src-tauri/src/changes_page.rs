@@ -44,10 +44,10 @@ pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<Vec<Repositor
     let mut found = Vec::new();
     for repository in games::repositories_of(game)?.into_iter().filter(|r| r.path.is_dir()) {
         let answer = kit::run_hearing(TOOL, &list_arguments(&repository.path), listener)?;
-        let changelogs = &answer["data"]["changelogs"];
-        if changelogs.as_array().is_some_and(|list| !list.is_empty()) {
-            found.push(RepositoryChanges { repository: repository.name, changelogs: changelogs.clone() });
-        }
+        // A repository with no changelog comes too, with none listed (0.53.0): the page offers its commits instead.
+        let changelogs = answer["data"]["changelogs"].clone();
+        let changelogs = if changelogs.is_array() { changelogs } else { Value::Array(Vec::new()) };
+        found.push(RepositoryChanges { repository: repository.name, changelogs });
     }
     Ok(found)
 }
@@ -74,13 +74,44 @@ pub fn entry_arguments(root: &Path, changelog: &str, text: &str) -> Result<Vec<S
 }
 
 /// The code of one commit, with every entry it wrote into the changelog: for a fact on the Timeline page, whose entries may since
-/// have been reworded or removed. The changelog may be one the repository no longer has; the kit checks the commit is there.
+/// have been reworded or removed. The changelog may be one the repository no longer has; the kit checks the commit is there. An
+/// empty changelog (0.53.0) is a repository that keeps none: the commit alone, naming no entries.
 pub fn commit_arguments(root: &Path, changelog: &str, commit: &str) -> Result<Vec<String>, String> {
-    changelog_checked(changelog)?;
+    if !changelog.is_empty() {
+        changelog_checked(changelog)?;
+    }
     if !checks::commit_hash(commit) {
         return Err(format!("{commit:?} is not a commit"));
     }
-    Ok(Args::new(TOOL, ENTRY).root(root).pair("--changelog", changelog).given("--commit", commit).json())
+    let arguments = Args::new(TOOL, ENTRY).root(root);
+    let arguments = if changelog.is_empty() { arguments } else { arguments.pair("--changelog", changelog) };
+    Ok(arguments.given("--commit", commit).json())
+}
+
+/// Commits listed a page (0.53.0).
+pub const COMMITS_PER_PAGE: u32 = 20;
+/// The furthest back a page may start: well past any repository of the owner's.
+const MAX_SKIP: u32 = 100_000;
+
+pub fn commits_arguments(root: &Path, skip: u32) -> Result<Vec<String>, String> {
+    if skip > MAX_SKIP {
+        return Err("that is further back than this program lists".to_owned());
+    }
+    Ok(Args::new(TOOL, "commits")
+        .root(root)
+        .pair("--top", &COMMITS_PER_PAGE.to_string())
+        .pair("--skip", &skip.to_string())
+        .json())
+}
+
+/// A repository's commits, newest first, from `skip` on (0.53.0; the owner's choice of 23 Nov 2026): for a repository with no
+/// changelog, where no entry leads to its code. Only reads.
+pub fn commits(game: &str, repository: &str, skip: u32, listener: Option<kit::Listener>) -> Result<Value, Failure> {
+    let found = games::named_repository(game, repository)?;
+    let arguments = commits_arguments(&found.path, skip).map_err(Failure::refused)?;
+    let answer = kit::run_hearing(TOOL, &arguments, listener)?;
+    Outcome::required(&answer)?;
+    Ok(answer["data"].clone())
 }
 
 /// The code behind one entry of one of the game's repositories, or, with a commit named, behind that commit.

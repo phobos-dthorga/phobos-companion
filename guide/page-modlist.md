@@ -49,6 +49,9 @@ Every mod on this PC, in one scroll: **Switched on**, in load order, and **Switc
 - **Every change keeps a backup of the list first.** **Undo the last change** goes back on the latest; press it again for the one before.
 - **Changes wait while the game or RimSort is open**, because either would write over them.
 
+On **Edit the list**, **The mod in focus** shows the picture of the mod you last moved to or pressed in either list, as the
+game's mod menu shows it, with its authors and the versions it was made for.
+
 Home shows a note when a game's list has problems or warnings.
 
 ### Keys

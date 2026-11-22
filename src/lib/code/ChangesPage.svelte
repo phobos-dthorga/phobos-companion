@@ -19,6 +19,7 @@
     versionWords,
   } from "../changelog/presentation";
   import RichText from "../shell/RichText.svelte";
+  import RepositoryCommits from "./RepositoryCommits.svelte";
   import Pager from "../shell/Pager.svelte";
   import { pageFrom, pageOf } from "../shell/paging";
   import { commitRuns, plainText } from "../shell/inline";
@@ -68,6 +69,20 @@
       chosenProduct ??
       choices[0] ??
       null,
+  );
+
+  /** Repositories with no changelog (0.53.0): their commits are listed instead, a press away. */
+  const bare = $derived(
+    reading.state === "ready"
+      ? reading.repositories
+          .filter((r) => r.changelogs.length === 0)
+          .map((r) => r.repository)
+      : [],
+  );
+  /** The repository whose commits are shown: the one the place names, or the only kind there is. */
+  const commitsOf = $derived(
+    bare.find((r) => r === here().focus.commits) ??
+      (choices.length === 0 ? (bare[0] ?? null) : null),
   );
 
   /** Versions a page: the newest six first; the page is part of the place, so Back returns to it. */
@@ -151,27 +166,19 @@
   <p class="muted">{t("changes-browser")}</p>
 {:else if reading.state === "failed"}
   <FailurePanel failure={reading.failure} onretry={load} />
-{:else if choices.length === 0}
+{:else if choices.length === 0 && bare.length === 0}
   <p class="lead">{t("changes-none", { game: game.name })}</p>
   <GuideLink entry="task-repository-ready" words={t("guide-ready-link")} />
+{:else if commitsOf}
+  {@render toggles()}
+  <RepositoryCommits
+    game={game.id}
+    repository={commitsOf}
+    page={pageFrom(here().focus.page)}
+    onturn={turn}
+  />
 {:else if chosen}
-  <div class="toggles" role="group" aria-label={t("changes-products-label")}>
-    {#each choices as choice (keyOf(choice))}
-      <button
-        type="button"
-        class="toggle"
-        aria-pressed={keyOf(choice) === keyOf(chosen)}
-        onclick={() =>
-          setFocus({
-            repository: choice.repository,
-            changelog: choice.log.changelog,
-            page: "",
-          })}
-      >
-        {choice.log.product}
-      </button>
-    {/each}
-  </div>
+  {@render toggles()}
   <p class="muted where">
     {t("changes-where", {
       repository: chosen.repository,
@@ -279,6 +286,43 @@
   {/if}
   <p class="muted how">{t("changes-how")}</p>
 {/if}
+
+{#snippet toggles()}
+  <div class="toggles" role="group" aria-label={t("changes-products-label")}>
+    {#each choices as choice (keyOf(choice))}
+      <button
+        type="button"
+        class="toggle"
+        aria-pressed={!commitsOf && !!chosen && keyOf(choice) === keyOf(chosen)}
+        onclick={() =>
+          setFocus({
+            repository: choice.repository,
+            changelog: choice.log.changelog,
+            commits: "",
+            page: "",
+          })}
+      >
+        {choice.log.product}
+      </button>
+    {/each}
+    {#each bare as repository (repository)}
+      <button
+        type="button"
+        class="toggle"
+        aria-pressed={commitsOf === repository}
+        onclick={() =>
+          setFocus({
+            repository: "",
+            changelog: "",
+            commits: repository,
+            page: "",
+          })}
+      >
+        {t("changes-commits-of", { repository })}
+      </button>
+    {/each}
+  </div>
+{/snippet}
 
 {#snippet pager()}
   <Pager

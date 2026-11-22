@@ -104,3 +104,46 @@ export async function markSettings(
     (time) => ({ state: "ready", time }),
   );
 }
+
+/** Whether this game's tools pair each picture with its encoded texture (0.53.0); false in a browser. */
+export async function texturePairsOffered(game: string): Promise<boolean> {
+  if (inBrowser()) return false;
+  const answer = await ask<boolean, { state: "ready"; offered: boolean }>(
+    "texture_pairs_offered",
+    { game },
+    (offered) => ({ state: "ready", offered }),
+  );
+  return answer.state === "ready" && answer.offered;
+}
+
+/** One picture of a mod beside the encoded texture the game loads in its place (phobos-modkit 1.82.0). */
+export type TexturePair = {
+  picture: string | null;
+  encoded: string | null;
+  state: "fresh" | "stale" | "missing" | "left-over";
+  pictureSize: number | null;
+  encodedSize: number | null;
+};
+
+export type TexturePairs = {
+  name: string;
+  folder: string;
+  /** The encoded textures are stored upside down, as the game reads them. */
+  flipped: boolean;
+  counts: Record<TexturePair["state"], number>;
+  total: number;
+  pairs: TexturePair[];
+};
+
+/** One active mod's pictures beside their encoded textures. */
+export async function readTexturePairs(
+  game: string,
+  name: string,
+  onProgress?: OnProgress,
+): Promise<{ state: "ready"; found: TexturePairs } | Failed> {
+  return ask<TexturePairs, { state: "ready"; found: TexturePairs }>(
+    "texture_pairs",
+    { game, name, onProgress: progressChannel(onProgress) },
+    (found) => ({ state: "ready", found }),
+  );
+}

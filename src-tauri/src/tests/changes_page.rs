@@ -49,3 +49,17 @@ fn a_commits_code_is_asked_for_by_its_hash_alone() {
 fn the_list_asks_for_every_version_of_one_repository_to_page_through() {
     assert_eq!(list_arguments(Path::new("repo")), ["changes", "list", "--root", "repo", "--versions", "0", "--json"]);
 }
+
+#[test]
+fn a_commit_of_a_repository_with_no_changelog_is_asked_for_alone() {
+    let arguments = commit_arguments(Path::new("repo"), "", "abc1234").unwrap();
+    assert_eq!(arguments, ["changes", "entry", "--root", "repo", "--commit=abc1234", "--json"]);
+    assert!(commit_arguments(Path::new("repo"), "", "HEAD").is_err());
+}
+
+#[test]
+fn commits_are_listed_a_page_at_a_time() {
+    let arguments = commits_arguments(Path::new("repo"), 40).unwrap();
+    assert_eq!(arguments, ["changes", "commits", "--root", "repo", "--top", "20", "--skip", "40", "--json"]);
+    assert!(commits_arguments(Path::new("repo"), 1_000_000).is_err());
+}

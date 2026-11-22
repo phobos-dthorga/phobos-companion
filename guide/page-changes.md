@@ -11,6 +11,8 @@ see: task-code-behind, term-changelog-entry
 - Choose the changelog at the top. Entries not yet in a version come first.
 - **Show the code** opens the commit that wrote an entry, with every file it changed. See [the code behind an entry](task-code-behind).
 - In-game tests still waiting on a version are listed beside it.
+- A repository with no changelog has a **…: commits** button instead: its commits, newest first, twenty a page, each with
+  **Show the code**, pictures and textures included.
 
 ### Keys
 - **6** opens Changes.

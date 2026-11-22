@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { showingOf } from "../media/decode";
+  import ModFileCompare from "./ModFileCompare.svelte";
   import Placeholder from "../shell/Placeholder.svelte";
   import SettingsToLook from "./SettingsToLook.svelte";
   import SinceLastPlayed from "./SinceLastPlayed.svelte";
@@ -27,7 +29,9 @@
     makeMove,
     readInstalls,
     readTextures,
+    texturePairsOffered,
   } from "./desktopClient";
+  import TexturePairs from "./TexturePairs.svelte";
   import {
     blockedBy,
     changedMods,
@@ -397,8 +401,14 @@
     }
   });
 
+  /** Whether this game's tools pair pictures with encoded textures (0.53.0): each mod then offers the comparison. */
+  let pairsOffered = $state(false);
+
   onMount(() => {
     void load();
+    void texturePairsOffered(game.id).then(
+      (offered) => (pairsOffered = offered),
+    );
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   });
@@ -679,6 +689,9 @@
         {t("mods-commits-since", { count: mod.commitsSince })}
       </p>
     {/if}
+    {#if pairsOffered}
+      <TexturePairs game={game.id} name={mod.mod} />
+    {/if}
     {#if mod.update.lose.length > 0}
       <h5 class="lose">
         <span aria-hidden="true">−</span>
@@ -787,6 +800,22 @@
               {file.path}
               {#if file.rebuilt}
                 <span class="muted">{t("mods-file-rebuilt")}</span>
+              {/if}
+              {#if showingOf(file.path) !== "words" && mod.installed}
+                <button
+                  type="button"
+                  class="action compare-button"
+                  aria-expanded={showAll[`${key}/compare/${file.path}`] ??
+                    false}
+                  aria-label={t("mods-compare-for", { path: file.path })}
+                  onclick={() => toggle(`${key}/compare/${file.path}`)}
+                  >{showAll[`${key}/compare/${file.path}`]
+                    ? t("mods-compare-hide")
+                    : t("mods-compare")}</button
+                >
+                {#if showAll[`${key}/compare/${file.path}`]}
+                  <ModFileCompare {mod} {file} />
+                {/if}
               {/if}
             </li>
           {/each}

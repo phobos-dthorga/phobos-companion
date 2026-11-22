@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { t } from "../../i18n/runtime";
-  import { register } from "../../shortcuts/registry";
+  import { t } from "../i18n/runtime";
+  import { register } from "../shortcuts/registry";
   import type { SoundReading } from "./decode";
   import SoundSide from "./SoundSide.svelte";
 
@@ -11,8 +11,15 @@
    * A changed sound, before and after side by side (0.50.0). Z chooses the other version, Y plays or stops the chosen one; each has
    * its own player too. A sound added or removed has one side.
    */
-  let { before, after }: { before: Ready | null; after: Ready | null } =
-    $props();
+  let {
+    before,
+    after,
+    labels,
+  }: {
+    before: Ready | null;
+    after: Ready | null;
+    labels: { before: string; after: string };
+  } = $props();
 
   /** The version picked; one that does not exist is never the chosen one. */
   let picked = $state<"before" | "after">("after");
@@ -55,7 +62,7 @@
 <div class="pair" class:one={!before || !after}>
   {#if before}
     <SoundSide
-      label={t("media-side-before")}
+      label={labels.before}
       channels={before.channels}
       rate={before.rate}
       seconds={before.seconds}
@@ -67,7 +74,7 @@
   {/if}
   {#if after}
     <SoundSide
-      label={t("media-side-after")}
+      label={labels.after}
       channels={after.channels}
       rate={after.rate}
       seconds={after.seconds}

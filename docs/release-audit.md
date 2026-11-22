@@ -71,6 +71,7 @@ What it adds to what stands between the Companion and another person, all small,
 | **The window's content policy allows `media-src 'self' blob:`**, so it can play a sound it decoded itself | Only addresses the window made from bytes the host handed it; nothing from the network | None |
 | **Open with its own program** writes a copy into the program's own folder (`opened-copies`) and asks the system to open it | Only for a kind the kit named as media (never a program or an unknown kind), only on a press; copies are let go after a day | On Linux and macOS it uses `xdg-open` and `open`, unchecked |
 | **Save a copy** writes one file where the person chose in the system's Save dialog | The host writes only the path the dialog gave | None |
+| **Pictures and sounds outside the repositories are read** (0.53.0): a mod's installed copy and backups, each mod's preview, its encoded textures | Only a file a kit answer named in this run, of a picture or sound kind, at most 64 MB; nothing is written | None |
 
 ## Already right
 

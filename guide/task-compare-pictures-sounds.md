@@ -3,7 +3,7 @@ title: Compare a changed picture or sound
 kind: task
 go: changes
 words: picture, texture, dds, sound, audio, image, spectrogram, whine, before and after, flick, diff, png, ogg, wav
-see: task-code-behind, page-changes
+see: task-code-behind, page-changes, page-mods, task-see-screenshots
 ---
 1. Open the code behind an entry (**Show the code**), and pick the picture or sound from the file list (**J** and **K** step through
    the files).
@@ -18,6 +18,8 @@ see: task-code-behind, page-changes
 - **Fit** shows the whole picture, enlarged by a whole number when it is small so its pixels stay even; **1×**, **2×**, **4×**
   and **8×** draw it at that many times its own pixels, to scroll round (the **=** key steps through them all). **Checks**, **Dark** or **Light** behind
   see-through parts: stray specks hide on the wrong ground.
+- In **Show what changed**, **Exact**, **4 levels**, **16 levels** and **64 levels** say how far a pixel may differ before it is
+  marked. A picture exported again, or encoded, shifts most pixels a little: **16 levels** leaves what really changed.
 - DDS textures are drawn too: BC1 to BC5 (DXT1 to DXT5) and BC7. Others are named, not drawn.
 
 ### A sound
@@ -27,3 +29,8 @@ see: task-code-behind, page-changes
   and its **spectrogram**: time left to right, pitch upwards, brighter for louder, with lines at 4 kHz and 15 kHz.
 - **Play the band near ... kHz alone, moved down** plays the strongest high band moved down to 1 kHz, where nearly every ear hears
   well, at a steady loudness. It is a listening aid, made in the window and never saved.
+
+### Elsewhere
+
+The same views are on the **Mods** page (**Compare** beside a changed picture or sound, and **Compare pictures with their encoded
+textures**), on **Changes** for a repository with no changelog (its commits), and on a screenshot (**Compare with the one before**).

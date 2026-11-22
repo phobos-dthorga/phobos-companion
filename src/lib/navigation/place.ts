@@ -131,13 +131,18 @@ export function placeOf(address: string): Place | null {
   }
   let dialog: Dialog | null = null;
   const need = (...keys: string[]) => keys.every((k) => dialogParts[k]);
-  if (dialogKind === "code" && need("repository", "changelog", "text")) {
+  // A commit of a repository with no changelog (0.53.0) is named by its commit alone.
+  if (
+    dialogKind === "code" &&
+    need("repository", "text") &&
+    (dialogParts.changelog || dialogParts.commit)
+  ) {
     const lead = dialogParts.text;
     dialog = {
       kind: "code",
       request: {
         repository: dialogParts.repository,
-        changelog: dialogParts.changelog,
+        changelog: dialogParts.changelog ?? "",
         product: dialogParts.product ?? "",
         entry: {
           version: dialogParts.version ?? "",

@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, SAMPLE_PNG, sampleHome } from "./host";
 
 const CONTROL_MIN_PX = 44;
 
@@ -334,10 +334,13 @@ async function open(
   slowRead = false,
   // Changes the sample before the page reads it, for a case one test needs.
   edit: (installs: ReturnType<typeof sampleInstalls>) => void = () => {},
+  // More answers a test needs (0.53.0: pictures, texture pairs).
+  more: Record<string, { result: unknown }> = {},
 ) {
   const installs = sampleInstalls(running);
   edit(installs);
   await mockHost(page, {
+    ...more,
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
     // A slow read, for the bars a read again shows: the tools speak three progress lines, a moment apart.
@@ -951,6 +954,77 @@ test.describe("Since you last played (0.28.0)", () => {
     await expect(since).toContainText("reaches back a week");
     await expect(
       since.getByRole("button", { name: "Check what they mean for ours" }),
+    ).toBeVisible();
+    await audit(page);
+  });
+  test("compares a changed picture with the repository's, and a mod's pictures with their encoded textures (0.53.0)", async ({
+    page,
+  }) => {
+    await open(
+      page,
+      [],
+      false,
+      (installs) => {
+        const mod = installs.result[0].status.mods[0];
+        Object.assign(mod.installed ?? {}, {
+          folder: "C:/Game/Mods/SampleMod",
+        });
+        Object.assign(mod.repository, { folder: "D:/repo/mods/SampleMod" });
+        (mod.files?.paths as unknown[] | undefined)?.push({
+          path: "Textures/Boat.png",
+          change: "changed",
+          category: "textures",
+        });
+      },
+      {
+        viewable_file: { result: SAMPLE_PNG },
+        texture_pairs_offered: { result: true },
+        texture_pairs: {
+          result: {
+            name: "Sample Mod",
+            folder: "C:/Game/Mods/SampleMod",
+            flipped: true,
+            counts: { fresh: 0, stale: 0, missing: 1, "left-over": 0 },
+            total: 1,
+            pairs: [
+              {
+                picture: "Textures/Boat.png",
+                encoded: null,
+                state: "missing",
+                pictureSize: 120,
+                encodedSize: null,
+              },
+            ],
+          },
+        },
+      },
+    );
+    await page.getByRole("button", { name: "Show the files" }).first().click();
+    await page
+      .getByRole("button", {
+        name: "Compare Textures/Boat.png, installed now with another copy",
+      })
+      .click();
+    await expect(
+      page.getByRole("img", { name: "The picture, Installed now" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("img", { name: "The picture, In the repository" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Show what changed" }).click();
+    await expect(page.getByText("No pixel changed")).toBeVisible();
+    await audit(page);
+
+    await page
+      .getByRole("button", {
+        name: "Compare pictures with their encoded textures",
+      })
+      .first()
+      .click();
+    await expect(page.getByText("1 textures: 0 fresh")).toBeVisible();
+    await page.getByRole("button", { name: /^Boat\.png/ }).click();
+    await expect(
+      page.getByText("No encoded texture: the game loads the picture itself."),
     ).toBeVisible();
     await audit(page);
   });

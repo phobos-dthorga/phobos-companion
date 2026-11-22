@@ -8,6 +8,7 @@
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
   import { register } from "../shortcuts/registry";
+  import ModPreview from "./ModPreview.svelte";
   import {
     editModList,
     readMods,
@@ -87,6 +88,14 @@
   let chosenOff = $state<string[]>([]);
   let focusOn = $state("");
   let focusOff = $state("");
+  /** The mod last in focus in either list, whose picture is shown (0.53.0). */
+  let lastFocus = $state("");
+  $effect(() => {
+    if (focusOn) lastFocus = focusOn;
+  });
+  $effect(() => {
+    if (focusOff) lastFocus = focusOff;
+  });
   let carrying = $state<{
     keys: string[];
     place: number;
@@ -640,6 +649,8 @@
       <ProgressBar {progress} fallback={t("modlist-changing")} />
     {/if}
   </section>
+
+  <ModPreview mod={listing.mods.find((m) => m.key === lastFocus) ?? null} />
 
   {#if show !== "off"}
     <section class="panel" aria-labelledby="modlist-edit-on">

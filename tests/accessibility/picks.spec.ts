@@ -113,5 +113,43 @@ for (const [name, viewport] of [
         page.getByRole("heading", { level: 2, name: "The billy kettle" }),
       ).toBeVisible();
     });
+    test("keeps the zoom, the ground and the marks from pick to pick, and compares one try with another (0.57.0)", async ({
+      page,
+    }) => {
+      await open(page);
+      await page.keyboard.press("Shift+P");
+      const against = page.getByRole("group", {
+        name: "What the try in focus is compared with",
+      });
+      await against.getByRole("button", { name: "Try 4" }).click();
+      await expect(
+        page.getByRole("img", { name: "The picture, Try 4" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("img", { name: "The picture, Try 3" }),
+      ).toBeVisible();
+      await page.getByRole("button", { name: "2×" }).click();
+      await page.getByRole("button", { name: "Soil" }).click();
+      await page
+        .getByRole("button", { name: "Mark loose specks and fringes" })
+        .click();
+      await expect(page.getByText(/^Marked: /).first()).toBeVisible();
+      await audit(page);
+      await page.keyboard.press("Shift+J");
+      await expect(
+        page.getByRole("heading", { level: 2, name: "The tent lamp" }),
+      ).toBeVisible();
+      await expect(page.getByRole("button", { name: "2×" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await expect(page.getByRole("button", { name: "Soil" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await expect(
+        page.getByRole("button", { name: "Mark loose specks and fringes" }),
+      ).toHaveAttribute("aria-pressed", "true");
+    });
   });
 }

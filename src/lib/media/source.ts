@@ -37,6 +37,8 @@ export type MediaSource = {
   alone?: string;
   /** A game's own grounds, offered after the Companion's (0.55.0). */
   grounds?: Ground[];
+  /** Where it is compared ("picks", "code", "mods"...): each place keeps its own view, zoom and ground for the run (0.57.0). */
+  place?: string;
 };
 
 /** A picture turned over top to bottom, as its file stores it for a game that reads it so. */

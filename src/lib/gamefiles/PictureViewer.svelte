@@ -58,6 +58,7 @@
       : null,
     after: sideOf({ path }, t("shots-compare-label", { when })),
     tolerance: 0,
+    place: "screenshots",
   });
 
   async function load() {

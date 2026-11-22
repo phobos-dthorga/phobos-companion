@@ -31,6 +31,8 @@
   } = $props();
 
   let words = $state("");
+  /** What the try in focus is set against (0.57.0): "in-use", another try's id, or "" for the one in use, else the first other try. */
+  let against = $state("");
   let thumbnails = $state<Record<string, string | null>>({});
 
   const pick = $derived(placed.pick);
@@ -61,28 +63,55 @@
   $effect(() => {
     void pick.id;
     words = "";
+    against = "";
   });
 
-  const source = $derived<MediaSource>({
-    key: `${placed.repository}/${pick.id}/${focus.id}`,
-    before:
-      pick.inUse && pick.inUseThere
+  /** The tries the one in focus can be set against: every other try on this PC. */
+  const others = $derived(
+    pick.tries.filter((found) => found.id !== focus.id && found.there),
+  );
+  const inUseShown = $derived(Boolean(pick.inUse && pick.inUseThere));
+  /** The choice in effect: the one asked for while it can be shown, else the one in use, else the first other try. */
+  const setAgainst = $derived(
+    against === "in-use" && inUseShown
+      ? "in-use"
+      : others.some((found) => found.id === against)
+        ? against
+        : inUseShown
+          ? "in-use"
+          : (others[0]?.id ?? ""),
+  );
+
+  const source = $derived.by((): MediaSource => {
+    const other = others.find((found) => found.id === setAgainst);
+    return {
+      key: `${placed.repository}/${pick.id}/${focus.id}/${setAgainst}`,
+      before:
+        setAgainst === "in-use" && pick.inUse
+          ? {
+              label: t("picks-in-use"),
+              path: pick.inUse,
+              read: () => readViewable(pick.inUse ?? ""),
+            }
+          : other
+            ? {
+                label: other.label,
+                path: other.path,
+                read: () => readViewable(other.path),
+              }
+            : null,
+      after: focus.there
         ? {
-            label: t("picks-in-use"),
-            path: pick.inUse,
-            read: () => readViewable(pick.inUse ?? ""),
+            label: focus.label,
+            path: focus.path,
+            read: () => readViewable(focus.path),
           }
         : null,
-    after: focus.there
-      ? {
-          label: focus.label,
-          path: focus.path,
-          read: () => readViewable(focus.path),
-        }
-      : null,
-    tolerance: 0,
-    alone: pick.inUse ? t("picks-alone-missing") : t("picks-alone-new"),
-    grounds: placed.grounds,
+      tolerance: 0,
+      alone: pick.inUse ? t("picks-alone-missing") : t("picks-alone-new"),
+      grounds: placed.grounds,
+      place: "picks",
+    };
   });
 
   function answerWords(): string {
@@ -145,7 +174,29 @@
     {/each}
   </div>
 
-  {#if focus.there || (pick.inUse && pick.inUseThere)}
+  {#if inUseShown || others.length > 0}
+    <div class="toggles" role="group" aria-label={t("picks-against-label")}>
+      <span class="muted small against">{t("picks-against")}</span>
+      {#if inUseShown}
+        <button
+          type="button"
+          class="toggle"
+          aria-pressed={setAgainst === "in-use"}
+          onclick={() => (against = "in-use")}>{t("picks-in-use")}</button
+        >
+      {/if}
+      {#each others as other (other.id)}
+        <button
+          type="button"
+          class="toggle"
+          aria-pressed={setAgainst === other.id}
+          onclick={() => (against = other.id)}>{other.label}</button
+        >
+      {/each}
+    </div>
+  {/if}
+
+  {#if focus.there || inUseShown}
     <div class="compare">
       <MediaCompare {source} />
     </div>
@@ -260,6 +311,18 @@
   .missing {
     color: var(--colour-risk);
     font-size: var(--type-small);
+  }
+
+  .toggles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .against {
+    margin-inline-end: 6px;
   }
 
   .compare {

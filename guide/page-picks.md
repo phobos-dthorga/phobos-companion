@@ -13,6 +13,11 @@ Waiting ones come first. Each shows its tries, small and side by side, and the t
 same views as the code viewer: **Side by side**, **Flick between them** (**Z**), **Show what changed**, the zoom buttons and the
 grounds, including the game's own (soil and dark stone for RimWorld). A sound has its players, spectrograms and the band alone.
 
+**Compare with:** sets the try in focus against the one in use now, or against any other try, so a new picture with nothing in
+use is compared too, and a correction try shows exactly what the fix touched. **Mark loose specks and fringes** paints the edge
+check's findings in the accent colour, with their counts beside the picture. The zoom, the ground, the view and the marks stay as
+you left them from one pick and try to the next.
+
 **Pick Try …** keeps your pick; **None of these** says none will do, with your words for what to try next. The next waiting pick
 opens. An agent session applies it later, and it leaves the list; until then, pressing another changes it.
 

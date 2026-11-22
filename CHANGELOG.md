@@ -4,6 +4,24 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.57.0] - 2026-11-23
+
+Picks made easier to compare (the owner, 23 Nov 2026: "the remembered image size, background colour, etc. should be remembered
+between each pick. It makes it VERY HARD to compare otherwise", and on question cards, both altered forms of the compare tool).
+
+### Changed
+
+- **The zoom, the ground, the view, the tolerance and the side flicked to stay as you left them** when you move to the next pick,
+  try, file or screenshot, for the whole run; each place (Picks, the code viewer, the Mods page, encoded textures, screenshots)
+  keeps its own. **The last picture stays on screen while the next is read**, so nothing jumps. Not yet tested on screen.
+
+### Added
+
+- **Picks: Compare with** the one in use now or **any other try**: a new picture with nothing in use is compared too, and a
+  correction try shows what the fix touched (flick with Z, side by side, or what changed). Not yet tested on screen.
+- **Mark loose specks and fringes**, wherever a picture is compared: the edge check's loose specks, loose strokes, pale fringe and
+  haze painted in the accent colour, counted beside the picture. The same figures as `edge_check.py`: equal on all 53 of your
+  textures checked, 15 of them with something loose. Not yet tested on screen.
 ## [0.56.0] - 2026-11-23
 
 Helpers for the player in the Mod list (the owner, 23 Nov 2026: "Is there anything more we can do, especially to help the

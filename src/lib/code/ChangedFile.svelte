@@ -91,6 +91,7 @@
     before: sideOf("before"),
     after: sideOf("after"),
     tolerance: 0,
+    place: "code",
     alone: exists.before ? t("media-only-before") : t("media-only-after"),
   });
 

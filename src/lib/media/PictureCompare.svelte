@@ -4,6 +4,8 @@
   import { register } from "../shortcuts/registry";
   import type { Ground } from "./source";
   import { themeColour } from "./decode";
+  import { findEdges, markedPicture, type Edges } from "./edges";
+  import { viewSettings } from "./viewSettings.svelte";
   import {
     changedShare,
     compare,
@@ -20,8 +22,6 @@
     VIEWS,
     ZOOMS,
     type Backdrop,
-    type PictureView,
-    type Zoom,
   } from "./viewing";
 
   /**
@@ -37,6 +37,7 @@
     startTolerance = 0,
     alone,
     grounds = [],
+    place = "default",
   }: {
     before: Raster | null;
     after: Raster | null;
@@ -47,34 +48,30 @@
     alone?: string;
     /** A game's own grounds (0.55.0, from a picks file): offered after the Companion's, by name. */
     grounds?: Ground[];
+    /** Where the pictures are compared: each place keeps its own view, zoom, ground and marks for the run (0.57.0). */
+    place?: string;
   } = $props();
 
   /** The page's own element, to tell whether it sits in a dialog: its keys work only where it is. */
   let here = $state<HTMLElement | null>(null);
 
-  let view = $state<PictureView>("side");
-  let zoom = $state<Zoom>("fit");
-  /** One of the Companion's grounds, or a game's own by its place in `grounds` ("ground-0"). */
-  let backdrop = $state<Backdrop | `ground-${number}`>("checks");
+  // Kept for the run in this place, so the next pick, try or file is seen as the last one was (0.57.0).
+  // svelte-ignore state_referenced_locally
+  const settings = viewSettings(place, startTolerance);
 
-  function groundStyle(choice: typeof backdrop): string {
+  function groundStyle(choice: string): string {
     const own = /^ground-(\d+)$/.exec(choice);
     const colour = own ? grounds[Number(own[1])]?.colour : undefined;
     if (colour) return `background: ${colour};`;
     return backdropStyle(own ? "checks" : (choice as Backdrop));
   }
-  let flicked = $state<"before" | "after">("after");
-  let tolerance = $state(0);
-  $effect.pre(() => {
-    tolerance = startTolerance;
-  });
   /** The frame's inside width, measured, and the window's height: the room a fitted picture has. */
   let roomWidth = $state(0);
   let windowHeight = $state(0);
 
   const both = $derived(before !== null && after !== null);
   const difference = $derived(
-    before && after ? compare(before, after, tolerance) : null,
+    before && after ? compare(before, after, settings.tolerance) : null,
   );
   const marked = $derived.by((): Raster | null => {
     if (!before || !after || !difference) return null;
@@ -90,21 +87,26 @@
     };
   });
   const shown = $derived(
-    view === "flick" ? (flicked === "before" ? before : after) : null,
+    settings.view === "flick"
+      ? settings.flicked === "before"
+        ? before
+        : after
+      : null,
   );
 
   function flick() {
     if (!both) return;
-    view = "flick";
-    flicked = flicked === "before" ? "after" : "before";
+    settings.view = "flick";
+    settings.flicked = settings.flicked === "before" ? "after" : "before";
   }
 
   function stepZoom() {
-    zoom = ZOOMS[(ZOOMS.indexOf(zoom) + 1) % ZOOMS.length];
+    settings.zoom = ZOOMS[(ZOOMS.indexOf(settings.zoom) + 1) % ZOOMS.length];
   }
 
   /** How wide a picture is drawn: whole inside its frame when fitted (0.52.0), else its own pixels times the zoom. */
   function widthOf(raster: Raster): string {
+    const zoom = settings.zoom;
     if (zoom !== "fit") return `${raster.width * zoom}px`;
     const scale = fitScale(
       raster.width,
@@ -146,6 +148,22 @@
     return { update: draw };
   }
 
+  /** Each picture's loose bits, found once and kept while it is shown: finding them takes up to two seconds on a large one. */
+  const found = new WeakMap<Raster, { edges: Edges; marked: Raster }>();
+
+  function edgesOf(raster: Raster) {
+    let known = found.get(raster);
+    if (!known) {
+      const edges = findEdges(raster);
+      known = {
+        edges,
+        marked: markedPicture(raster, edges, rgbOf(themeColour("accent"))),
+      };
+      found.set(raster, known);
+    }
+    return known;
+  }
+
   function number(value: number): string {
     return value.toLocaleString(LOCALE);
   }
@@ -163,6 +181,7 @@
 <svelte:window bind:innerHeight={windowHeight} />
 
 {#snippet picture(raster: Raster, label: string)}
+  {@const loose = settings.edges ? edgesOf(raster) : null}
   <figure class="picture">
     <figcaption>
       <span class="side">{label}</span>
@@ -172,18 +191,28 @@
           height: number(raster.height),
         })}</span
       >
+      {#if loose}
+        <span class="loose"
+          >{t("media-edges-counts", {
+            specks: loose.edges.specks,
+            strokes: loose.edges.strokes,
+            fringe: loose.edges.fringe,
+            haze: loose.edges.haze,
+          })}</span
+        >
+      {/if}
     </figcaption>
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div
       class="scroll"
-      style={groundStyle(backdrop)}
+      style={groundStyle(settings.backdrop)}
       role="img"
       aria-label={t("media-picture-label", { side: label })}
       tabindex="0"
       use:measure
     >
       <canvas
-        use:paint={raster}
+        use:paint={loose ? loose.marked : raster}
         style:width={widthOf(raster)}
         aria-hidden="true"
       ></canvas>
@@ -198,8 +227,8 @@
         <button
           type="button"
           class="toggle"
-          aria-pressed={view === choice.id}
-          onclick={() => (view = choice.id)}>{t(choice.words)}</button
+          aria-pressed={settings.view === choice.id}
+          onclick={() => (settings.view = choice.id)}>{t(choice.words)}</button
         >
       {/each}
     </div>
@@ -209,8 +238,8 @@
       <button
         type="button"
         class="toggle"
-        aria-pressed={zoom === choice}
-        onclick={() => (zoom = choice)}
+        aria-pressed={settings.zoom === choice}
+        onclick={() => (settings.zoom = choice)}
         >{choice === "fit"
           ? t("media-zoom-fit")
           : t("media-zoom-times", { times: choice })}</button
@@ -222,18 +251,29 @@
       <button
         type="button"
         class="toggle"
-        aria-pressed={backdrop === choice.id}
-        onclick={() => (backdrop = choice.id)}>{t(choice.words)}</button
+        aria-pressed={settings.backdrop === choice.id}
+        onclick={() => (settings.backdrop = choice.id)}
+        >{t(choice.words)}</button
       >
     {/each}
     {#each grounds as ground, index (ground.name)}
       <button
         type="button"
         class="toggle"
-        aria-pressed={backdrop === `ground-${index}`}
-        onclick={() => (backdrop = `ground-${index}`)}>{ground.name}</button
+        aria-pressed={settings.backdrop === `ground-${index}`}
+        onclick={() => (settings.backdrop = `ground-${index}`)}
+        >{ground.name}</button
       >
     {/each}
+  </div>
+  <div class="toggles" role="group" aria-label={t("media-edges-label")}>
+    <button
+      type="button"
+      class="toggle"
+      aria-pressed={settings.edges}
+      onclick={() => (settings.edges = !settings.edges)}
+      >{t("media-edges-mark")}</button
+    >
   </div>
 </div>
 
@@ -246,26 +286,29 @@
   {:else if after}
     {@render picture(after, labels.after)}
   {/if}
-{:else if view === "side" && before && after}
+{:else if settings.view === "side" && before && after}
   <div class="pair">
     {@render picture(before, labels.before)}
     {@render picture(after, labels.after)}
   </div>
-{:else if view === "flick" && shown}
+{:else if settings.view === "flick" && shown}
   <div class="flick">
     <button type="button" class="flick-button" onclick={flick}>
       {t("media-flick-to", {
-        side: flicked === "before" ? labels.after : labels.before,
+        side: settings.flicked === "before" ? labels.after : labels.before,
       })}
     </button>
     <p class="small" aria-live="polite">
       {t("media-flick-showing", {
-        side: flicked === "before" ? labels.before : labels.after,
+        side: settings.flicked === "before" ? labels.before : labels.after,
       })}
     </p>
   </div>
-  {@render picture(shown, flicked === "before" ? labels.before : labels.after)}
-{:else if view === "changed" && marked && difference}
+  {@render picture(
+    shown,
+    settings.flicked === "before" ? labels.before : labels.after,
+  )}
+{:else if settings.view === "changed" && marked && difference}
   <div
     class="toggles tolerance"
     role="group"
@@ -275,8 +318,8 @@
       <button
         type="button"
         class="toggle"
-        aria-pressed={tolerance === choice}
-        onclick={() => (tolerance = choice)}
+        aria-pressed={settings.tolerance === choice}
+        onclick={() => (settings.tolerance = choice)}
         >{choice === 0
           ? t("media-tolerance-exact")
           : t("media-tolerance-levels", { levels: choice })}</button
@@ -312,7 +355,7 @@
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div
       class="scroll"
-      style={groundStyle(backdrop)}
+      style={groundStyle(settings.backdrop)}
       role="img"
       aria-label={t("media-changed-caption")}
       tabindex="0"
@@ -375,6 +418,11 @@
   }
 
   .side {
+    font-weight: 600;
+  }
+
+  .loose {
+    color: var(--colour-accent);
     font-weight: 600;
   }
 

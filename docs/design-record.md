@@ -1306,6 +1306,21 @@ may repeat where never on screen together or be held with Shift, Ctrl or Alt.
 Tools after Decisions, shown with the features for agent sessions; the next waiting pick opening after a press; every try drawn
 128 pixels square on the first ground; a pick's words optional, even for none of these.
 
+## Picks made easier to compare (built 23 Nov 2026, 0.57.0)
+
+**The owner's request** (23 Nov 2026): settings "remembered between each pick", and whether the compare tool belongs on Picks
+"in an altered form": both forms offered on a card were chosen.
+
+| Part | How |
+| --- | --- |
+| Remembered | `src/lib/media/viewSettings.svelte.ts`: view, zoom, ground, tolerance, side flicked to and marks, kept for the run per place (a `MediaSource`'s `place`). `MediaCompare` keeps the last pictures on screen while the next are read, with one line kept for "Reading the next one…", so nothing moves. Not kept between runs (agent choice: the owner asked for between picks) |
+| Compare with | `PickView.svelte`: the one in use, or any other try on this PC; falls back to the one in use, then the first other try, when the choice is the try in focus |
+| Loose bits | `src/lib/media/edges.ts`, ported from phobos-rimworld's `edge_check.py` (its thresholds and structures): specks, loose strokes, joined fringe and haze, painted in the accent colour. Erosion and dilation by a disk through an exact distance transform. Equal to the Python figures on 53 shipped textures (15 with something loose); up to 1.7 s on the largest, so worked out only while the marks are on |
+| Games | Every place that compares pictures; the thresholds are phobos-rimworld's and name no game |
+
+**Agent choices, owner to revise:** marks offered everywhere a picture is compared, not only on Picks; one accent colour for every
+kind of mark, the kinds told apart by the counts in words; settings kept for the run only.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

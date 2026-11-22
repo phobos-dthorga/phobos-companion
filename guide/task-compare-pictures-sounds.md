@@ -20,6 +20,10 @@ see: task-code-behind, page-changes, page-mods, task-see-screenshots
   see-through parts: stray specks hide on the wrong ground.
 - In **Show what changed**, **Exact**, **4 levels**, **16 levels** and **64 levels** say how far a pixel may differ before it is
   marked. A picture exported again, or encoded, shifts most pixels a little: **16 levels** leaves what really changed.
+- **Mark loose specks and fringes** paints what the edge check finds in the accent colour: crumbs, loose strokes, pale paper left
+  round a cut-out and haze, counted beside the picture.
+- The view, the zoom, the ground, the tolerance and the marks stay as you left them when you move to the next file, pick or
+  screenshot, each place keeping its own.
 - DDS textures are drawn too: BC1 to BC5 (DXT1 to DXT5) and BC7. Others are named, not drawn.
 
 ### A sound

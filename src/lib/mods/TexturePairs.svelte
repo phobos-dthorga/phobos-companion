@@ -106,6 +106,7 @@
           }
         : null,
       tolerance: ENCODED_TOLERANCE,
+      place: "textures",
       alone:
         pair.state === "missing"
           ? t("mods-pairs-alone-missing")

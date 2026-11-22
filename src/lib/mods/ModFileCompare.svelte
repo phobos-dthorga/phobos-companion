@@ -54,6 +54,7 @@
       ),
       after,
       tolerance: 0,
+      place: "mods",
       alone:
         file.change === "added" && !backup
           ? t("mods-compare-only-repository")

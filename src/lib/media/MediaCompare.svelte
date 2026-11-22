@@ -68,10 +68,14 @@
       URL.revokeObjectURL(loaded.reading.address);
   }
 
+  /** The source whose sides are on screen: the last one stays while the next is read (0.57.0), so nothing jumps between picks. */
+  let shownSource = $state<MediaSource | null>(null);
+  let loading = $state(false);
+
   async function load(target: MediaSource) {
-    letGo(sides.before);
-    letGo(sides.after);
-    sides = { before: { state: "reading" }, after: { state: "reading" } };
+    loading = true;
+    if (shownSource === null)
+      sides = { before: { state: "reading" }, after: { state: "reading" } };
     const [before, after] = await Promise.all([
       loadSide(target.before),
       loadSide(target.after),
@@ -81,7 +85,11 @@
       letGo(after);
       return;
     }
+    letGo(sides.before);
+    letGo(sides.after);
     sides = { before, after };
+    shownSource = target;
+    loading = false;
   }
 
   $effect(() => {
@@ -95,8 +103,11 @@
     letGo(sides.after);
   });
 
+  /** What is on screen: the sides read last, with their own names. */
+  const on = $derived(shownSource ?? source);
+
   function labelOf(side: Side): string {
-    return source[side]?.label ?? "";
+    return on[side]?.label ?? "";
   }
 
   function pictureOf(loaded: Loaded) {
@@ -111,22 +122,23 @@
       : null;
   }
 
-  const showing = $derived(
-    showingOf(source.after?.path ?? source.before?.path ?? ""),
-  );
+  const showing = $derived(showingOf(on.after?.path ?? on.before?.path ?? ""));
   const reading = $derived(
     sides.before.state === "reading" || sides.after.state === "reading",
   );
   const picturesReady = $derived(
-    (!source.before || pictureOf(sides.before) !== null) &&
-      (!source.after || pictureOf(sides.after) !== null),
+    (!on.before || pictureOf(sides.before) !== null) &&
+      (!on.after || pictureOf(sides.after) !== null),
   );
   const soundsReady = $derived(
-    (!source.before || soundOf(sides.before) !== null) &&
-      (!source.after || soundOf(sides.after) !== null),
+    (!on.before || soundOf(sides.before) !== null) &&
+      (!on.after || soundOf(sides.after) !== null),
   );
 </script>
 
+<p class="small next" aria-live="polite">
+  {loading && shownSource !== null ? t("media-reading-next") : ""}
+</p>
 {#if showing === "words"}
   <!-- Only pictures, textures and sounds reach here; the page names anything else in words. -->
 {:else if reading}
@@ -175,9 +187,10 @@
       before={pictureOf(sides.before)}
       after={pictureOf(sides.after)}
       labels={{ before: labelOf("before"), after: labelOf("after") }}
-      startTolerance={source.tolerance ?? 0}
-      alone={source.alone}
-      grounds={source.grounds ?? []}
+      startTolerance={on.tolerance ?? 0}
+      alone={on.alone}
+      grounds={on.grounds ?? []}
+      place={on.place ?? "default"}
     />
   {:else if showing === "sound" && soundsReady}
     <SoundCompare
@@ -192,5 +205,12 @@
   .small {
     margin: 4px 12px 8px;
     font-size: var(--type-small);
+  }
+
+  /* One line kept for the words, so the pictures never move when they come and go. */
+  .next {
+    min-height: 1.4em;
+    margin-block: 0;
+    color: var(--colour-text-muted);
   }
 </style>

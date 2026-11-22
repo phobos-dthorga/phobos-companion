@@ -48,3 +48,22 @@ export function backdropStyle(backdrop: Backdrop): string {
   if (backdrop === "light") return `background: ${light};`;
   return `background-color: ${dark}; background-image: conic-gradient(${light}33 25%, transparent 0 50%, ${light}33 0 75%, transparent 0); background-size: 16px 16px;`;
 }
+
+/** How much of the window's height a fitted picture may take (agent default, 0.52.0): room above it for the buttons and words. */
+export const FIT_HEIGHT_SHARE = 0.5;
+
+/**
+ * How many times its own size a fitted picture is drawn (0.52.0; the owner's screenshot of 22 Nov 2026: a 128 x 128 icon fitted to
+ * the width alone came out about 750 pixels square, its bottom half cut off). The whole picture fits the room both ways; a small one
+ * is enlarged by a whole number, so every pixel stays an even square, and one larger than the room is shrunk to fit.
+ */
+export function fitScale(
+  width: number,
+  height: number,
+  roomWidth: number,
+  roomHeight: number,
+): number {
+  if (width <= 0 || height <= 0 || roomWidth <= 0 || roomHeight <= 0) return 1;
+  const most = Math.min(roomWidth / width, roomHeight / height);
+  return most >= 1 ? Math.floor(most) : most;
+}

@@ -4,6 +4,20 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.52.0] - 2026-11-23
+
+### Changed
+
+- **Fit shows the whole picture in the code viewer.** It fitted the width alone, so a small icon (your 128 × 128 MealHalt, in your
+  screenshot of 22 Nov) came out about 750 pixels square with its bottom half cut off. Now the whole picture fits its frame both ways,
+  no taller than half the window: a small one is enlarged by a whole number so every pixel stays an even square, and a large one is
+  shrunk to fit. Side by side fits each half the same way. 1× to 8× are unchanged. Not yet tested on screen.
+
+### Seen working on screen
+
+- **A new picture in the code viewer** (0.50.0), with its size and its Save a copy and Open with its own program buttons: your
+  screenshot of 22 Nov 2026. Flicking, Show what changed, DDS textures, sounds and pressing the copy buttons are not yet tested on
+  screen.
 ## [0.51.0] - 2026-11-23
 
 ### Added

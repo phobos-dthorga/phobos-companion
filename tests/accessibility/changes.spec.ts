@@ -560,9 +560,19 @@ for (const [name, viewport] of [
       const viewer = page.getByRole("dialog");
       await expect(viewer).toContainText("A picture");
       await expect(viewer).toContainText("120 B before, 110 B after");
-      await expect(
-        viewer.getByRole("img", { name: "The picture, After" }),
-      ).toBeVisible();
+      const fitted = viewer.getByRole("img", { name: "The picture, After" });
+      await expect(fitted).toBeVisible();
+      // Fit shows the whole picture (0.52.0): no taller than half the window, and a whole number of times its 8 x 4 pixels.
+      const drawn = await fitted
+        .locator("canvas")
+        .evaluate((canvas) => [
+          canvas.getBoundingClientRect().width,
+          canvas.getBoundingClientRect().height,
+          window.innerHeight,
+        ]);
+      expect(drawn[1]).toBeLessThanOrEqual(drawn[2] * 0.5 + 1);
+      expect(drawn[0] % 8).toBe(0);
+      expect(drawn[0]).toBe(drawn[1] * 2);
       await viewer.getByRole("button", { name: "Show what changed" }).click();
       await expect(viewer).toContainText("4 pixels changed (12.5 %");
       await expect(viewer).toContainText(

@@ -15,7 +15,8 @@ see: task-code-behind, page-changes
 - **Side by side**, **Flick between them** (the **Z** key swaps before and after in the same place: the easiest way to spot a thin
   line appearing or vanishing) and **Show what changed** (every changed pixel solid in the accent colour, boxed, the rest dimmed,
   with a count).
-- **Fit**, **1×**, **2×**, **4×** and **8×** zoom (the **=** key steps through them). **Checks**, **Dark** or **Light** behind
+- **Fit** shows the whole picture, enlarged by a whole number when it is small so its pixels stay even; **1×**, **2×**, **4×**
+  and **8×** draw it at that many times its own pixels, to scroll round (the **=** key steps through them all). **Checks**, **Dark** or **Light** behind
   see-through parts: stray specks hide on the wrong ground.
 - DDS textures are drawn too: BC1 to BC5 (DXT1 to DXT5) and BC7. Others are named, not drawn.
 

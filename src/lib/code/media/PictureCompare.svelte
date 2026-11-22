@@ -13,6 +13,8 @@
   import {
     BACKDROPS,
     backdropStyle,
+    FIT_HEIGHT_SHARE,
+    fitScale,
     VIEWS,
     ZOOMS,
     type Backdrop,
@@ -32,6 +34,9 @@
   let zoom = $state<Zoom>("fit");
   let backdrop = $state<Backdrop>("checks");
   let flicked = $state<"before" | "after">("after");
+  /** The frame's inside width, measured, and the window's height: the room a fitted picture has. */
+  let roomWidth = $state(0);
+  let windowHeight = $state(0);
 
   const both = $derived(before !== null && after !== null);
   const difference = $derived(before && after ? compare(before, after) : null);
@@ -62,9 +67,26 @@
     zoom = ZOOMS[(ZOOMS.indexOf(zoom) + 1) % ZOOMS.length];
   }
 
-  /** How wide a picture is drawn: the pane's width when fitted, else its own pixels times the zoom. */
+  /** How wide a picture is drawn: whole inside its frame when fitted (0.52.0), else its own pixels times the zoom. */
   function widthOf(raster: Raster): string {
-    return zoom === "fit" ? "100%" : `${raster.width * zoom}px`;
+    if (zoom !== "fit") return `${raster.width * zoom}px`;
+    const scale = fitScale(
+      raster.width,
+      raster.height,
+      roomWidth,
+      windowHeight * FIT_HEIGHT_SHARE,
+    );
+    return `${raster.width * scale}px`;
+  }
+
+  /** Keeps `roomWidth` to the frame's inside width as the window or the pane changes size. */
+  function measure(frame: HTMLElement) {
+    const observer = new ResizeObserver(() => {
+      roomWidth = frame.clientWidth;
+    });
+    observer.observe(frame);
+    roomWidth = frame.clientWidth;
+    return { destroy: () => observer.disconnect() };
   }
 
   /** Puts a picture's pixels on a canvas, and again whenever they change. */
@@ -101,6 +123,8 @@
   );
 </script>
 
+<svelte:window bind:innerHeight={windowHeight} />
+
 {#snippet picture(raster: Raster, label: string)}
   <figure class="picture">
     <figcaption>
@@ -119,6 +143,7 @@
       role="img"
       aria-label={t("media-picture-label", { side: label })}
       tabindex="0"
+      use:measure
     >
       <canvas
         use:paint={raster}
@@ -232,6 +257,7 @@
       role="img"
       aria-label={t("media-changed-caption")}
       tabindex="0"
+      use:measure
     >
       <div class="marked" style:width={widthOf(marked)}>
         <canvas use:paint={marked} aria-hidden="true"></canvas>
@@ -303,11 +329,13 @@
   canvas {
     display: block;
     height: auto;
+    margin-inline: auto;
     image-rendering: pixelated;
   }
 
   .marked {
     position: relative;
+    margin-inline: auto;
   }
 
   .marked canvas {

@@ -1246,6 +1246,11 @@ held at that floor in the whine search** (a sound with nothing above 4 kHz showe
 floor, as ffmpeg's -91 dB does for the review tool, finds the same 13.5 kHz whine the review tool finds in Ostranauts' washer pump
 loop, at 14.1 dB to its 12.8). The window's content policy now lets it play sounds it made itself (`media-src 'self' blob:`).
 
+**Seen on screen (the owner's screenshot, 22 Nov 2026):** a new picture drawn, with its size and its two copy buttons. The rest is
+not yet tested on screen. **That screenshot showed Fit fitting the width alone**, cutting off the bottom of a 128 × 128 icon, so
+**0.52.0** fits the whole picture in its frame (the owner's yes on a card): no taller than half the window (agent default), enlarged
+by a whole number when small so pixels stay even squares, shrunk when large (`fitScale` in `viewing.ts`).
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

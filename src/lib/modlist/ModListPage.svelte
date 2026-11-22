@@ -19,6 +19,7 @@
   import ModListEditor from "./ModListEditor.svelte";
   import ModListSaved from "./ModListSaved.svelte";
   import ModListSort from "./ModListSort.svelte";
+  import SinceNote from "./SinceNote.svelte";
   import {
     HEADING,
     MARK,
@@ -253,6 +254,20 @@
           <p class="muted small">
             {t("modlist-list-count", { count: found.list.count })}
           </p>
+          {#if check.since?.[found.list.key]}
+            {@const since = check.since[found.list.key]}
+            <SinceNote
+              {since}
+              busy={busy || running}
+              onundo={() =>
+                yes({
+                  kind: "undo",
+                  list: found.list,
+                  change: since.change?.why ?? "",
+                })}
+              onsaved={() => showView("saved")}
+            />
+          {/if}
           {#if found.bySeverity.problem.length + found.bySeverity.warning.length === 0}
             <p class="clean">{t("modlist-list-clean")}</p>
           {/if}

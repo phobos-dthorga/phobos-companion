@@ -257,6 +257,9 @@
 {:else}
   {@const mods = reading.mods}
   {@const lists = reading.lists}
+  {@const lastClean = (lists.sources.kept ?? []).find(
+    (k) => k.ran?.clean === true,
+  )}
   {@const list = mods.lists.find((l) => l.key === listKey)}
   {@const running = mods.running.length > 0}
   {@const locked = busy || running || !list?.writable}
@@ -319,6 +322,23 @@
         >
       {/if}
     </form>
+    <div class="buttons">
+      <button
+        type="button"
+        class="action strong"
+        disabled={busy || !list || !lastClean}
+        onclick={() =>
+          lastClean &&
+          compare({
+            source: "kept",
+            reference: lastClean.ref,
+            label: lastClean.label,
+          })}>{t("modlist-saved-last-clean")}</button
+      >
+      {#if !lastClean}
+        <span class="muted small">{t("modlist-saved-no-clean")}</span>
+      {/if}
+    </div>
     <div class="buttons">
       {#if lists.files}
         <button
@@ -476,7 +496,20 @@
                 chosen.reference === item.ref}
             >
               <div class="who">
-                <strong>{item.label}</strong>
+                <strong
+                  >{item.label}
+                  {#if item.ran?.clean === true}
+                    <span class="chip ran-clean"
+                      >{t("modlist-saved-ran-clean")}</span
+                    >
+                  {:else if item.ran?.clean === false}
+                    <span class="chip ran-errors"
+                      >{t("modlist-saved-ran-errors", {
+                        count: item.ran.new_errors ?? 0,
+                      })}</span
+                    >
+                  {/if}</strong
+                >
                 <span class="muted small"
                   >{t("modlist-saved-row", {
                     when: formatWhen(item.when),
@@ -676,6 +709,20 @@
     border: 1px solid var(--colour-line);
     border-radius: 999px;
     color: var(--colour-text);
+  }
+
+  .chip.ran-clean {
+    margin-inline-start: 6px;
+    font-weight: 400;
+    background: var(--shade-success);
+    border-color: var(--colour-success);
+  }
+
+  .chip.ran-errors {
+    margin-inline-start: 6px;
+    font-weight: 400;
+    background: var(--shade-risk);
+    border-color: var(--colour-risk);
   }
 
   .chip.on {

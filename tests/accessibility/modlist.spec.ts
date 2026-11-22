@@ -75,9 +75,46 @@ const check = {
       writable: true,
     },
   ],
-  problems: [],
-  counts: { problem: 0, warning: 0, note: 0 },
+  problems: [
+    {
+      kind: "replacement",
+      severity: "note",
+      list_key: "active",
+      id: "bravo",
+      name: "Bravo Beds",
+      title:
+        "Bravo Beds has a continued version for 1.7: Bravo Beds (Continued) by Someone.",
+      why: "From the community's Use This Instead list.",
+      clue: "",
+      needed_by: [],
+      fixes: [],
+      workshop_id: "2000000002",
+    },
+  ],
+  counts: { problem: 0, warning: 0, note: 1 },
   backups: [],
+  since: {
+    active: {
+      verdict: "new-errors",
+      change: {
+        why: "re-sort the whole list: 178 moved",
+        at: "20261122T161132Z",
+        file: "b.list",
+      },
+      new: [
+        {
+          id: "e44346e9",
+          level: "ERROR",
+          count: 2,
+          message:
+            "Could not find type named IAmMother.Compat.VNPE.CompProperties_PipedPaste",
+          mods: ["I Am Mother"],
+        },
+      ],
+      new_errors: 1,
+      run: "2026-11-22T16:37:52+00:00",
+    },
+  },
 };
 
 const changed = (ids: string[]) => ({
@@ -173,7 +210,22 @@ const savedLists = {
           note: "",
         },
       ],
-      kept: [],
+      kept: [
+        {
+          source: "kept",
+          ref: "20261121T220105Z",
+          label: "Game start, 22 Nov 2026 09:01",
+          when: "2026-11-21T22:01:05+00:00",
+          count: 5,
+          version: "1.7",
+          note: "",
+          ran: {
+            started: "2026-11-21T22:01:05+00:00",
+            clean: true,
+            new_errors: 0,
+          },
+        },
+      ],
       save: [
         {
           source: "save",
@@ -221,6 +273,14 @@ const compared = {
 
 async function open(page: Page) {
   await mockHost(page, {
+    mod_list_undo: {
+      result: {
+        ok: true,
+        title: "went back",
+        refusal: null,
+        data: { undoes: "re-sort the whole list: 178 moved" },
+      },
+    },
     mod_list_lists: savedLists,
     mod_list_compare: compared,
     mod_list_save: {
@@ -648,6 +708,70 @@ for (const [name, viewport] of [
       await page.getByRole("option", { name: /Alpha Tools/ }).click();
       await expect(panel).toContainText("This mod has no picture of its own.");
       await audit(page);
+    });
+
+    test("new errors after a change are named, with Undo asked first and a way to a list that ran clean", async ({
+      page,
+    }) => {
+      await open(page);
+      await expect(
+        page.getByRole("heading", {
+          name: "Your next game after your change showed 1 new error",
+        }),
+      ).toBeVisible();
+      await expect(page.getByText(/IAmMother\.Compat\.VNPE/)).toBeVisible();
+      await shot(page, `${name}-since`);
+      await audit(page);
+      await page
+        .getByRole("button", { name: "Undo the last change" })
+        .first()
+        .click();
+      expect(await asked(page, "mod_list_undo")).toEqual([]);
+      await page.getByRole("button", { name: "Yes, put it back" }).click();
+      await expect
+        .poll(async () => (await asked(page, "mod_list_undo")).length)
+        .toBe(1);
+    });
+
+    test("a continued version can be subscribed to from What's wrong", async ({
+      page,
+    }) => {
+      await open(page);
+      await expect(
+        page.getByText(/has a continued version for 1\.7/),
+      ).toBeVisible();
+      await page
+        .getByRole("button", { name: "Subscribe", exact: true })
+        .click();
+      await expect
+        .poll(async () =>
+          (await asked(page, "mod_list_subscribe")).map((a) => a.numbers),
+        )
+        .toEqual([["2000000002"]]);
+    });
+
+    test("the last list that ran clean is marked and loaded after a look", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("button", { name: "Saved lists", exact: true })
+        .click();
+      await expect(page.getByText("Ran clean", { exact: true })).toBeVisible();
+      await page
+        .getByRole("button", {
+          name: "Go back to the last list that ran clean",
+        })
+        .click();
+      await expect
+        .poll(async () =>
+          (await asked(page, "mod_list_compare")).map((a) => [
+            a.source,
+            a.reference,
+            a.apply,
+          ]),
+        )
+        .toEqual([["kept", "20261121T220105Z", false]]);
     });
   });
 }

@@ -354,6 +354,14 @@
             >
           {/if}
           <div class="confirm">
+            {#if full}
+              <p class="caution">
+                {t("modlist-sort-full-caution", {
+                  count: moves.length,
+                  total: preview.count ?? 0,
+                })}
+              </p>
+            {/if}
             <p>{t("modlist-sort-confirm", { count: moves.length })}</p>
             <div class="buttons">
               <button
@@ -603,6 +611,12 @@
     border-inline-start: 3px solid var(--colour-accent);
     background: var(--shade-accent);
     border-radius: 4px;
+  }
+
+  .caution {
+    padding: 6px 10px;
+    border-inline-start: 3px solid var(--colour-risk);
+    background: var(--shade-risk);
   }
 
   .confirm {

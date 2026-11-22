@@ -2060,6 +2060,23 @@
     "modlist-steam-unsubscribe-yes": "Yes, unsubscribe",
     "modlist-steam-unsubscribed": "{ $count ->\n    [one] Unsubscribed from 1 (switched off first: { $off }).\n   *[other] Unsubscribed from { $count } (switched off first: { $off }).\n  }",
     "modlist-steam-link": "Subscribe by Workshop link or number",
-    "modlist-steam-offer-on": "{ $name } is on this PC now."
+    "modlist-steam-offer-on": "{ $name } is on this PC now.",
+    "modlist-since-new-title": "{ $count ->\n    [one] Your next game after your change showed 1 new error\n   *[other] Your next game after your change showed { $count } new errors\n  }",
+    "modlist-since-change": "The change: { $why }, { $when }.",
+    "modlist-since-points": "Points at { $mods }",
+    "modlist-since-caution": "New since is not the same as caused by: a save or a mod update can bring errors too. Each points at what the log names.",
+    "modlist-since-undo": "Undo the last change",
+    "modlist-since-undo-confirm": "Put the list back as it was before “{ $why }”? A backup of the list as it is now is kept first.",
+    "modlist-since-undo-yes": "Yes, put it back",
+    "modlist-since-saved": "Go back to a list that ran clean…",
+    "modlist-since-clean": "Your next game after “{ $why }” ran with no new errors.",
+    "modlist-since-changed": "The list was changed outside the Companion since “{ $why }” (by the game, RimSort or by hand), so that change can no longer be judged.",
+    "modlist-since-not-run": "Start the game once to see whether “{ $why }” broke anything: the Companion then compares that run with the one before.",
+    "modlist-note-broke": "{ $count ->\n    [one] Your last change to the mod list was followed by 1 new error in the game.\n   *[other] Your last change to the mod list was followed by { $count } new errors in the game.\n  }",
+    "modlist-saved-ran-clean": "Ran clean",
+    "modlist-saved-ran-errors": "{ $count ->\n    [one] 1 new error\n   *[other] { $count } new errors\n  }",
+    "modlist-saved-last-clean": "Go back to the last list that ran clean",
+    "modlist-saved-no-clean": "None has yet: a list is marked once the game has run on it and closed without new errors.",
+    "modlist-sort-full-caution": "A full re-sort rebuilds the whole order and moves { $count } of your { $total } mods. Mods that lean on another without saying so can break; Sort: fewest moves only moves what a rule says is out of place."
   }
 }

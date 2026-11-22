@@ -26,6 +26,7 @@ const STEAM_KINDS: readonly string[] = [
   "needs",
   "removed",
   "unsubscribed",
+  "replacement",
 ];
 
 /** The kit's backups record what each was kept before; going back keeps one too, which is never itself undone. */
@@ -62,7 +63,11 @@ export function findingsByList(check: ModListCheck): ListFindings[] {
  */
 export function subscribable(problem: ModProblem): boolean {
   if (problem.workshop_id === "") return false;
-  if (problem.kind === "missing" || problem.kind === "unsubscribed")
+  if (
+    problem.kind === "missing" ||
+    problem.kind === "unsubscribed" ||
+    problem.kind === "replacement"
+  )
     return true;
   return problem.kind === "needs" && problem.fixes.length === 0;
 }
@@ -87,6 +92,15 @@ export function lastChange(
 export function worthMentioning(check: ModListCheck | null): number | null {
   if (!check || !check.supported) return null;
   const count = check.counts.problem + check.counts.warning;
+  return count > 0 ? count : null;
+}
+
+/** How many new errors the first game run after the last change showed, over every list, or null when none did (0.56.0). */
+export function breakage(check: ModListCheck | null): number | null {
+  if (!check?.since) return null;
+  const count = Object.values(check.since)
+    .filter((s) => s.verdict === "new-errors")
+    .reduce((sum, s) => sum + (s.new_errors ?? 0), 0);
   return count > 0 ? count : null;
 }
 

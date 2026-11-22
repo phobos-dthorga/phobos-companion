@@ -3,7 +3,7 @@
   import { t } from "../i18n/runtime";
   import { goPage } from "../navigation/navigation.svelte";
   import { latest, refreshIfStale } from "./latest.svelte";
-  import { worthMentioning } from "./presentation";
+  import { breakage, worthMentioning } from "./presentation";
 
   /**
    * On Home (0.45.0): a note when a game's list of active mods has problems or warnings, leading to the Mod list page. The check
@@ -15,12 +15,19 @@
   onMount(() => void refreshIfStale(game));
 
   const count = $derived(worthMentioning(latest.checks[game] ?? null));
+  /** New errors in the first game run after the last change (0.56.0). */
+  const broke = $derived(breakage(latest.checks[game] ?? null));
 </script>
 
-{#if count !== null}
+{#if count !== null || broke !== null}
   <section class="panel attention" aria-labelledby="modlist-note-title">
     <h2 id="modlist-note-title">{t("modlist-note-title")}</h2>
-    <p>{t("modlist-note-body", { count })}</p>
+    {#if broke !== null}
+      <p class="broke">{t("modlist-note-broke", { count: broke })}</p>
+    {/if}
+    {#if count !== null}
+      <p>{t("modlist-note-body", { count })}</p>
+    {/if}
     <button type="button" class="action" onclick={() => goPage("modlist")}
       >{t("modlist-note-go")}</button
     >
@@ -46,5 +53,11 @@
 
   p {
     margin-bottom: 10px;
+  }
+
+  .broke {
+    padding: 6px 10px;
+    border-inline-start: 3px solid var(--colour-risk);
+    background: var(--shade-risk);
   }
 </style>

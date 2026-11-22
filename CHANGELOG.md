@@ -4,6 +4,31 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.56.0] - 2026-11-23
+
+Helpers for the player in the Mod list (the owner, 23 Nov 2026: "Is there anything more we can do, especially to help the
+player?"; their choices on a question card: all four, with a caution on Full re-sort).
+
+### Added
+
+- **Mod list: did my change break it?** At the top of each list on What's wrong, the first game run after your last change,
+  compared with the run before: its new errors with what the log points at, **Undo the last change** (asked first, in the note)
+  and **Go back to a list that ran clean…**; a clean run, a change not yet run and a list changed outside the Companion are said
+  in a line. Home's note also says when a change was followed by new errors. New since is not the same as caused by, and the
+  note says so. Only runs that both loaded a save (or neither) are compared (kit 1.85.0). Not yet tested on screen.
+- **Saved lists: Ran clean.** A list kept at a game start is marked **Ran clean** (or with its new errors) once the game has run
+  on it and closed; **Go back to the last list that ran clean** compares the newest such list with yours, then **Use this list**
+  loads it. Not yet tested on screen.
+- **What's wrong, more notes**: a library several mods carry where an older copy loads first; mods that do not say they work
+  with the game's version but likely do (a folder for it, their Workshop page, the community's list, or no errors from them in
+  your last game) in one note, so only the doubtful stay apart; and a continued version of an old or missing mod from the
+  community's Use This Instead list, with **Open in Steam** and **Subscribe**. Not yet tested on screen.
+
+### Changed
+
+- **Full re-sort says what it costs**: before Use this order, it says how many of your mods it moves, and that fewest moves only
+  moves what a rule says is out of place.
+- Tool kit pin v1.84.0 to v1.85.0.
 ## [0.55.0] - 2026-11-23
 
 The Picks page (the owner, 23 Nov 2026: "Go ahead and build the picks page", after answering its design's three questions).

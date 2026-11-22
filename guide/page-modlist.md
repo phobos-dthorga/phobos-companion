@@ -11,9 +11,10 @@ see: task-fix-mod-list, task-edit-mod-list, task-sort-mod-list, task-saved-lists
 Four views, chosen at the top: **What's wrong**, **Edit the list**, **Sort** and **Saved lists**.
 
 ### What's wrong
+- **After a change:** the first game run after your last change is compared with the run before. New errors show at the top of the list, with what the log points at, **Undo the last change** (asked first) and **Go back to a list that ran clean…**. A clean run is said in a line. New since is not the same as caused by: a save or a mod update can bring errors too.
 - **Problems:** a mod switched on but not on this PC, with the likeliest reason (taken off the Workshop by its author, no longer subscribed, a download not finished, a folder gone); a mod another needs that is off or missing; two mods that refuse each other; a mod listed twice.
 - **Warnings:** a mod loading in the wrong place; a mod the Workshop no longer has, or Steam no longer updates for you.
-- **Notes:** mods that do not say they work with this game version (many still do), and what the check could not see.
+- **Notes:** mods that do not say they work with this game version; those likely to work anyway (a folder for the version, their Workshop page, the community's list, or no errors from them in your last game) share one note. A library several mods carry where an older copy loads first. A continued version of an old or missing mod, from the community's Use This Instead list, with **Subscribe**. And what the check could not see.
 - **Clue:** when a missing mod was a patch between two others, the page says if one of them now names the other in its own files, so may do the job itself. A clue, not proof.
 
 **A change offered here waits for your yes on its card.** **Open in Steam** opens a mod's Workshop page in Steam, where you subscribe. **Ask Steam too** (on by default) checks which Workshop items still exist; it takes a few seconds more.

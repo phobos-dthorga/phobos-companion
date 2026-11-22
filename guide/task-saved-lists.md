@@ -16,4 +16,4 @@ see: page-modlist, task-edit-mod-list, task-fix-mod-list
 
 **To share a list:** press **Save as a file…**. It writes the game's own kind of list file (.rml), which the game's mod menu can load too.
 
-A copy of your list is kept by itself each time the game starts with a different list, the next time the Companion reads it.
+A copy of your list is kept by itself each time the game starts with a different list, the next time the Companion reads it. Once the game has run on it and closed with no new errors, it is marked **Ran clean**. **Go back to the last list that ran clean** compares the newest such list with yours; **Use this list** loads it.

@@ -56,6 +56,37 @@ export type ModListCheck = {
   problems: ModProblem[];
   counts: Record<Severity, number>;
   backups: ModBackup[];
+  /** What the first game run after the last change showed, by list (phobos-modkit 1.85.0). */
+  since?: Record<string, Since>;
+};
+
+/** A verdict on the last change (phobos-modkit 1.85.0, `mod-list since`). */
+export type SinceVerdict =
+  | "clean"
+  | "new-errors"
+  | "not-run-since"
+  | "too-late"
+  | "running"
+  | "no-change"
+  | "unknown"
+  | "changed-since";
+
+/** An error signature new since the change, and the mods the log's clues point at. */
+export type NewError = {
+  id: string;
+  level: string;
+  count: number;
+  message: string;
+  mods: string[];
+};
+
+/** What the first game run after the last change made here showed. */
+export type Since = {
+  verdict: SinceVerdict;
+  change?: { why: string; at: string; file: string };
+  new?: NewError[];
+  new_errors?: number;
+  run?: string;
 };
 
 /** What a change or an undo did, or why the kit refused it. */
@@ -192,6 +223,8 @@ export type ListInfo = {
   count: number;
   version: string;
   note: string;
+  /** A list kept at a game start: what that run showed (phobos-modkit 1.85.0); clean is null when it could not be compared. */
+  ran?: { started?: string; clean?: boolean | null; new_errors?: number };
 };
 
 /** Every saved list on offer, by source; `files` says whether list files can be opened and written for this game. */

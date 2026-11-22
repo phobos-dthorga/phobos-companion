@@ -4,6 +4,21 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.68.0] - 2026-11-23
+
+Backups kept as zips. Kit pin v1.95.0 to v1.96.0.
+
+### Changed
+
+- **Each mod backup is one zip file** (the owner's choice of 23 Nov 2026, "One zip per backup"): **Back up the installed copy**
+  writes one, checked file for file, and **Go back to this** unpacks it. Backups made before stay folders until **the next install
+  or go-back packs them**, each checked first; its report says how much space that saved. On the owner's RimWorld backups that is
+  4,254 MB as folders against about 855 MB as zips; the largest, 735 MB, became 95 MB in 7 seconds. Compare still shows a changed
+  picture from a zipped backup, and Remove repeated backups finds repeats among zips and folders alike.
+- **Guide**: the Backup entry says backups are zips, and when older ones are packed.
+
+Not yet tested on screen.
+
 ## [0.67.0] - 2026-11-23
 
 Scans in the background, for the page list's numbers (the owner, 23 Nov 2026: "a scan after updating to see if a sort is needed

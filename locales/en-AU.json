@@ -2130,6 +2130,7 @@
     "about-online-body": "Only what Settings lists under Going online, and only public pages: nothing about you is sent.",
     "about-online-kind": "{ $name }: { $address } ({ $state })",
     "about-online-steam": "The Mod list page also asks Steam's public Workshop pages when its Ask Steam too is on, and Subscribe speaks to your own Steam client.",
-    "about-online-change": "Going online settings"
+    "about-online-change": "Going online settings",
+    "modlist-sort-use-anyway": "Use this order anyway"
   }
 }

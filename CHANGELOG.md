@@ -4,6 +4,21 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.62.0] - 2026-11-23
+
+After the owner's full re-sort preview with 0.60.0 (23 Nov 2026: "Thoughts?"); the owner chose all three fixes on a question
+card. Kit pin v1.89.0 to v1.91.0.
+
+### Changed
+
+- **When no rule needs any move, Not now comes first** in Sort's last step, and the other button reads **Use this order anyway**:
+  a full re-sort stays there, without the page leaning towards it. Not yet tested on screen.
+- **Only mods that pass a mod of another group are folded as moved into their group** (kit 1.91.0); one that only changes places
+  inside its group joins the names fold. On the owner's list the five "moved into their group" were already in it: all 134 moves
+  are now names moves.
+- **A group move's reason follows the links back to the framework** (kit 1.91.0): "Combat Extended loads after it, and Vehicle
+  Framework after Combat Extended", not only the nearest link. The Guide's Mod list page says both.
+
 ## [0.61.0] - 2026-11-23
 
 The first slice of going online (`docs/online.md`, O4's gate lights; the owner's go-ahead and answers of 23 Nov 2026). Kit pin

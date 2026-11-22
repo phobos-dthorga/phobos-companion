@@ -268,6 +268,9 @@
 
     {#if preview}
       {@const moves = preview.moves ?? []}
+      <!-- No rule needs any move (0.62.0): Not now comes first, and the order is used only "anyway". -->
+      {@const nothingGained =
+        moves.length > 0 && movesByKind(moves).explained.length === 0}
       {@const used = preview.rules}
       <div class="result">
         <p class="summary" class:clean={moves.length === 0}>
@@ -396,18 +399,33 @@
             {/if}
             <p>{t("modlist-sort-confirm", { count: moves.length })}</p>
             <div class="buttons">
-              <button
-                type="button"
-                class="action strong"
-                disabled={locked}
-                onclick={useIt}>{t("modlist-sort-use")}</button
-              >
-              <button
-                type="button"
-                class="action"
-                onclick={() => (preview = null)}
-                >{t("modlist-sort-set-aside")}</button
-              >
+              {#if nothingGained}
+                <button
+                  type="button"
+                  class="action strong"
+                  onclick={() => (preview = null)}
+                  >{t("modlist-sort-set-aside")}</button
+                >
+                <button
+                  type="button"
+                  class="action"
+                  disabled={locked}
+                  onclick={useIt}>{t("modlist-sort-use-anyway")}</button
+                >
+              {:else}
+                <button
+                  type="button"
+                  class="action strong"
+                  disabled={locked}
+                  onclick={useIt}>{t("modlist-sort-use")}</button
+                >
+                <button
+                  type="button"
+                  class="action"
+                  onclick={() => (preview = null)}
+                  >{t("modlist-sort-set-aside")}</button
+                >
+              {/if}
             </div>
           </div>
         {/if}

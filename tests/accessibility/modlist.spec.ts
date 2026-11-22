@@ -626,6 +626,14 @@ for (const [name, viewport] of [
       await expect(
         page.getByText("Alpha Tools: it is a framework or loads at the top."),
       ).toBeVisible();
+      // Nothing to gain: Not now comes first, and the order is used only "anyway".
+      const anyway = page.getByRole("button", {
+        name: "Use this order anyway",
+      });
+      await expect(anyway).toBeVisible();
+      await expect(
+        anyway.locator("xpath=..").getByRole("button").first(),
+      ).toHaveText("Not now");
       await audit(page);
     });
 

@@ -4,6 +4,29 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.55.0] - 2026-11-23
+
+The Picks page (the owner, 23 Nov 2026: "Go ahead and build the picks page", after answering its design's three questions).
+
+### Added
+
+- **Picks** (Tools, **Shift + P**): every picture and sound the art tools made tries of, waiting for your pick, from every
+  repository that keeps a list of them (`config/picks.json`, kit 1.83.0's `picks`). Each shows its tries small and side by side,
+  and the try in focus against the one in use with the code viewer's views, on the game's own grounds too (Soil and Dark stone for
+  RimWorld). **J** and **K** step through the tries, **Shift + J** and **Shift + K** through the picks; **Pick Try …** (**Ctrl +
+  Enter**) or **None of these** (**Shift + N**), with words if you like, and the next waiting pick opens. Your pick is kept in the
+  Companion's own folder; an agent session applies it and it leaves the list. Home says how many wait. Shown with the other features
+  for agent sessions. phobos-rimworld's `review_cards.py` offers every card's tries here, and `sound_review.py --offer` its sounds.
+  Guide: Picks, and Pick a picture or a sound the art tools made. Not yet tested on screen.
+
+### Changed
+
+- **Keys, now every letter is taken** (your choice of 23 Nov 2026): a key held with **Shift** before a letter is a key of its own,
+  and a key may repeat where its two places are never on screen together, given a like move in each (**J** and **K** step through
+  files in the code viewer and tries on Picks). Shift with a letter no longer does what the letter alone does.
+- **Z, Y and = work wherever a picture or sound is compared**: on the Mods page and Picks too, not only in the code viewer and on a
+  screenshot. They are listed under their own heading in Change keyboard shortcuts; a key you had changed for them before is back
+  to its default.
 ## [0.54.0] - 2026-11-23
 
 From the owner's log of 23 Nov 2026: after a Full re-sort, I Am Mother's compat code failed to load and a save's mechs went

@@ -177,6 +177,7 @@
       labels={{ before: labelOf("before"), after: labelOf("after") }}
       startTolerance={source.tolerance ?? 0}
       alone={source.alone}
+      grounds={source.grounds ?? []}
     />
   {:else if showing === "sound" && soundsReady}
     <SoundCompare

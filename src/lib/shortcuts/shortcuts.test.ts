@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ACTIONS } from "./actions";
+import { ACTIONS, together } from "./actions";
 import {
   actionFor,
   fromFile,
@@ -13,7 +13,12 @@ import { belongsElsewhere, keyOf, keyWords } from "./keys";
 
 const press = (
   key: string,
-  held: Partial<{ ctrlKey: boolean; altKey: boolean; metaKey: boolean }> = {},
+  held: Partial<{
+    ctrlKey: boolean;
+    altKey: boolean;
+    metaKey: boolean;
+    shiftKey: boolean;
+  }> = {},
 ) => ({
   key,
   ctrlKey: false,
@@ -47,9 +52,11 @@ describe("keys", () => {
 });
 
 describe("the defaults", () => {
-  it("give every action a different key, none of them kept for moving around", () => {
-    const keys = ACTIONS.map((a) => a.defaultKey).filter(Boolean);
-    expect(new Set(keys).size).toBe(keys.length);
+  it("give actions that can work together different keys, none of them kept for moving around", () => {
+    for (const a of ACTIONS)
+      for (const b of ACTIONS)
+        if (a !== b && a.defaultKey && a.defaultKey === b.defaultKey)
+          expect(together(a.scope, b.scope), `${a.id} and ${b.id}`).toBe(false);
     expect(
       ACTIONS.every(
         (a) =>
@@ -59,12 +66,15 @@ describe("the defaults", () => {
     ).toBe(true);
   });
 
-  it("need no key held with another", () => {
-    expect(
-      ACTIONS.every(
-        (a) => !a.defaultKey?.includes("+") || a.defaultKey === "+",
-      ),
-    ).toBe(true);
+  // 0.55.0: once every letter was taken, the owner allowed keys held with Shift, Ctrl or Alt ("just using Shift, Ctrl, Alt"); a
+  // single key stays first where one is free, and nothing needs more than one key held besides the one pressed.
+  it("hold at most one of Shift, Ctrl or Alt", () => {
+    for (const a of ACTIONS) {
+      if (!a.defaultKey || a.defaultKey === "+") continue;
+      const held = a.defaultKey.split("+").slice(0, -1);
+      expect(held.length, a.id).toBeLessThanOrEqual(1);
+      expect(["Shift", "Ctrl", "Alt"]).toEqual(expect.arrayContaining(held));
+    }
   });
 });
 
@@ -125,6 +135,27 @@ describe("the owner's keys", () => {
       format: 1,
       enabled: false,
       keys: { "page.home": "h" },
+    });
+  });
+});
+
+describe("keys held together and keys that repeat (0.55.0)", () => {
+  it("names Shift before a letter, and leaves a symbol Shift made as it is", () => {
+    expect(keyOf(press("J", { shiftKey: true }))).toBe("Shift+j");
+    expect(keyOf(press("?", { shiftKey: true }))).toBe("?");
+    expect(keyOf(press("Enter", { ctrlKey: true }))).toBe("Ctrl+Enter");
+    expect(keyWords("Shift+j")).toBe("Shift + J");
+  });
+
+  it("lets a key repeat only where its places are never on screen together", () => {
+    expect(refusal("picks.next-try", "j", NOTHING_SAVED)).toBeNull();
+    expect(refusal("picks.next-try", "z", NOTHING_SAVED)).toEqual({
+      reason: "taken",
+      by: "media.flick",
+    });
+    expect(refusal("code.next-file", "1", NOTHING_SAVED)).toEqual({
+      reason: "taken",
+      by: "page.home",
     });
   });
 });

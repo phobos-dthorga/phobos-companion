@@ -19,6 +19,7 @@ export const PAGE_NAMES = [
   "reports",
   "settings",
   "decisions",
+  "picks",
   "about",
   "guide",
 ] as const;
@@ -26,7 +27,7 @@ export const PAGE_NAMES = [
 export type PageName = (typeof PAGE_NAMES)[number];
 
 /** Pages for AI agent sessions (0.37.0): left out of the page bar and Go to anything while those features are hidden. */
-export const FOR_AGENTS_PAGES: readonly PageName[] = ["decisions"];
+export const FOR_AGENTS_PAGES: readonly PageName[] = ["decisions", "picks"];
 
 /** A dialog over the window that the trail keeps, so Back closes it and Forward opens it again. */
 export type Dialog =

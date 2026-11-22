@@ -144,6 +144,8 @@ describe("reading an entry", () => {
     // The Decisions page and the words for what agent sessions do are marked, so a person without them reads past them.
     for (const id of [
       "page-decisions",
+      "page-picks",
+      "task-pick-art",
       "term-claim",
       "term-screen-note",
       "task-something-off",

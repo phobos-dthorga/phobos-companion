@@ -1,4 +1,4 @@
-import { ACTIONS, action } from "./actions";
+import { ACTIONS, action, together } from "./actions";
 import { RESERVED } from "./keys";
 
 /** What the owner saved: only what differs from the defaults, and whether shortcuts are on at all. */
@@ -35,8 +35,9 @@ export function actionFor(
 }
 
 /**
- * Why a key cannot be given to an action, or null when it can. Every key is checked against every action, whatever its scope,
- * since a page's actions and the connections view's work at the same time.
+ * Why a key cannot be given to an action, or null when it can. A key is checked against every action whose scope can work at the
+ * same moment as this one's (0.55.0: a key may repeat in places never on screen together); a page's actions and the connections
+ * view's work at the same time, so they never share one.
  */
 export function refusal(
   id: string,
@@ -44,8 +45,11 @@ export function refusal(
   saved: Saved,
 ): { reason: "reserved" } | { reason: "taken"; by: string } | null {
   if (RESERVED.has(key)) return { reason: "reserved" };
+  const scope = action(id)?.scope;
   for (const [other, bound] of keysNow(saved)) {
-    if (other !== id && bound === key) return { reason: "taken", by: other };
+    const otherScope = action(other)?.scope;
+    if (other === id || bound !== key || !scope || !otherScope) continue;
+    if (together(scope, otherScope)) return { reason: "taken", by: other };
   }
   return null;
 }

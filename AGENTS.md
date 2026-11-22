@@ -120,6 +120,11 @@ reads them.
   textures, the Mod list's previews) only read, through `src-tauri/src/viewable.rs`: a file a kit answer named in this run (each
   changed file in every copy of a mod, each preview, each picture and encoded texture of a pair), of a kind the window draws or
   plays, at most 64 MB.
+- **The Picks page reads, and a press keeps a pick** (0.55.0; the owner, 23 Nov 2026: "Go ahead and build the picks page";
+  `src-tauri/src/picks_page.rs`): the kit's `picks list` over the repositories that keep `config/picks.json`, and every file a pick
+  names may then be shown. **Pick** and **None of these** run the kit's `picks answer`, which appends one line to `picks/<repository>.jsonl`
+  in this program's own folder, only on a press, only for a repository the list names, and only while the manifest calls it
+  `writes`. Nothing in a repository changes: a session applies the pick and settles it.
 - **The Timeline page only reads**: the kit's `history`, through `src-tauri/src/history_page.rs`, which checks the repository is one
   of the game's, the changelog a plain path inside it, and the commit or moment plain text of the right shape. The history log it
   shows is written by the tools as they work, never by this program.

@@ -14,11 +14,13 @@ const MODIFIERS = new Set([
 ]);
 
 /**
- * The name of the key a press made: "7", "a", "?", "Backspace", "Ctrl+s". A letter is its lower case; a symbol is what the key
- * typed (so Shift+/ is "?"); Ctrl, Alt and Meta come first when held. A modifier pressed alone is no key.
+ * The name of the key a press made: "7", "a", "?", "Backspace", "Ctrl+s", "Shift+j". A letter is its lower case; a symbol is what
+ * the key typed (so Shift+/ is "?"); Ctrl, Alt and Meta come first when held, and Shift before a letter (0.55.0; the owner's
+ * "just using Shift, Ctrl, Alt", once every letter was taken). A modifier pressed alone is no key.
  */
 export function keyOf(
-  event: Pick<KeyboardEvent, "key" | "ctrlKey" | "altKey" | "metaKey">,
+  event: Pick<KeyboardEvent, "key" | "ctrlKey" | "altKey" | "metaKey"> &
+    Partial<Pick<KeyboardEvent, "shiftKey">>,
 ): string | null {
   if (!event.key || MODIFIERS.has(event.key)) return null;
   const key =
@@ -31,6 +33,7 @@ export function keyOf(
     event.ctrlKey && "Ctrl",
     event.altKey && "Alt",
     event.metaKey && "Meta",
+    event.shiftKey && /^[a-z]$/.test(key) && "Shift",
   ].filter(Boolean);
   return [...held, key].join("+");
 }

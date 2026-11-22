@@ -1280,6 +1280,32 @@ browser tests); compare with the screenshot just before or after, not any one.
 
 **Seen on screen (the owner's screenshot, 23 Nov 2026):** What changed marking the Bulk Tanker's re-exported tanks at 1×.
 
+## Picks (built 23 Nov 2026, 0.55.0)
+
+**The owner's request** (23 Nov 2026): "Go ahead and build the picks page", designed first in [picks-page.md](picks-page.md),
+whose three questions the owner answered that day: picks from a file each repository keeps, a pick kept as an answer, and keys that
+may repeat where never on screen together or be held with Shift, Ctrl or Alt.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Pick among an art tool's tries on one page, each against the one in use, flicked, with what changed marked, at game size on the game's grounds, or hear a sound's tries measured; say none will do, with words; change a pick until it is applied |
+| What does it stop them doing? | Nothing: cards in a conversation still work for a session without the Companion |
+| How does it change the way they work? | A batch of picks becomes one sitting at their own pace, keyboard first, instead of links and one question card each in a conversation (where the dialog hid the links) |
+| What outside it notices? | The repository's art records, once a session applies the pick |
+
+| Part | How |
+| --- | --- |
+| The tools | phobos-modkit 1.83.0's `picks`: `list` (surface `picks`), `answer` (writes one line to `picks/<repository>.jsonl` in this program's folder), `offer` and `settle` for the art tools |
+| The host | `src-tauri/src/picks_page.rs`: asks only repositories that keep `config/picks.json`, unredacted; remembers every file a pick names (`viewable.rs`); answers only for a repository the list names, ids of the kit's shape, while the manifest calls `answer` `writes` |
+| The window | `src/lib/picks/`: the list, waiting ones first (`presentation.ts`); `PickView.svelte` with every try small (pictures a browser draws itself) and `MediaCompare` with the one in use; `PicksNote.svelte` on Home |
+| Keys | `Scope` gains `media` and `picks`; `TOGETHER` in `actions.ts` says which scopes work at once, and the shortcut check refuses a shared key only between those. `keyOf` names Shift before a letter. The media keys left the code viewer's scope, so they work on any page that compares |
+| Grounds | A picks file's own colours, after the Companion's Checks, Dark and Light |
+| Games | Any repository with a picks file. Offered today by phobos-rimworld's art tools; a next game's tools offer with `picks offer` or the kit's `offer` |
+
+**Agent choices, owner to revise:** **Shift + P** for the page, **Shift + J/K**, **Ctrl + Enter** and **Shift + N**; the page under
+Tools after Decisions, shown with the features for agent sessions; the next waiting pick opening after a press; every try drawn
+128 pixels square on the first ground; a pick's words optional, even for none of these.
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

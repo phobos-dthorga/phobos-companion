@@ -4,7 +4,15 @@
  * view (on the Code map page or inside the code viewer).
  */
 export type Scope =
-  "everywhere" | "code" | "connections" | "memory" | "explorer";
+  | "everywhere"
+  | "code"
+  | "connections"
+  | "memory"
+  | "explorer"
+  /** A picture or a sound being compared (0.55.0): in the code viewer, on the Mods page, a screenshot, the Picks page. */
+  | "media"
+  /** The Picks page (0.55.0). */
+  | "picks";
 
 export type Action = {
   id: string;
@@ -94,6 +102,13 @@ export const ACTIONS: Action[] = [
     scope: "everywhere",
     defaultKey: "d",
     words: "shortcut-page-decisions",
+    forAgents: true,
+  },
+  {
+    id: "page.picks",
+    scope: "everywhere",
+    defaultKey: "Shift+p",
+    words: "shortcut-page-picks",
     forAgents: true,
   },
   {
@@ -215,22 +230,65 @@ export const ACTIONS: Action[] = [
     words: "shortcut-code-previous-file",
   },
   {
-    id: "code.flick",
-    scope: "code",
+    id: "media.flick",
+    scope: "media",
     defaultKey: "z",
-    words: "shortcut-code-flick",
+    words: "shortcut-media-flick",
   },
   {
-    id: "code.play",
-    scope: "code",
+    id: "media.play",
+    scope: "media",
     defaultKey: "y",
-    words: "shortcut-code-play",
+    words: "shortcut-media-play",
   },
   {
-    id: "code.zoom",
-    scope: "code",
+    id: "media.zoom",
+    scope: "media",
     defaultKey: "=",
-    words: "shortcut-code-zoom",
+    words: "shortcut-media-zoom",
+  },
+  // The Picks page (0.55.0): J and K step through tries as they step through files in the code viewer, never on screen together.
+  {
+    id: "picks.next-try",
+    scope: "picks",
+    defaultKey: "j",
+    words: "shortcut-picks-next-try",
+    forAgents: true,
+  },
+  {
+    id: "picks.previous-try",
+    scope: "picks",
+    defaultKey: "k",
+    words: "shortcut-picks-previous-try",
+    forAgents: true,
+  },
+  {
+    id: "picks.next-pick",
+    scope: "picks",
+    defaultKey: "Shift+j",
+    words: "shortcut-picks-next-pick",
+    forAgents: true,
+  },
+  {
+    id: "picks.previous-pick",
+    scope: "picks",
+    defaultKey: "Shift+k",
+    words: "shortcut-picks-previous-pick",
+    forAgents: true,
+  },
+  {
+    id: "picks.choose",
+    scope: "picks",
+    defaultKey: "Ctrl+Enter",
+    words: "shortcut-picks-choose",
+    forAgents: true,
+  },
+  {
+    id: "picks.none",
+    scope: "picks",
+    defaultKey: "Shift+n",
+    words: "shortcut-picks-none",
+    forAgents: true,
   },
   {
     id: "connections.around",
@@ -319,7 +377,37 @@ export const SCOPES: { scope: Scope; words: string }[] = [
   { scope: "connections", words: "shortcut-scope-connections" },
   { scope: "memory", words: "shortcut-scope-memory" },
   { scope: "explorer", words: "shortcut-scope-explorer" },
+  { scope: "media", words: "shortcut-scope-media" },
+  { scope: "picks", words: "shortcut-scope-picks" },
 ];
+
+/**
+ * Which scopes can work at the same moment (0.55.0; the owner, 23 Nov 2026, once every letter was taken: "repeat where never
+ * together (while trying to prevent confusion)"). Two actions may share a key only when their scopes are never on screen together,
+ * and a repeated key is given a like move in each (J and K step through items wherever they appear).
+ */
+const TOGETHER: Record<Scope, Scope[]> = {
+  everywhere: [
+    "everywhere",
+    "code",
+    "connections",
+    "memory",
+    "explorer",
+    "media",
+    "picks",
+  ],
+  code: ["everywhere", "code", "connections", "media"],
+  connections: ["everywhere", "code", "connections"],
+  memory: ["everywhere", "memory"],
+  explorer: ["everywhere", "explorer"],
+  media: ["everywhere", "code", "media", "picks"],
+  picks: ["everywhere", "media", "picks"],
+};
+
+/** Whether two scopes' keys can work at the same moment, so may not share a key. */
+export function together(a: Scope, b: Scope): boolean {
+  return TOGETHER[a].includes(b);
+}
 
 export function action(id: string): Action | undefined {
   return ACTIONS.find((a) => a.id === id);

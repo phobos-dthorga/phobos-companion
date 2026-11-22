@@ -1,7 +1,9 @@
 # The picks page: picture and sound picks inside the Companion
 
-**Status (23 Nov 2026): a design, nothing built; the owner has answered its three questions** (below). The owner chose "design
-first" on 23 Nov 2026, when asked where else the code viewer's pictures and sounds could go. Building waits for the owner's go.
+**Status (23 Nov 2026): built in 0.55.0** (the owner's "Go ahead and build the picks page"), with kit 1.83.0's `picks` and
+phobos-rimworld's art tools offering picks. What was built is in [design-record.md](design-record.md), "Picks". The owner chose
+"design first" on 23 Nov 2026, when asked where else the code viewer's pictures and sounds could go, and answered its three
+questions the same day (below).
 
 ## Why
 

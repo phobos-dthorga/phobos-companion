@@ -1,12 +1,7 @@
-<script module lang="ts">
-  /** Each preview's address for this run, made once per picture (0.53.0): moving through a long list reads none twice. */
-  const made = new Map<string, Promise<string | null>>();
-</script>
-
 <script lang="ts">
   import { untrack } from "svelte";
   import { t } from "../i18n/runtime";
-  import { readViewable } from "../media/desktopClient";
+  import { pictureAddress } from "../media/addresses";
   import type { ModRow } from "./types";
 
   /**
@@ -18,26 +13,13 @@
   let address = $state<string | null>(null);
   let failed = $state(false);
 
-  function previewOf(path: string): Promise<string | null> {
-    let found = made.get(path);
-    if (!found) {
-      found = readViewable(path).then((answer) =>
-        answer.state === "ready"
-          ? URL.createObjectURL(new Blob([answer.bytes as BlobPart]))
-          : null,
-      );
-      made.set(path, found);
-    }
-    return found;
-  }
-
   $effect(() => {
     const path = mod?.preview ?? null;
     address = null;
     failed = false;
     if (!path) return;
     // Asking the host writes to the activity strip's state: untracked, so this effect never waits on its own write.
-    void untrack(() => previewOf(path)).then((url) => {
+    void untrack(() => pictureAddress(path)).then((url) => {
       if ((mod?.preview ?? null) !== path) return;
       address = url;
       failed = url === null;

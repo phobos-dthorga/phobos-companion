@@ -24,6 +24,7 @@
   import SafeCopiesCard from "../safecopies/SafeCopiesCard.svelte";
   import ClaimsPanel from "../claims/ClaimsPanel.svelte";
   import DecisionsNote from "../decisions/DecisionsNote.svelte";
+  import PicksNote from "../picks/PicksNote.svelte";
   import { agents } from "../agents/state.svelte";
 
   const PENDING_SHOWN = 6;
@@ -218,6 +219,7 @@
 
 {#if agents.shown}
   <DecisionsNote game={game.id} />
+  <PicksNote game={game.id} />
 {/if}
 
 <RecordsNote game={game.id} />

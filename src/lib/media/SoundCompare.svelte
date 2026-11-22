@@ -49,16 +49,19 @@
     else player.pause();
   }
 
+  /** The page's own element, to tell whether it sits in a dialog: its keys work only where it is. */
+  let here = $state<HTMLElement | null>(null);
+
   onMount(() =>
     register({
-      scope: "code",
-      inDialog: true,
-      run: { "code.flick": switchSide, "code.play": play },
+      scope: "media",
+      inDialog: here?.closest("dialog") != null,
+      run: { "media.flick": switchSide, "media.play": play },
     }),
   );
 </script>
 
-<p class="small">{t("media-sound-how")}</p>
+<p class="small" bind:this={here}>{t("media-sound-how")}</p>
 <div class="pair" class:one={!before || !after}>
   {#if before}
     <SoundSide

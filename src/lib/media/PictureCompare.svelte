@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { LOCALE, t } from "../i18n/runtime";
   import { register } from "../shortcuts/registry";
+  import type { Ground } from "./source";
   import { themeColour } from "./decode";
   import {
     changedShare,
@@ -35,6 +36,7 @@
     labels,
     startTolerance = 0,
     alone,
+    grounds = [],
   }: {
     before: Raster | null;
     after: Raster | null;
@@ -43,11 +45,24 @@
     startTolerance?: number;
     /** Words above a picture with one side only. */
     alone?: string;
+    /** A game's own grounds (0.55.0, from a picks file): offered after the Companion's, by name. */
+    grounds?: Ground[];
   } = $props();
+
+  /** The page's own element, to tell whether it sits in a dialog: its keys work only where it is. */
+  let here = $state<HTMLElement | null>(null);
 
   let view = $state<PictureView>("side");
   let zoom = $state<Zoom>("fit");
-  let backdrop = $state<Backdrop>("checks");
+  /** One of the Companion's grounds, or a game's own by its place in `grounds` ("ground-0"). */
+  let backdrop = $state<Backdrop | `ground-${number}`>("checks");
+
+  function groundStyle(choice: typeof backdrop): string {
+    const own = /^ground-(\d+)$/.exec(choice);
+    const colour = own ? grounds[Number(own[1])]?.colour : undefined;
+    if (colour) return `background: ${colour};`;
+    return backdropStyle(own ? "checks" : (choice as Backdrop));
+  }
   let flicked = $state<"before" | "after">("after");
   let tolerance = $state(0);
   $effect.pre(() => {
@@ -135,11 +150,12 @@
     return value.toLocaleString(LOCALE);
   }
 
+  // A scope of its own (0.55.0), whether in a dialog (the code viewer, a screenshot) or on a page (Mods, Picks).
   onMount(() =>
     register({
-      scope: "code",
-      inDialog: true,
-      run: { "code.flick": flick, "code.zoom": stepZoom },
+      scope: "media",
+      inDialog: here?.closest("dialog") != null,
+      run: { "media.flick": flick, "media.zoom": stepZoom },
     }),
   );
 </script>
@@ -160,7 +176,7 @@
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div
       class="scroll"
-      style={backdropStyle(backdrop)}
+      style={groundStyle(backdrop)}
       role="img"
       aria-label={t("media-picture-label", { side: label })}
       tabindex="0"
@@ -175,7 +191,7 @@
   </figure>
 {/snippet}
 
-<div class="controls">
+<div class="controls" bind:this={here}>
   {#if both}
     <div class="toggles" role="group" aria-label={t("media-view-label")}>
       {#each VIEWS as choice (choice.id)}
@@ -208,6 +224,14 @@
         class="toggle"
         aria-pressed={backdrop === choice.id}
         onclick={() => (backdrop = choice.id)}>{t(choice.words)}</button
+      >
+    {/each}
+    {#each grounds as ground, index (ground.name)}
+      <button
+        type="button"
+        class="toggle"
+        aria-pressed={backdrop === `ground-${index}`}
+        onclick={() => (backdrop = `ground-${index}`)}>{ground.name}</button
       >
     {/each}
   </div>
@@ -288,7 +312,7 @@
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div
       class="scroll"
-      style={backdropStyle(backdrop)}
+      style={groundStyle(backdrop)}
       role="img"
       aria-label={t("media-changed-caption")}
       tabindex="0"

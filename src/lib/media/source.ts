@@ -22,6 +22,9 @@ export type MediaSide = {
   turnOver?: boolean;
 };
 
+/** A colour a game's pictures are seen on (a picks file's grounds), offered beside the Companion's own. */
+export type Ground = { name: string; colour: string };
+
 export type MediaSource = {
   /** Changes whenever the sides do, so both are read again. */
   key: string;
@@ -32,6 +35,8 @@ export type MediaSource = {
   tolerance?: number;
   /** Words shown above a picture that has one side only; none says nothing. */
   alone?: string;
+  /** A game's own grounds, offered after the Companion's (0.55.0). */
+  grounds?: Ground[];
 };
 
 /** A picture turned over top to bottom, as its file stores it for a game that reads it so. */

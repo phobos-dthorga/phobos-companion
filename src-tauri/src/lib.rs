@@ -28,6 +28,7 @@ mod other_code_page;
 mod patch_targets;
 mod pending;
 mod pick;
+mod picks_page;
 mod pictures;
 mod records_backup;
 mod reports;
@@ -649,6 +650,23 @@ async fn answer_decision(
     blocking(move || decisions_page::answer(&repository, &id, &option, &words)).await
 }
 
+/// The pictures and sounds waiting for the owner's pick, in every repository that keeps a picks file (0.55.0). Only reads.
+#[tauri::command]
+async fn picks_list() -> Result<serde_json::Value, Failure> {
+    blocking(picks_page::read).await
+}
+
+/// Records the owner's pick, a try or none, once they press it (0.55.0).
+#[tauri::command]
+async fn answer_pick(
+    repository: String,
+    id: String,
+    pick: String,
+    words: String,
+) -> Result<picks_page::PickResult, Failure> {
+    blocking(move || picks_page::answer(&repository, &id, &pick, &words)).await
+}
+
 /// What a game writes and what Steam records about it: what changed since the last launch, saves, screenshots and space.
 #[tauri::command]
 async fn game_files(game: String, since: Option<String>) -> Result<serde_json::Value, Failure> {
@@ -1181,6 +1199,8 @@ pub fn run() {
             safe_copies_set_daily,
             claims_list,
             decisions_list,
+            picks_list,
+            answer_pick,
             answer_decision,
             game_files,
             show_game_file,

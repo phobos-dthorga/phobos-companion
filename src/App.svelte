@@ -49,6 +49,7 @@
   import ScreenNoteButton from "./lib/notes/ScreenNoteButton.svelte";
   import MakeupPage from "./lib/makeup/MakeupPage.svelte";
   import DecisionsPage from "./lib/decisions/DecisionsPage.svelte";
+  import PicksPage from "./lib/picks/PicksPage.svelte";
   import { agents } from "./lib/agents/state.svelte";
   import AboutPage from "./lib/about/AboutPage.svelte";
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
@@ -115,6 +116,7 @@
     ["page.logs", "logs"],
     ["page.makeup", "makeup"],
     ["page.decisions", "decisions"],
+    ["page.picks", "picks"],
     ["page.about", "about"],
     ["page.gamefiles", "gamefiles"],
     ["page.memory", "memory"],
@@ -160,6 +162,7 @@
         { page: "reports", key: "page-reports" },
         { page: "settings", key: "page-settings" },
         { page: "decisions", key: "page-decisions" },
+        { page: "picks", key: "page-picks" },
         { page: "about", key: "page-about" },
         { page: "guide", key: "page-guide" },
       ],
@@ -364,6 +367,8 @@
         <GuidePage game={selected} />
       {:else if page === "decisions" && home.state !== "reading"}
         <DecisionsPage />
+      {:else if page === "picks" && home.state !== "reading"}
+        <PicksPage />
       {:else if selected && page === "reports"}
         {#key selected.id}
           <ReportsPage game={selected} />
@@ -457,17 +462,19 @@
                       ? t("source-body-makeup")
                       : page === "decisions"
                         ? t("source-body-decisions")
-                        : page === "about"
-                          ? t("source-body-about")
-                          : page === "gamefiles"
-                            ? t("source-body-gamefiles")
-                            : page === "modlist"
-                              ? t("source-body-modlist")
-                              : page === "memory"
-                                ? t("source-body-memory")
-                                : page === "explorer"
-                                  ? t("source-body-explorer")
-                                  : t("source-body")}
+                        : page === "picks"
+                          ? t("source-body-picks")
+                          : page === "about"
+                            ? t("source-body-about")
+                            : page === "gamefiles"
+                              ? t("source-body-gamefiles")
+                              : page === "modlist"
+                                ? t("source-body-modlist")
+                                : page === "memory"
+                                  ? t("source-body-memory")
+                                  : page === "explorer"
+                                    ? t("source-body-explorer")
+                                    : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

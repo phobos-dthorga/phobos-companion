@@ -210,6 +210,7 @@
     color: var(--colour-text-muted);
     border: 1px solid var(--colour-line);
     border-radius: 3px;
+    white-space: nowrap;
   }
 
   @media (max-width: 900px) {

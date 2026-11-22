@@ -4,6 +4,13 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.66.1] - 2026-11-23
+
+### Fixed
+
+- **A tab's key stays on one line.** "Alt + 1" beside a tab's name broke after the plus, dropping the number beneath it (the
+  owner's picture of the Mods page, 23 Nov 2026). The keys beside the pages on the left hold to one line the same way.
+
 ## [0.66.0] - 2026-11-23
 
 A tidier window (the owner's choices of 23 Nov 2026, made on a mock-up first): the pages down the left, and Settings, Mods and

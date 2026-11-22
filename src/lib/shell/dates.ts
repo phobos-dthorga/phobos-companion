@@ -51,6 +51,12 @@ export function formatUnixDate(unix: number): string {
   return formatDate(new Date(unix * 1000));
 }
 
+/** "18 Nov 2026, 8:07 pm" from seconds: when an answer kept from earlier was read (0.63.0, the "as of" lines). */
+export function formatUnixWhen(unix: number): string {
+  const date = new Date(unix * 1000);
+  return `${formatDate(date)}, ${formatTime(date)}`;
+}
+
 /** "3:14 am". */
 export function formatTime(date: Date): string {
   return new Intl.DateTimeFormat(LOCALE, {

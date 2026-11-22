@@ -5,10 +5,12 @@ import {
   lateNightly,
   lightKey,
   markOf,
+  nightlyAsOf,
   oldestStale,
   toneOf,
+  watchFindings,
 } from "./presentation";
-import type { CheckRun, RepoStatus, RepoStatusAnswer } from "./types";
+import type { CheckRun, Feed, RepoStatus, RepoStatusAnswer } from "./types";
 
 const run = (workflow: string, conclusion: string | null): CheckRun => ({
   workflow,
@@ -98,5 +100,62 @@ describe("the gate lights", () => {
       callsLeft(answer([], { allowance: { ...allowance, turned: true } })),
     ).toBeNull();
     expect(callsLeft(answer([]))).toBeNull();
+  });
+});
+
+describe("the nightly watch's findings", () => {
+  const finding = (commit: string, member: string, date: string) => ({
+    mod: "Vehicle Framework",
+    commit,
+    member,
+    date,
+    subject: "VF-412",
+  });
+  const feed = (
+    repository: string,
+    findings: unknown[],
+    extra: Partial<Feed> = {},
+  ): Feed => ({
+    source: `${repository}@companion-results:`,
+    repository,
+    state: "read",
+    stale: false,
+    asOf: null,
+    files: [
+      {
+        path: "upstream-watch.json",
+        kind: "upstream-watch",
+        state: "new",
+        content: { findings },
+      },
+    ],
+    ...extra,
+  });
+
+  it("are listed newest first, each once, and only what has a finding's shape", () => {
+    const shown = watchFindings({
+      switchedOn: true,
+      feeds: [
+        feed("me/game", [
+          finding("aaa", "A.B", "2026-11-10"),
+          finding("bbb", "C.D", "2026-11-15"),
+          finding("aaa", "A.B", "2026-11-10"),
+          { mod: "No commit" },
+        ]),
+      ],
+    });
+    expect(shown.map((f) => f.commit)).toEqual(["bbb", "aaa"]);
+    expect(shown[0].repository).toBe("me/game");
+  });
+
+  it("say how old the oldest kept copy is, and nothing when all are fresh", () => {
+    const fresh = feed("me/a", []);
+    expect(nightlyAsOf({ switchedOn: true, feeds: [fresh] })).toBeNull();
+    const kept = feed("me/b", []);
+    kept.files[0] = { ...kept.files[0], state: "kept", keptAt: 70 };
+    const stale = feed("me/c", [], { stale: true, asOf: 90 });
+    expect(nightlyAsOf({ switchedOn: true, feeds: [fresh, kept, stale] })).toBe(
+      70,
+    );
   });
 });

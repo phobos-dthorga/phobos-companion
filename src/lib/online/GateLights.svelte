@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from "../i18n/runtime";
   import { goPage } from "../navigation/navigation.svelte";
-  import { formatDate, formatTime, formatWhen } from "../shell/dates";
+  import { formatUnixWhen, formatWhen } from "../shell/dates";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started, type ProgressState } from "../shell/progress";
   import { readRepoStatus } from "./desktopClient";
@@ -60,11 +60,6 @@
   function openSwitch() {
     goPage("settings", { panel: "online" });
   }
-
-  function askedWhen(seconds: number): string {
-    const date = new Date(seconds * 1000);
-    return `${formatDate(date)}, ${formatTime(date)}`;
-  }
 </script>
 
 {#if lights && lights.repositories.length > 0}
@@ -107,7 +102,7 @@
     </ul>
     {#if stale !== null}
       <p class="small as-of" role="status">
-        {t("lights-as-of", { when: askedWhen(stale) })}
+        {t("lights-as-of", { when: formatUnixWhen(stale) })}
       </p>
     {/if}
     {#if lights.limited}

@@ -27,6 +27,7 @@
   import PicksNote from "../picks/PicksNote.svelte";
   import { agents } from "../agents/state.svelte";
   import GateLights from "../online/GateLights.svelte";
+  import TheirCodeChanged from "../online/TheirCodeChanged.svelte";
 
   const PENDING_SHOWN = 6;
   const OPEN_SHOWN = 6;
@@ -302,6 +303,7 @@
 {/if}
 
 <GateLights game={game.id} />
+<TheirCodeChanged game={game.id} />
 
 {#if agents.shown}
   <ClaimsPanel />

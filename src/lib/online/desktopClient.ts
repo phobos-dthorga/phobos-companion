@@ -6,7 +6,7 @@ import {
 } from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
-import type { OnlineStatus, RepoStatusAnswer } from "./types";
+import type { NightlyAnswer, OnlineStatus, RepoStatusAnswer } from "./types";
 
 type Read = { state: "ready"; status: OnlineStatus } | Failed;
 const ready = (status: OnlineStatus) => ({ state: "ready" as const, status });
@@ -35,5 +35,20 @@ export async function readRepoStatus(
     "repo_status",
     { game, pressed, onProgress: progressChannel(onProgress) },
     (lights) => ({ state: "ready", lights }),
+  );
+}
+
+type Nightly = { state: "ready"; nightly: NightlyAnswer } | Failed;
+
+/** What the nightly watch found for a game's repositories, while Nightly watch is on (0.63.0). */
+export async function readNightly(
+  game: string,
+  onProgress?: OnProgress,
+): Promise<Nightly | typeof BROWSER> {
+  if (inBrowser()) return BROWSER;
+  return ask<NightlyAnswer, Nightly>(
+    "nightly_watch",
+    { game, onProgress: progressChannel(onProgress) },
+    (nightly) => ({ state: "ready", nightly }),
   );
 }

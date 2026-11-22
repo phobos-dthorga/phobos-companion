@@ -82,3 +82,38 @@ export type RepoStatusAnswer = {
   allowance?: Allowance | null;
   limited?: string | null;
 };
+
+/** One commit the nightly watch found in another author's public source touching a member our code names (0.63.0). */
+export type WatchFinding = {
+  mod: string;
+  commit: string;
+  member: string;
+  date?: string;
+  subject?: string;
+  /** Our file and line that names the member. */
+  ours?: string;
+  link?: string | null;
+};
+
+/** One file of a feed, as the kit read and checked it. */
+export type FeedFile = {
+  path: string;
+  kind: string | null;
+  state: "new" | "same" | "kept" | "failed" | "refused";
+  why?: string;
+  content?: unknown;
+  keptAt?: number;
+};
+
+export type Feed = {
+  source: string;
+  repository: string;
+  state: "read" | "missing" | "unreachable" | "refused";
+  feed?: string;
+  updated?: string;
+  stale: boolean;
+  asOf: number | null;
+  files: FeedFile[];
+};
+
+export type NightlyAnswer = { feeds: Feed[]; switchedOn: boolean };

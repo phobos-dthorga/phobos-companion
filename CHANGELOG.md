@@ -4,6 +4,22 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.63.0] - 2026-11-23
+
+The second slice of going online (`docs/online.md`, O3's nightly watch). Kit pin v1.91.0 to v1.92.0.
+
+### Added
+
+- **Their code changed, on Home**: what the nightly watch on GitHub's own machine found in the public source of mods yours patch:
+  each commit that touches a method your code names, newest first, with its date and words, the method, and your line that names
+  it, before those authors' updates reach you. Read from each repository's results branch; a repository with no nightly run shows
+  nothing. When GitHub can't be reached, Home shows the watch's last answer and says from when. phobos-rimworld's first nightly
+  run (23 Nov 2026) found 16 such commits in 24 mods' source. Not yet tested on screen.
+- **Nightly watch, in Settings → Going online**: its own switch, **on by default** (the owner's choice), contacting
+  raw.githubusercontent.com at most every six hours, outside GitHub's hourly calls. Switching it off asks first: you would hear
+  of such a change only after the update reaches you. Not yet tested on screen.
+- **Guide**: "Choose what the Companion asks the internet" and Home's entry name the nightly watch.
+
 ## [0.62.0] - 2026-11-23
 
 After the owner's full re-sort preview with 0.60.0 (23 Nov 2026: "Thoughts?"); the owner chose all three fixes on a question

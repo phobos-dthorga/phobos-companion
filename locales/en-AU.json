@@ -2131,6 +2131,16 @@
     "about-online-kind": "{ $name }: { $address } ({ $state })",
     "about-online-steam": "The Mod list page also asks Steam's public Workshop pages when its Ask Steam too is on, and Subscribe speaks to your own Steam client.",
     "about-online-change": "Going online settings",
-    "modlist-sort-use-anyway": "Use this order anyway"
+    "modlist-sort-use-anyway": "Use this order anyway",
+    "online-nightly-watch-name": "Nightly watch",
+    "online-nightly-watch-body": "Home shows what the nightly watch on GitHub's own machine found: commits in the public source of mods yours patch that touch a method your code names, before their update reaches you. It reads each repository's results, at most every six hours, without counting against GitHub's hourly calls.",
+    "online-nightly-watch-loss": "You will hear that another author changed a method your mods patch only after their update reaches you. The check after an update still runs.",
+    "nightly-title": "Their code changed",
+    "nightly-body": "{ $count ->\n    [one] Last night's watch found 1 commit in another author's public source that touches a method your code names. It may not be in their Workshop update yet.\n   *[other] Last night's watch found { $count } commits in other authors' public source that touch methods your code names. They may not be in their Workshop updates yet.\n  }",
+    "nightly-commit": "{ $commit }, { $when }: { $subject }",
+    "nightly-ours": "Your code that names it: { $where }",
+    "nightly-more": "{ $count ->\n    [one] And 1 more.\n   *[other] And { $count } more.\n  }",
+    "nightly-as-of": "GitHub could not be asked just now, so this is the watch's last answer as read { $when }.",
+    "nightly-limit": "Matched by name: read the commit before acting on it. Public source can differ from the Workshop build, so this is an early warning; the check after an update stays the real one."
   }
 }

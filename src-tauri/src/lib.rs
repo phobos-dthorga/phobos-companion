@@ -23,6 +23,7 @@ mod memory_page;
 mod mod_list_lists;
 mod mod_list_page;
 mod mod_list_steam;
+mod nightly;
 mod open_work;
 mod other_code_page;
 mod patch_targets;
@@ -718,6 +719,17 @@ async fn choose_agent_features(
     .await
 }
 
+/// What the nightly watch found in the public source of mods a game's repositories patch, while the switch is on (0.63.0).
+#[tauri::command]
+async fn nightly_watch(
+    app: tauri::AppHandle,
+    game: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<serde_json::Value, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || nightly::read(&data, &game, Some(&hearing(on_progress)))).await
+}
+
 /// Which kinds of online call the program may make by itself, each with what it contacts (0.61.0, `docs/online.md`).
 #[tauri::command]
 async fn online_status(app: tauri::AppHandle) -> Result<companion_core::online::Status, Failure> {
@@ -1265,7 +1277,8 @@ pub fn run() {
             choose_agent_features,
             online_status,
             choose_online,
-            repo_status
+            repo_status,
+            nightly_watch
         ])
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {

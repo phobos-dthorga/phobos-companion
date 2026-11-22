@@ -171,8 +171,9 @@ reads them.
   online, the host checks the kit's manifest still calls it `reads-online` (`kit::reads_online`). A look the program makes by
   itself is `--automatic`, so the kit keeps the hour's last keyless GitHub calls for a press. **Nothing is ever sent about the
   person**: calls only read public pages, keyless. A new kind joins `KINDS`, the window's words (`src/lib/online/presentation.ts`)
-  and the Guide's Going online entry in one change. Gate lights (`src-tauri/src/repo_status.rs`, the kit's `repos status`) is the
-  first.
+  and the Guide's Going online entry in one change. The kinds: Gate lights (`src-tauri/src/repo_status.rs`, the kit's `repos
+  status`) and Nightly watch (0.63.0, `src-tauri/src/nightly.rs`, the kit's `feeds read --root`, reading each repository's
+  `companion-results` branch).
 - **Otherwise read-only towards games, saves and repositories.** The only other things the program writes are the owner's test verdicts and, since
   0.9.0, their word on notes no row names ("make a row" or "no row needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks),
   each appended to its own data folder (`test-verdicts/<repository>.jsonl` and `test-key-decisions/<repository>.jsonl`,

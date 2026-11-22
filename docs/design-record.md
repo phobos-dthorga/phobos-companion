@@ -1344,6 +1344,27 @@ calls "on for listed repositories with a setting to disable otherwise, with appl
 after two days; a press asking again after a minute; off meaning no call even on a press. **Risk (agent's grade): low**; nothing
 of the person's is changed or sent.
 
+## Going online, slice 2: the nightly watch (built 23 Nov 2026, 0.63.0)
+
+**The owner's request**: O3 of [online.md](online.md), with their answer "a results branch", written only when the result changes.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See on Home, before an update arrives, which commits in other authors' public source touch a method their code names, with the line of theirs that names it |
+| What does it stop them doing? | Nothing; switching Nightly watch off stops only the reading |
+| How does it change the way they work? | The look happens each night on GitHub's machine, with the PC off; a fix can be ready before the update lands |
+| What outside the thing notices? | Nobody is told: the results branch is public, and GitHub runs the job |
+
+| Part | How |
+| --- | --- |
+| The nightly run | phobos-rimworld's `.github/workflows/upstream-watch.yml` calls the kit's reusable `nightly-feed.yml` at a tag (`kit-ref`), which runs `rimworld-upstream pending --clone-into --feed` and commits to `companion-results` only when the answer changed |
+| The reading | `src-tauri/src/nightly.rs` runs the kit's `feeds read --root` for the game's repositories, only while Nightly watch is on and the manifest still calls it `reads-online`; the kit checks each file's size, hash and kind, and keeps the last good copy |
+| The window | `src/lib/online/TheirCodeChanged.svelte` on Home; `watchFindings` and `nightlyAsOf` in `presentation.ts` |
+| Games | The reading and the panel are game-free; a next game needs its own `upstream` adapter (what counts as ours, and the language git splits changes by) and a caller workflow |
+
+**Agent choices, owner to revise:** the panel's name "Their code changed"; ten findings shown before "and N more"; 30 days looked
+back; 16:17 UTC. **Risk (agent's grade): low.**
+
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the

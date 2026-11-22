@@ -1,4 +1,6 @@
 import type {
+  NightlyAnswer,
+  WatchFinding,
   LightState,
   NightlyRun,
   RepoChecks,
@@ -61,6 +63,11 @@ export function lightKey(state: LightState): string {
 type KindWords = { name: string; body: string; loss: string };
 
 const KIND_WORDS: Record<string, KindWords> = {
+  "nightly-watch": {
+    name: "online-nightly-watch-name",
+    body: "online-nightly-watch-body",
+    loss: "online-nightly-watch-loss",
+  },
   "gate-lights": {
     name: "online-gate-lights-name",
     body: "online-gate-lights-body",
@@ -107,4 +114,51 @@ export function callsLeft(
   const allowance = answer.allowance;
   if (!allowance || allowance.turned) return null;
   return { remaining: allowance.remaining, size: allowance.size ?? 60 };
+}
+
+/** One finding as Home lists it: which repository's watch found it, and the finding itself. */
+export type ShownFinding = WatchFinding & { repository: string };
+
+function isFinding(value: unknown): value is WatchFinding {
+  const item = value as Record<string, unknown> | null;
+  return (
+    typeof item?.mod === "string" &&
+    typeof item.commit === "string" &&
+    typeof item.member === "string"
+  );
+}
+
+/**
+ * Every commit the nightly watches found (0.63.0), newest first, each once: the kit checked each file, but the window still reads
+ * only what has the shape of a finding.
+ */
+export function watchFindings(answer: NightlyAnswer): ShownFinding[] {
+  const seen = new Set<string>();
+  const found: ShownFinding[] = [];
+  for (const feed of answer.feeds) {
+    for (const file of feed.files) {
+      if (file.kind !== "upstream-watch") continue;
+      const findings = (file.content as { findings?: unknown } | undefined)
+        ?.findings;
+      if (!Array.isArray(findings)) continue;
+      for (const finding of findings.filter(isFinding)) {
+        const key = `${feed.repository}|${finding.commit}|${finding.member}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        found.push({ ...finding, repository: feed.repository });
+      }
+    }
+  }
+  return found.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+}
+
+/** When the oldest copy shown was read, in seconds, when any is an earlier one kept because GitHub couldn't be asked. */
+export function nightlyAsOf(answer: NightlyAnswer): number | null {
+  const times = answer.feeds.flatMap((feed) => [
+    ...(feed.stale && feed.asOf !== null ? [feed.asOf] : []),
+    ...feed.files
+      .filter((file) => file.state === "kept" && file.keptAt !== undefined)
+      .map((file) => file.keptAt as number),
+  ]);
+  return times.length > 0 ? Math.min(...times) : null;
 }

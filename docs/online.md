@@ -1,7 +1,8 @@
 # Going online: gate lights, report links, the nightly watch and data feeds (O2 to O4)
 
 **Status (23 Nov 2026):** **slice 1 built** in Companion 0.61.0 with phobos-modkit 1.89.0 (gate lights, the switches, About's
-list; not yet tested on screen); slices 2 to 4 designed, not built. The owner asked for O2 to O4 of [later.md](later.md#going-online)
+list); **slice 2 built** in Companion 0.63.0 with phobos-modkit 1.90.0 to 1.92.0 (the feed format, the reusable nightly workflow,
+phobos-rimworld's nightly run, Home's Their code changed); neither tested on screen yet. Slices 3 and 4 designed, not built. The owner asked for O2 to O4 of [later.md](later.md#going-online)
 together, "since they might share a few things in common", and answered four questions by card the same day (below). Built in the
 order under [Build order](#build-order). Agent choices are labelled so the owner can revise them.
 
@@ -12,7 +13,17 @@ order under [Build order](#build-order). Agent choices are labelled so the owner
   after a push, while a check runs, or once a day.
 - **Off means off** (agent's reading of "a setting to disable"): a kind switched off makes no call even on a press, so a person
   who switched it off is never surprised by one. The S2 line below said a press still might; this replaces it.
-- **The "as of" line (S6) lives in the gate lights for now**; it moves to `src/lib/shell/` when a second panel needs it (slice 2).
+- **The "as of" line (S6)**: its time is `formatUnixWhen` in `src/lib/shell/dates.ts` from 0.63.0, used by both panels; each
+  panel keeps its own words for it.
+
+**Learnt while building slice 2:**
+
+- **The nightly workflow runs the kit at its own tag** (`kit-ref`, required), not the caller's submodule pin: phobos-rimworld
+  pinned kit 1.83.0, which has none of the nightly tools.
+- **Check workflows with `actionlint` before pushing** (on the owner's PC): the first try named the `runner` context in a job's
+  `env`, which GitHub refuses before a run starts.
+- **First real run** (phobos-rimworld, 23 Nov 2026, manual start): 56 seconds, 24 fresh clones, 16 findings, published to
+  `companion-results` and read back keyless. Its fresh clones found two more than the owner's local ones, which were older.
 
 ## Read this first (gotchas)
 

@@ -149,6 +149,9 @@ here may become something the Companion needs in order to work (the owner's rule
 (something to keep alive, and against "nothing is sent anywhere"); an AI service inside the Companion (leased, not owned); a
 bucket for public downloads (GitHub Releases already gives that free).
 
+**O2 to O4 are designed together** in [online.md](online.md) (the owner's go-ahead and four answers of 23 Nov 2026), with what
+they share and the build order.
+
 **Suggested order (agent's lean):** O5(a) at once, being the owner's own step; then O1 with O6, which a first public release
 needs; then O4, O2 and O3; O5(b) when the owner has worded the rule.
 

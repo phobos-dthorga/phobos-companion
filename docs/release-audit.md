@@ -106,10 +106,15 @@ Much of the foundation already suits others, and should be kept so:
 | Where should releases live? | **GitHub Releases** (the phobos-companion repository) |
 | Which part first? | **A clean PC can install it and start** (A1, A2, A3, A5) |
 
+**Answered (23 Nov 2026):**
+
+| Question | The owner's answer |
+| --- | --- |
+| Sign the installer? | **SignPath Foundation**, the free signing for open-source projects (B5). Its conditions, and what else going online would add, are in [later.md](later.md#going-online), O6 and O1 |
+
 **Still open:**
 
 | Question | Agent lean |
 | --- | --- |
-| Sign the installer? | Look into free open-source signing; until then, say plainly what Windows will warn |
 | Which platform after Windows? | Linux, after the first Windows release |
 | Should the general Mods adapter (B2) come before a first release? | No: after, once someone asks for a game that needs it |

@@ -58,8 +58,15 @@
         : { state: "failed", failure: answer.failure };
   }
 
-  function open(next: Placed | undefined) {
-    if (next) setFocus({ pick: keyOf(next) });
+  /**
+   * Opens a pick. Opened by hand, it lets go of the last "Kept" line (0.69.2; the owner's screen note of 23 Nov 2026: a line
+   * naming the pick before, shown over another, read as the wrong name tied to the sound). The move to the next waiting pick
+   * after a press keeps it, as it says what the press did.
+   */
+  function open(next: Placed | undefined, byHand = true) {
+    if (!next) return;
+    if (byHand) told = null;
+    setFocus({ pick: keyOf(next) });
   }
 
   function stepPick(step: 1 | -1) {
@@ -98,7 +105,7 @@
           : t("picks-done", { title: was.pick.title, label }),
     };
     await load();
-    open(nextWaiting(placed, keyOf(was)));
+    open(nextWaiting(placed, keyOf(was)), false);
   }
 
   onMount(() => {

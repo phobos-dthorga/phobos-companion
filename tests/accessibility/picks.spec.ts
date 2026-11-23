@@ -158,6 +158,10 @@ for (const [name, viewport] of [
       await expect(
         page.getByRole("heading", { level: 2, name: "The billy kettle" }),
       ).toBeVisible();
+      // 0.69.2: opened by hand, another pick no longer shows the last "Kept" line (the owner's screen note of 23 Nov 2026).
+      await expect(
+        page.getByRole("status").filter({ hasText: "Kept:" }),
+      ).toHaveCount(0);
     });
     test("which sound Y plays starts again on each sound, never carried from the last (0.68.1)", async ({
       page,

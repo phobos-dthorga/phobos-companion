@@ -103,6 +103,8 @@
   /** How long the page waits before reading again when the window comes back into focus. */
   const FOCUS_READ_AFTER_MS = 15_000;
   const STRIP = "strip";
+  /** The Textures tab (0.69.1): it lists what wants encoding, so it offers the press too (the owner's screen note of 23 Nov 2026). */
+  const TEXTURES = "textures";
 
   let reading = $state<InstallsReading>({ state: "reading" });
   let textures = $state<TexturesReading>({ state: "reading" });
@@ -1287,6 +1289,26 @@
           </li>
         {/each}
       </ul>
+      <p class="texture-press">
+        <button
+          type="button"
+          class="move-button"
+          disabled={busy !== null || running.length > 0}
+          aria-pressed={asking?.place === TEXTURES && asking.kind === "encode"}
+          onclick={() =>
+            ask({ kind: "encode", place: TEXTURES, mods: toEncode })}
+        >
+          {t("mods-pre-action-encode")}
+        </button>
+        {#if running.length > 0}
+          <span class="muted blocked"
+            >{t("mods-blocked-running", { game: game.name })}</span
+          >
+        {/if}
+      </p>
+      {#if asking?.place === TEXTURES}
+        {@render question()}
+      {/if}
     </section>
   {/if}
 {/snippet}
@@ -1590,6 +1612,14 @@
 
   .blocked {
     font-size: var(--type-small);
+  }
+
+  .texture-press {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-block: 12px 0;
   }
 
   details > summary {

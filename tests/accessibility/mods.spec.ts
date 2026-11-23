@@ -612,6 +612,32 @@ for (const [name, viewport] of [
       await expect(confirm).toHaveCount(0);
     });
 
+    test("the Textures tab offers encoding too, and asks first (0.69.1)", async ({
+      page,
+    }) => {
+      await open(page);
+      await page.getByRole("tab", { name: /Textures/ }).click();
+      const list = page.getByRole("region", { name: "Textures to encode" });
+      await list.getByRole("button", { name: "Encode their textures" }).click();
+      const confirm = list.getByRole("group", { name: "Confirm" });
+      await expect(confirm).toContainText("Old Pictures, New Pictures");
+      await audit(page);
+      await confirm.getByRole("button", { name: "Cancel" }).click();
+      await expect(confirm).toHaveCount(0);
+    });
+
+    test("the Textures tab's encoding waits while the game runs (0.69.1)", async ({
+      page,
+    }) => {
+      await open(page, ["rimworld.exe"]);
+      await page.getByRole("tab", { name: /Textures/ }).click();
+      const list = page.getByRole("region", { name: "Textures to encode" });
+      await expect(
+        list.getByRole("button", { name: "Encode their textures" }),
+      ).toBeDisabled();
+      await expect(list).toContainText("Waits until");
+    });
+
     test("installing and encoding wait while the game runs; building doesn't", async ({
       page,
     }) => {

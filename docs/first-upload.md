@@ -14,11 +14,11 @@ in [publishing.md](publishing.md).
   uploads, Steam shows you as playing that game.
 - **Close the game first** (Ostranauts or RimWorld). The upload speaks to Steam as that game; the game running at the same
   time is untried. (Agent's precaution, not a known fault.)
-- **In Ostranauts, turn Build first off, and don't use Update all waiting yet.** Ostranauts builds each mod with its own
-  script (`scripts/build-<mod>.ps1`), and its catalogue has no build command for the Publish page to run, so both ask for
-  one and stop. Build with the script, then **Prepare** with **Build first** off.
-- **Ostranauts' packages were all out of date on 23 Nov 2026**, and the Spacer Stories build failed its own native checks
-  against the installed game. Every mod you send needs a fresh build that passes.
+- **Reinstall Ostranauts first.** On 23 Nov 2026 the game was not installed on this PC (only a leftover BepInEx folder), so
+  no Ostranauts mod can be built, and every package there is out of date. Each needs a fresh build that passes.
+- **Build first works in Ostranauts too** (from 23 Nov 2026): it runs the mod's own `scripts/build-<mod>.ps1` with the game's
+  folder from `.local/install-settings.json` (`OstranautsPath`). Use Companion 0.69.2 or newer: before it, Build first's
+  output could spoil the page's answer. **Update all waiting** builds each mod the same way.
 - **A private upload may come from uncommitted work; a public one may not.** Commit first, then **Prepare** again.
 - **Never press Upload again after a create that gave no item number.** Look at your Workshop items on Steam first: a blind
   retry can make a duplicate item. (Updates of existing items, as below, cannot make duplicates.)
@@ -28,9 +28,9 @@ in [publishing.md](publishing.md).
 
 ## Before you start (once)
 
-- [ ] Install **D'thorga Companion 0.69.0**:
-      `C:\Users\phobo\AppData\Local\phobos-modkit\target\release\bundle\nsis\D’thorga Companion_0.69.0_x64-setup.exe`
-- [ ] Steam running and signed in; the game closed.
+- [ ] Install **D'thorga Companion 0.69.2 or newer** (the newest installer is in
+      `C:\Users\phobo\AppData\Local\phobos-modkit\target\release\bundle\nsis\`).
+- [ ] Ostranauts installed, with BepInEx; Steam running and signed in; the game closed.
 - [ ] In the Companion, **Settings → Publishing**: **Workshop uploads** is **On**.
 
 ## Test 1: a private update (Phobos Exchange)
@@ -38,12 +38,11 @@ in [publishing.md](publishing.md).
 Phobos Exchange is a **private** item already on Steam (item 3815077672), with an update due: **0.5.2 on Steam, 0.6.0 here**.
 Being private, nobody else sees it, so it is the safest first send.
 
-- [ ] Build it in PowerShell from the phobos-ostranauts folder:
-      `.\scripts\build-exchange.ps1 -OstranautsPath 'C:\program files (x86)\steam\steamapps\common\Ostranauts'`
-      It must finish without an error.
 - [ ] Open **Publish** (**Shift + W**), choose **Ostranauts**, and step to **Phobos Exchange** with **J** and **K**.
 - [ ] Read the **Change note** tab: it should cover version 0.6.0 (and anything between 0.5.2 and 0.6.0).
-- [ ] Turn **Build first** off, then press **Prepare** (**E**). The card should show no blockers.
+- [ ] With **Build first** on, press **Prepare** (**E**). It builds the mod with `scripts/build-exchange.ps1`, then stages it;
+      the build must pass, and the card should then show no blockers. (By hand, the same build is
+      `python scripts/workshop_build.py PhobosExchange` in the phobos-ostranauts folder.)
 - [ ] Check the sender is **The Steam client**.
 - [ ] Press **Send the update** (**Shift + U**), read the question, and confirm.
 - [ ] **What success looks like:** a bar while it uploads, then the card shows 0.6.0 as sent, and the **Uploads** tab has a new
@@ -60,9 +59,8 @@ Choose a **public** item whose new version you are happy to release now. On 23 N
 **Phobos Spacer Stories** (0.3.1 to 0.4.0; its build failed on 23 Nov). **Dependencies go first**: if the mod you choose
 needs the newer Framework, send Framework first.
 
-- [ ] Build it with its script, as in Test 1. It must pass.
 - [ ] **Commit everything first.** A public upload refuses a candidate prepared from uncommitted work.
-- [ ] **Prepare** (**E**) with **Build first** off.
+- [ ] **Prepare** (**E**) with **Build first** on, as in Test 1. The build must pass.
 - [ ] **Send the update** (**Shift + U**). The item stays public; no "make public" question, as it already is.
 - [ ] Open the item (**O**) and check it as in Test 1. Here the Draft heading in the change note should read **Released**.
 - [ ] Press **Read Steam back** (**B**): it marks the version **Released** in the mod's changelog, dated as Steam shows it.
@@ -72,8 +70,6 @@ needs the newer Framework, send Framework first.
 
 - [ ] Tell Claude: "both Workshop tests worked" (with anything that looked wrong). The old Ostranauts scripts
       (`prepare-workshop`, `upload-workshop`, `update-workshop`, `pull-workshop`) are then retired, as you chose.
-- [ ] Optional follow-up to ask for: Ostranauts build commands in its catalogue, so **Build first** and **Update all waiting**
-      work there too.
 
 ## Later: a RimWorld mod's first upload
 
@@ -103,4 +99,6 @@ need it.
 | The upload ends with "Steam did not confirm the upload" | Open the item on Steam. If the new version is there, tell Claude to reconcile the receipt; if not, try again |
 | A create gave no item number | **Stop.** Look at your Workshop items on Steam first, then tell Claude; never press Upload again before that |
 | Steam asks for the Workshop legal agreement | Accept it on the item's page; until then others cannot see the item |
-| "--build needs a build command in the catalogue" | Ostranauts: turn **Build first** off and build with its script |
+| "The game's folder was not found" (an Ostranauts build) | Set `OstranautsPath` in phobos-ostranauts' `.local/install-settings.json`, or reinstall the game |
+| "Supply OstranautsPath for a local game installation" | The game is missing from that folder: reinstall Ostranauts (with BepInEx) |
+| "The build failed for …; no candidate prepared" | The build's own words are in the page's output: fix what it names, or tell Claude |

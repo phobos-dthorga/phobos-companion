@@ -12,6 +12,20 @@ Maintained from 9 November 2026.
   on Clean up; the Guide's Settings entry says seven tabs, not six. The design record's opening and its Limits no longer say
   nothing has been judged on screen or that it needs Python on the PATH.
 
+## [0.69.2] - 2026-11-23
+
+Two fixes from the owner's screen notes of 23 Nov 2026. Not yet tested on screen.
+
+### Fixed
+
+- **The Mods page's Textures tab can encode, as Before you play can.** It listed the mods whose textures want encoding but had no
+  button, so the press was found only on the other tab ("How come I cannot encode the textures?"). **Encode their textures**
+  now sits under the list, asks first, and waits while the game runs, as the one on Before you play does.
+- **The Picks page lets go of the last "Kept" line when you open another pick yourself.** It went on saying "Kept: Try 83 for
+  n11-window" while n11-suppression was open, which read as the wrong name tied to that sound. Every pick had been kept for its
+  own name, and the sounds made from them were the right ones. The move to the next waiting pick after a press still shows
+  the line, as it says what that press did.
+
 ## [0.69.1] - 2026-11-23
 
 A fix from the owner's report of 23 Nov 2026. Not yet tested on screen.

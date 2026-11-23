@@ -1,3 +1,5 @@
+import type { CodeSet } from "../code/codeColours";
+
 /** A theme, as the host checked it (0.33.0; `companion_core::themes`): data only, a colour for each of the window's roles. */
 export type Theme = {
   schema_version: number;
@@ -30,3 +32,33 @@ export type Problem = {
   ratio: number;
   needs: number;
 };
+
+/** A set of code colours kept from a VS Code theme (0.77.0; `companion_core::code_colours`). */
+export type CodeSetOffered = {
+  id: string;
+  name: string;
+  /** The file it was brought in from, by name. */
+  from: string;
+  kind: string | null;
+  rules: number;
+};
+
+/** Every set kept, the choice ("theme" for the theme's own), and the set in use made readable on the theme in use. */
+export type CodeColoursStatus = {
+  chosen: string;
+  sets: CodeSetOffered[];
+  active: CodeSet | null;
+  unreadable: [string, string][];
+  fell_back: string | null;
+};
+
+/** A colour theme VS Code, or an editor built from it, has on this computer. */
+export type VsCodeTheme = {
+  label: string;
+  extension: string;
+  kind: string;
+  file: string;
+};
+
+/** What bringing a theme in did: the code colours now, and the file read, or null when the dialog was closed. */
+export type MovedCode = { status: CodeColoursStatus; file: string | null };

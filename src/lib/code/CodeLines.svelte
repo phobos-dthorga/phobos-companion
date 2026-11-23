@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+  import { onCodeColours } from "./codeColours";
   import { highlightLines } from "./highlightCore";
   import { escapeHtml } from "./presentation";
 
@@ -15,10 +17,15 @@
     $props();
 
   let painted = $state<string[] | null>(null);
+  /** Counts changes of the code colours in use (0.77.0), so the lines are coloured again when they change. */
+  let coloursChanged = $state(0);
+
+  onMount(() => onCodeColours(() => coloursChanged++));
 
   $effect(() => {
     const text = lines.join("\n");
     const kind = language;
+    void coloursChanged;
     painted = null;
     void highlightLines(kind, text).then((html) => {
       if (lines.join("\n") === text) painted = html;

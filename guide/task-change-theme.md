@@ -18,3 +18,11 @@ see: term-theme
 4. **Keep and use** when every colour can be read. **Save as a file…** keeps a draft at any time.
 
 **Bring in a theme file…** and **Save a copy…** share themes as files.
+
+### Code colours from VS Code
+1. Under the themes, at **Code colours**, press **Find VS Code's themes on this computer**.
+2. Press **Bring in** beside the one you use in VS Code (Dark Modern, if you never chose one). Code takes its colours at once,
+   and the sample below shows them. **Bring in a VS Code theme file…** takes a theme from anywhere else.
+3. A colour too faint for your theme's background takes your theme's own, and the panel says how many did. A light VS Code theme
+   loses most of its colours on a dark theme.
+4. **Use these** beside **This theme's own** goes back to the theme's code colours; **Remove** takes a theme away.

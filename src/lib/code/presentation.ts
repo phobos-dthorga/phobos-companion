@@ -90,9 +90,17 @@ export function escapeHtml(text: string): string {
 
 /**
  * One piece of code as the highlighter read it (0.76.0): its text, its role's place in the theme's code colours
- * (`scopeRoles.json`), and Shiki's style bits: italic 1, bold 2, underline 4, struck through 8.
+ * (`scopeRoles.json`), and Shiki's style bits: italic 1, bold 2, underline 4, struck through 8. Coloured by a set brought in from
+ * a VS Code theme (0.77.0), its role is -1 and it carries its colour, `#RRGGBB`.
  */
-export type Piece = [text: string, role: number, style: number];
+export type Piece = [
+  text: string,
+  role: number,
+  style: number,
+  colour?: string,
+];
+
+const SOLID = /^#[0-9A-F]{6}$/;
 
 const STYLES: [number, string][] = [
   [1, "tok-italic"],
@@ -103,7 +111,8 @@ const STYLES: [number, string][] = [
 
 /**
  * Pieces of code as one piece of HTML per line: each run of text escaped, and wrapped in a span naming its role and style unless
- * it is plain. Neighbouring pieces of the same kind share one span. Nothing but escaped text and these class names reaches the HTML.
+ * it is plain; a piece with its own colour (a set from VS Code) carries it as a style. Neighbouring pieces of the same kind share
+ * one span. Nothing but escaped text, these class names and colours checked as `#RRGGBB` reaches the HTML.
  */
 export function piecesToHtml(
   lines: Piece[][],
@@ -116,11 +125,11 @@ export function piecesToHtml(
     const close = () => {
       if (run)
         html += open
-          ? `<span class="${open}">${escapeHtml(run)}</span>`
+          ? `<span ${open}>${escapeHtml(run)}</span>`
           : escapeHtml(run);
       run = "";
     };
-    for (const [text, role, style] of line) {
+    for (const [text, role, style, colour] of line) {
       const classes = [
         ...(roles[role] && roles[role] !== "plain"
           ? [`tok-${roles[role]}`]
@@ -129,9 +138,16 @@ export function piecesToHtml(
           ([, name]) => name,
         ),
       ].join(" ");
-      if (classes !== open) {
+      const own = colour && SOLID.test(colour) ? colour : "";
+      const opening = [
+        classes ? `class="${classes}"` : "",
+        own ? `style="color:${own}"` : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+      if (opening !== open) {
         close();
-        open = classes;
+        open = opening;
       }
       run += text;
     }

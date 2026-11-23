@@ -210,6 +210,7 @@ under the same manifest check as the press.
 | `ai-usage.jsonl` | Core, `ai.rs` | Each answer to **Send** | Appended: time, service, model, tokens; never the text |
 | The system's key store | Core, `ai_keys.rs` | **Keep this key**, **Forget this key** | Keys for AI services only, under "D'thorga Companion"; never in a file |
 | `themes/<id>.json`, `chosen.json` | Core, `themes.rs` | Keep, Import, Remove, Use | Shape, ≤ 32 KB, contrast on every surface |
+| `code-colours/<id>.json`, `chosen.json` | Core, `code_colours.rs` | **Bring in**, **Bring in a VS Code theme file…**, **Use these**, Remove | Read from the file chosen or a theme VS Code lists, and the files it builds on in its own folder, ≤ 512 KB each, at most four; kept as selectors, `#RRGGBB` colours and four style words; checked again when read back (0.77.0) |
 | `opened-copies/` | Host, `changed_files.rs` | **Open with its own program** | A media kind the kit named, ≤ 64 MB |
 | `report-drafts/report.md` | Host, `report_links.rs` | A report link to our repository | Overwritten each time |
 | `games.json` (installed) | Core, `games.rs` | First steps; **Add** a game | Every field checked; `games.json.before-add` kept |

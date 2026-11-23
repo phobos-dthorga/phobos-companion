@@ -221,6 +221,10 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   - **Looked at** on a setting the Mods page lists as new (Settings to look at): the mark, appended per repository in this
     program's folder; nothing in a repository or a game changes;
   - **Workshop uploads** (Settings, Publishing; 0.69.0): the owner's On or Off, in this program's folder;
+  - **Code colours from VS Code** (Settings, Appearance; 0.77.0, `docs/code-reading.md` step 2): a VS Code theme's code colours,
+    read on **Bring in** from a theme the host's own listing of VS Code's themes named (checked against a fresh listing) or from a
+    file the person chose in the Open dialog, with the files it builds on only from its own folder; kept, chosen and removed in
+    `code-colours/` in this program's folder. **Find VS Code's themes on this computer** only reads;
   - **Save a picture** (P) and **Something's off** (!): a picture of the page into the owner's Pictures folder (a D'thorga
     Companion folder) and the clipboard, or into a screen note above;
   - **First steps** (0.35.0): a new, empty games list where there is none, naming the projects folder the owner chose; it

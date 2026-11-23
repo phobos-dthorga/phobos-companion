@@ -15,6 +15,7 @@ pub mod ai_client;
 pub mod ai_keys;
 pub mod args;
 pub mod checks;
+pub mod code_colours;
 pub mod failure;
 pub mod games;
 pub mod git;

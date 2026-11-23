@@ -205,6 +205,21 @@ export function themeFile(theme: Theme): string {
   return `${JSON.stringify(document, null, 2)}\n`;
 }
 
+/** The choice of code colours that means "the theme's own" (0.77.0; the host's `code_colours::THEME_OWN`). */
+export const THEME_OWN = "theme";
+
+/**
+ * What a VS Code theme says it is, as one word the catalogue can choose its words by: VS Code writes `dark`, `light`, `hc`,
+ * `hcLight` or `hc-black` in a theme file, and the host lists installed ones as dark, light or high contrast.
+ */
+export function kindOf(
+  kind: string | null | undefined,
+): "dark" | "light" | "high" {
+  const word = (kind ?? "").toLowerCase();
+  if (word.startsWith("hc") || word.includes("high")) return "high";
+  return word.includes("light") || word === "vs" ? "light" : "dark";
+}
+
 /** The colours a theme's card shows as small swatches: its accent and its four meanings. */
 export const SWATCHES: Role[] = [
   "accent",

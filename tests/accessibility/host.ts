@@ -124,6 +124,16 @@ export async function mockHost(
     publish_waiting: { result: { waiting: 0, mods: [] } },
     // Home's Safe copies card (0.42.0) reads on every visit; a test that is not about it sees a game that lists none.
     safe_copies_status: { result: [] },
+    // The code colours in use are read at every start (0.77.0); a test that is not about them sees the theme's own.
+    code_colours_status: {
+      result: {
+        chosen: "theme",
+        sets: [],
+        active: null,
+        unreadable: [],
+        fell_back: null,
+      },
+    },
     // And its daily run (0.44.0): not set, never run.
     safe_copies_daily: {
       result: {

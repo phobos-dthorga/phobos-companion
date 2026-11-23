@@ -275,7 +275,7 @@ pub struct Problem {
 }
 
 /// The colour of something code is drawn on: the background, or a removed or added line's tint over it.
-fn code_ground(theme: &Theme, ground: &str) -> String {
+pub fn code_ground(theme: &Theme, ground: &str) -> String {
     match DIFF_TINTS.iter().find(|(name, _)| *name == ground) {
         Some((_, tint)) => mix(theme.colour(tint), theme.colour("canvas"), DIFF_SHARE),
         None => theme.colour(ground).to_owned(),

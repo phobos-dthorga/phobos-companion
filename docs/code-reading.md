@@ -2,7 +2,8 @@
 
 **Status (24 Nov 2026):** the owner said go for steps 1 to 4 ("proceed with Steps #1 through #4, step-wise if necessary"), and
 asked to be told clearly before step 7, for which they will give the resources it needs. **Step 1 is built** (0.76.0; as built in
-`design-record.md`, "Code in VS Code's colours"). Steps 5 to 7 wait for the owner's word. When a step is built, its design moves
+`design-record.md`, "Code in VS Code's colours"), **step 2 is built** (0.77.0; "Code colours from VS Code" there), and step 4's
+reader is in phobos-modkit 1.111.0 (`connections names`). Steps 5 to 7 wait for the owner's word. When a step is built, its design moves
 into `design-record.md` and `later.md` keeps one line pointing there.
 
 **The owner's request** (24 Nov 2026): "What can we do to improve the syntax highlighting, etc. of Companion? I want to bring it

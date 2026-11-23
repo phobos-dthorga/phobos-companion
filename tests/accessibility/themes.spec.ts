@@ -99,6 +99,106 @@ test.describe("Appearance", () => {
     );
   });
 
+  test("code colours: VS Code's themes on this computer are listed, one is brought in, and the sample takes its colours (0.77.0)", async ({
+    page,
+  }) => {
+    const modern = {
+      id: "dark-modern",
+      name: "Dark Modern",
+      plain: "#CCCCCC",
+      rules: [
+        { scope: ["keyword.control"], foreground: "#C586C0" },
+        { scope: ["entity.name.function"], foreground: "#DCDCAA" },
+      ],
+      replaced: 26,
+      notes: [
+        "It builds on dark_plus.json and dark_vs.json, read from the same folder.",
+      ],
+    };
+    const kept = {
+      chosen: "dark-modern",
+      sets: [
+        {
+          id: "dark-modern",
+          name: "Dark Modern",
+          from: "dark_modern.json",
+          kind: "dark",
+          rules: 65,
+        },
+      ],
+      active: modern,
+      unreadable: [],
+      fell_back: null,
+    };
+    await open(page, {
+      vscode_themes: {
+        result: [
+          {
+            label: "Dark Modern",
+            extension: "Default Themes",
+            kind: "dark",
+            file: "C:\\Sample\\VS Code\\themes\\dark_modern.json",
+          },
+          {
+            label: "Light Modern",
+            extension: "Default Themes",
+            kind: "light",
+            file: "C:\\Sample\\VS Code\\themes\\light_modern.json",
+          },
+        ],
+      },
+      bring_in_vscode_theme: {
+        result: {
+          status: kept,
+          file: "C:\\Sample\\VS Code\\themes\\dark_modern.json",
+        },
+      },
+      choose_code_colours: {
+        result: { ...kept, chosen: "theme", active: null },
+      },
+    });
+    const panel = page.getByRole("region", {
+      name: "Code colours",
+      exact: true,
+    });
+    await expect(
+      panel.getByRole("button", {
+        name: "Use the code colours This theme's own",
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await panel
+      .getByRole("button", { name: "Find VS Code's themes on this computer" })
+      .click();
+    const found = panel.getByRole("list", {
+      name: "VS Code's themes on this computer",
+    });
+    await expect(found).toContainText("Default Themes, a light theme");
+    await audit(page);
+    await found
+      .getByRole("button", { name: "Bring in Dark Modern's code colours" })
+      .click();
+    await expect(panel.getByRole("status")).toContainText(
+      "Dark Modern's code colours are kept and in use now.",
+    );
+    await expect(panel).toContainText(
+      "26 of Dark Modern's colours can't be read on this theme",
+    );
+    await expect(panel).toContainText(
+      "From dark_modern.json, a dark theme, 65 colour rules",
+    );
+    const sample = panel.getByRole("region", {
+      name: "A few lines of code in the code colours in use",
+    });
+    await expect(
+      sample.locator('span[style="color:#C586C0"]').first(),
+    ).toHaveText("if");
+    await audit(page);
+    await panel
+      .getByRole("button", { name: "Use the code colours This theme's own" })
+      .click();
+    await expect(sample.locator(".tok-flow").first()).toHaveText("if");
+  });
+
   test("making a theme: each pair that cannot be read is named, and Keep waits until all can", async ({
     page,
   }) => {

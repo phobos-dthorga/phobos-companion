@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { useCodeColours, type CodeSet } from "./codeColours";
 import { hasGrammar, highlightLines } from "./highlightCore";
 import { GRAMMAR_OF } from "./languages";
 import { GRAMMARS, tokenise } from "./shikiCore";
@@ -77,6 +78,30 @@ describe("the highlighter", () => {
     const lines = await highlightLines("python", "a = 1\n\n\nb = 2\n");
     expect(lines).toHaveLength(5);
     expect(lines![1]).toBe("");
+  });
+
+  it("colours code in a set brought in from a VS Code theme, once it is in use, and in the theme's own again after", async () => {
+    const set: CodeSet = {
+      id: "hand-made",
+      name: "Hand made",
+      plain: "#CCCCCC",
+      rules: [
+        { scope: ["keyword.control"], foreground: "#C586C0" },
+        { scope: ["string"], foreground: "#CE9178", fontStyle: "italic" },
+      ],
+      replaced: 0,
+      notes: [],
+    };
+    useCodeColours(set);
+    const lines = await highlightLines("csharp", 'if (a) return "x";');
+    expect(lines![0]).toContain('<span style="color:#C586C0">if</span>');
+    expect(lines![0]).toContain(
+      '<span class="tok-italic" style="color:#CE9178">"x"</span>',
+    );
+    useCodeColours(null);
+    expect((await highlightLines("csharp", "if (a) {}"))![0]).toContain(
+      '<span class="tok-flow">if</span>',
+    );
   });
 
   it("says when a kind of file has no grammar, so it is shown plain", async () => {

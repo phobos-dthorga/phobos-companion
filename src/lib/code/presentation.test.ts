@@ -87,6 +87,23 @@ describe("highlighted code, line by line", () => {
     ]);
   });
 
+  it("gives a piece coloured by a set from VS Code its colour, and only a colour written #RRGGBB", () => {
+    expect(
+      piecesToHtml(
+        [
+          [
+            ["if", -1, 0, "#C586C0"],
+            [" x", -1, 2, "#D4D4D4"],
+            ["y", -1, 0, 'red" onclick="x'],
+          ],
+        ],
+        roles,
+      ),
+    ).toEqual([
+      '<span style="color:#C586C0">if</span><span class="tok-bold" style="color:#D4D4D4"> x</span>y',
+    ]);
+  });
+
   it("gives an empty line back empty", () => {
     expect(piecesToHtml([[]], roles)).toEqual([""]);
   });

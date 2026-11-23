@@ -10,6 +10,7 @@
   } from "./desktopClient";
   import { SWATCHES } from "./presentation";
   import { useTheme } from "./runtime";
+  import CodeColoursPanel from "./CodeColoursPanel.svelte";
   import ThemeMaker from "./ThemeMaker.svelte";
   import type { Offered, Theme, ThemeStatus } from "./types";
 
@@ -259,6 +260,7 @@
         <p class="muted small">{t("themes-file-unreadable", { file, why })}</p>
       {/each}
       <p class="muted small">{t("themes-how")}</p>
+      <CodeColoursPanel themeId={status.active.id} />
     {/if}
   {/if}
   <div aria-live="polite">

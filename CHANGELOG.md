@@ -4,6 +4,27 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.77.0] - 2026-11-24
+
+### Added
+
+- **Bring in a VS Code theme's code colours** (the owner's choice by card, 24 Nov 2026: "Switch, plus bring in a theme";
+  `docs/code-reading.md`, step 2). Settings → Appearance has **Code colours**: **Find VS Code's themes on this computer** lists
+  the colour themes VS Code (and VS Code Insiders, VSCodium and Cursor) has installed, its own and its extensions', each with
+  **Bring in**; **Bring in a VS Code theme file…** takes any other. A theme that builds on another, as Dark Modern builds on Dark+,
+  is read with it, but only from its own folder. Code then takes that theme's colours everywhere code is shown, and **This theme's
+  own** goes back. A sample of code shows the colours in use. **A colour that can't be read on your theme's background, or on
+  removed and added lines, takes your theme's own colour for that kind of code, and the panel says how many did**: the lean of
+  your open decision `code-colours-contrast`. Read by hand from VS Code's own themes on this PC: Dark Modern 65 rules (26 swapped
+  on House D'thorga, nearly all Dark+'s blue, which falls short on a removed line by 0.01), Dark 2026 118 (32), Light Modern 64
+  (61, as a light theme on a dark background). **Not tested on screen.**
+
+### Changed
+
+- **companion-core 0.22.0**: `code_colours` reads a VS Code theme (comments and trailing commas allowed, colours `#RGB` to
+  `#RRGGBBAA`, see-through parts drawn solid and said so), keeps sets, checks them again when read back, makes them readable on
+  the theme in use, and finds VS Code's installed themes with the labels VS Code shows.
+
 ## [0.76.1] - 2026-11-24
 
 ### Fixed

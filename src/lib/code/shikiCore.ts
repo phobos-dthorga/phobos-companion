@@ -1,6 +1,7 @@
 import { createHighlighterCore, type HighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 import type { LanguageRegistration, ThemeRegistration } from "shiki/core";
+import type { SetForHighlighter } from "./codeColours";
 import { GRAMMAR_OF } from "./languages";
 import type { Piece } from "./presentation";
 import table from "./scopeRoles.json";
@@ -105,29 +106,74 @@ function load(grammar: string): Promise<boolean> {
 /** The grammars this module can fetch, for the tests that hold `languages.ts` to it. */
 export const GRAMMARS: readonly string[] = Object.keys(LOADERS);
 
+/** Sets brought in from VS Code themes, by key, once each is made a Shiki theme (0.77.0). */
+const setsLoaded = new Map<string, Promise<void>>();
+
+function loadSet(set: SetForHighlighter): Promise<void> {
+  let loading = setsLoaded.get(set.key);
+  if (!loading) {
+    const theme: ThemeRegistration = {
+      name: set.key,
+      type: "dark",
+      fg: set.plain,
+      bg: "#000000",
+      settings: [
+        { settings: { foreground: set.plain, background: "#000000" } },
+        ...set.rules.map((rule) => ({
+          scope: rule.scope,
+          settings: {
+            ...(rule.foreground ? { foreground: rule.foreground } : {}),
+            ...(rule.fontStyle !== undefined
+              ? { fontStyle: rule.fontStyle }
+              : {}),
+          },
+        })),
+      ],
+    };
+    loading = core().then((shiki) => shiki.loadTheme(theme));
+    setsLoaded.set(set.key, loading);
+  }
+  return loading;
+}
+
 /**
  * Code as pieces, a list a line: each piece's text, its role's place in the theme's code colours, and Shiki's style bits (italic
- * 1, bold 2, underline 4, struck through 8). Null when the kind of file has no grammar or it could not be read: the caller then
- * shows the text plain, so a failure costs only the colours.
+ * 1, bold 2, underline 4, struck through 8). With a set brought in from a VS Code theme, each piece carries that set's colour
+ * instead, its role -1. Null when the kind of file has no grammar or it could not be read: the caller then shows the text plain, so
+ * a failure costs only the colours.
  */
 export async function tokenise(
   language: string,
   code: string,
+  set: SetForHighlighter | null = null,
 ): Promise<Piece[][] | null> {
   const grammar = GRAMMAR_OF[language];
   if (!grammar) return null;
   try {
     if (!(await load(grammar))) return null;
+    if (set) await loadSet(set);
     const shiki = await core();
-    return shiki
-      .codeToTokensBase(code, { lang: grammar, theme: THEME_NAME })
-      .map((line) =>
-        line.map((token): Piece => [
+    const lines = shiki.codeToTokensBase(code, {
+      lang: grammar,
+      theme: set ? set.key : THEME_NAME,
+    });
+    return lines.map((line) =>
+      line.map((token): Piece => {
+        const style = Math.max(0, token.fontStyle ?? 0);
+        if (set)
+          return [
+            token.content,
+            -1,
+            style,
+            (token.color ?? set.plain).toUpperCase(),
+          ];
+        return [
           token.content,
           ROLE_OF.get((token.color ?? "").toLowerCase()) ?? PLAIN,
-          Math.max(0, token.fontStyle ?? 0),
-        ]),
-      );
+          style,
+        ];
+      }),
+    );
   } catch {
     return null;
   }

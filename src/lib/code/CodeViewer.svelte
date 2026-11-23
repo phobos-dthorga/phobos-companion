@@ -12,6 +12,7 @@
   import { readEntryCode } from "./desktopClient";
   import ChangedFile from "./ChangedFile.svelte";
   import { formatSize } from "../shell/sizes";
+  import { onCodeColours } from "./codeColours";
   import { highlightLines } from "./highlightCore";
   import {
     byKind,
@@ -107,7 +108,12 @@
 
   onMount(() => {
     void load();
-    return register({
+    // New code colours (0.77.0): every file is coloured again, the one shown at once.
+    const stopColours = onCodeColours(() => {
+      painted = {};
+      if (file) open(file);
+    });
+    const stopKeys = register({
       scope: "code",
       inDialog: true,
       run: {
@@ -118,6 +124,10 @@
         "code.previous-file": () => stepFile(-1),
       },
     });
+    return () => {
+      stopColours();
+      stopKeys();
+    };
   });
 </script>
 

@@ -2,7 +2,8 @@ import { mount } from "svelte";
 import App from "./App.svelte";
 import "./app.css";
 import { applyTheme, rememberedTheme, useTheme } from "./lib/theme/runtime";
-import { readThemes } from "./lib/theme/desktopClient";
+import { readCodeColours, readThemes } from "./lib/theme/desktopClient";
+import { useCodeColours } from "./lib/code/codeColours";
 import houseDthorga from "../themes/house-dthorga.json";
 import { loadAgents } from "./lib/agents/state.svelte";
 import { loadChat } from "./lib/chat/state.svelte";
@@ -19,6 +20,10 @@ if (remembered) applyTheme(remembered);
 mount(App, { target });
 void readThemes().then((answer) => {
   if (answer.state === "ready") useTheme(answer.status.active.colours);
+});
+// Code colours brought in from a VS Code theme (0.77.0): the theme's own until the host answers.
+void readCodeColours().then((answer) => {
+  if (answer.state === "ready") useCodeColours(answer.status.active);
 });
 // Whether features for agent sessions show (0.37.0): hidden, or as last time, until the host answers.
 void loadAgents();

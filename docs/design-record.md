@@ -902,6 +902,31 @@ closer](code-reading.md); bringing in a theme is step 2.
 grey to operators; Phobos D'thorga's and High contrast's code colours; comments not italic (VS Code's Dark+ does not italicise
 them; the old colours did). **Not tested on screen.**
 
+## Code colours from VS Code (built 24 Nov 2026, 0.77.0)
+
+**The owner chose "Switch, plus bring in a theme" by card** (24 Nov 2026): step 2 of [Reading code closer](code-reading.md).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Read code in exactly the colours of the VS Code theme they use, chosen from a list of the themes on their computer, or from any theme file |
+| What does it stop them doing? | Hunting through AppData for a theme file; bringing in anything but colours; code they cannot read because a theme was made for another background |
+| How does it change the way they work? | Code in the Companion looks the same as in their editor, whichever theme the editor uses |
+| What outside it notices? | Every place code is shown (code viewer, Their code, the sample), which colours again at once; the records backup, which copies `code-colours/` with the rest |
+
+| Part | How |
+| --- | --- |
+| Reading a theme | `companion_core::code_colours::from_vscode`: comments and trailing commas taken out first, then `tokenColors` (a scope or scopes, a colour, a style) and `editor.foreground`. `#RGB`, `#RGBA` and `#RRGGBBAA` read as VS Code reads them; a see-through part is drawn solid and said so. Semantic colours are left out, in words: they need a language server |
+| Files it builds on | **Followed, from the same folder only** (agent's choice, against the design's "refused"): VS Code's own Dark Modern builds on Dark+, which builds on Visual Studio Dark, so refusing `include` would have refused the theme the owner most likely uses. A name with a path, another folder, a non-JSON file or a loop is refused in words; at most four files, 512 KB each |
+| Finding installed themes | `installed`: the extension folders of VS Code (both install layouts), VS Code Insiders, VSCodium and Cursor, on Windows, Linux and macOS; each extension's `contributes.themes`, labels from its `package.nls.json` as VS Code shows them, and only `.json` themes inside the extension's own folder. **Bring in** names a file, which the host checks against a fresh listing before reading it |
+| Kept | `code-colours/<id>.json` (our own shape: selectors, colours, styles, notes) and `chosen.json`; checked again when read back, so a file changed by hand is shown and never used |
+| Readable on the theme in use | Each colour below 4.5:1 on the background or on removed and added lines takes the theme's own code colour for its kind, found through `scopeRoles.json` (the longest Dark+ selector its own starts with); the count is shown. The lean of the open decision `code-colours-contrast` (agent's default until the owner answers) |
+| Drawn | The worker makes the set a Shiki theme of its own; each piece carries its colour, written into the HTML only when it is `#RRGGBB`. Code shown already colours again when the set or the theme changes |
+
+**Measured by hand on this PC's VS Code** (an ignored test, `vs_codes_own_themes_on_this_computer_are_read`): Dark Modern 65
+rules, 26 swapped on House D'thorga; Dark 2026 118 and 32; Dark+ 65 and 26; Dark High Contrast 54 and 19; Light Modern 64 and 61.
+Nearly every swap on a dark theme is Dark+'s blue #569CD6 (4.49:1 on a removed line, 0.01 short), which takes House D'thorga's
+#5CA2DC. **Not tested on screen.**
+
 ## The Guide (built 20 Nov 2026, 0.34.0)
 
 **The owner asked for "documentation, or an encyclopedia, into the Companion, so I know what to do or how to find something"**,

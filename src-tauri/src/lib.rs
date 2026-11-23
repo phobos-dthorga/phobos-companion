@@ -12,6 +12,7 @@ mod changes_page;
 mod chat_page;
 mod claims_board;
 mod cleanup_page;
+mod code_colours_page;
 mod connections_page;
 mod decisions_page;
 mod explorer_page;
@@ -1163,6 +1164,53 @@ async fn export_theme_draft(app: tauri::AppHandle, text: String, title: String) 
     blocking(move || themes_page::export_draft(&app, &data, &text, &title)).await
 }
 
+/// Code colours from VS Code (0.77.0): every set kept, and the one in use made readable on the theme in use. Only reads.
+#[tauri::command]
+async fn code_colours_status(app: tauri::AppHandle) -> Result<companion_core::code_colours::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || Ok(code_colours_page::status(&data))).await
+}
+
+/// Uses a kept set of code colours from now on, or the theme's own ("theme").
+#[tauri::command]
+async fn choose_code_colours(
+    app: tauri::AppHandle,
+    id: String,
+) -> Result<companion_core::code_colours::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || code_colours_page::choose(&data, &id)).await
+}
+
+/// Takes away a kept set of code colours, on the person's second press.
+#[tauri::command]
+async fn remove_code_colours(
+    app: tauri::AppHandle,
+    id: String,
+) -> Result<companion_core::code_colours::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || code_colours_page::remove(&data, &id)).await
+}
+
+/// The colour themes VS Code and the editors built from it have on this computer. Only reads.
+#[tauri::command]
+async fn vscode_themes() -> Result<Vec<companion_core::code_colours::Installed>, Failure> {
+    blocking(move || Ok(code_colours_page::installed())).await
+}
+
+/// Brings in one installed VS Code theme the last listing named, checked against a fresh listing; kept and used.
+#[tauri::command]
+async fn bring_in_vscode_theme(app: tauri::AppHandle, file: String) -> Result<code_colours_page::Moved, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || code_colours_page::bring_in_installed(&data, &file)).await
+}
+
+/// Brings in a VS Code theme file the person chooses in Windows' Open dialog; kept and used.
+#[tauri::command]
+async fn bring_in_code_colours_file(app: tauri::AppHandle, title: String) -> Result<code_colours_page::Moved, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || code_colours_page::bring_in_file(&app, &data, &title)).await
+}
+
 /// One listed screenshot's bytes, raw, for the window to draw small or whole (0.32.0).
 #[tauri::command]
 async fn screenshot(path: String) -> Result<tauri::ipc::Response, Failure> {
@@ -1670,6 +1718,12 @@ pub fn run() {
             remove_theme,
             keep_theme,
             export_theme_draft,
+            code_colours_status,
+            choose_code_colours,
+            remove_code_colours,
+            vscode_themes,
+            bring_in_vscode_theme,
+            bring_in_code_colours_file,
             start_games_list,
             agent_features,
             choose_agent_features,

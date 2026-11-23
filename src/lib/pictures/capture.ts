@@ -74,6 +74,25 @@ export function openScrollingBoxes(element: HTMLElement): () => void {
   };
 }
 
+/**
+ * What the picture shows where one of the page's pictures cannot be read (0.69.1): a grey box crossed through, so a gap is seen
+ * rather than the whole picture failing, as it did on the Picks page with "[object Event]". Drawn only into the saved picture.
+ */
+export const UNREADABLE_PICTURE =
+  "data:image/svg+xml;base64," +
+  btoa(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">' +
+      '<rect width="64" height="64" fill="#808080" fill-opacity="0.35"/>' +
+      '<path d="M0 0L64 64M64 0L0 64" stroke="#808080" stroke-width="3"/></svg>',
+  );
+
+/** A failure as words: a picture that would not load reaches here as a bare event, which says nothing as text. */
+export function problemText(problem: unknown, unreadable: string): string {
+  if (typeof Event !== "undefined" && problem instanceof Event)
+    return unreadable;
+  return problem instanceof Error ? problem.message : String(problem);
+}
+
 /** Draws an element whole, scrolled parts included, as PNG bytes. */
 export async function capture(element: HTMLElement): Promise<Uint8Array> {
   const { toBlob } = await import("html-to-image");
@@ -87,6 +106,9 @@ export async function capture(element: HTMLElement): Promise<Uint8Array> {
       width: element.scrollWidth,
       height: element.scrollHeight + PICTURE_SPARE_PX,
       skipFonts: true,
+      // One picture that cannot be read leaves a crossed box, never a failed picture of the whole page.
+      imagePlaceholder: UNREADABLE_PICTURE,
+      onImageErrorHandler: () => undefined,
       filter: belongsInPicture,
       style: { margin: "0", maxHeight: "none", overflow: "visible" },
     });

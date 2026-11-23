@@ -1,7 +1,14 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, SAMPLE_PNG, sampleHome, toneWav } from "./host";
+import {
+  healthyKit,
+  mockHost,
+  SAMPLE_PNG,
+  sampleHome,
+  toneWav,
+  useInstalledPolicy,
+} from "./host";
 
 /** Made-up picks (0.55.0): two pictures with their tries, as an art tool would offer them. */
 function pick(id: string, title: string, tries: string[]) {
@@ -50,6 +57,45 @@ async function open(page: Page) {
   });
   await page.goto("/");
 }
+
+test.describe("a picture of the Picks page", () => {
+  async function saveUnder(page: Page, change?: (csp: string) => string) {
+    await useInstalledPolicy(page, change);
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      picks_list: { result: list },
+      viewable_file: { result: SAMPLE_PNG },
+      save_picture: { result: "C:/Pictures/Picks.png" },
+      show_picture: { result: null },
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Go to Picks" }).click();
+    await expect(
+      page.getByRole("img", { name: "The picture, Try 3" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Save a picture" }).click();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Saved to" }),
+    ).toBeVisible({ timeout: 20_000 });
+  }
+
+  test("is made under the installed program's security policy, its tries' pictures in it", async ({
+    page,
+  }) => {
+    // The owner's report of 23 Nov 2026: "The picture could not be made: [object Event]". The tries are shown from blob:
+    // addresses, which the policy let the page show but not read back, so the picture had nothing to copy.
+    await saveUnder(page);
+  });
+
+  test("is still made when a picture on the page cannot be read, a crossed box in its place", async ({
+    page,
+  }) => {
+    await saveUnder(page, (csp) =>
+      csp.replace("connect-src 'self' blob:", "connect-src 'self'"),
+    );
+  });
+});
 
 async function audit(page: Page) {
   const results = await new AxeBuilder({ page })

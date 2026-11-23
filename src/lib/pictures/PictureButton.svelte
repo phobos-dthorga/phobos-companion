@@ -6,6 +6,7 @@
     capture,
     copyPicture,
     pictureName,
+    problemText,
     SETTLED_LOOKS,
     settledLooks,
     stillLoading,
@@ -105,7 +106,10 @@
           ? { state: "saved", path: saved.path, copied }
           : { state: "failed", reason: saved.failure.detail };
     } catch (problem) {
-      result = { state: "failed", reason: String(problem) };
+      result = {
+        state: "failed",
+        reason: problemText(problem, t("picture-failed-unreadable")),
+      };
     }
   }
 

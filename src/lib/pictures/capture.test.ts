@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   LOADING_MARK,
   pictureName,
+  problemText,
+  UNREADABLE_PICTURE,
   pictureScale,
   SETTLED_LOOKS,
   settledLooks,
@@ -9,6 +11,23 @@ import {
 } from "./capture";
 
 describe("pictures of a page", () => {
+  it("says a picture that would not load in words, never as [object Event]", () => {
+    expect(problemText(new Event("error"), "a picture could not be read")).toBe(
+      "a picture could not be read",
+    );
+    expect(problemText(new Error("the page could not be drawn"), "x")).toBe(
+      "the page could not be drawn",
+    );
+    expect(problemText("refused", "x")).toBe("refused");
+  });
+
+  it("marks a picture it cannot read with a crossed box, drawn from data the policy always allows", () => {
+    expect(UNREADABLE_PICTURE.startsWith("data:image/svg+xml;base64,")).toBe(
+      true,
+    );
+    expect(atob(UNREADABLE_PICTURE.split(",")[1])).toContain("<path");
+  });
+
   it("names a picture by game, page and when, so pictures sort by when they were taken", () => {
     expect(
       pictureName("RimWorld", "Make-up", new Date(2026, 10, 19, 8, 5, 9)),

@@ -1,4 +1,27 @@
+import { readFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
+
+/**
+ * The installed program's security policy, from src-tauri/tauri.conf.json, put on the page as the program would (0.69.1: the
+ * browser checks ran without it, so a picture of the Picks page that the installed program refused passed here).
+ */
+export async function useInstalledPolicy(
+  page: Page,
+  change: (csp: string) => string = (csp) => csp,
+) {
+  const config = JSON.parse(
+    readFileSync("src-tauri/tauri.conf.json", "utf-8"),
+  ) as { app: { security: { csp: string } } };
+  const csp = change(config.app.security.csp);
+  await page.route("**/*", async (route) => {
+    if (route.request().resourceType() !== "document") return route.fallback();
+    const response = await route.fetch();
+    await route.fulfill({
+      response,
+      headers: { ...response.headers(), "content-security-policy": csp },
+    });
+  });
+}
 
 const DAY = 86_400;
 const nowSeconds = () => Math.floor(Date.now() / 1000);

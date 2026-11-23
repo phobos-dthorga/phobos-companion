@@ -4,8 +4,9 @@
 //!
 //! **Its switch starts off** (risk graded high: an agent can change or delete files in the repository by itself, at once), kept with
 //! the chosen agent in `chat.json`. The program starts only the command the agents file names, found by name on the search path,
-//! **never installs one and never passes a login**. Through the Companion the agent may only read text files inside the repository
-//! and ask the person's permission; writes and commands through it are refused. It is handed the tool kit's MCP server (the
+//! **never installs one and never passes a login**. Through the Companion the agent may read text files inside the repository, ask
+//! the person's permission, and since 0.75.0 (slice 5) write a text file there **only after the person saw exactly what would
+//! change and said yes**; commands through it are refused. It is handed the tool kit's MCP server (the
 //! reports that read). One agent runs at a time; leaving the page, starting another or closing the program ends its whole process
 //! tree.
 
@@ -229,6 +230,11 @@ pub fn cancel() -> Result<(), Failure> {
 /// The person's answer to a permission the agent asked: one of the options it offered, or none.
 pub fn answer_permission(request: &str, option: Option<&str>) -> Result<(), Failure> {
     client()?.answer_permission(request, option).map_err(Failure::refused)
+}
+
+/// The person's answer to a change the agent asked to make through the Companion (0.75.0): written on a yes, declined on a no.
+pub fn answer_write(request: &str, allow: bool) -> Result<(), Failure> {
+    client()?.answer_write(request, allow).map_err(Failure::refused)
 }
 
 /// Ends the agent running, with every process it started. Ending none is not an error.

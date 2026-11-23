@@ -4,6 +4,23 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.75.0] - 2026-11-23
+
+### Added
+
+- **On the Chat page, an agent may change a file through the Companion, with your yes on each change** (the owner, 23 Nov 2026:
+  "go ahead with slice 5"; `docs/ai.md`, A3). When the agent asks, a card shows the file and the change line by line, lines
+  marked **+** added and **−** removed, the unchanged ones folded away; nothing is written until you press **Make this change**,
+  and **Don't** tells the agent you said no. Only inside the repository it was started in, never inside `.git`, at most 2 MB, and
+  checked again at the moment of writing; **Stop** declines every change still waiting. Running a command through the Companion
+  stays refused: a question for you on the Decisions page (`chat-commands`). **Not yet tried with a real agent, and not tested on
+  screen.**
+
+### Changed
+
+- **companion-core 0.20.0**: `acp` offers writing text files (`fs.writeTextFile`), each held until the person answers, with
+  `write_target` checking where it would go. The Chat page's words and the Guide say what an agent may now do through it.
+
 ## [0.74.0] - 2026-11-23
 
 ### Added

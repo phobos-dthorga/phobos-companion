@@ -824,6 +824,12 @@ async fn chat_permission(request: String, option: Option<String>) -> Result<(), 
     blocking(move || chat_page::answer_permission(&request, option.as_deref())).await
 }
 
+/// The person's answer to a change the agent asked to make through the Companion, shown whole first (0.75.0).
+#[tauri::command]
+async fn chat_write(request: String, allow: bool) -> Result<(), Failure> {
+    blocking(move || chat_page::answer_write(&request, allow)).await
+}
+
 /// Ends the agent running, with every process it started.
 #[tauri::command]
 async fn chat_end() -> Result<(), Failure> {
@@ -1620,6 +1626,7 @@ pub fn run() {
             chat_prompt,
             chat_cancel,
             chat_permission,
+            chat_write,
             chat_end,
             picks_list,
             publish_read,

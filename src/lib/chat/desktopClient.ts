@@ -65,6 +65,14 @@ export async function chatPermission(
   return ask<null, Done>("chat_permission", { request, option }, done);
 }
 
+/** The person's answer to a change the agent asked to make through the Companion, shown whole first (0.75.0). */
+export async function chatWrite(
+  request: string,
+  allow: boolean,
+): Promise<Done> {
+  return ask<null, Done>("chat_write", { request, allow }, done);
+}
+
 /** Ends the agent with every process it started. */
 export async function chatEnd(): Promise<Done> {
   if (inBrowser()) return { state: "ready" };

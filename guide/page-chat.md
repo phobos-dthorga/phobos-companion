@@ -16,12 +16,14 @@ see: task-chat-agent, page-settings, task-ai-services
 
 **When it asks your permission**, a card shows what it wants to do and its own choices, such as **Allow once** or **Reject**, and **Neither**. It waits for you.
 
+**When it asks to change a file through the Companion**, a card shows the file and the change line by line: lines marked **+** are added, lines marked **−** removed. Nothing is written until you press **Make this change**; **Don't** tells it you said no. It may never change anything inside `.git`, or outside the repository.
+
 **Stop** asks it to stop its turn. **End** ends it, and everything it started; so does leaving the page.
 
 **What it can and can't do:**
 
 - **It is its own program, with your own access to the disk.** It may change or delete files in the repository by itself, as it would in a terminal, and the Companion cannot stop that. git shows everything that changed.
-- **Through the Companion it may only read files in that repository**, each one listed, and ask your permission. If it asks the Companion to change a file or run a command, the Companion refuses and says so.
+- **Through the Companion it may read files in that repository**, each one listed, ask your permission, and **change a file only on your yes**. If it asks the Companion to run a command, the Companion refuses and says so.
 - It can ask the tool kit's reports that read, as an AI program can ([more](task-ai-programs)).
 
 ### Keys

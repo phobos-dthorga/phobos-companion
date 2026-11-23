@@ -1,12 +1,59 @@
 import { describe, expect, it } from "vitest";
 import {
   answered,
+  answeredWrite,
   apply,
+  lineDiff,
   refusedWrite,
   waitingPermissions,
   type Entry,
 } from "./presentation";
 import type { ChatEvent } from "./types";
+
+describe("a change the agent asks for (0.75.0)", () => {
+  it("shows what is removed and added, and keeps the lines around them", () => {
+    expect(lineDiff("one\ntwo\nthree\n", "one\nTWO\nthree\n")).toEqual([
+      { mark: " ", text: "one" },
+      { mark: "-", text: "two" },
+      { mark: "+", text: "TWO" },
+      { mark: " ", text: "three" },
+    ]);
+  });
+
+  it("folds kept lines far from any change", () => {
+    const before = Array.from({ length: 20 }, (_, i) => `line ${i}`).join("\n");
+    const after = before.replace("line 10", "line ten");
+    const diff = lineDiff(before, after, 1);
+    expect(diff[0]).toEqual({ mark: "…", count: 9 });
+    expect(diff.filter((l) => l.mark === "-" || l.mark === "+")).toEqual([
+      { mark: "-", text: "line 10" },
+      { mark: "+", text: "line ten" },
+    ]);
+    expect(diff.at(-1)).toEqual({ mark: "…", count: 8 });
+  });
+
+  it("shows a new file as all added, and reads Windows line endings", () => {
+    expect(lineDiff(null, "a\r\nb\r\n")).toEqual([
+      { mark: "+", text: "a" },
+      { mark: "+", text: "b" },
+    ]);
+    expect(lineDiff("same", "same")).toEqual([{ mark: "…", count: 1 }]);
+  });
+
+  it("waits for the person's answer, then keeps it", () => {
+    const entries = apply([], {
+      kind: "write",
+      request: "w1",
+      path: "src/Boat.cs",
+      before: null,
+      after: "x",
+    });
+    expect(waitingPermissions(entries)).toBe(1);
+    const after = answeredWrite(entries, "w1", false);
+    expect(after[0]).toMatchObject({ answered: false });
+    expect(waitingPermissions(after)).toBe(0);
+  });
+});
 
 function all(events: ChatEvent[], start: Entry[] = []): Entry[] {
   return events.reduce(apply, start);

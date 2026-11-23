@@ -6,9 +6,10 @@
 //! more; the Chat page's host module starts and ends the program.
 //!
 //! **What an agent may do through the Companion**: read a text file inside the repository it was started in (`fs/read_text_file`,
-//! each read shown to the person), and ask the person's permission for its own steps (`session/request_permission`, answered only
-//! by the person). **Never** write a file or run a command through the Companion: neither is offered, and each such request is
-//! refused and shown. The agent's own tools are its own: it may change files by itself, as it would in a terminal, and the page
+//! each read shown to the person), ask the person's permission for its own steps (`session/request_permission`, answered only
+//! by the person), and since 0.75.0 (slice 5) **write a text file inside the repository, only after the person saw exactly what
+//! would change and said yes** (`fs/write_text_file`, never inside `.git`). **Never** run a command through the Companion: it is
+//! not offered, and each such request is refused and shown. The agent's own tools are its own: it may change files by itself, as it would in a terminal, and the page
 //! says so before a first start.
 
 use crate::failure::Failure;
@@ -32,6 +33,8 @@ const MAX_READ: u64 = 2 * 1024 * 1024;
 const AUTH_REQUIRED: i64 = -32000;
 const METHOD_NOT_FOUND: i64 = -32601;
 const INVALID_PARAMS: i64 = -32602;
+/// What the agent is told when the person declines a change.
+const DECLINED: &str = "The person chose not to make this change. Go on without it, or ask them.";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Agent {
@@ -148,7 +151,12 @@ pub enum Event {
     Permission { request: String, title: String, options: Vec<PermissionOption> },
     /// The agent read a file through the Companion, or was refused.
     Read { path: String, allowed: bool, reason: Option<String> },
-    /// The agent asked to change a file or run a command through the Companion, and was refused.
+    /// The agent asks to write a file through the Companion (0.75.0): what is there now, if anything, and what it would write. It
+    /// waits for the person's yes.
+    Write { request: String, path: String, before: Option<String>, after: String },
+    /// A write the agent asked for, made on the person's yes, or not made (declined, or refused by a check), with why.
+    Written { path: String, written: bool, reason: Option<String> },
+    /// The agent asked to run a command, or for something else the Companion does not offer, and was refused.
     Refused { what: String },
     /// The agent's program has ended.
     Ended { reason: String },
@@ -188,6 +196,55 @@ pub fn read_file(root: &Path, params: &Value) -> Result<(String, String), (Strin
     Ok((shown, content))
 }
 
+/// Where a file the agent asked to write would go, checked: an absolute path, never inside `.git`, whose nearest existing folder,
+/// once links are followed, is inside the root, and which is not a folder. Returns the path as the person sees it (inside the
+/// repository) and the path to write.
+pub fn write_target(root: &Path, asked: &str) -> Result<(String, PathBuf), (String, String)> {
+    let shown = asked.to_owned();
+    let path = Path::new(asked);
+    let refused = |why: &str| Err((shown.clone(), why.to_owned()));
+    if asked.is_empty() || !path.is_absolute() || path.components().any(|c| c == Component::ParentDir) {
+        return refused("the path is not an absolute path to a file");
+    }
+    let Some(name) = path.file_name() else { return refused("the path names no file") };
+    let mut folder = path.parent().unwrap_or(path).to_path_buf();
+    let mut missing = Vec::new();
+    while !folder.exists() {
+        let Some(part) = folder.file_name() else { return refused("no folder of it exists") };
+        missing.push(part.to_owned());
+        folder = folder.parent().map(Path::to_path_buf).unwrap_or_default();
+    }
+    let Ok(real) = folder.canonicalize() else { return refused("its folder could not be read") };
+    let Ok(inside) = real.strip_prefix(root) else {
+        return refused("it is outside the repository the agent was started in");
+    };
+    let mut relative = inside.to_path_buf();
+    relative.extend(missing.iter().rev());
+    relative.push(name);
+    let shown = relative.to_string_lossy().replace('\\', "/");
+    if relative.components().any(|c| c.as_os_str().eq_ignore_ascii_case(".git")) {
+        return Err((shown, "git's own folder is never changed".to_owned()));
+    }
+    let target = root.join(&relative);
+    if target.is_dir() {
+        return Err((shown, "it is a folder".to_owned()));
+    }
+    if let Ok(followed) = target.canonicalize()
+        && !followed.starts_with(root)
+    {
+        return Err((shown, "it leads outside the repository".to_owned()));
+    }
+    Ok((shown, target))
+}
+
+/// A write waiting on the person: the agent's request id, where it goes, and what it would write.
+struct Waiting {
+    id: Value,
+    shown: String,
+    target: PathBuf,
+    content: String,
+}
+
 /// One running agent, as the protocol sees it: what is written to it, the requests waiting for its answers, the permissions
 /// waiting for the person's.
 pub struct Client {
@@ -195,6 +252,8 @@ pub struct Client {
     waiting: Mutex<HashMap<u64, Sender<Result<Value, String>>>>,
     /// Each permission waiting on the person: the agent's request id, and the ids of the options it offered.
     permissions: Mutex<HashMap<String, (Value, Vec<String>)>>,
+    /// Each write waiting on the person's yes (0.75.0).
+    writes: Mutex<HashMap<String, Waiting>>,
     next: AtomicU64,
     root: PathBuf,
     session: Mutex<Option<String>>,
@@ -215,6 +274,7 @@ impl Client {
             writer: Mutex::new(Box::new(writer)),
             waiting: Mutex::new(HashMap::new()),
             permissions: Mutex::new(HashMap::new()),
+            writes: Mutex::new(HashMap::new()),
             next: AtomicU64::new(1),
             root: root.canonicalize().unwrap_or_else(|_| root.to_path_buf()),
             session: Mutex::new(None),
@@ -290,6 +350,9 @@ impl Client {
         }
         if let Ok(mut permissions) = self.permissions.lock() {
             permissions.clear();
+        }
+        if let Ok(mut writes) = self.writes.lock() {
+            writes.clear();
         }
         (self.on_event)(Event::Ended { reason: "The agent's program has ended.".to_owned() });
     }
@@ -392,25 +455,101 @@ impl Client {
                     self.respond_error(id, INVALID_PARAMS, &format!("The Companion did not read it: {reason}."));
                 }
             },
+            "fs/write_text_file" => self.ask_to_write(id, params),
             other if other.starts_with("fs/") || other.starts_with("terminal/") => {
                 (self.on_event)(Event::Refused { what: other.to_owned() });
                 self.respond_error(
                     id,
                     METHOD_NOT_FOUND,
-                    "The Companion does not let an agent change files or run commands through it.",
+                    "The Companion does not let an agent run commands through it.",
                 );
             }
             _ => self.respond_error(id, METHOD_NOT_FOUND, "The Companion does not offer that."),
         }
     }
 
-    /// The handshake: the protocol's version, and what the Companion offers (reading text files only).
+    /// A write the agent asks for: checked, then shown to the person with what is there now, and kept until they answer.
+    fn ask_to_write(&self, id: &Value, params: &Value) {
+        let refuse = |path: String, reason: String| {
+            (self.on_event)(Event::Written { path, written: false, reason: Some(reason.clone()) });
+            self.respond_error(id, INVALID_PARAMS, &format!("The Companion did not write it: {reason}."));
+        };
+        let (shown, target) = match write_target(&self.root, params["path"].as_str().unwrap_or_default()) {
+            Ok(found) => found,
+            Err((path, reason)) => return refuse(path, reason),
+        };
+        let Some(content) = params["content"].as_str() else {
+            return refuse(shown, "it gave no text to write".to_owned());
+        };
+        if content.len() as u64 > MAX_READ {
+            return refuse(shown, format!("it is more than {} MB", MAX_READ / (1024 * 1024)));
+        }
+        let before = match std::fs::metadata(&target) {
+            Ok(found) if found.len() > MAX_READ => {
+                return refuse(shown, format!("the file there is more than {} MB", MAX_READ / (1024 * 1024)));
+            }
+            Ok(_) => std::fs::read(&target).ok().map(|b| String::from_utf8_lossy(&b).into_owned()),
+            Err(_) => None,
+        };
+        let key = format!("w{}", self.next.fetch_add(1, Ordering::Relaxed));
+        if let Ok(mut writes) = self.writes.lock() {
+            writes.insert(
+                key.clone(),
+                Waiting { id: id.clone(), shown: shown.clone(), target, content: content.to_owned() },
+            );
+        }
+        (self.on_event)(Event::Write { request: key, path: shown, before, after: content.to_owned() });
+    }
+
+    /// The person's answer to a write the agent asked for: on a yes the file is written, its folder checked again first; on a no
+    /// the agent is told the person declined.
+    pub fn answer_write(&self, request: &str, allow: bool) -> Result<(), String> {
+        let waiting = self
+            .writes
+            .lock()
+            .ok()
+            .and_then(|mut writes| writes.remove(request))
+            .ok_or_else(|| "that change is no longer waiting".to_owned())?;
+        let outcome = if allow {
+            // Checked again at the moment of writing, so a folder that became a link meanwhile is still caught.
+            write_target(&self.root, &waiting.target.to_string_lossy()).map_err(|(_, reason)| reason).and_then(
+                |(_, target)| {
+                    if let Some(folder) = target.parent() {
+                        std::fs::create_dir_all(folder).map_err(|e| format!("its folder could not be made: {e}"))?;
+                    }
+                    std::fs::write(&target, &waiting.content).map_err(|e| format!("it could not be written: {e}"))
+                },
+            )
+        } else {
+            Err("you chose not to make this change".to_owned())
+        };
+        match outcome {
+            Ok(()) => {
+                self.respond(&waiting.id, json!({}));
+                (self.on_event)(Event::Written { path: waiting.shown, written: true, reason: None });
+            }
+            Err(reason) => {
+                let message =
+                    if allow { format!("The Companion did not write it: {reason}.") } else { DECLINED.to_owned() };
+                self.respond_error(&waiting.id, INVALID_PARAMS, &message);
+                (self.on_event)(Event::Written {
+                    path: waiting.shown,
+                    written: false,
+                    reason: allow.then_some(reason),
+                });
+            }
+        }
+        Ok(())
+    }
+
+    /// The handshake: the protocol's version, and what the Companion offers (reading text files, and since 0.75.0 writing them on
+    /// the person's yes; never a terminal).
     pub fn initialize(&self, version: &str, timeout: Duration) -> Result<Value, String> {
         let answer = self.request(
             "initialize",
             json!({
                 "protocolVersion": PROTOCOL_VERSION,
-                "clientCapabilities": {"fs": {"readTextFile": true, "writeTextFile": false}, "terminal": false},
+                "clientCapabilities": {"fs": {"readTextFile": true, "writeTextFile": true}, "terminal": false},
                 "clientInfo": {"name": "dthorga-companion", "title": "D'thorga Companion", "version": version},
             }),
             timeout,
@@ -458,6 +597,10 @@ impl Client {
             self.permissions.lock().map(|mut p| p.drain().map(|(_, (id, _))| id).collect()).unwrap_or_default();
         for id in waiting {
             self.respond(&id, json!({"outcome": {"outcome": "cancelled"}}));
+        }
+        let writes: Vec<String> = self.writes.lock().map(|w| w.keys().cloned().collect()).unwrap_or_default();
+        for key in writes {
+            let _ = self.answer_write(&key, false);
         }
     }
 

@@ -10,7 +10,9 @@ and the AI services kind of going online. Checked by tests and a real listing of
 mods?** under the Mods page's update check, through one shared card. **Slice 3b built** in Companion 0.73.0 with phobos-modkit
 1.110.0: the model may ask the kit's read-only reports. **Slice 4 (A3's first slice) built** in Companion 0.74.0: the Chat page,
 its switch off until turned on; **no real agent started yet** (none is on the owner's computer), and nothing tested on screen.
-Slice 5 (changes through the Companion with a yes on each) waits. The owner asked for "AI integration
+**Slice 5 built** in Companion 0.75.0 (the owner, 23 Nov 2026: "go ahead with slice 5"): an agent may change a file through the
+Companion, shown line by line, only on the person's yes; commands through it stay refused, pending the decision `chat-commands`.
+Every slice of the build order is now built; none is tested on screen or with a real model or agent. The owner asked for "AI integration
 directly into Companion", through an open framework that reaches "a multitude of services, preferably with some of the bigger
 ones at least", chose all three parts below by card the same day, and then took the agent's lean on all four open questions
 ("go with your leans on all four and start building"). Agent choices are labelled so the owner can revise them.
@@ -267,7 +269,15 @@ Each slice is a working thing by itself, with its own version and commit.
 | 3 | **A2, the other buttons** (built, 0.72.0) | phobos-companion | None |
 | 3b | **The kit's tools for the model** (built, 0.73.0 with phobos-modkit 1.110.0): the model may ask A1's read-only reports while it answers, with each call shown | phobos-modkit, then phobos-companion | None |
 | 4 | **A3, first slice** (built, 0.74.0): one agent, the chat page, permission cards, reads only through the Companion | phobos-companion | A new page; process tree ending on every system |
-| 5 | **A3 with the kit's tools**, and changes through the Companion with a yes on each | phobos-companion | None |
+| 5 | **A3 with the kit's tools**, and changes through the Companion with a yes on each (built, 0.75.0; the kit's tools came in 0.74.0) | phobos-companion | None |
+
+**Slice 5 as built (0.75.0)** (agent choices, to revise): the Companion now offers `fs.writeTextFile`. Each `fs/write_text_file`
+is checked first (an absolute path inside the repository, its nearest existing folder followed through links, never inside
+`.git` in any letter case, not a folder, at most 2 MB each way), then shown on a card as a line-by-line difference against what
+is there (a new file all added; kept lines more than two away from a change folded), with **+** and **−** marks so colour never
+carries it alone. **Make this change** writes it, making missing folders, after checking the target again; **Don't** answers the
+agent with "the person chose not to make this change"; **Stop** declines every change still waiting. Running commands through
+the Companion (`terminal/*`) stays refused: that is the owner's decision `chat-commands`, with the agent's lean to keep it so.
 
 ## Open, for the owner to revise
 

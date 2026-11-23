@@ -52,4 +52,5 @@ fn without_an_agent_running_every_request_is_refused_in_words() {
     assert!(prompt("   ").is_err());
     assert!(cancel().is_err());
     assert!(answer_permission("p1", None).is_err());
+    assert!(answer_write("w1", true).is_err());
 }

@@ -109,7 +109,7 @@ fn the_handshake_offers_reading_only_and_a_conversation_starts_in_the_repository
     assert_eq!(asked["params"]["protocolVersion"], 1);
     assert_eq!(
         asked["params"]["clientCapabilities"],
-        json!({"fs": {"readTextFile": true, "writeTextFile": false}, "terminal": false})
+        json!({"fs": {"readTextFile": true, "writeTextFile": true}, "terminal": false})
     );
     agent.write(json!({"jsonrpc": "2.0", "id": asked["id"], "result": {"protocolVersion": 1, "authMethods": []}}));
     assert!(started.join().unwrap().is_ok());
@@ -218,21 +218,123 @@ fn a_file_inside_the_repository_is_read_and_shown_one_outside_is_refused() {
 }
 
 #[test]
-fn a_write_or_a_command_through_the_companion_is_refused_and_shown() {
+fn a_command_through_the_companion_is_refused_and_shown() {
     let root = scratch();
     let mut agent = started(&root);
-    let target = root.canonicalize().unwrap().join("src").join("New.cs");
-    agent.write(json!({"jsonrpc": "2.0", "id": "w1", "method": "fs/write_text_file",
-                       "params": {"sessionId": "sess_1", "path": target, "content": "x"}}));
-    let answer = agent.read();
-    assert_eq!((answer["id"].as_str(), answer["error"]["code"].as_i64()), (Some("w1"), Some(-32601)));
     agent.write(json!({"jsonrpc": "2.0", "id": 2, "method": "terminal/create", "params": {"command": "rm"}}));
-    assert!(agent.read().get("error").is_some());
-    assert!(!target.exists());
+    let answer = agent.read();
+    assert_eq!(answer["error"]["code"].as_i64(), Some(-32601));
+    assert_eq!(agent.heard_at_least(1), [Event::Refused { what: "terminal/create".into() }]);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+fn ask_to_write(agent: &mut StandIn, id: u64, path: &Path, content: &str) {
+    agent.write(json!({"jsonrpc": "2.0", "id": id, "method": "fs/write_text_file",
+                       "params": {"sessionId": "sess_1", "path": path, "content": content}}));
+}
+
+#[test]
+fn a_write_waits_for_a_yes_shows_what_is_there_and_then_writes() {
+    let root = scratch();
+    std::fs::write(root.join("src").join("Boat.cs"), "old line\n").unwrap();
+    let mut agent = started(&root);
+    let file = root.canonicalize().unwrap().join("src").join("Boat.cs");
+    ask_to_write(&mut agent, 41, &file, "new line\n");
+    let Some(Event::Write { request, path, before, after }) = agent.heard_at_least(1).pop() else {
+        panic!("it should wait for the person")
+    };
+    assert_eq!((path.as_str(), before.as_deref(), after.as_str()), ("src/Boat.cs", Some("old line\n"), "new line\n"));
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), "old line\n", "nothing is written before the yes");
+    agent.client.answer_write(&request, true).unwrap();
+    assert_eq!(agent.read(), json!({"jsonrpc": "2.0", "id": 41, "result": {}}));
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), "new line\n");
     assert_eq!(
-        agent.heard_at_least(2),
-        [Event::Refused { what: "fs/write_text_file".into() }, Event::Refused { what: "terminal/create".into() }]
+        agent.heard_at_least(2).pop(),
+        Some(Event::Written { path: "src/Boat.cs".into(), written: true, reason: None })
     );
+    assert!(agent.client.answer_write(&request, true).is_err(), "answered once only");
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn a_new_file_in_a_new_folder_is_made_on_a_yes() {
+    let root = scratch();
+    let mut agent = started(&root);
+    let file = root.canonicalize().unwrap().join("docs").join("notes").join("New.md");
+    ask_to_write(&mut agent, 42, &file, "Hello");
+    let Some(Event::Write { request, path, before, .. }) = agent.heard_at_least(1).pop() else {
+        panic!("it should wait")
+    };
+    assert_eq!((path.as_str(), before), ("docs/notes/New.md", None));
+    agent.client.answer_write(&request, true).unwrap();
+    assert_eq!(agent.read()["result"], json!({}));
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), "Hello");
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn a_no_leaves_the_file_as_it_was_and_tells_the_agent() {
+    let root = scratch();
+    std::fs::write(root.join("src").join("Boat.cs"), "old line\n").unwrap();
+    let mut agent = started(&root);
+    let file = root.canonicalize().unwrap().join("src").join("Boat.cs");
+    ask_to_write(&mut agent, 43, &file, "new line\n");
+    let Some(Event::Write { request, .. }) = agent.heard_at_least(1).pop() else { panic!("it should wait") };
+    agent.client.answer_write(&request, false).unwrap();
+    let answer = agent.read();
+    assert!(answer["error"]["message"].as_str().unwrap().contains("chose not to make this change"));
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), "old line\n");
+    assert_eq!(
+        agent.heard_at_least(2).pop(),
+        Some(Event::Written { path: "src/Boat.cs".into(), written: false, reason: None })
+    );
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn a_write_outside_the_repository_or_into_git_is_refused_at_once() {
+    let root = scratch();
+    std::fs::create_dir_all(root.join(".git")).unwrap();
+    let outside = std::env::temp_dir().join(format!("companion-acp-write-outside-{}.txt", std::process::id()));
+    let mut agent = started(&root);
+    ask_to_write(&mut agent, 44, &outside, "x");
+    assert!(agent.read()["error"]["message"].as_str().unwrap().contains("outside the repository"));
+    let git = root.canonicalize().unwrap().join(".git").join("config");
+    ask_to_write(&mut agent, 45, &git, "x");
+    assert!(agent.read()["error"]["message"].as_str().unwrap().contains("git's own folder"));
+    agent.write(json!({"jsonrpc": "2.0", "id": 46, "method": "fs/write_text_file",
+                       "params": {"sessionId": "sess_1", "path": "src/Relative.cs", "content": "x"}}));
+    assert!(agent.read().get("error").is_some(), "a relative path is refused");
+    assert!(!outside.exists() && !git.exists());
+    let heard = agent.heard_at_least(3);
+    assert!(heard.iter().all(|e| matches!(e, Event::Written { written: false, reason: Some(_), .. })));
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn stopping_declines_every_write_waiting() {
+    let root = scratch();
+    let mut agent = started(&root);
+    let file = root.canonicalize().unwrap().join("src").join("Waiting.cs");
+    ask_to_write(&mut agent, 47, &file, "x");
+    assert_eq!(agent.heard_at_least(1).len(), 1);
+    agent.client.cancel();
+    assert_eq!(agent.read()["method"], "session/cancel");
+    assert!(agent.read()["error"]["message"].as_str().unwrap().contains("chose not to make this change"));
+    assert!(!file.exists());
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn a_write_target_is_inside_the_root_and_never_a_folder() {
+    let root = scratch().canonicalize().unwrap();
+    std::fs::create_dir_all(root.join(".git")).unwrap();
+    let ok = write_target(&root, &root.join("src").join("A.cs").to_string_lossy()).unwrap();
+    assert_eq!(ok, ("src/A.cs".to_owned(), root.join("src").join("A.cs")));
+    assert!(write_target(&root, &root.join("src").to_string_lossy()).is_err(), "a folder");
+    assert!(write_target(&root, &root.join(".GIT").join("HEAD").to_string_lossy()).is_err(), "git, in any case");
+    assert!(write_target(&root, &format!("{}/src/../../x", root.to_string_lossy())).is_err(), "a step up");
+    assert!(write_target(&root, "").is_err());
     std::fs::remove_dir_all(root).unwrap();
 }
 

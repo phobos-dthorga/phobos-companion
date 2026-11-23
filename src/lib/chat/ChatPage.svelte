@@ -11,10 +11,13 @@
     chatPermission,
     chatPrompt,
     chatStart,
+    chatWrite,
   } from "./desktopClient";
   import {
     answered,
+    answeredWrite,
     apply,
+    lineDiff,
     refusedWrite,
     waitingPermissions,
     type Entry,
@@ -88,12 +91,22 @@
     else said = t("chat-failed", { reason: answer.failure.detail });
   }
 
+  /** The person's answer to a change the agent asked to make through the Companion (0.75.0). */
+  async function decideWrite(request: string, allow: boolean) {
+    const answer = await chatWrite(request, allow);
+    if (answer.state === "ready")
+      entries = answeredWrite(entries, request, allow);
+    else said = t("chat-failed", { reason: answer.failure.detail });
+  }
+
   async function stop() {
     await chatCancel();
     entries = entries.map((e) =>
       e.kind === "permission" && e.answered === null
         ? { ...e, answered: "" }
-        : e,
+        : e.kind === "write" && e.answered === null
+          ? { ...e, answered: false }
+          : e,
     );
   }
 
@@ -260,6 +273,75 @@
               </p>
             {/if}
           </section>
+        {:else if entry.kind === "write"}
+          <section class="ask" aria-labelledby={`chat-write-${entry.request}`}>
+            <h3 id={`chat-write-${entry.request}`}>
+              {entry.before === null
+                ? t("chat-write-create", {
+                    agent: running.started.agent,
+                    path: entry.path,
+                  })
+                : t("chat-write-change", {
+                    agent: running.started.agent,
+                    path: entry.path,
+                  })}
+            </h3>
+            <p class="small">{t("chat-write-key")}</p>
+            <ol class="diff" aria-label={t("chat-write-diff-label")}>
+              {#each lineDiff(entry.before, entry.after) as line, i (i)}
+                {#if line.mark === "…"}
+                  <li class="kept small muted">
+                    {t("chat-write-unchanged", { count: line.count })}
+                  </li>
+                {:else}
+                  <li
+                    class={line.mark === "+"
+                      ? "added"
+                      : line.mark === "-"
+                        ? "removed"
+                        : "kept"}
+                  >
+                    <span class="mark" aria-hidden="true"
+                      >{line.mark === "-" ? "−" : line.mark}</span
+                    ><span class="sr-only"
+                      >{line.mark === "+"
+                        ? t("chat-write-added")
+                        : line.mark === "-"
+                          ? t("chat-write-removed")
+                          : ""}</span
+                    >{line.text}
+                  </li>
+                {/if}
+              {/each}
+            </ol>
+            {#if entry.answered === null}
+              <div class="buttons">
+                <button
+                  type="button"
+                  class="action"
+                  onclick={() => void decideWrite(entry.request, true)}
+                  >{t("chat-write-yes")}</button
+                >
+                <button
+                  type="button"
+                  class="action"
+                  onclick={() => void decideWrite(entry.request, false)}
+                  >{t("chat-write-no")}</button
+                >
+              </div>
+            {/if}
+          </section>
+        {:else if entry.kind === "written"}
+          <p class={entry.written ? "small" : "small refused-line"}>
+            {entry.written
+              ? t("chat-written", { path: entry.path })
+              : entry.reason
+                ? t("chat-not-written-refused", {
+                    path: entry.path,
+                    reason: entry.reason,
+                  })
+                : t("chat-not-written", { path: entry.path })}
+          </p>
         {:else if entry.kind === "read"}
           <p class="small muted">
             {entry.allowed
@@ -387,6 +469,41 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 6px;
+  }
+
+  /* Every line wraps rather than scrolls; each carries its mark, so colour never says alone what changed. */
+  .diff {
+    margin: 6px 0;
+    padding: 6px 8px;
+    list-style: none;
+    font-size: var(--type-small);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: var(--colour-canvas);
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
+  }
+
+  .diff .mark {
+    display: inline-block;
+    width: 1.5ch;
+  }
+
+  .diff .added {
+    border-inline-start: 3px solid var(--colour-success);
+  }
+
+  .diff .removed {
+    border-inline-start: 3px solid var(--colour-risk);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .refused-line {

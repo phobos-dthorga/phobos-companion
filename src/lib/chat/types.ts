@@ -47,5 +47,13 @@ export type ChatEvent =
       options: ChatOption[];
     }
   | { kind: "read"; path: string; allowed: boolean; reason: string | null }
+  | {
+      kind: "write";
+      request: string;
+      path: string;
+      before: string | null;
+      after: string;
+    }
+  | { kind: "written"; path: string; written: boolean; reason: string | null }
   | { kind: "refused"; what: string }
   | { kind: "ended"; reason: string };

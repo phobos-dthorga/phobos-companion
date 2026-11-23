@@ -86,7 +86,14 @@ for (const [name, viewport] of [
               allowed: true,
               reason: null,
             },
-            { kind: "refused", what: "fs/write_text_file" },
+            { kind: "refused", what: "terminal/create" },
+            {
+              kind: "write",
+              request: "w1",
+              path: "src/Boat.cs",
+              before: "hull = null\n",
+              after: "hull = new Hull()\n",
+            },
             {
               kind: "permission",
               request: "p1",
@@ -104,6 +111,7 @@ for (const [name, viewport] of [
           ],
         },
         chat_permission: { result: null },
+        chat_write: { result: null },
       });
       await page.getByRole("button", { name: "Chat", exact: true }).click();
       await expect(page.getByRole("heading", { level: 1 })).toContainText(
@@ -131,7 +139,7 @@ for (const [name, viewport] of [
         "Read through the Companion: src/Boat.cs",
       );
       await expect(main).toContainText(
-        "It asked to change a file through the Companion, and was refused.",
+        "It asked to run a command through the Companion, and was refused.",
       );
       await expect(main).toContainText(
         "Claude (Claude Agent) asks: Edit Boat.cs",
@@ -143,6 +151,15 @@ for (const [name, viewport] of [
       expect(await smallControls(page)).toBe(0);
       await page.getByRole("button", { name: "Reject", exact: true }).click();
       await expect(main).toContainText("You answered: Reject");
+      // A change through the Companion: shown line by line, made only on a yes (0.75.0).
+      await expect(main).toContainText(
+        "Claude (Claude Agent) asks to change src/Boat.cs",
+      );
+      await expect(main).toContainText("hull = new Hull()");
+      await page.getByRole("button", { name: "Make this change" }).click();
+      await expect(
+        page.getByRole("button", { name: "Make this change" }),
+      ).toHaveCount(0);
       const overflow = await page.evaluate(
         () =>
           document.documentElement.scrollWidth -

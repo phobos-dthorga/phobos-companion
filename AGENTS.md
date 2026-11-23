@@ -154,10 +154,12 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
 - **Chat page: a whole agent in a repository, on the person's press, with its switch off until turned on** (0.74.0; the owner,
   23 Nov 2026: "go ahead with A3", and of the switch starting off: "a very good choice"; `docs/ai.md`, A3). The program starts
   only an agent `config/chat-agents.json` names, by its command found on the search path, in a repository from the games list;
-  **it never installs an agent, never passes a login and holds no key for one**. Through the Companion the agent may only read
-  text files inside that repository (each read shown) and ask the person's permission (answered only by the person, only with
-  an option it offered); writing a file and running a command through it are not offered, and each request is refused and
-  shown (`companion_core::acp`). It is handed the kit's MCP server (reports that read). **The agent is its own program with the
+  **it never installs an agent, never passes a login and holds no key for one**. Through the Companion the agent may read text
+  files inside that repository (each read shown), ask the person's permission (answered only by the person, only with an option
+  it offered), and **write a text file there only after the person saw the change line by line and pressed Make this change**
+  (0.75.0, slice 5; the owner's answer "reads only at first, then a yes on each"): never inside `.git`, at most 2 MB, its folder
+  checked again at the moment of writing, and a no tells the agent it was declined. **Running a command through it is not
+  offered**, and each request is refused and shown (`companion_core::acp`); that waits on the owner's decision `chat-commands`. It is handed the kit's MCP server (reports that read). **The agent is its own program with the
   person's own access to the disk**, and may change files by itself: the page says so before a first start. One runs at a time;
   leaving the page, starting another, switching off or closing the program ends its whole process tree. **Agents and tests
   never start a real agent on the owner's computer**: tests stand in the agent on pipes; ask the owner first.

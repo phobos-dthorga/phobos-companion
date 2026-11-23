@@ -14,4 +14,4 @@ see: page-chat, page-settings
 
 **Off** hides the page again and ends any agent running.
 
-**Good to know:** the agent may change or delete files in the repository by itself, as it would in a terminal. Through the Companion it may only read files there and ask your permission. Keep your work committed, and git will show anything it changed.
+**Good to know:** the agent may change or delete files in the repository by itself, as it would in a terminal. Through the Companion it may read files there, ask your permission, and change a file only after you see the change and press **Make this change**. Keep your work committed, and git will show anything it changed.

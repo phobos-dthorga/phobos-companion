@@ -53,183 +53,152 @@ reads them.
 
 ## What the program may do
 
-- **The host decides what may run, from the kit's manifest** (`src-tauri/src/reports.rs`), and checks again when asked to run it: the
-  window can only request. Today that is reports marked `reads` with a `question` and nothing required. `reads-online` and typed inputs
-  come next; anything else needs a design record and a confirmation step. **`owner-only` is never run**, and the program never holds
+One bullet per page: what it may change, only when, and what guards it. **How each guard works, and every file and folder the
+program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)** ("Where state lives", "The security gates").
+
+- **The host decides what may run, from the kit's manifest, and checks again when asked to run it**: the window can only request.
+  The report viewer runs only reports marked `reads`, with a `question` and nothing required; `reads-online` and typed inputs come
+  next; anything else needs a design record and a confirmation step. **`owner-only` is never run**, and the program never holds
   credentials.
-- **The Mods page is the one place the program changes a game's files** (owner, 18 Nov 2026: a part "dedicated to the updating,
-  reversing changes, making backups"): the kit's `installs build`, `install`, `backup` and `restore`, for a repository with
-  `config/installs.json`, and the game's texture command's `encode` (found through the manifest's `textures` surface, never by
-  name; it writes encoded textures into mod folders, Workshop ones included, by the owner's choice of 18 Nov 2026). Each only when
-  the owner presses a button and, except Build (which writes only inside the repository), confirms; and only while the kit's
-  manifest still calls it `writes` or `runs` (`src-tauri/src/installs_page.rs`). The host checks the repository, the move and every
-  name; the kit refuses installing, going back and encoding while the game runs, and never deletes: the install it replaces becomes
-  a backup.
-- **The Mod list page changes a game's list of active mods, one change at a time, only after the owner's yes on the card**
-  (0.45.0; the owner, 22 Nov 2026: "our own, third-party, mod managing", with fixes "on press + confirm, with backup and undo";
-  `src-tauri/src/mod_list_page.rs`, design record "Mod list"). The kit's `mod-list fix --apply` and `undo --apply`, only while the
-  manifest calls them `writes`, and only a change the last check of that game offered, or a list it named; the kit keeps a
-  byte-for-byte backup first, refuses while the game or a mod manager (RimSort) runs, and refuses to undo over a list changed since.
-  **Never make a change by itself.** Its check reads with Steam's public Workshop API when Ask Steam too is on (the kit's
-  `reads-online`, no account); Home's note reads without it, at most every half hour. **Open in Steam** hands the system only
-  `steam://url/CommunityFilePage/<number>`, for a Workshop number a check named in this run. Subscribing through the Steam client
-  (the owner's choice) is a later step with its own design record. **Edit the list** (0.46.0; the owner's choice "each change
-  saved at once") runs `mod-list fix --apply` on each press of Switch on, Switch off or a move, with no second yes, only for a
-  mod and a list the last `mod-list mods` listing named and a place from 1; each still keeps a backup, and Undo walks back one
-  change at a time. From 0.47.0 one change may name several mods (each one the listing named, at most 500), moved or switched as
-  one block. **Sort** (0.47.0) runs `mod-list sort` to show the moves and writes only on the owner's press of **Use this order**
-  (`--apply`, while the manifest calls it `writes`); **Your rules** runs `mod-list rules --apply` to keep or take away one of the
-  owner's rules, for mods the last listing named. RimSort's own files are only read. Dragging is a shortcut: every move has keys.
-  **Saved lists** (0.48.0; `src-tauri/src/mod_list_lists.rs`) run `mod-list compare` to show what loading a list would change and
-  `load --apply` only on the owner's press of **Use this list**, for a list the last `mod-list lists` named or a file the owner
-  chose in the Open dialog the host showed; `save`, `forget` and `export` write only on a press, an exported file only where the
-  owner chose in the Save dialog. Saves and RimSort's files are only read. **Find on the Workshop** hands the Steam client only a
-  Workshop search for a missing mod's name, for the game's own app id.
-  **Subscribe and Unsubscribe** (0.49.0; `src-tauri/src/mod_list_steam.rs`) run the kit's `mod-list subscribe --apply` and
-  `unsubscribe --apply`, which borrow the game's own Steam library and speak to the Steam client already running and signed in: no
-  credentials are held. Subscribe runs on the owner's press, for any well-formed Workshop number (it only adds); **Unsubscribe only
-  after the owner's yes in the window**, only for mods the last listing or check named, and it switches them off first. **Agents
-  never press either on the owner's account**, in a test or otherwise (the Workshop rule): browser tests stand in a host.
-- **The Publish page sends mods to the Steam Workshop, only on the owner's press and yes** (0.69.0; the owner, 23 Nov 2026,
-  for "a visual way for the user to modify and upload their mods easily"; `src-tauri/src/publish_page.rs`, `docs/publishing.md`).
-  The kit's `steam-publish upload` and `update` run **only while the manifest calls them `owner-press`**, only while the owner's
-  **Workshop uploads** setting is on (Settings, Publishing; on by default), and only after the owner's yes in the window; making
-  an item public is an update with `--confirm-public`, sent only after a second, stronger yes naming item, version and everyone.
-  **Never by itself, and never in a test: agents never press it** (the Workshop rule); browser tests stand in a host. The
-  Steam client route speaks to the client already signed in; SteamCMD runs in a window of its own (`--new-console`), where the
-  owner types the login, so no credentials are held. **Save the page** runs `page --write` (the text on standard input) and
-  **Prepare** runs `notes --write` and `prepare`, on a press while the manifest calls them `writes` and `runs`; they write only
-  the page, release notes and the kit's staging. **Read Steam back** runs `pull --write`, only while the **Workshop pages** kind
-  of going online is on. **Open in Steam** hands the system only `steam://url/CommunityFilePage/<number>` for a number the last
-  card named. Names are checked: a repository of the game that keeps `config/workshop-publishing.json`, a mod the last reading
-  named.
-- **The Memory page starts a watch of the running game only on the owner's press and confirmation** (owner, 19 Nov 2026: memory
-  profiling "will be done from the Companion"; `src-tauri/src/memory_page.rs`, design record "Memory"): the kit's watch, found by
-  the manifest's `memory-watch` surface, attaches Microsoft's dotnet-counters to the game once unless the owner chose Windows' figures
-  only, and runs only while the manifest calls it `runs`. **Never start one by itself** unless the owner chooses that on the
-  Decisions page. Reading a watch only reads; stopping and marking write only into the watch's own folder in the kit's cache, while
-  the manifest calls them `writes`. The host checks the length is one offered, every text is one line of a sane length and a
-  watch's name has the kit's shape, and puts a mark's words after `--`.
-- **The Explorer takes a snapshot of the running game only on the owner's press and confirmation** (owner, 20 Nov 2026: debugging
-  tools that look at "variables in memory"; `docs/debugging.md`, design record "Explorer"): the kit's `look-serve`, found by the
-  manifest's `look-inside` surface and run only while the manifest calls it `runs`. A snapshot pauses the game for about half a
-  second and nothing is written to the game. **Never take one by itself.** One is held at a time, and let go on Let it go, on
-  leaving the page, when the program closes, or after ten minutes (the owner's choice). Each request's kind is from a fixed list,
-  and its type name, address, words and numbers are checked for shape and size before the kit sees them.
-- **The Changes page and the code viewer only read**: the kit's `changes`, through `src-tauri/src/changes_page.rs`, which checks
-  the repository is one of the game's and the changelog a plain path inside it before the kit sees either. **The code viewer's
-  pictures and sounds** (0.50.0; the owner, 22 Nov 2026: "display multimedia in parts like this", with Save a copy and Open with its
-  own program) go through `src-tauri/src/changed_files.rs`: it hands over a side's bytes only for a binary file the kit's last answer
-  for that repository and commit named, read with git, at most 64 MB. **Save a copy** writes only where the owner chose in Windows'
-  Save dialog; **Open with its own program** writes a copy into `opened-copies` in this program's own folder and asks the system to
-  open it, only for a kind the kit named as media, never a program or a kind it did not know, so a press can never run something.
-  Both only on a press. **Pictures and sounds elsewhere** (0.53.0; the owner's choice of 23 Nov 2026: the Mods page, encoded
-  textures, the Mod list's previews) only read, through `src-tauri/src/viewable.rs`: a file a kit answer named in this run (each
-  changed file in every copy of a mod, each preview, each picture and encoded texture of a pair), of a kind the window draws or
-  plays, at most 64 MB.
-- **The Picks page reads, and a press keeps a pick** (0.55.0; the owner, 23 Nov 2026: "Go ahead and build the picks page";
-  `src-tauri/src/picks_page.rs`): the kit's `picks list` over the repositories that keep `config/picks.json`, and every file a pick
-  names may then be shown. **Pick** and **None of these** run the kit's `picks answer`, which appends one line to `picks/<repository>.jsonl`
-  in this program's own folder, only on a press, only for a repository the list names, and only while the manifest calls it
-  `writes`. Nothing in a repository changes: a session applies the pick and settles it.
-- **The Timeline page only reads**: the kit's `history`, through `src-tauri/src/history_page.rs`, which checks the repository is one
-  of the game's, the changelog a plain path inside it, and the commit or moment plain text of the right shape. The history log it
-  shows is written by the tools as they work, never by this program.
-- **The Settings page writes one file, the central settings file**, through the kit's `settings set`
-  (`src-tauri/src/settings_page.rs`): only when the owner presses Save or Use the default, or chooses a path in Windows' own
-  picker (0.29.0; owner, 20 Nov 2026: "file dialog window pickers ... where ever a directory needs to be chosen"; `src-tauri/src/
-  pick.rs` only answers with the path, and the save is the same), only while the manifest still calls it `writes`, and only a
-  setting the tools list, as one line. It never writes a repository's own settings. **Every folder or file a page asks for gets
-  the picker beside its type-in box** (owner's choice: keep both). **It adds to the games list on one press too** (0.31.0, Add a
-  game from Steam; `docs/later.md` item 5, the owner's yes of 19 Nov 2026): `companion_core::games::add` writes one new entry
-  into `.local/games.json`, after the window showed it whole; the host checks the id, the name, the Steam game, the data folder
-  and every repository again, keeps the list's own order, keeps the list as it was in `games.json.before-add`, and writes nothing
-  when a check fails. It never changes or removes an entry already there.
-- **Their code and What did an update change? read, except one press** (owner's choice of 19 Nov 2026, "Read and compare, on
-  your press"; `src-tauri/src/other_code_page.rs`): the kit's reports carrying the manifest's `other-code` and `updates` surfaces.
-  **Decompile runs only on the owner's press, only for an assembly the kit's `holder` named in this run of the program, and only
-  while the manifest calls it `runs`**; it writes only into the kit's cache. Names go to the kit after `--`, checked to have the
-  shape of a type or member name; a kept file is a plain `.dll` name. Other authors' code is shown, never copied into a repository.
-- **Keep the new builds writes only into the tools' archive** (0.28.0, `other_code_page::keep_builds`): the kit's
-  `rimworld-archive snapshot`, found by the `updates` surface, only on the owner's press and while the manifest calls it `writes`. It
-  copies new builds of the game and tied mods into the archive, never touching the game's or the mods' folders.
+- **Mods page: the one place the program changes a game's files** (owner, 18 Nov 2026: a part "dedicated to the updating,
+  reversing changes, making backups"). May: the kit's `installs build`, `install`, `backup` and `restore` for a repository with
+  `config/installs.json`, and the game's texture `encode`, found by the manifest's `textures` surface, never by name, writing into
+  mod folders, Workshop ones included (the owner's choice of 18 Nov 2026). Only when: the owner presses and, except Build (which
+  writes only inside the repository), confirms; while the manifest calls it `writes` or `runs`. Guarded: the host checks the
+  repository, the move and every name; the kit refuses installing, going back and encoding while the game runs, and never deletes:
+  the install it replaces becomes a backup.
+- **Mod list page: a game's list of active mods, one change at a time** (0.45.0; the owner, 22 Nov 2026: "our own, third-party,
+  mod managing", with fixes "on press + confirm, with backup and undo"; design record "Mod list"). **Never a change by itself.**
+  - *Fix and Undo*: only after the owner's yes on the card; only a change the last check offered, or a list it named. The kit
+    keeps a byte-for-byte backup first, refuses while the game or a mod manager (RimSort) runs, and refuses to undo over a list
+    changed since.
+  - *Edit the list* (0.46.0; the owner's choice "each change saved at once"): each press of Switch on, Switch off or a move is
+    saved at once, with no second yes; only a mod and a list the last listing named, a place from 1, at most 500 mods moved or
+    switched as one block (0.47.0). Each keeps a backup; Undo walks back one change at a time. Dragging is a shortcut: every move
+    has keys.
+  - *Sort* (0.47.0) shows the moves and writes only on **Use this order**; *Your rules* keeps or takes away one of the owner's
+    rules, for mods the last listing named.
+  - *Saved lists* (0.48.0) show what loading would change and load only on **Use this list**, for a list the last listing named or
+    a file the owner chose in the host's Open dialog; save, forget and export write only on a press, an exported file only where
+    the owner chose in the Save dialog.
+  - *Subscribe and Unsubscribe* (0.49.0) speak to the Steam client already running and signed in, through the game's own Steam
+    library: no credentials held. Subscribe runs on a press for any well-formed Workshop number (it only adds); **Unsubscribe only
+    after the owner's yes**, only for mods the last listing or check named, switching them off first. **Agents never press either
+    on the owner's account**, in a test or otherwise (the Workshop rule): browser tests stand in a host.
+  - *Reading*: the check reads Steam's public Workshop API only when Ask Steam too is on (`reads-online`, no account); Home's note
+    reads without it, at most every half hour. Saves and RimSort's files are only read. **Open in Steam** and **Find on the
+    Workshop** hand the Steam client only a Workshop page a check named in this run, or a search for a missing mod's name in the
+    game's own app.
+  - Every write runs only while the manifest calls it `writes`.
+- **Publish page: mods to the Steam Workshop, only on the owner's press and yes** (0.69.0; the owner, 23 Nov 2026, for "a visual
+  way for the user to modify and upload their mods easily"; `docs/publishing.md`). Upload and update run only while the manifest
+  calls them `owner-press`, only while the owner's **Workshop uploads** setting is on (Settings, Publishing; on by default), and
+  only after the owner's yes; **making an item public needs a second, stronger yes** naming item, version and everyone. **Never by
+  itself, and never in a test: agents never press it** (the Workshop rule); browser tests stand in a host. No credentials are
+  held: the Steam client route speaks to the client already signed in, and SteamCMD runs in a window of its own where the owner
+  types the login. **Save the page** and **Prepare** write only the page, the release notes and the kit's staging, on a press,
+  while the manifest calls them `writes` and `runs`. **Read Steam back** runs only while the **Workshop pages** kind of going
+  online is on. **Open in Steam** opens only an item the last card named. Names are checked: a repository of the game that keeps
+  `config/workshop-publishing.json`, a mod the last reading named.
+- **Memory page: a watch of the running game, only on the owner's press and confirmation** (owner, 19 Nov 2026: memory profiling
+  "will be done from the Companion"; design record "Memory"). The game's `memory-watch` tool attaches Microsoft's dotnet-counters
+  once unless the owner chose Windows' figures only, only while the manifest calls it `runs`. **Never start one by itself** unless
+  the owner chooses that on the Decisions page. Reading a watch only reads; stopping and marking write only into the watch's own
+  folder in the kit's cache, while the manifest calls them `writes`. Every length, text and name is checked first.
+- **Explorer: a snapshot of the running game, only on the owner's press and confirmation** (owner, 20 Nov 2026: debugging tools
+  that look at "variables in memory"; `docs/debugging.md`). The game's `look-inside` tool, only while the manifest calls it
+  `runs`; it pauses the game for about half a second and writes nothing to the game. **Never take one by itself.** One is held at
+  a time, and let go on Let it go, on leaving the page, when the program closes, or after ten minutes (the owner's choice). Every
+  request is checked for kind, shape and size first.
+- **Changes page and the code viewer only read.** The code viewer's **pictures and sounds** (0.50.0; the owner, 22 Nov 2026:
+  "display multimedia in parts like this", with Save a copy and Open with its own program) are only files the kit's last answer
+  named, at most 64 MB. **Save a copy** writes only where the owner chose in the Save dialog; **Open with its own program** writes
+  a copy into the program's own folder and opens it only for a kind the kit named as media, never a program or a kind it did not
+  know, **so a press can never run something**. Both only on a press. **Pictures and sounds elsewhere** (0.53.0; the owner's
+  choice of 23 Nov 2026: the Mods page, encoded textures, the Mod list's previews) only read, the same way.
+- **Picks page reads, and a press keeps a pick** (0.55.0; the owner, 23 Nov 2026: "Go ahead and build the picks page"). Every
+  file a pick names may be shown. **Pick** and **None of these** append the owner's answer in the program's own folder, only on a press, only for a repository the list
+  names, only while the manifest calls it `writes`. Nothing in a repository changes: a session applies the pick and settles it.
+- **Timeline page only reads.** The history log it shows is written by the tools as they work, never by this program.
+- **Settings page writes one file, the central settings file**: only when the owner presses Save or Use the default, or chooses a
+  path in Windows' own picker (0.29.0; owner, 20 Nov 2026: "file dialog window pickers ... where ever a directory needs to be
+  chosen"); only while the manifest calls it `writes`; only a setting the tools list, as one line. It never writes a repository's
+  own settings. **Every folder or file a page asks for gets the picker beside its type-in box** (owner's choice: keep both).
+- **Settings adds to the games list on one press** (0.31.0, Add a game from Steam; `docs/later.md` item 5, the owner's yes of 19
+  Nov 2026): one new entry in `.local/games.json`, after the window showed it whole, with every field checked again, the list's
+  order kept and the list as it was kept beside it; nothing is written when a check fails. **It never changes or removes an entry
+  already there.**
+- **Their code and What did an update change? read, except one press** (owner's choice of 19 Nov 2026, "Read and compare, on your
+  press"). **Decompile runs only on the owner's press, only for an assembly the kit named in this run of the program, and only
+  while the manifest calls it `runs`**; it writes only into the kit's cache. Other authors' code is shown, never copied into a
+  repository.
+- **Keep the new builds writes only into the tools' archive** (0.28.0): on the owner's press, while the manifest calls it
+  `writes`; it never touches the game's or the mods' folders.
 - **Clean up deletes only what the owner chose and confirmed** (owner, 20 Nov 2026: "some kind of ongoing cleanup process", with
-  their yes first; `src-tauri/src/cleanup_page.rs`): the kit's `cleanup`, listing by default; deleting runs only after the owner
-  chooses the groups, presses Clean up the chosen and confirms, only the groups chosen (`--group`, each one argument), and only while
-  the manifest calls it `writes`. The kit deletes nothing its listing did not name and never touches saves, game or mod folders or
-  settings. **Never start a clean-up by itself**, and install backups start unchosen. Home's note only reads, at most every half hour.
-- **The code viewer's How it connects and the Code map page only read**: the kit's `connections`, through
-  `src-tauri/src/connections_page.rs`, which checks the repository is one of the game's, a thing's id has the tools' shape, a commit
-  is a commit and a search is one line, before the kit sees any of them. Pictures are drawn by `src/lib/connections/`, with the
-  geometry in `layout.ts`, tested without a screen.
-- **The owner's keyboard shortcuts are kept in `shortcuts.json` in this program's own folder** (`src-tauri/src/shortcuts.rs`),
-  written only from the Settings page's shortcuts dialog, whole and checked.
+  their yes first). It lists by default; it deletes only the groups the owner chose, after **Clean up the chosen** and a
+  confirmation, while the manifest calls it `writes`. The kit deletes nothing its listing did not name and never touches saves,
+  game or mod folders or settings. **Never start a clean-up by itself**, and install backups start unchosen. Home's note only
+  reads, at most every half hour.
+- **How it connects and the Code map only read.** Their pictures' geometry is in `src/lib/connections/layout.ts`, tested without a
+  screen.
+- **Keyboard shortcuts** are written only from the Settings page's shortcuts dialog, whole and checked.
 - **Features for AI agent sessions are offered, never assumed** (0.37.0; the owner, 20 Nov 2026: "Hidden unless switched on, or
-  otherwise detected"). Something's off, the Decisions page and its note, open screen notes and the claims board show only while
-  `src/lib/agents/state.svelte.ts` says so: by the person's choice in Settings, or, by default, when `companion_core::agents`
-  finds sessions at work (a listed repository's `AGENTS.md`, `CLAUDE.md`, `.claude` or `config/decisions.json`, or notes and
-  answers already kept). A new feature for agent sessions joins that switch, its key carries `forAgents`, its page joins
-  `FOR_AGENTS_PAGES` and its Guide entries `for: agents`. The choice is kept in `features.json` in the program's own folder.
+  otherwise detected"). Something's off, the Decisions page and its note, open screen notes and the claims board show only by the
+  person's choice in Settings or, by default, when sessions are found at work. **A new feature for agent sessions joins that
+  switch**: its key carries `forAgents`, its page joins `FOR_AGENTS_PAGES` and its Guide entries `for: agents`.
 - **Every kind of call to the internet has its own switch, on for the repositories on the games list** (0.61.0; the owner, 23 Nov
-  2026: "On for listed repositories with a setting to disable otherwise, with applicable warnings of severe loss of functionality";
-  `docs/online.md`). `companion_core::online::KINDS` lists each kind, the address it contacts and whether losing it is severe; the
-  person's choices are kept in `online.json` in the program's own folder, and Settings → Going online and About show the same list.
-  **Off means off**: the host makes no call of that kind, on a press or by itself. Before passing a report the flag that takes it
-  online, the host checks the kit's manifest still calls it `reads-online` (`kit::reads_online`). A look the program makes by
-  itself is `--automatic`, so the kit keeps the hour's last keyless GitHub calls for a press. **Nothing is ever sent about the
-  person**: calls only read public pages, keyless. A new kind joins `KINDS`, the window's words (`src/lib/online/presentation.ts`)
-  and the Guide's Going online entry in one change. The kinds: Gate lights (`src-tauri/src/repo_status.rs`, the kit's `repos
-  status`), Nightly watch (0.63.0, `src-tauri/src/nightly.rs`, the kit's `feeds read --root`, reading each repository's
-  `companion-results` branch), Known problems (0.64.0, `mod_list_page.rs`: `feeds read --root --from published`, best
-  effort, then `mod-list check --known`, which reads only the kit's kept copies) and Their reports (0.65.0, below).
-- **Report links open GitHub in the browser, and never post** (0.65.0; the owner's choice of 23 Nov 2026: the Logs page only;
-  `src-tauri/src/report_links.rs`). The kit's `issue-links where` names each mod's repository, ours or theirs, and the host opens
-  only an address for a repository that answer named, of the shape it expects: our repository's new-issue form filled in (its
-  text kept first in `report-drafts/report.md` in the program's own folder, overwritten each time), another author's blank form,
-  or one of their issues. **Another author's form is never filled in**: drafts to them go through the owner's tracker
-  (phobos-modkit `rules/reports.md`). Listing their issues reads GitHub keyless, only on a press, while Their reports is on.
-  `companion_core::process::open_address` is the one place an address is handed to the system.
-- **Otherwise read-only towards games, saves and repositories.** The only other things the program writes are the owner's test verdicts and, since
-  0.9.0, their word on notes no row names ("make a row" or "no row needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks),
-  each appended to its own data folder (`test-verdicts/<repository>.jsonl` and `test-key-decisions/<repository>.jsonl`,
-  `src-tauri/src/tests_page.rs`, owner, 17 Nov 2026); phobos-modkit's `test-pass` reads both and `apply` writes verdicts into a test
-  list, never this program. **Screen notes** (0.22.0) are written whole into `screen-notes/<id>/` in its own data folder
-  (`src-tauri/src/screen_notes.rs`): the page's picture and `note.json`; only the kit's `screen-notes resolve` writes beside them.
-  **Back up now** (0.22.0, `src-tauri/src/records_backup.rs`) runs the kit's `records backup`, which copies this program's records
-  into a new dated folder in the folder the owner chose (`recordsBackupPath`), on the owner's press and while the manifest
-  calls it `writes`; it never deletes a copy. **It also runs by itself** (0.29.0; owner, 20 Nov 2026: "every few hours when it's
-  open, and if the schedule is missed, the soonest next opportunity"): a timer in the host makes a copy when the kit's `records
-  status --every-hours` says one is due, as `records backup --automatic`, under the same manifest check, and Home says when one
-  failed and why. It is the one write this program makes without a press. **Copy now** (0.42.0, `src-tauri/src/safe_copies.rs`)
-  runs the kit's `safe-copies run` for a repository of the game that has `config/safe-copies.json`, on the owner's press and while
-  the manifest calls it `writes`: it copies into the folders the owner chose and marked, and pushes the private repository the owner
-  chose; it deletes nothing at a source and lets go only older copies beyond the number a set keeps (the saves, kit 1.68.0), and the
-  kit keeps anything made from a game's or the owner's private files off every shared place. **Check the copies** only reads.
-  **Restore** (0.43.0) runs the kit's `safe-copies restore` into a folder the owner picked in Windows' own picker, and **Let go**
-  runs `safe-copies let-go --apply` for one copy the kit lists as no longer taken; each only after the owner's yes on the card, and
-  only while the manifest calls it `writes`. Restore never replaces a different file unless the owner then presses Replace older
-  files, and never a newer one; Let go never touches the file the copy was made from. **Decide** (0.22.0, `src-tauri/src/decisions_page.rs`) runs the kit's `decisions
-  answer`, which appends the owner's answer to `decisions/<repository>.jsonl` in this program's folder. **The Game files page only
-  reads** (the kit's `game-files report`, `src-tauri/src/game_files_page.rs`); Show in folder opens the file manager on a file
-  inside a folder the last report named, and nothing else.
+  2026: "On for listed repositories with a setting to disable otherwise, with applicable warnings of severe loss of
+  functionality"; `docs/online.md`). **Off means off**: no call of that kind, on a press or by itself. A report is passed the flag
+  that takes it online only while the manifest calls it `reads-online`; a look the program makes by itself says so
+  (`--automatic`), keeping the hour's last keyless GitHub calls for a press. **Nothing is ever sent about the person**: calls only
+  read public pages, keyless. Settings → Going online and About show the same list of kinds. **A new kind joins
+  `companion_core::online::KINDS`, the window's words and the Guide's Going online entry in one change.**
+- **Report links open GitHub in the browser, and never post** (0.65.0; the owner's choice of 23 Nov 2026: the Logs page only).
+  Only an address for a repository the kit named: our repository's new-issue form filled in, another author's blank form, or one
+  of their issues. **Another author's form is never filled in**: drafts to them go through the owner's tracker (phobos-modkit
+  `rules/reports.md`). Listing their issues reads only on a press, while Their reports is on. **One place in the code hands an
+  address to the system** (`companion_core::process::open_address`).
+- **Otherwise read-only towards games, saves and repositories.** The only other things the program writes, each only on the
+  owner's press unless said:
+  - the owner's test verdicts (owner, 17 Nov 2026) and, since 0.9.0, their word on notes no row names ("make a row" or "no row
+    needed"; owner, 18 Nov 2026, phobos-rimworld's seen-in-play checks), appended in its own folder. phobos-modkit's `test-pass`
+    reads both and `apply` writes verdicts into a test list, never this program;
+  - **screen notes** (0.22.0), written whole; only the kit's `screen-notes resolve` writes beside them;
+  - **Back up now** (0.22.0): a copy of this program's records into a new dated folder in the folder the owner chose, while the
+    manifest calls it `writes`; it never deletes a copy. **It also runs by itself** (0.29.0; owner, 20 Nov 2026: "every few hours
+    when it's open, and if the schedule is missed, the soonest next opportunity"), under the same check, and Home says when one
+    failed and why. **It is the one write this program makes without a press;**
+  - **Copy now** (0.42.0), for a repository with `config/safe-copies.json`, while the manifest calls it `writes`: into the folders
+    the owner chose and marked, and a push of the private repository the owner chose. It deletes nothing at a source and lets go
+    only older copies beyond the number a set keeps (the saves, kit 1.68.0); the kit keeps anything made from a game's or the
+    owner's private files off every shared place. **Check the copies** only reads;
+  - **Restore** (0.43.0), into a folder the owner picked, and **Let go**, for one copy the kit lists as no longer taken: each only
+    after the owner's yes on the card, while the manifest calls it `writes`. Restore never replaces a different file unless the
+    owner then presses Replace older files, and never a newer one; Let go never touches the file the copy was made from;
+  - **Decide** (0.22.0): the owner's answer, appended in this program's folder.
+
+  **The Game files page only reads**; Show in folder opens the file manager on a file inside a folder the last report named, and
+  nothing else.
 - **The core never names a game.** A game reaches it only through the manifest's `game` field and the owner's own list,
   `.local/games.json`, which holds personal paths and is never committed.
-- **Git is read with `--no-optional-locks` and `core.fsmonitor=false`**, through `src-tauri/src/git.rs`: reading takes no lock and
-  starts no background watcher. A test that makes a repository sets `core.fsmonitor false` in it and removes it with read-only handling.
+- **Git is read with `--no-optional-locks` and `core.fsmonitor=false`**, through `companion_core::git`: reading takes no lock and
+  starts no background watcher. A test that makes a repository sets `core.fsmonitor false` in it and removes it with read-only
+  handling.
 - **Tools run as processes through the pinned kit.** Fix a tool in phobos-modkit, then move the pin; never edit the submodule.
 
 ## How it is built
 
+The layers, the folder map, a page's parts, how the kit runs and how to add a page are in
+[`docs/architecture.md`](docs/architecture.md). The rules:
+
 - **The window presents, the host decides.** Svelte components show what they are given. Only a `desktopClient.ts` may import
   `@tauri-apps/*`. Tauri commands stay thin: one line of delegation each, through `blocking` in `src-tauri/src/lib.rs`.
-- **Code more than one part uses lives once** (owner, 19 Nov 2026; `docs/shared-code-audit.md`). In the host, that is the
-  `companion-core` crate (`src-tauri/core`), which holds no Tauri: the games list (`games::find`, `repositories_of`,
-  `named_repository`), the kit (`kit::run_hearing`, `Outcome` for every answer, `allowed_by_manifest` before every change), failures
-  (`Failure::refused`), request checks (`checks`) and arguments (`args::Args`, where the window's text is always `given`, one
-  argument). A page's host module keeps only what is its own. In the window it is `src/lib/shell/` (`ask` and `BROWSER` for every
-  request, the `Waiting` and `Pending` readings, `dates.ts` for every date, `WindowDialog.svelte` for a dialog over the window),
-  `src/lib/changelog/` for showing a changelog, and `src/app.css` for a page's `h1`, `.lead`, `.how`, `.small` and pressed
-  `.toggle` choices. Before writing a helper or a style, look there first.
+- **Code more than one part uses lives once** (owner, 19 Nov 2026; `docs/shared-code-audit.md`): in the host, the `companion-core`
+  crate (`src-tauri/core`), which holds no Tauri; in the window, `src/lib/shell/`, `src/lib/changelog/` and `src/app.css`. A
+  page's own module keeps only what is its own. Every request goes through `ask` (and `BROWSER` outside the program), every kit
+  answer through `Outcome`, every change through `allowed_by_manifest`, the window's text to the kit always as one argument
+  (`args::Args::given`), every date through `dates.ts`, and every dialog over the window through `WindowDialog.svelte`. **Before
+  writing a helper or a style, look there first.**
 - **Words live in `locales/en-AU.json`**, never in a component; a test holds every key to it. Fluent, with named variables.
 - **Colours come from the theme in use**, by role, never a literal colour in a component. A test holds the program's own themes
   (`themes/*.json`) to the contrast rules. Colour never carries a meaning alone.
@@ -237,8 +206,9 @@ reads them.
   version, an id, a name, an optional author and exactly the twenty roles as `#RRGGBB`, at most 32 KB. The host's
   `companion_core::themes` is the authority: it checks the shape and the contrast (words 4.5:1, chart colours 3:1, lines 1.5:1, on
   every surface) before a theme is kept or used, keeps the owner's themes and choice in the program's own folder, opens the Open
-  and Save dialogs itself, and falls back to House D'thorga, saying why, when the chosen theme is missing or fails. The window sets
-  only `--colour-<role>` from it. A new role is added to the format, every theme file, both checks and the maker in one change.
+  and Save dialogs itself, and falls back to House D'thorga, saying why, when the chosen theme is missing or fails. The window
+  sets only `--colour-<role>` from it. A new role is added to the format, every theme file, both checks and the maker in one
+  change.
 - **Controls are at least 44 px**, nothing needs a drag or appears only on hover, everything is reachable from the keyboard, and
   the type floor is 12 px. **The page list down the left is the one exception: its rows are 40 px** (the owner's choice of 23 Nov
   2026, so every page shows without scrolling in a window about 940 px high).
@@ -249,34 +219,34 @@ reads them.
 - **Failures say what happened, what stayed safe and what to do**, then the technical detail folded away.
 - **Charts come from the tools, drawn by one component.** The kit sends a chart block with roles, never colours;
   `src/lib/charts/CompanionChart.svelte` is the only component that draws, and `echartsCore.ts` the only module that imports
-  ECharts, on demand. Every chart has a description read in place of the picture, its key in the page's own text, its values
-  where a pointer isn't needed, and **Show the numbers** for the table. Motion stops for reduced motion; chart text is 13 px.
+  ECharts, on demand. Every chart has a description read in place of the picture, its key in the page's own text, its values where
+  a pointer isn't needed, and **Show the numbers** for the table. Motion stops for reduced motion; chart text is 13 px.
 - **The globe comes from the tools, drawn by one module.** The kit sends a globe block (phobos-modkit `docs/manifest.md`);
-  `src/lib/atlas/globeScene.ts` is the only module that imports three.js, on demand, and `planet.ts` holds the arithmetic,
-  tested without a screen. Every move has a button and a key; dragging and the wheel are shortcuts. Colours for a measure
-  come from `colours.ts`'s ramps, chosen by the dataviz rules; a category layer brings the kit's own colours.
-- **Code is coloured by one module, from the theme.** `src/lib/code/highlightCore.ts` is the only module that imports highlight.js,
-  on demand, a grammar at a time; the kit names what a file is and never a colour. Token colours are the theme's roles, set in
-  `CodeViewer.svelte`; the "something went wrong" colour is never used for code. A changed line carries a `+` or `−` mark beside it.
-  Code reaches the page escaped (by the highlighter, or by `hunkHtml`): never put file text into `{@html}` any other way.
-- **Work that takes time shows a bar and says what it is doing** (owner, 19 Nov 2026). Every request that runs a tool gives the host
-  a progress channel (`progressChannel` in `src/lib/shell/desktopClient.ts`); the host passes on the tool's progress lines
-  (`kit::run_hearing`), and `ProgressBar.svelte` is the one component that draws them: filled when the tool can count its steps,
-  moving when it cannot, always with words, and its latest line of output beneath. A new tool that can take more than a moment
-  speaks progress lines (phobos-modkit `docs/manifest.md`, Progress) before its page is built. **A read again that keeps the page on
-  screen still shows a bar** (owner, 19 Nov 2026: a silent Read again "you ... think that the app ... is broken"), and its button
-  says it is working until it is done.
+  `src/lib/atlas/globeScene.ts` is the only module that imports three.js, on demand, and `planet.ts` holds the arithmetic, tested
+  without a screen. Every move has a button and a key; dragging and the wheel are shortcuts. Colours for a measure come from
+  `colours.ts`'s ramps, chosen by the dataviz rules; a category layer brings the kit's own colours.
+- **Code is coloured by one module, from the theme.** `src/lib/code/highlightCore.ts` is the only module that imports
+  highlight.js, on demand, a grammar at a time; the kit names what a file is and never a colour. Token colours are the theme's
+  roles, set in `CodeViewer.svelte`; the "something went wrong" colour is never used for code. A changed line carries a `+` or `−`
+  mark beside it. Code reaches the page escaped (by the highlighter, or by `hunkHtml`): never put file text into `{@html}` any
+  other way.
+- **Work that takes time shows a bar and says what it is doing** (owner, 19 Nov 2026). Every request that runs a tool gives the
+  host a progress channel, and the host passes on the tool's progress lines; `ProgressBar.svelte` is the one component that draws
+  them: filled when the tool can count its steps, moving when it cannot, always with words, and its latest line of output beneath.
+  A new tool that can take more than a moment speaks progress lines (phobos-modkit `docs/manifest.md`, Progress) before its page
+  is built. **A read again that keeps the page on screen still shows a bar** (owner, 19 Nov 2026: a silent Read again "you ...
+  think that the app ... is broken"), and its button says it is working until it is done.
 - **Quantities are preset buttons or the game's own kind of control**, not sliders.
 - **Every move goes through the window's trail** (owner, 19 Nov 2026: `docs/cross-links.md`, N1 to N3): a link calls `go` or
-  `openDialog` (`src/lib/navigation/navigation.svelte.ts`), a choice on a page calls `setFocus` and reads it back from `here()`, and
-  the code viewer and the changelog as it stood are drawn by the App from the trail, never by a page. A new page lists the focus keys
-  it reads in `docs/cross-links.md`, and a new kind of thing joins Go to anything (`src/lib/navigation/goto.ts`).
-- **The Guide is kept with the program** (0.34.0; the owner, 20 Nov 2026: "documentation, or an encyclopedia, into the
-  Companion, so I know what to do or how to find something"). **A change that adds or alters a page, a panel or a button updates
-  its entries in `guide/` in the same commit**: the page's entry, any How do I…? answer whose steps it changes, and a word it
-  introduces. Each entry is a small file (`docs/guide-entries.md` gives the format); write it as the player guides are written:
-  answer first, numbered steps, **bold** for what to press, the key beside it, and the button's words exactly as the page shows
-  them. `src/lib/guide/entries.test.ts` refuses a page with no entry, a link or See also to no entry, a Take me there a page cannot
+  `openDialog` (`src/lib/navigation/navigation.svelte.ts`), a choice on a page calls `setFocus` and reads it back from `here()`,
+  and the code viewer and the changelog as it stood are drawn by the App from the trail, never by a page. A new page lists the
+  focus keys it reads in `docs/cross-links.md`, and a new kind of thing joins Go to anything (`src/lib/navigation/goto.ts`).
+- **The Guide is kept with the program** (0.34.0; the owner, 20 Nov 2026: "documentation, or an encyclopedia, into the Companion,
+  so I know what to do or how to find something"). **A change that adds or alters a page, a panel or a button updates its entries
+  in `guide/` in the same commit**: the page's entry, any How do I…? answer whose steps it changes, and a word it introduces. Each
+  entry is a small file (`docs/guide-entries.md` gives the format); write it as the player guides are written: answer first,
+  numbered steps, **bold** for what to press, the key beside it, and the button's words exactly as the page shows them.
+  `src/lib/guide/entries.test.ts` refuses a page with no entry, a link or See also to no entry, a Take me there a page cannot
   show, and an entry nothing links to.
 - **A page's common moves have keyboard shortcuts** (owner, 19 Nov 2026), listed once in `src/lib/shortcuts/actions.ts` with its
   default, and offered by the view while it is on screen (`register` in `src/lib/shortcuts/registry.ts`). They never act in a text
@@ -288,6 +258,7 @@ reads them.
 - **Dark first.**
 - **A new library has to earn it**: a real need now, less upkeep than a small local version, one place it can be replaced from,
   tests that fit, and safe behaviour when it fails. Record it in `THIRD_PARTY_NOTICES.md`.
+- **A new page follows the checklist in `docs/architecture.md`, "How to add a page"**, so it reaches every list it belongs to.
 
 ## Names
 

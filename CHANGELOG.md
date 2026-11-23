@@ -10,6 +10,10 @@ Maintained from 9 November 2026.
   docs rewrite, step 2, 23 Nov 2026: "Move all 12 now"). AGENTS.md drops what the kit's every-session, brand and changelog rules
   now say; publishing.md points to the kit's own publishing guide for how the kit publishes, and debugging.md to its heap reader
   guide, so each is explained in one place. The kit also brings steam-publish's build output on standard error (1.105.1).
+- **The architecture page explains the codebase in one place** (the owner's docs rewrite, step 4, 23 Nov 2026):
+  `docs/architecture.md`, written fresh from the code, traces a press from the window through the host to the kit, with one
+  table of where every piece of state lives, the security gates, the tests and a checklist for adding a page. AGENTS.md keeps
+  every rule, one bullet a page, and points there for how each works; the design record's "How it is built" points there too.
 
 ### Fixed
 

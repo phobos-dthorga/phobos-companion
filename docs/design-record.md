@@ -41,26 +41,10 @@ colours below; the first version only reads.
 
 ## How it is built
 
-```mermaid
-flowchart LR
-  P[Person or dragon] --> W[Window: Svelte 5]
-  W -->|desktop client| H[Rust host]
-  H -->|manifest and --json| K[phobos-modkit, pinned]
-  A[Agent session] -->|same commands| K
-```
-
-**The window presents, the host decides.** Svelte components show what they are given. Only `desktopClient.ts` files may
-talk to the host. The host owns running tools, and later the watcher, the databases and the refusals.
-
-**One boundary to the tools.** The host runs `python -m phobos_modkit <command> --json` and reads one shape, the envelope
-(phobos-modkit `docs/manifest.md`). A process per question is cheap: 0.16 s to start on the owner's PC, against 0.2 to 2.7 s
-for the query itself (measured 9 Nov 2026, best case for other PCs).
-
-**The manifest decides what the program may run.** Each report says what it does: `reads`, `reads-online`, `writes`, `runs`
-or `owner-only`. The first version runs only the first two, and `owner-only` never.
-
-**The core never names a game**, the rule phobos-modkit keeps too. A game's name reaches the core only through the
-manifest's `game` field and the owner's own list of games.
+**Moved to [architecture.md](architecture.md)** (23 Nov 2026, the owner's docs rewrite, step 4): the layers from the window to
+the kit, the folder map, a page traced from press to file, where every piece of state lives, the security gates, the tests and
+how to add a page. The rules it follows are in [`AGENTS.md`](../AGENTS.md). The decisions behind it stand as recorded above:
+Tauri 2 with Svelte 5 over a Rust host, and the Python tools run as processes.
 
 ## The window
 

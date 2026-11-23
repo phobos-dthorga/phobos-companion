@@ -1,7 +1,14 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, openTab, SAMPLE_PNG, sampleHome } from "./host";
+import {
+  healthyKit,
+  mockHost,
+  openTab,
+  SAMPLE_PNG,
+  sampleAiStatus,
+  sampleHome,
+} from "./host";
 
 const CONTROL_MIN_PX = 44;
 
@@ -994,6 +1001,64 @@ test.describe("Since you last played (0.28.0)", () => {
     ).toBeVisible();
     await audit(page);
   });
+  test("after a check, What does this mean for my mods? shows what goes first (0.72.0)", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      mod_installs: sampleInstalls(["RimWorld"]),
+      texture_status: sampleTextures(["RimWorld"]),
+      mod_settings: { result: sampleLedger },
+      game_files: { result: gameFiles },
+      updates: { result: kept },
+      patch_targets: { result: targets },
+      ai_status: { result: sampleAiStatus },
+      update_check: {
+        result: {
+          available: true,
+          ok: true,
+          refusal: null,
+          report: { title: "After the update" },
+          data: { since, names: { found: 12, failing: [] } },
+        },
+      },
+      ai_prepare_update_check: {
+        result: {
+          id: 9,
+          what: "update-meaning",
+          service: "Ollama",
+          model: "sample-model:8b",
+          local: true,
+          instruction: "You help a person who makes game mods.",
+          text: "After the update\nNames:\nEvery name still found.",
+          characters: 47,
+        },
+      },
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Mods", exact: true }).click();
+    const panel = page.getByRole("group", { name: "Since you last played" });
+    await expect(
+      panel.getByRole("button", { name: "What does this mean for my mods?" }),
+    ).toHaveCount(0);
+    await panel
+      .getByRole("button", { name: "Check what they mean for ours" })
+      .click();
+    await panel
+      .getByRole("button", { name: "What does this mean for my mods?" })
+      .click();
+    await expect(panel).toContainText("Every name still found.");
+    await expect(panel).toContainText(
+      "To Ollama on this computer, model sample-model:8b.",
+    );
+    await audit(page);
+    await panel.getByRole("button", { name: "Cancel" }).click();
+    await expect(
+      panel.getByRole("button", { name: "What does this mean for my mods?" }),
+    ).toBeVisible();
+  });
+
   test("compares a changed picture with the repository's, and a mod's pictures with their encoded textures (0.53.0)", async ({
     page,
   }) => {

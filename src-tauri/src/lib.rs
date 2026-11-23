@@ -719,6 +719,30 @@ async fn ai_prepare_fault(app: tauri::AppHandle, game: String, fault: String) ->
     blocking(move || ai_help::prepare_fault(&data, &game, &fault)).await
 }
 
+/// What Summarise this version would send, built by the host from the changelogs the Changes page last read (0.72.0).
+#[tauri::command]
+async fn ai_prepare_version(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    changelog: String,
+    version: String,
+) -> Result<ai_help::Prepared, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || ai_help::prepare_version(&data, &game, &repository, &changelog, &version)).await
+}
+
+/// What "What does this mean for my mods?" would send, built from a repository's last update check (0.72.0).
+#[tauri::command]
+async fn ai_prepare_update_check(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+) -> Result<ai_help::Prepared, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || ai_help::prepare_update_check(&data, &game, &repository)).await
+}
+
 /// Sends the question last prepared, on the person's press, streaming the answer's text through the window's channel.
 #[tauri::command]
 async fn ai_send(
@@ -1508,6 +1532,8 @@ pub fn run() {
             ai_forget_key,
             ai_models,
             ai_prepare_fault,
+            ai_prepare_version,
+            ai_prepare_update_check,
             ai_send,
             picks_list,
             publish_read,

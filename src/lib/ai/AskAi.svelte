@@ -2,16 +2,27 @@
   import { t } from "../i18n/runtime";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { started } from "../shell/progress";
-  import { prepareFault, sendPrepared } from "./desktopClient";
+  import type { Failed } from "../shell/types";
+  import { sendPrepared } from "./desktopClient";
   import { loadAi } from "./state.svelte";
   import type { AiAnswer, AiPrepared } from "./types";
 
   /**
-   * Explain this fault, on the Logs page (0.71.0; `docs/ai.md`, A2; the owner's choice of 23 Nov 2026: "shown first, then my
-   * press"). A press asks the host to build the question from the fault it last read; the card shows all of it, and the service and
-   * model it would go to; only **Send** sends it. The answer is shown as plain text as it arrives, never acted on.
+   * One question to an AI service, on any page (0.71.0 for Explain this fault on Logs; shared since 0.72.0 by Summarise this
+   * version on Changes and What does this mean for my mods? on Mods; `docs/ai.md`, A2; the owner's choice of 23 Nov 2026: "shown
+   * first, then my press"). A press asks the host, through `prepare`, to build the question from what it last read; the card shows
+   * all of it, and the service and model it would go to; only **Send** sends it. The answer is shown as plain text as it arrives,
+   * never acted on. `key` keeps each card's headings apart on a page with several.
    */
-  let { game, fault }: { game: string; fault: string } = $props();
+  let {
+    key,
+    button,
+    prepare: build,
+  }: {
+    key: string;
+    button: string;
+    prepare: () => Promise<{ state: "ready"; prepared: AiPrepared } | Failed>;
+  } = $props();
 
   type Step =
     | { step: "idle" }
@@ -25,7 +36,7 @@
 
   async function prepare() {
     now = { step: "preparing" };
-    const answer = await prepareFault(game, fault);
+    const answer = await build();
     now =
       answer.state === "ready"
         ? { step: "shown", prepared: answer.prepared }
@@ -45,82 +56,82 @@
   }
 
   function stopWords(answer: AiAnswer): string | null {
-    if (answer.stop === "cut") return t("explain-stop-cut");
-    if (answer.stop === "refused") return t("explain-stop-refused");
+    if (answer.stop === "cut") return t("ask-stop-cut");
+    if (answer.stop === "refused") return t("ask-stop-refused");
     if (answer.stop === "failed")
-      return t("explain-stop-failed", {
-        reason: answer.problem ?? t("explain-no-reason"),
+      return t("ask-stop-failed", {
+        reason: answer.problem ?? t("ask-no-reason"),
       });
     return null;
   }
 
   function countWords(answer: AiAnswer): string {
     if (answer.inputTokens === null && answer.outputTokens === null)
-      return t("explain-tokens-unknown");
-    return t("explain-tokens", {
+      return t("ask-tokens-unknown");
+    return t("ask-tokens", {
       sent: answer.inputTokens ?? 0,
       received: answer.outputTokens ?? 0,
     });
   }
 </script>
 
-<div class="explain">
+<div class="ask">
   {#if now.step === "idle" || now.step === "failed"}
     <button type="button" class="action" onclick={() => void prepare()}
-      >{t("explain-button")}</button
+      >{button}</button
     >
     {#if now.step === "failed"}
       <p class="told refused" role="status">
-        {t("explain-failed", { reason: now.reason })}
+        {t("ask-failed", { reason: now.reason })}
       </p>
     {/if}
   {:else if now.step === "preparing"}
-    <ProgressBar progress={started()} fallback={t("explain-preparing")} />
+    <ProgressBar progress={started()} fallback={t("ask-preparing")} />
   {:else if now.step === "shown"}
     {@const prepared = now.prepared}
-    <section class="card" aria-labelledby={`explain-title-${fault}`}>
-      <h4 id={`explain-title-${fault}`}>{t("explain-shown-title")}</h4>
+    <section class="card" aria-labelledby={`ask-title-${key}`}>
+      <h4 id={`ask-title-${key}`}>{t("ask-shown-title")}</h4>
       <p class="small now">
         {prepared.local
-          ? t("explain-goes-local", {
+          ? t("ask-goes-local", {
               service: prepared.service,
               model: prepared.model,
             })
-          : t("explain-goes-online", {
+          : t("ask-goes-online", {
               service: prepared.service,
               model: prepared.model,
             })}
       </p>
-      <p class="small">{t("explain-instruction-title")}</p>
+      <p class="small">{t("ask-instruction-title")}</p>
       <pre class="lines">{prepared.instruction}</pre>
       <p class="small">
-        {t("explain-text-title", { count: prepared.characters })}
+        {t("ask-text-title", { count: prepared.characters })}
       </p>
       <pre class="lines">{prepared.text}</pre>
       <div class="buttons">
         <button type="button" class="action" onclick={() => void send(prepared)}
-          >{t("explain-send")}</button
+          >{t("ask-send")}</button
         >
         <button
           type="button"
           class="action"
-          onclick={() => (now = { step: "idle" })}>{t("explain-cancel")}</button
+          onclick={() => (now = { step: "idle" })}>{t("ask-cancel")}</button
         >
       </div>
     </section>
   {:else if now.step === "sending"}
     <ProgressBar
       progress={started()}
-      fallback={t("explain-sending", { service: now.prepared.service })}
+      fallback={t("ask-sending", { service: now.prepared.service })}
     />
     {#if now.text}
       <div class="answer">{now.text}</div>
     {/if}
   {:else if now.step === "answered"}
     {@const answer = now.answer}
-    <section class="card" aria-labelledby={`explain-answer-${fault}`}>
-      <h4 id={`explain-answer-${fault}`}>
-        {t("explain-answer-title", {
+    <section class="card" aria-labelledby={`ask-answer-${key}`}>
+      <h4 id={`ask-answer-${key}`}>
+        {t("ask-answer-title", {
           service: now.prepared.service,
           model: now.prepared.model,
         })}
@@ -132,19 +143,19 @@
         {#if stopWords(answer)}
           <p class="told refused" role="status">{stopWords(answer)}</p>
         {:else}
-          <p class="sr-only" role="status">{t("explain-done")}</p>
+          <p class="sr-only" role="status">{t("ask-done")}</p>
         {/if}
       </div>
-      <p class="muted small">{countWords(answer)} {t("explain-not-checked")}</p>
+      <p class="muted small">{countWords(answer)} {t("ask-not-checked")}</p>
       <button type="button" class="action" onclick={() => void prepare()}
-        >{t("explain-again")}</button
+        >{t("ask-again")}</button
       >
     </section>
   {/if}
 </div>
 
 <style>
-  .explain {
+  .ask {
     margin: 8px 0;
   }
 

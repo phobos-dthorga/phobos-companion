@@ -23,6 +23,9 @@
   import Pager from "../shell/Pager.svelte";
   import { pageFrom, pageOf } from "../shell/paging";
   import { commitRuns, plainText } from "../shell/inline";
+  import AskAi from "../ai/AskAi.svelte";
+  import { prepareVersion } from "../ai/desktopClient";
+  import { ai, loadAi } from "../ai/state.svelte";
   import type {
     ChangelogEntry,
     ChangelogList,
@@ -149,6 +152,8 @@
 
   onMount(() => {
     void load();
+    // Summarise this version shows only once an AI service and its model are ready (0.72.0, Settings → AI).
+    void loadAi();
     void readTestLists(game.id).then((read) => {
       if (read.state === "ready") testLists = read.lists;
     });
@@ -214,6 +219,19 @@
       </div>
       {#if version.summary}
         <p class="summary">{version.summary}</p>
+      {/if}
+      {#if ai.status?.ready && version.entries.length > 0}
+        <AskAi
+          key={`version-${version.version}`}
+          button={t("summarise-button")}
+          prepare={() =>
+            prepareVersion(
+              game.id,
+              chosen.repository,
+              chosen.log.changelog,
+              version.version,
+            )}
+        />
       {/if}
       {#if waiting.length > 0}
         <div class="waiting">

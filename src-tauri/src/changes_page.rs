@@ -13,6 +13,11 @@ use companion_core::kit::{self, Outcome};
 use serde::Serialize;
 use serde_json::Value;
 use std::path::Path;
+use std::sync::Mutex;
+
+/// Each game's changelogs from its last reading (0.72.0): Summarise this version asks about one by its repository, changelog and
+/// version, and the host takes its entries from here, so the window can never put words of its own into what an AI is sent.
+static SEEN: Mutex<Vec<(String, RepositoryChanges)>> = Mutex::new(Vec::new());
 
 const TOOL: &str = "changes";
 const LIST: &str = "list";
@@ -49,7 +54,38 @@ pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<Vec<Repositor
         let changelogs = if changelogs.is_array() { changelogs } else { Value::Array(Vec::new()) };
         found.push(RepositoryChanges { repository: repository.name, changelogs });
     }
+    remember(game, &found);
     Ok(found)
+}
+
+/// Keeps a game's changelogs from its latest reading, in place of the last.
+pub fn remember(game: &str, found: &[RepositoryChanges]) {
+    if let Ok(mut seen) = SEEN.lock() {
+        seen.retain(|(g, _)| g != game);
+        seen.extend(found.iter().map(|r| (game.to_owned(), r.clone())));
+    }
+}
+
+/// One version of one changelog the game's latest reading named: its product's name and the version as the kit gave it.
+pub fn remembered_version(
+    game: &str,
+    repository: &str,
+    changelog: &str,
+    version: &str,
+) -> Result<(String, Value), Failure> {
+    let missing = || Failure::refused("that version is not in the changelogs as last read: read them again");
+    let seen = SEEN.lock().map_err(|_| missing())?;
+    let log = seen
+        .iter()
+        .filter(|(g, r)| g == game && r.repository == repository)
+        .flat_map(|(_, r)| r.changelogs.as_array().cloned().unwrap_or_default())
+        .find(|log| log["changelog"].as_str() == Some(changelog))
+        .ok_or_else(missing)?;
+    let found = log["versions"]
+        .as_array()
+        .and_then(|versions| versions.iter().find(|v| v["version"].as_str() == Some(version)).cloned())
+        .ok_or_else(missing)?;
+    Ok((log["product"].as_str().unwrap_or(repository).to_owned(), found))
 }
 
 fn list_arguments(root: &Path) -> Vec<String> {

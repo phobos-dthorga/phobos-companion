@@ -24,7 +24,8 @@
   import ReportLinks from "../online/ReportLinks.svelte";
   import { readReportPlaces } from "../online/desktopClient";
   import type { ReportPlace } from "../online/types";
-  import ExplainFault from "../ai/ExplainFault.svelte";
+  import AskAi from "../ai/AskAi.svelte";
+  import { prepareFault } from "../ai/desktopClient";
   import { ai, loadAi } from "../ai/state.svelte";
 
   /** Explain this fault shows only once an AI service and its model are ready (0.71.0, Settings → AI). */
@@ -341,7 +342,11 @@
               <ReportLinks game={game.id} {signature} {places} log={data.log} />
             {/if}
             {#if ai.status?.ready}
-              <ExplainFault game={game.id} fault={signature.id} />
+              <AskAi
+                key={`fault-${signature.id}`}
+                button={t("explain-button")}
+                prepare={() => prepareFault(game.id, signature.id)}
+              />
             {/if}
             {#if (signature.frames ?? []).length > 0}
               <h3>{t("logs-stack-title")}</h3>

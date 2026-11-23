@@ -77,6 +77,35 @@ export async function prepareFault(
   );
 }
 
+type Prepared = { state: "ready"; prepared: AiPrepared } | Failed;
+const shown = (prepared: AiPrepared) => ({ state: "ready" as const, prepared });
+
+/** What Summarise this version would send, built by the host from the changelogs it last read (0.72.0). Nothing is sent. */
+export async function prepareVersion(
+  game: string,
+  repository: string,
+  changelog: string,
+  version: string,
+): Promise<Prepared> {
+  return ask<AiPrepared, Prepared>(
+    "ai_prepare_version",
+    { game, repository, changelog, version },
+    shown,
+  );
+}
+
+/** What "What does this mean for my mods?" would send, built from the repository's last update check (0.72.0). */
+export async function prepareUpdateCheck(
+  game: string,
+  repository: string,
+): Promise<Prepared> {
+  return ask<AiPrepared, Prepared>(
+    "ai_prepare_update_check",
+    { game, repository },
+    shown,
+  );
+}
+
 /** Sends the question the host last prepared, on the person's press; each piece of the answer goes to onText as it comes. */
 export async function sendPrepared(
   id: number,

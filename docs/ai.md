@@ -5,7 +5,10 @@
 from any AI program, and the panel not yet tested on screen.** **Slice 2 (A2's first button) built** in Companion 0.71.0 (the
 owner, 23 Nov 2026: "go ahead with A2"): Settings → AI services, **Explain this fault** on Logs, keys in the system's key store,
 and the AI services kind of going online. Checked by tests and a real listing of the models of the owner's running Ollama;
-**no real question has been sent yet, and nothing tested on screen.** A3 is a design only. The owner asked for "AI integration
+**no real question has been sent yet, and nothing tested on screen.** **Slice 3's buttons built** in Companion 0.72.0 (the owner,
+23 Nov 2026: "You can proceed with the others"): **Summarise this version** on Changes and **What does this mean for my
+mods?** under the Mods page's update check, through one shared card; the kit's tools for the model wait for a slice of their
+own. A3 is a design only. The owner asked for "AI integration
 directly into Companion", through an open framework that reaches "a multitude of services, preferably with some of the bigger
 ones at least", chose all three parts below by card the same day, and then took the agent's lean on all four open questions
 ("go with your leans on all four and start building"). Agent choices are labelled so the owner can revise them.
@@ -134,6 +137,14 @@ person chose, and shows the answer beneath as it arrives.
 **The first buttons (agent's proposal, `ai-first-buttons`):** **Explain this fault** on Logs, then **Summarise what changed**
 on Changes and **What does this update mean for my mods?** on What did an update change.
 
+**As built (0.72.0), where it differs** (agent choices): **Summarise this version** sits on each version of the Changes page,
+since a version is what a changelog groups and a person reads, rather than one button for the whole changelog. **What does this
+mean for my mods?** sits under a finished update check on the Mods page (Since you last played), not on What did an update
+change, because the check is what says what the updates mean for our code; it is offered only after a check this run made, and
+sends that check's report as plain text (`ai_help::report_text`: its title, facts, lines, bullets, tables cut at 30 rows, code,
+and charts by their description). All three buttons share one card (`src/lib/ai/AskAi.svelte`) and one way to prepare
+(`ai_help::keep`); each has its own instruction file.
+
 **The two rules, as they read since A2 was built** (AGENTS.md, 0.71.0, on the owner's answers; the wording is the agent's, for
 the owner to revise):
 
@@ -215,7 +226,8 @@ Each slice is a working thing by itself, with its own version and commit.
 | --- | --- | --- | --- |
 | 1 | **A1**: `mcp serve`, its three tools, both handshakes; Settings → AI programs | phobos-modkit, then phobos-companion | None |
 | 2 | **A2, first button**: `companion_core::ai`, services, the key store, the `ai-services` kind, Settings → AI services, **Explain this fault** on Logs, a local model and one online service | phobos-companion | Credentials; what is sent; a new online kind |
-| 3 | **A2, the other buttons**, then the kit's tools for the model | phobos-companion | None |
+| 3 | **A2, the other buttons** (built, 0.72.0) | phobos-companion | None |
+| 3b | **The kit's tools for the model**: the model may ask A1's read-only reports while it answers, with each call shown | phobos-companion | None |
 | 4 | **A3, first slice**: one agent, the chat page, permission cards, reads only through the Companion | phobos-companion | A new page; process tree ending on every system |
 | 5 | **A3 with the kit's tools**, and changes through the Companion with a yes on each | phobos-companion | None |
 

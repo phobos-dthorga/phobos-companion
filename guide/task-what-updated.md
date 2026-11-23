@@ -2,8 +2,8 @@
 title: See what updated since you last played
 kind: task
 go: mods
-words: updated, steam update, workshop, since last played, new version, changed, update check, temporary patch, broke, xml patch
-see: page-gamefiles, page-mods
+words: updated, steam update, workshop, since last played, new version, changed, update check, temporary patch, broke, xml patch, AI
+see: page-gamefiles, page-mods, task-ai-services
 ---
 1. Open **Mods** (the **5** key). **Since you last played**, in Before you play, says what updated since the session before, and whether any update changed something our mods patch.
 2. **See what changed** opens the change itself. **Keep the new builds** keeps them to compare with later.
@@ -18,5 +18,7 @@ It answers four things:
 - whether everything **our XML patches** name is still there.
 
 It says names and files still match; it does not show that anything works in play.
+
+Once [an AI is chosen](task-ai-services), **What does this mean for my mods?** appears under a finished check: it puts the check in plain words, most urgent first, with a next step for each problem. It shows you what it would send first, and sends it only on **Send**.
 
 For every Workshop item updated, and whether Steam updated the game, open **Game files** (the **W** key): **What changed** looks back to your last launch, the last day or the last week.

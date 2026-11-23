@@ -18,6 +18,9 @@
     type UpdateCheck,
   } from "./sinceLastPlayed";
   import { readPatches, readSince, type Patches } from "./sinceReading";
+  import AskAi from "../ai/AskAi.svelte";
+  import { prepareUpdateCheck } from "../ai/desktopClient";
+  import { ai, loadAi } from "../ai/state.svelte";
 
   /**
    * Since you last played (0.28.0; the owner's go-ahead, 20 Nov 2026), in Before you play: what updated since the session before
@@ -121,7 +124,11 @@
   const names = (files: KeptFile[]) =>
     files.map((f) => f.owner_name).join(", ");
 
-  onMount(read);
+  onMount(() => {
+    void read();
+    // What does this mean for my mods? shows only once an AI service and its model are ready (0.72.0, Settings → AI).
+    void loadAi();
+  });
 </script>
 
 {#if summary}
@@ -327,6 +334,13 @@
             {/if}
           {/if}
           <p class="small muted">{t("check-limits")}</p>
+          {#if ai.status?.ready && repositories[0]}
+            <AskAi
+              key="update-check"
+              button={t("update-meaning-button")}
+              prepare={() => prepareUpdateCheck(game, repositories[0])}
+            />
+          {/if}
           <button type="button" class="action" onclick={checkOurs}
             >{t("check-again")}</button
           >

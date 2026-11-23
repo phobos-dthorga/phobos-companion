@@ -4,6 +4,25 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.72.0] - 2026-11-23
+
+### Added
+
+- **Summarise this version, on each version of the Changes page** (the owner, 23 Nov 2026: "You can proceed with the others";
+  `docs/ai.md`, A2). Puts a version in plain words: what a player would notice, what they must do, and what the changelog says is
+  not yet tested. The host builds the question from the changelogs it last read, by repository, changelog and version, and shows
+  it whole before **Send**. **Not yet tested on screen, and no real question sent yet.**
+- **What does this mean for my mods?, under a finished update check on the Mods page.** Puts the check (Check what they mean for
+  ours) in plain words, most urgent first, with a next step for each problem. Offered only after a check this run made; the host
+  sends that check's report as plain text. **Not yet tested on screen, and no real question sent yet.**
+
+### Changed
+
+- **The three AI buttons share one card**, so Explain this fault, Summarise this version and What does this mean for my mods? look
+  and behave the same: what would be sent and where first, then **Send** or **Cancel**, then the answer as text with its tokens.
+  The card's words now read for any page ("What is sent, from the page as last read", **Ask again**). Each button keeps its own
+  instruction file in `prompts/`. The Guide's Changes, update and AI entries name the new buttons.
+
 ## [0.71.0] - 2026-11-23
 
 ### Added

@@ -1,7 +1,13 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome, toneWav } from "./host";
+import {
+  healthyKit,
+  mockHost,
+  sampleAiStatus,
+  sampleHome,
+  toneWav,
+} from "./host";
 
 const CONTROL_MIN_PX = 44;
 
@@ -376,6 +382,61 @@ for (const [name, viewport] of [
           document.documentElement.clientWidth,
       );
       expect(overflow).toBeLessThanOrEqual(0);
+    });
+
+    test("Summarise this version shows what goes first, and only once an AI is ready (0.72.0)", async ({
+      page,
+    }) => {
+      await open(page, sampleCode(), {
+        ai_status: { result: sampleAiStatus },
+        ai_prepare_version: {
+          result: {
+            id: 3,
+            what: "summarise-version",
+            service: "Ollama",
+            model: "sample-model:8b",
+            local: true,
+            instruction: "You help a person who makes or plays game mods.",
+            text: "Product: Sample Mod\nVersion: 1.3.0\n\nAdded:\n- Sample boats float.",
+            characters: 60,
+          },
+        },
+        ai_send: {
+          result: {
+            text: "Boats float now.",
+            stop: "cut",
+            problem: null,
+            inputTokens: null,
+            outputTokens: null,
+          },
+        },
+      });
+      const version = page.getByRole("region", { name: "1.3.0" });
+      await version
+        .getByRole("button", { name: "Summarise this version" })
+        .click();
+      await expect(version).toContainText(
+        "What is sent, from the page as last read (60 characters):",
+      );
+      await expect(version).toContainText("- Sample boats float.");
+      await audit(page);
+      await version.getByRole("button", { name: "Send", exact: true }).click();
+      await expect(version).toContainText("Boats float now.");
+      await expect(version).toContainText("was cut off");
+      await expect(version).toContainText(
+        "The service did not count the tokens.",
+      );
+      await audit(page);
+    });
+
+    test("no AI ready means no Summarise this version", async ({ page }) => {
+      await open(page, sampleCode(), {
+        ai_status: { result: { ...sampleAiStatus, ready: false } },
+      });
+      await expect(page.getByRole("region", { name: "1.3.0" })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Summarise this version" }),
+      ).toHaveCount(0);
     });
 
     test("shows the code behind an entry, coloured, code first", async ({

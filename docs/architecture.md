@@ -233,8 +233,9 @@ under the same manifest check as the press.
 | The Steam Workshop | Kit, `steam-publish`, `mod-list` | Upload, update, subscribe | `owner-press` or `writes`; a yes |
 
 **In memory, for one run:** files a kit answer named (`viewable.rs:32`), the Publish page's last mods and items, the Mod list's
-last listing, the Explorer's snapshot, each game's last log faults (`logs_page::remember`) and the one question last prepared for
-an AI service (`ai_help.rs`). A press is refused for anything this run was not shown.
+last listing, the Explorer's snapshot, each game's last log faults (`logs_page::remember`), its last changelogs
+(`changes_page::remember`), each repository's last update check (`other_code_page::remember_check`), and the one question last
+prepared for an AI service (`ai_help.rs`). A press is refused for anything this run was not shown.
 
 ## The security gates
 

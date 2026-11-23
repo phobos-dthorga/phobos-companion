@@ -28,6 +28,29 @@ const MAX_NAME: usize = 300;
 /// The assemblies `holder` named, the only ones `decompile` may be asked for.
 static HELD: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
 
+/// Each repository's last update check (0.72.0), as (game, repository, the kit's report): What does this mean for my mods? asks
+/// about it, and the host takes the report from here.
+static CHECKED: Mutex<Vec<(String, String, Value)>> = Mutex::new(Vec::new());
+
+/// Keeps a repository's latest update check, in place of the last.
+pub fn remember_check(game: &str, repository: &str, report: &Value) {
+    if let Ok(mut checked) = CHECKED.lock() {
+        checked.retain(|(g, r, _)| !(g == game && r == repository));
+        checked.push((game.to_owned(), repository.to_owned(), report.clone()));
+    }
+}
+
+/// A repository's latest update check's report, from this run of the program.
+pub fn remembered_check(game: &str, repository: &str) -> Result<Value, Failure> {
+    CHECKED
+        .lock()
+        .ok()
+        .and_then(|checked| {
+            checked.iter().find(|(g, r, _)| g == game && r == repository).map(|(.., report)| report.clone())
+        })
+        .ok_or_else(|| Failure::refused("that repository's update check is not one this run made: check again"))
+}
+
 /// What the tools answered: `available` is false when this game's tools offer no such report.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Answer {
@@ -228,7 +251,11 @@ pub fn update_check(
     let found = games::named_repository(game, repository)?;
     let Some(tool) = tool(game, UPDATE_CHECK, "", RUNS)? else { return Ok(Answer::missing()) };
     let arguments = update_check_arguments(&tool, &found.path, since).map_err(Failure::refused)?;
-    Ok(Answer::of(&kit::run_hearing(&tool, &arguments, listener)?))
+    let answer = Answer::of(&kit::run_hearing(&tool, &arguments, listener)?);
+    if answer.ok {
+        remember_check(game, repository, &answer.report);
+    }
+    Ok(answer)
 }
 
 #[cfg(test)]

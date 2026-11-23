@@ -17,7 +17,11 @@ see: task-explain-fault, task-going-online, task-ai-programs, page-settings
 4. Press **Read the models**, then choose one under **The model that answers**.
 5. Choose an **Answer length**: **Short**, **Medium** or **Long**.
 
-When it says **Ready**, open a fault on the [Logs](page-logs) page and press **Explain this fault**.
+When it says **Ready**, three buttons appear, each showing what it would send before **Send**:
+
+- **Explain this fault**, on a fault on the [Logs](page-logs) page ([more](task-explain-fault));
+- **Summarise this version**, on each version on the [Changes](page-changes) page;
+- **What does this mean for my mods?**, under a finished update check on the [Mods](page-mods) page ([more](task-what-updated)).
 
 **Good to know:**
 

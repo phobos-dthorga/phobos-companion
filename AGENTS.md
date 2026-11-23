@@ -136,9 +136,13 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   **Forget this key**. **The services are data** (`config/ai-services.json`), checked by `companion_core::ai` before use: a
   loopback one runs on this computer, any other must be https and needs a key. **Read the models** asks a service on a press,
   through the same gate as a question.
-- **Logs: Explain this fault sends only what the person was shown, on their press** (0.71.0; the owner's choice of 23 Nov 2026:
-  "shown first, then my press"; `docs/ai.md`, A2). The host builds the question from a fault the page's last reading named, by
-  its id, and an instruction file kept with the program (`prompts/`); the window never adds words. **Send** sends that question
+- **Help on pages sends only what the person was shown, on their press** (0.71.0; the owner's choice of 23 Nov 2026: "shown first,
+  then my press"; `docs/ai.md`, A2): **Explain this fault** on Logs, and since 0.72.0 **Summarise this version** on Changes and
+  **What does this mean for my mods?** under the Mods page's update check, all through `src/lib/ai/AskAi.svelte`. The host builds
+  each question from what that page's last reading named (a fault by its id; a repository's changelog and version; a
+  repository's update check from this run) and an instruction file kept with the program (`prompts/`); the window never adds
+  words. **A new button adds its instruction file, a `prepare_` function in `ai_help.rs` that reads only what the host itself
+  read, and its Guide words, in one change.** **Send** sends that question
   and nothing else, only the one last prepared, after `companion_core::ai::ready` checks the service, its key and, for an online
   one, AI services in Going online. **The model is given no tools**, and its answer is shown as text, never acted on, never put
   into `{@html}`. Each answer's token count is appended to `ai-usage.jsonl`. **Agents and tests never send a real question**:

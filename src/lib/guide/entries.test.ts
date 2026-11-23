@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PAGE_NAMES, type PageName } from "../navigation/place";
+import { PAGE_TABS } from "../shell/tabs";
 import {
   destination,
   ENTRIES,
@@ -37,10 +38,13 @@ const FOCUS_KEYS: Partial<Record<PageName, string[]>> = {
   reports: ["command", "report"],
   guide: ["entry"],
 };
-const PANELS: Partial<Record<PageName, string[]>> = {
-  settings: ["records", "cleanup", "themes", "games", "agents", "online"],
-  mods: ["settings"],
-};
+/** The panels each page's tabs hold, from the one list of tabs (0.70.0: a hand-kept copy here had fallen behind). */
+const PANELS: Partial<Record<PageName, string[]>> = Object.fromEntries(
+  Object.entries(PAGE_TABS).map(([page, tabs]) => [
+    page,
+    tabs.flatMap((tab) => tab.panels ?? []),
+  ]),
+);
 
 describe("the Guide's entries", () => {
   it("are all read without a fault, about fifty of them", () => {

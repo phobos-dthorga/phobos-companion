@@ -1,9 +1,11 @@
 # AI in the Companion: tools for AI programs, help on pages, and a chat page (A1 to A3)
 
-**Status (23 Nov 2026):** a design record only. **Nothing is built, and nothing here is tested.** The owner asked for "AI
-integration directly into Companion", through an open framework that reaches "a multitude of services, preferably with some of
-the bigger ones at least", and chose all three parts below by card the same day. Agent choices are labelled so the owner can
-revise them; the ones that need the owner's word are also on the Decisions page (`config/decisions.json`, ids opening `ai-`).
+**Status (23 Nov 2026):** **slice 1 (A1) built** in Companion 0.70.0 with phobos-modkit 1.109.0: the kit's `mcp serve` and
+`mcp setup`, and Settings → AI. Checked by tests and one real run of the server over standard input and output; **not yet tried
+from any AI program, and the panel not yet tested on screen.** A2 and A3 are designs only. The owner asked for "AI integration
+directly into Companion", through an open framework that reaches "a multitude of services, preferably with some of the bigger
+ones at least", chose all three parts below by card the same day, and then took the agent's lean on all four open questions
+("go with your leans on all four and start building"). Agent choices are labelled so the owner can revise them.
 
 **The whole design in four lines:**
 
@@ -18,9 +20,10 @@ revise them; the ones that need the owner's word are also on the Decisions page 
   carries the protocol version in `_meta`, and a server must answer `server/discover`. Programs in use still speak the older
   revisions, so a server answers both (below). The official Python package `mcp` is on a rewritten 2.x line for the same reason.
 - **The kit's Python is standard library only** (its own rule), and the installer ships Python with no extra packages. So A1's
-  server is a small one of our own (agent choice, on the Decisions page), not the official package.
-- **Never pass `--no-redact`.** Every report has it. A1 and A2 take a report's answer only as redacted, so the home folder
-  reads `~` in anything a model sees.
+  server is a small one of our own (the owner's choice, by the agent's lean), not the official package.
+- **Never pass `--no-redact` for a model.** Every report has it. A1 and A2 take a report's answer only as redacted, so the home
+  folder reads `~` in anything a model sees. The one exception is `mcp setup`'s lines, shown only to the person, since they must
+  name real folders.
 - **A Claude, ChatGPT or Gemini subscription does not pay for calls a program of ours makes** (agent's knowledge, not checked on
   23 Nov 2026). A2 needs a key charged per use, or a model on the person's own computer, which costs nothing. A3 is different:
   the agent is its own program with its own login, so it uses whatever that login includes.
@@ -42,14 +45,16 @@ revise them; the ones that need the owner's word are also on the Decisions page 
 | Which do you want to have? | **All three**: buttons on pages, a chat page, tools for other AI programs |
 | May the Companion keep keys for AI services? | "I wish to make Companion work across multiple operating systems and am willing to bend this rule now; it was an old one just to maintain security while we were growing, to not stray off course accidentally. How does all this shape our choices now?" |
 | What may be sent to an online model? | "Read before." |
+| The four questions that followed (Decisions page) | **The agent's lean on all four** (the owner, 23 Nov 2026), and of the chat page's switch starting off: "a very good choice" |
 
-**Agent's readings, to confirm** (both on the Decisions page):
+**The four, as answered:**
 
-- **Keys**: the rule bends narrowly. Keys for AI services the person adds are kept in the operating system's own key store;
-  nothing else is held, and Steam passwords stay never held (`ai-credentials-rule`).
-- **"Read before."**: read as "see my answer on the card before", so this rule may bend too. The other reading, "I read it
-  before it is sent", gives the same result. Either way: the text is shown first, and goes on the person's press
-  (`ai-what-is-sent`).
+| Id | Answer |
+| --- | --- |
+| `ai-credentials-rule` | **Keys for AI services only**: kept in the operating system's own key store (or read from an environment variable), never in a file of ours. Steam passwords stay never held |
+| `ai-what-is-sent` | **Shown first, then the person's press**, under an AI services switch that starts off |
+| `ai-mcp-server` | **A small server of our own**, standard library only: built (A1) |
+| `ai-chat-changes` | **Reads only at first**, then a yes on each change through the Companion |
 
 ## What the three share
 
@@ -91,6 +96,19 @@ input and output. It is game-free: what it offers comes from the manifest, so ev
 
 **Not verified:** which revision each AI program speaks today, and so how much use the older handshake gets. Check the
 specification's stdio and versioning pages again before building; the facts above were read on 23 Nov 2026.
+
+**As built (0.70.0, kit 1.109.0), where it differs from the table above** (agent choices):
+
+- **The server's name is `dthorga-reports`, shown as "D'thorga Reports"**: the brand's form, the word saying what it offers.
+- **An answer is the report's Markdown summary**; `form: "json"` asks for the whole envelope instead. Giving both every time
+  doubled the run, and an envelope can be large (a globe's tiles).
+- **Without a repository, a report runs in an empty temporary folder**, so a report's "current folder" default never reads
+  wherever the AI program happened to start.
+- **A value holding a slash is refused even when it is not a path** (a SQL query that divides): the simple check is the safe
+  one. A report is stopped after 300 seconds; an answer is cut at 60,000 characters, saying so.
+- **The panel offers no `--online` choice yet.** The server can take it, but going online from a program the Companion did not
+  start would sit outside Settings → Going online's switches; that waits until someone needs it.
+- **The kit reads the games list in one place now** (`games_list.py`), shared with the daily safe copies.
 
 ## A2: help on pages (the Companion calls a model itself)
 
@@ -176,16 +194,7 @@ Each slice is a working thing by itself, with its own version and commit.
 
 ## Open, for the owner to revise
 
-On the Decisions page (`config/decisions.json`):
-
-| Id | Question | Agent's lean |
-| --- | --- | --- |
-| `ai-credentials-rule` | How far does the credentials rule bend? | Narrowly: keys for AI services only |
-| `ai-what-is-sent` | What may be sent to an online model? | Shown first, then a press |
-| `ai-mcp-server` | Our own small MCP server, or the official package? | Our own |
-| `ai-chat-changes` | May an agent change files through the Companion? | Not in the first slice; then with a yes on each |
-
-Smaller agent choices, revisable here: genai over rig (`ai-library`); the ACP crate over a reader of our own
+The four questions are answered (above). Smaller agent choices, revisable here: genai over rig (`ai-library`); the ACP crate over a reader of our own
 (`ai-chat-library`); the first buttons (`ai-first-buttons`); three MCP tools in place of one for each report; every switch
 starting off; local models listed first; a month's token total kept.
 

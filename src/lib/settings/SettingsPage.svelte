@@ -30,6 +30,7 @@
   import AgentsPanel from "../agents/AgentsPanel.svelte";
   import PublishingPanel from "../publish/PublishingPanel.svelte";
   import OnlinePanel from "../online/OnlinePanel.svelte";
+  import AiProgramsPanel from "../ai/AiProgramsPanel.svelte";
   import type { Setting, SettingsReading } from "./types";
 
   /**
@@ -278,6 +279,8 @@
       <AgentsPanel />
     {:else if tab === "publishing"}
       <PublishingPanel />
+    {:else if tab === "ai"}
+      <AiProgramsPanel />
     {:else}
       {@render folders()}
     {/if}

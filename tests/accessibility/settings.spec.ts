@@ -59,6 +59,24 @@ const sampleSettings = {
   ],
 };
 
+/** Invented setup lines for an AI program (0.70.0), as the kit's `mcp setup` gives them. */
+const sampleServer = {
+  command: "C:\\Sample\\python.exe",
+  args: ["-m", "phobos_modkit", "mcp", "serve"],
+  env: { PYTHONPATH: "C:\\Sample\\kit" },
+};
+const sampleAiSetup = {
+  name: "dthorga-reports",
+  online: false,
+  ...sampleServer,
+  serversJson: JSON.stringify(
+    { mcpServers: { "dthorga-reports": sampleServer } },
+    null,
+    2,
+  ),
+  claudeCode: `claude mcp add-json --scope user dthorga-reports '${JSON.stringify({ type: "stdio", ...sampleServer })}'`,
+};
+
 async function open(
   page: Page,
   saved: unknown = {
@@ -72,6 +90,7 @@ async function open(
     kit_status: healthyKit,
     settings_list: { result: sampleSettings },
     set_setting: { result: saved },
+    ai_programs_setup: { result: sampleAiSetup },
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Settings", exact: true }).click();
@@ -170,6 +189,43 @@ for (const [name, viewport] of [
       await expect(page.locator("main").getByRole("status")).toContainText(
         "Saved historyPath to the central settings file.",
       );
+    });
+
+    test("the AI tab shows the lines for AI programs, copies them, and passes the audit", async ({
+      page,
+    }) => {
+      await open(page);
+      await openTab(page, "AI");
+      await expect(
+        page.getByRole("heading", { name: "AI programs" }),
+      ).toBeVisible();
+      await expect(page.locator("#settings-ai-programs")).toContainText(
+        '"mcpServers"',
+      );
+      await expect(page.locator("#settings-ai-programs")).toContainText(
+        "claude mcp add-json --scope user dthorga-reports",
+      );
+      await audit(page);
+      await page.getByRole("button", { name: "Copy the list" }).click();
+      await expect(
+        page.locator("#settings-ai-programs").getByRole("status"),
+      ).toContainText("clipboard");
+      const small = await page
+        .locator("#settings-ai-programs")
+        .evaluate(
+          (root, min) =>
+            [...root.querySelectorAll("button")]
+              .map((e) => e.getBoundingClientRect())
+              .filter((r) => r.width > 0 && r.height < min).length,
+          CONTROL_MIN_PX,
+        );
+      expect(small).toBe(0);
+      const overflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
     });
 
     test("a refusal is shown in words and nothing is called saved", async ({

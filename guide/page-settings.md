@@ -3,10 +3,10 @@ title: Settings
 kind: page
 page: settings
 go: settings
-words: options, preferences, folders, paths, keys, theme, backup, games, agents, online, internet, workshop uploads, publishing
-see: task-change-folder, task-change-key, task-change-theme, task-agent-features, task-going-online, task-records-backup, task-add-game, task-clean-up
+words: options, preferences, folders, paths, keys, theme, backup, games, agents, online, internet, workshop uploads, publishing, AI, MCP
+see: task-change-folder, task-change-key, task-change-theme, task-agent-features, task-going-online, task-records-backup, task-add-game, task-clean-up, task-ai-programs
 ---
-**How the Companion works for you, and where the tools keep and find things**, in seven tabs:
+**How the Companion works for you, and where the tools keep and find things**, in eight tabs:
 
 - **Look and keys:** [choose or make a theme](task-change-theme), and [change any key, or turn one off](task-change-key).
 - **Games:** [add a game Steam has installed](task-add-game).
@@ -15,6 +15,7 @@ see: task-change-folder, task-change-key, task-change-theme, task-agent-features
 - **Backups and space:** [where copies of your records go, and how fresh they are](task-records-backup), and [clean up what the tools left behind](task-clean-up).
 - **Agent sessions:** [show or hide the features for AI agent sessions](task-agent-features).
 - **Publishing:** **Workshop uploads**, **On** or **Off**: whether the [Publish](page-publish) page offers Upload, Make public and Update all waiting. On by default.
+- **AI:** [the lines that let an AI program you use ask the tool kit's reports](task-ai-programs), with **Copy the list** and **Copy the command**.
 
 ### Keys
 - **9** opens Settings.

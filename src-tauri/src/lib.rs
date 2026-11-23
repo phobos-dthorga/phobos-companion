@@ -4,6 +4,7 @@
 //! request checks, failures. This file holds the Tauri commands, each one line of delegation on a worker thread.
 
 mod about_page;
+mod ai_programs;
 mod changed_files;
 mod changes_page;
 mod claims_board;
@@ -641,6 +642,12 @@ async fn claims_list() -> Result<serde_json::Value, Failure> {
 #[tauri::command]
 async fn decisions_list() -> Result<serde_json::Value, Failure> {
     blocking(decisions_page::read).await
+}
+
+/// The lines an AI program needs to start the kit's MCP server (0.70.0, Settings → AI). Only reads.
+#[tauri::command]
+async fn ai_programs_setup() -> Result<serde_json::Value, Failure> {
+    blocking(ai_programs::read).await
 }
 
 /// Records the owner's answer to one decision, once they press Decide.
@@ -1412,6 +1419,7 @@ pub fn run() {
             safe_copies_set_daily,
             claims_list,
             decisions_list,
+            ai_programs_setup,
             picks_list,
             publish_read,
             publish_waiting,

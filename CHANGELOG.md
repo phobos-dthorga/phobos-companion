@@ -4,8 +4,29 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.70.0] - 2026-11-23
+
+### Added
+
+- **Settings → AI: the lines that let an AI program ask the tool kit's reports** (the owner, 23 Nov 2026: AI "directly into
+  Companion", all three parts of `docs/ai.md` chosen, and "go with your leans on all four and start building"). A new **AI** tab
+  holds **AI programs**: the lines to paste into Claude Desktop, LM Studio, Gemini CLI and others, and Claude Code's one command,
+  each with a Copy button. The AI program then starts the kit's MCP server by itself (phobos-modkit 1.109.0, `mcp serve`), which
+  runs only the kit's reports that read, names repositories only from the games list, and shows home folders as `~`. The panel
+  only reads; nothing here goes online. Guide: a new How do I…? entry, "Let an AI program ask the tool kit's reports", and the
+  Settings entry names the eighth tab. Checked by tests and one real run of the server; **not yet tested on screen, and not yet
+  tried from any AI program.**
+
 ### Changed
 
+- **The kit pin moves from v1.105.1 to v1.109.0**, for `mcp` (1.109.0). It also brings each option's `metavar` and help text in
+  the manifest (1.106.0), doc-tables (1.107.0, 1.108.0), the kit's architecture and library docs (1.108.1), and rimworld-perf's
+  manifest naming only the reports that attach to the game as `runs` (1.107.0). The five the Memory page runs keep the effects
+  it checks (watch `runs`, watch-status and watch-report `reads`, watch-stop and watch-mark `writes`), and the Explorer's
+  look-serve stays `runs`.
+- **The AI design record takes the owner's four answers**: keys for AI services only, kept in the system's key store; text
+  shown first and sent on a press; a small MCP server of our own; and a chat agent changing nothing through the Companion at
+  first. The four leave the Decisions page.
 - **AGENTS.md names everything the program writes**, as the architecture page found it (the owner, 23 Nov 2026: "fix those
   AGENTS gaps too"): the Looked at marks, the Workshop uploads switch, Save a picture, First steps' new games list and the
   daily safe copies' scheduled task join the list; the five kinds of going online are named; the two commands sent raw bytes

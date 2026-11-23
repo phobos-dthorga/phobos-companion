@@ -124,6 +124,11 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   path in Windows' own picker (0.29.0; owner, 20 Nov 2026: "file dialog window pickers ... where ever a directory needs to be
   chosen"); only while the manifest calls it `writes`; only a setting the tools list, as one line. It never writes a repository's
   own settings. **Every folder or file a page asks for gets the picker beside its type-in box** (owner's choice: keep both).
+- **Settings → AI only reads, and a press of Copy fills the clipboard** (0.70.0; the owner's choice of 23 Nov 2026, `docs/ai.md`,
+  A1): the lines an AI program needs to start the kit's MCP server, from the kit's `mcp setup`, shown in full since they must
+  name real folders. **The server is started by the AI program the person sets up, never by this program**, and runs only the
+  kit's reports the manifest calls `reads` (phobos-modkit `docs/mcp.md`). **Before asking a running AI program anything about
+  the kit's reports, read that doc**; never hand a model the kit's `--no-redact` output.
 - **Settings adds to the games list on one press** (0.31.0, Add a game from Steam; `docs/later.md` item 5, the owner's yes of 19
   Nov 2026): one new entry in `.local/games.json`, after the window showed it whole, with every field checked again, the list's
   order kept and the list as it was kept beside it; nothing is written when a check fails. **It never changes or removes an entry

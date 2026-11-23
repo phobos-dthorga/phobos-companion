@@ -543,7 +543,7 @@ dependencies = [
 
 [[package]]
 name = "companion-core"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "apple-native-keyring-store",
  "keyring-core",
@@ -2661,7 +2661,7 @@ dependencies = [
 
 [[package]]
 name = "phobos-companion"
-version = "0.75.0"
+version = "0.76.0"
 dependencies = [
  "companion-core",
  "serde",

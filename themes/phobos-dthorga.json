@@ -23,6 +23,18 @@
     "series_5": "#8FE3B2",
     "series_6": "#6EC3E0",
     "series_7": "#E8D27A",
-    "series_8": "#D9A27E"
+    "series_8": "#D9A27E",
+    "code_keyword": "#FF8C9A",
+    "code_flow": "#E3A0E0",
+    "code_type": "#7FD6C0",
+    "code_function": "#F2D49B",
+    "code_variable": "#F5C6CE",
+    "code_constant": "#FFB27A",
+    "code_string": "#9FE3B8",
+    "code_number": "#E8D27A",
+    "code_comment": "#B8979D",
+    "code_tag": "#FF8C9A",
+    "code_punctuation": "#E8D4D8",
+    "code_plain": "#F2E2E5"
   }
 }

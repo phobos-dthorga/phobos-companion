@@ -256,9 +256,10 @@ The layers, the folder map, a page's parts, how the kit runs and how to add a pa
 - **Colours come from the theme in use**, by role, never a literal colour in a component. A test holds the program's own themes
   (`themes/*.json`) to the contrast rules. Colour never carries a meaning alone.
 - **A theme is data, never CSS** (0.33.0; the owner, 20 Nov 2026: themes "as OnAir has them", after onair-wyrmgrid's ADR-0009): a
-  version, an id, a name, an optional author and exactly the twenty roles as `#RRGGBB`, at most 32 KB. The host's
-  `companion_core::themes` is the authority: it checks the shape and the contrast (words 4.5:1, chart colours 3:1, lines 1.5:1, on
-  every surface) before a theme is kept or used, keeps the owner's themes and choice in the program's own folder, opens the Open
+  version, an id, a name, an optional author and exactly the twenty roles as `#RRGGBB`, with the twelve code colours (0.76.0) all
+  or none, at most 32 KB. A theme with none takes them from its other roles (`CODE_FROM`), so a theme made before stays usable. The
+  host's `companion_core::themes` is the authority: it checks the shape and the contrast (words 4.5:1, chart colours 3:1, lines
+  1.5:1, on every surface; code colours 4.5:1 on the background and on removed and added lines) before a theme is kept or used, keeps the owner's themes and choice in the program's own folder, opens the Open
   and Save dialogs itself, and falls back to House D'thorga, saying why, when the chosen theme is missing or fails. The window
   sets only `--colour-<role>` from it. A new role is added to the format, every theme file, both checks and the maker in one
   change.
@@ -278,11 +279,13 @@ The layers, the folder map, a page's parts, how the kit runs and how to add a pa
   `src/lib/atlas/globeScene.ts` is the only module that imports three.js, on demand, and `planet.ts` holds the arithmetic, tested
   without a screen. Every move has a button and a key; dragging and the wheel are shortcuts. Colours for a measure come from
   `colours.ts`'s ramps, chosen by the dataviz rules; a category layer brings the kit's own colours.
-- **Code is coloured by one module, from the theme.** `src/lib/code/highlightCore.ts` is the only module that imports
-  highlight.js, on demand, a grammar at a time; the kit names what a file is and never a colour. Token colours are the theme's
-  roles, set in `CodeViewer.svelte`; the "something went wrong" colour is never used for code. A changed line carries a `+` or `−`
-  mark beside it. Code reaches the page escaped (by the highlighter, or by `hunkHtml`): never put file text into `{@html}` any
-  other way.
+- **Code is coloured by one module, from the theme** (0.76.0: VS Code's grammars; the owner, 24 Nov 2026, `docs/code-reading.md`).
+  `src/lib/code/shikiCore.ts` is the only module that imports Shiki, run in a worker by `highlightCore.ts` (in the window only
+  where no worker starts), on demand, a grammar at a time; the kit names what a file is and never a colour. Which scope takes
+  which of the theme's twelve code colours is one table, `src/lib/code/scopeRoles.json`, from VS Code's Dark+ rules; a test holds
+  its roles to the host's `CODE_ROLES`. Pieces become `tok-<role>` spans coloured in `app.css`; the "something went wrong" colour
+  is never used for code. A changed line carries a `+` or `−` mark beside it. Code reaches the page escaped (by `piecesToHtml`, or
+  by `hunkHtml`): never put file text into `{@html}` any other way.
 - **Work that takes time shows a bar and says what it is doing** (owner, 19 Nov 2026). Every request that runs a tool gives the
   host a progress channel, and the host passes on the tool's progress lines; `ProgressBar.svelte` is the one component that draws
   them: filled when the tool can count its steps, moving when it cannot, always with words, and its latest line of output beneath.

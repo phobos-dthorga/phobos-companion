@@ -7,7 +7,7 @@
     problems,
     themeFile,
     validColour,
-    type Role,
+    withCodeColours,
   } from "./presentation";
   import { applyTheme } from "./runtime";
   import type { Offered, Theme, ThemeStatus } from "./types";
@@ -31,48 +31,67 @@
   } = $props();
 
   /** Each role's words, by literal key so the catalogue check can read them. */
-  const GROUPS: { title: string; roles: [Role, string][] }[] = [
-    {
-      title: "themes-group-surfaces",
-      roles: [
-        ["canvas", "themes-role-canvas"],
-        ["surface", "themes-role-surface"],
-        ["surface_raised", "themes-role-surface-raised"],
-        ["surface_soft", "themes-role-surface-soft"],
-      ],
-    },
-    {
-      title: "themes-group-words",
-      roles: [
-        ["text", "themes-role-text"],
-        ["text_muted", "themes-role-text-muted"],
-        ["line", "themes-role-line"],
-      ],
-    },
-    {
-      title: "themes-group-meanings",
-      roles: [
-        ["accent", "themes-role-accent"],
-        ["observed", "themes-role-observed"],
-        ["comparison", "themes-role-comparison"],
-        ["success", "themes-role-success"],
-        ["risk", "themes-role-risk"],
-      ],
-    },
-    {
-      title: "themes-group-charts",
-      roles: [
-        ["series_1", "themes-role-series-1"],
-        ["series_2", "themes-role-series-2"],
-        ["series_3", "themes-role-series-3"],
-        ["series_4", "themes-role-series-4"],
-        ["series_5", "themes-role-series-5"],
-        ["series_6", "themes-role-series-6"],
-        ["series_7", "themes-role-series-7"],
-        ["series_8", "themes-role-series-8"],
-      ],
-    },
-  ];
+  const GROUPS: { title: string; note?: string; roles: [string, string][] }[] =
+    [
+      {
+        title: "themes-group-surfaces",
+        roles: [
+          ["canvas", "themes-role-canvas"],
+          ["surface", "themes-role-surface"],
+          ["surface_raised", "themes-role-surface-raised"],
+          ["surface_soft", "themes-role-surface-soft"],
+        ],
+      },
+      {
+        title: "themes-group-words",
+        roles: [
+          ["text", "themes-role-text"],
+          ["text_muted", "themes-role-text-muted"],
+          ["line", "themes-role-line"],
+        ],
+      },
+      {
+        title: "themes-group-meanings",
+        roles: [
+          ["accent", "themes-role-accent"],
+          ["observed", "themes-role-observed"],
+          ["comparison", "themes-role-comparison"],
+          ["success", "themes-role-success"],
+          ["risk", "themes-role-risk"],
+        ],
+      },
+      {
+        title: "themes-group-charts",
+        roles: [
+          ["series_1", "themes-role-series-1"],
+          ["series_2", "themes-role-series-2"],
+          ["series_3", "themes-role-series-3"],
+          ["series_4", "themes-role-series-4"],
+          ["series_5", "themes-role-series-5"],
+          ["series_6", "themes-role-series-6"],
+          ["series_7", "themes-role-series-7"],
+          ["series_8", "themes-role-series-8"],
+        ],
+      },
+      {
+        title: "themes-group-code",
+        note: "themes-group-code-note",
+        roles: [
+          ["code_keyword", "themes-role-code-keyword"],
+          ["code_flow", "themes-role-code-flow"],
+          ["code_type", "themes-role-code-type"],
+          ["code_function", "themes-role-code-function"],
+          ["code_variable", "themes-role-code-variable"],
+          ["code_constant", "themes-role-code-constant"],
+          ["code_string", "themes-role-code-string"],
+          ["code_number", "themes-role-code-number"],
+          ["code_comment", "themes-role-code-comment"],
+          ["code_tag", "themes-role-code-tag"],
+          ["code_punctuation", "themes-role-code-punctuation"],
+          ["code_plain", "themes-role-code-plain"],
+        ],
+      },
+    ];
   const WORDS: Record<string, string> = {
     ...Object.fromEntries(GROUPS.flatMap((g) => g.roles)),
     diff_removed: "themes-role-diff-removed",
@@ -95,7 +114,9 @@
     from.id.startsWith(BUILT_IN_PREFIX) ? "" : (from.author ?? ""),
   );
   // svelte-ignore state_referenced_locally
-  let colours = $state<Record<string, string>>({ ...from.colours });
+  let colours = $state<Record<string, string>>(
+    withCodeColours({ ...from.colours }),
+  );
   let typed = $state<Record<string, string>>({});
   let working = $state(false);
   let said = $state<{ ok: boolean; words: string } | null>(null);
@@ -121,12 +142,12 @@
     if (preview) applyTheme(colours, preview);
   });
 
-  function pick(role: Role, value: string) {
+  function pick(role: string, value: string) {
     colours = { ...colours, [role]: value.toUpperCase() };
     typed = { ...typed, [role]: value.toUpperCase() };
   }
 
-  function type(role: Role, value: string) {
+  function type(role: string, value: string) {
     typed = { ...typed, [role]: value };
     const written = value.trim().startsWith("#")
       ? value.trim()
@@ -203,6 +224,7 @@
       {#each GROUPS as group (group.title)}
         <fieldset>
           <legend>{t(group.title)}</legend>
+          {#if group.note}<p class="muted small note">{t(group.note)}</p>{/if}
           {#each group.roles as [role] (role)}
             <div class="role">
               <input
@@ -265,6 +287,46 @@
               style:height={`${30 + ((n * 37) % 50)}%`}
             ></span>
           {/each}
+        </div>
+        <!-- A few lines of code in each code colour (0.76.0); the words of its comment are the only words in it. -->
+        <div class="p-code code-colours">
+          <code
+            ><span class="tok-comment">{t("themes-preview-code-comment")}</span
+            ></code
+          >
+          <code
+            ><span class="tok-keyword">public</span>
+            <span class="tok-keyword">float</span>
+            <span class="tok-function">Knots</span>(<span class="tok-type"
+              >Boat</span
+            > <span class="tok-variable">boat</span>)</code
+          >
+          <code class="p-removed">
+            <span class="tok-flow">return</span>
+            <span class="tok-variable">boat</span>.<span class="tok-variable"
+              >Speed</span
+            ><span class="tok-punctuation"> * </span><span class="tok-number"
+              >1.94</span
+            >;</code
+          >
+          <code class="p-added">
+            <span class="tok-flow">return</span>
+            <span class="tok-type">Units</span>.<span class="tok-function"
+              >ToKnots</span
+            >(<span class="tok-variable">boat</span>,
+            <span class="tok-constant">Rounding</span>.<span
+              class="tok-constant">None</span
+            >, <span class="tok-string">"Audeamus"</span>);</code
+          >
+          <code
+            ><span class="tok-punctuation">&lt;</span><span class="tok-tag"
+              >defName</span
+            ><span class="tok-punctuation">&gt;</span>Boat<span
+              class="tok-punctuation">&lt;/</span
+            ><span class="tok-tag">defName</span><span class="tok-punctuation"
+              >&gt;</span
+            ></code
+          >
         </div>
       </div>
 
@@ -500,6 +562,57 @@
   .p-bars span {
     flex: 1;
     border-radius: 2px 2px 0 0;
+  }
+
+  .p-code {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    padding: 6px 0;
+    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+    font-size: var(--type-caption);
+    line-height: 1.55;
+    background: var(--colour-canvas);
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
+  }
+
+  /* A sample, so its lines wrap rather than scroll: nothing in a preview needs reaching by keyboard. */
+  .p-code code {
+    padding-inline: 10px;
+    font: inherit;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border-inline-start: 4px solid transparent;
+  }
+
+  /* Removed and added lines' backgrounds, mixed here from the draft's own colours as app.css mixes them (DIFF_SHARE). */
+  .p-code .p-removed {
+    background: color-mix(
+      in srgb,
+      var(--colour-risk) 20%,
+      var(--colour-canvas)
+    );
+    border-inline-start-color: var(--colour-risk);
+  }
+
+  .p-code .p-added {
+    background: color-mix(
+      in srgb,
+      var(--colour-success) 20%,
+      var(--colour-canvas)
+    );
+    border-inline-start-color: var(--colour-success);
+  }
+
+  /* The two lines inside the method, indented as code is (the markup's own spaces are squeezed to one). */
+  .p-code .p-removed,
+  .p-code .p-added {
+    padding-inline-start: calc(10px + 3ch);
+  }
+
+  .note {
+    margin: 0 0 6px;
   }
 
   .checks {

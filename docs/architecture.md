@@ -79,7 +79,7 @@ flowchart LR
 | `src/lib/i18n/`, `locales/en-AU.json` | `t()` and every word the window shows (Fluent; about 2,300 keys) |
 | `src/lib/theme/`, `themes/*.json` | The program's three themes and the window side of themes |
 | `src/lib/guide/`, `guide/*.md` | The Guide: 77 entries (`page-`, `task-`, `term-`), read by `entries.ts` |
-| `src/lib/charts/`, `atlas/`, `code/` | The one module each that imports ECharts, three.js and highlight.js, on demand |
+| `src/lib/charts/`, `atlas/`, `code/` | The one module each that imports ECharts, three.js and Shiki, on demand (Shiki in a worker, `highlight.worker.ts`, since 0.76.0) |
 | `src-tauri/src/lib.rs` | The 129 Tauri commands, `blocking`, `hearing`, `data_folder`, and `run()` (setup, exit) |
 | `src-tauri/src/*.rs` | 41 host modules: mostly `<page>_page.rs`, plus shared host parts (`viewable`, `pick`, `pictures`) |
 | `src-tauri/src/tests/` | One Rust test file per host module, joined with `#[path = "tests/<module>.rs"]` |

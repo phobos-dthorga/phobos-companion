@@ -4,6 +4,28 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.76.0] - 2026-11-24
+
+### Changed
+
+- **Code is coloured as VS Code colours it** (the owner, 24 Nov 2026: "more inline with that of VS Code"; `docs/code-reading.md`,
+  step 1). The code viewer and Their code read code with VS Code's own grammars, through Shiki, so keywords, flow words (`if`,
+  `return`), types, methods, variables, constants, strings, numbers, comments and tags each take their own colour, where before
+  five colours covered everything. House D'thorga uses VS Code's Dark+ colours, with keywords, tags and comments a shade lighter
+  so they read on removed lines. Svelte files have their own grammar now. The reading runs off the window's thread, so a long file
+  never stalls it; plain text still shows first. Checked on real files from phobos-rimworld (C#, XML), phobos-ostranauts (C#,
+  JSON), Project Zomboid's PhobosLib and Chemistry Pathways (Lua), phobos-modkit (Python) and the Companion (Svelte, Rust,
+  TypeScript, TOML, Markdown). **Not tested on screen.**
+- **Every theme has twelve code colours** (keywords, flow words, types, methods, variables, constants, strings, numbers, comments,
+  tags, operators and the rest), checked to read on the background and on removed and added lines. **A theme of yours made before
+  keeps working**: without code colours it takes the ones code had before. Make your own has a **Code** group, and its preview
+  shows a few lines of code, a removed and an added line among them.
+- **companion-core 0.21.0**: `themes` gives the code colours (`CODE_ROLES`, `CODE_FROM`) and checks them.
+
+### Removed
+
+- **highlight.js**, replaced by Shiki 4.6.0 (MIT), which needs no WebAssembly (`THIRD_PARTY_NOTICES.md`).
+
 ## [0.75.0] - 2026-11-23
 
 ### Added

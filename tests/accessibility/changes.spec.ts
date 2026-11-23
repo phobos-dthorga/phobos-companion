@@ -471,8 +471,10 @@ for (const [name, viewport] of [
       const pane = viewer.getByRole("region", {
         name: "The code of src/Sample/Boat.cs",
       });
-      await expect(pane.locator(".hljs-keyword").first()).toHaveText("class");
-      await expect(pane.locator(".hljs-string")).toHaveText('"Audeamus"');
+      // Coloured by VS Code's grammars, read in a worker (0.76.0).
+      await expect(pane.locator(".tok-keyword").first()).toHaveText("class");
+      await expect(pane.locator(".tok-string")).toHaveText('"Audeamus"');
+      await expect(pane.locator(".tok-comment")).toHaveText("// afloat");
       await audit(page);
       const small = await viewer.evaluate(
         (dialog, min) =>

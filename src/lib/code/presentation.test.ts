@@ -7,9 +7,9 @@ import {
   hunkHtml,
   isTest,
   pathParts,
+  piecesToHtml,
   shownLines,
   sides,
-  splitHighlighted,
   writtenWords,
 } from "./presentation";
 import type { FileChange, Hunk } from "./types";
@@ -44,26 +44,51 @@ const hunk: Hunk = {
 };
 
 describe("highlighted code, line by line", () => {
-  it("keeps each line's spans balanced when one runs over a line break", () => {
-    const html =
-      '<span class="k">class</span> A\n<span class="c">/* one\ntwo */</span> x';
-    expect(splitHighlighted(html)).toEqual([
-      '<span class="k">class</span> A',
-      '<span class="c">/* one</span>',
-      '<span class="c">two */</span> x',
+  const roles = ["keyword", "string", "plain"];
+
+  it("wraps each piece in its role, and leaves plain text bare", () => {
+    expect(
+      piecesToHtml(
+        [
+          [
+            ["class", 0, 0],
+            [" A", 2, 0],
+          ],
+          [['"x"', 1, 0]],
+        ],
+        roles,
+      ),
+    ).toEqual([
+      '<span class="tok-keyword">class</span> A',
+      '<span class="tok-string">"x"</span>',
     ]);
   });
 
-  it("reopens every open span, innermost last", () => {
-    const html = '<span class="a">x<span class="b">y\nz</span></span>';
-    expect(splitHighlighted(html)).toEqual([
-      '<span class="a">x<span class="b">y</span></span>',
-      '<span class="a"><span class="b">z</span></span>',
+  it("joins neighbouring pieces of one kind, and names their style", () => {
+    expect(
+      piecesToHtml(
+        [
+          [
+            ["a", 0, 3],
+            ["b", 0, 3],
+            ["c", 2, 4],
+          ],
+        ],
+        roles,
+      ),
+    ).toEqual([
+      '<span class="tok-keyword tok-italic tok-bold">ab</span><span class="tok-underline">c</span>',
     ]);
   });
 
-  it("gives a single line back whole", () => {
-    expect(splitHighlighted("plain")).toEqual(["plain"]);
+  it("escapes every piece, so code never becomes markup", () => {
+    expect(piecesToHtml([[["<b> & </span>", 1, 0]]], roles)).toEqual([
+      '<span class="tok-string">&lt;b&gt; &amp; &lt;/span&gt;</span>',
+    ]);
+  });
+
+  it("gives an empty line back empty", () => {
+    expect(piecesToHtml([[]], roles)).toEqual([""]);
   });
 });
 

@@ -22,6 +22,18 @@
     "series_5": "#D55181",
     "series_6": "#0CA30C",
     "series_7": "#9085E9",
-    "series_8": "#E66767"
+    "series_8": "#E66767",
+    "code_keyword": "#5CA2DC",
+    "code_flow": "#C586C0",
+    "code_type": "#4EC9B0",
+    "code_function": "#DCDCAA",
+    "code_variable": "#9CDCFE",
+    "code_constant": "#4FC1FF",
+    "code_string": "#CE9178",
+    "code_number": "#B5CEA8",
+    "code_comment": "#78A964",
+    "code_tag": "#5CA2DC",
+    "code_punctuation": "#D4D4D4",
+    "code_plain": "#D4D4D4"
   }
 }

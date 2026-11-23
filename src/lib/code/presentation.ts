@@ -88,32 +88,56 @@ export function escapeHtml(text: string): string {
     .replaceAll(">", "&gt;");
 }
 
-const TOKEN = /(<span[^>]*>|<\/span>|\n)/;
+/**
+ * One piece of code as the highlighter read it (0.76.0): its text, its role's place in the theme's code colours
+ * (`scopeRoles.json`), and Shiki's style bits: italic 1, bold 2, underline 4, struck through 8.
+ */
+export type Piece = [text: string, role: number, style: number];
+
+const STYLES: [number, string][] = [
+  [1, "tok-italic"],
+  [2, "tok-bold"],
+  [4, "tok-underline"],
+  [8, "tok-strikethrough"],
+];
 
 /**
- * A highlighter's HTML for several lines, as one balanced piece of HTML per line. A span left open across a line break (a
- * comment or a string running over lines) is closed at the break and opened again on the next line.
+ * Pieces of code as one piece of HTML per line: each run of text escaped, and wrapped in a span naming its role and style unless
+ * it is plain. Neighbouring pieces of the same kind share one span. Nothing but escaped text and these class names reaches the HTML.
  */
-export function splitHighlighted(html: string): string[] {
-  const lines: string[] = [];
-  const open: string[] = [];
-  let line = "";
-  for (const piece of html.split(TOKEN)) {
-    if (piece === "\n") {
-      lines.push(line + "</span>".repeat(open.length));
-      line = open.join("");
-    } else if (piece === "</span>") {
-      open.pop();
-      line += piece;
-    } else if (piece.startsWith("<span")) {
-      open.push(piece);
-      line += piece;
-    } else {
-      line += piece;
+export function piecesToHtml(
+  lines: Piece[][],
+  roles: readonly string[],
+): string[] {
+  return lines.map((line) => {
+    let html = "";
+    let open = "";
+    let run = "";
+    const close = () => {
+      if (run)
+        html += open
+          ? `<span class="${open}">${escapeHtml(run)}</span>`
+          : escapeHtml(run);
+      run = "";
+    };
+    for (const [text, role, style] of line) {
+      const classes = [
+        ...(roles[role] && roles[role] !== "plain"
+          ? [`tok-${roles[role]}`]
+          : []),
+        ...STYLES.filter(([bit]) => (style & bit) !== 0).map(
+          ([, name]) => name,
+        ),
+      ].join(" ");
+      if (classes !== open) {
+        close();
+        open = classes;
+      }
+      run += text;
     }
-  }
-  lines.push(line + "</span>".repeat(open.length));
-  return lines;
+    close();
+    return html;
+  });
 }
 
 /**

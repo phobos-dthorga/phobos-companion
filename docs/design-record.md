@@ -364,7 +364,7 @@ item", with "a decent syntax highlighter", for the Mods page "and for any future
 | --- | --- |
 | Finding the code | phobos-modkit `changes entry`: the oldest commit in which the entry's opening appears in its changelog (`git log -S`), then that commit's diff. Nothing extra is written in a changelog |
 | Order | Code, then data and definitions, then words, then other files; the viewer opens the code file with the most new lines, and the code before its tests |
-| Colours | highlight.js, one grammar at a time, through `highlightCore.ts`; each side of a change is coloured whole so a comment or string over several lines reads right; token colours are the theme's roles |
+| Colours | highlight.js, one grammar at a time, through `highlightCore.ts`; each side of a change is coloured whole so a comment or string over several lines reads right; token colours are the theme's roles. **Since 0.76.0, VS Code's grammars**: see "Code in VS Code's colours" below |
 | Two views | What changed (both line numbers, a plus or minus mark) and The code as it now stands (removed lines left out) |
 
 **What it means for how changes are written** (the owner asked to be told): nothing new is written in a changelog. The view is
@@ -864,7 +864,7 @@ screen.**
 
 | Part | How |
 | --- | --- |
-| The format | `themes/*.json`, as House D'thorga's has been since 0.1: schema 1, an id, a name, an optional author, twenty roles. Built-ins' ids start `org.phobosdthorga.companion.`, which the owner's may not |
+| The format | `themes/*.json`, as House D'thorga's has been since 0.1: schema 1, an id, a name, an optional author, twenty roles, and since 0.76.0 twelve code colours, all or none. Built-ins' ids start `org.phobosdthorga.companion.`, which the owner's may not |
 | The checks | `companion_core::themes::usable` (the host's, the authority) and `src/lib/theme/presentation.ts`'s `problems` (the window's, for the maker's live list), the same rules, each tested on every theme file |
 | Kept | `themes/` in the program's own folder: the owner's themes as `<id>.json` and `chosen.json`; a theme with the same id is a revision, the same colours under another id are refused |
 | Drawn | `applyTheme` sets only the roles, only as `#RRGGBB`; the window remembers the colours in its own storage so the next start draws in them at once, and the host's answer confirms them |
@@ -876,6 +876,31 @@ what was worked out, pale coral for what went wrong (so it is not the accent's r
 the accent. Both pass every check (weakest words 6.0:1). **Agent choices, owner to revise:** those mappings; the role names the maker
 shows; the author line shown only on the owner's themes. **Not built** (as OnAir): fonts, pictures, layouts or any CSS, which stay
 refused. **Nothing here is tested on screen.**
+
+## Code in VS Code's colours (built 24 Nov 2026, 0.76.0)
+
+**The owner asked to bring the code viewer's colours "more inline with that of VS Code"** (24 Nov 2026), and chose by card the
+switch to VS Code's own grammars with a VS Code theme brought in for the colours. This is step 1 of [Reading code
+closer](code-reading.md); bringing in a theme is step 2.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Read code in the colours they know from their editor: keywords, flow words, types, methods, variables, constants, strings, numbers, comments and tags each their own colour |
+| What does it stop them doing? | Reading names, calls and variables as one undivided colour, as the five colours of 0.12.0 showed them |
+| How does it change the way they work? | Moving between the editor and the Companion costs nothing: the same piece of code looks the same in both |
+| What outside it notices? | Every theme (twelve code colours, checked) and the maker (a Code group and a code sample in its preview); the Guide's theme entries |
+
+| Part | How |
+| --- | --- |
+| The reader | Shiki 4.6.0 with VS Code's grammars and its JavaScript engine (no WebAssembly), in `shikiCore.ts`; each grammar a file of its own, fetched on first use. Svelte has its own grammar now (it was read as XML) |
+| Off the window's thread | `highlightCore.ts` asks a worker (`highlight.worker.ts`); where none starts, the window reads it itself. Plain text shows first, as before. Measured: 217 lines of C# 127 ms; the first Svelte file 851 ms while its embedded grammars load |
+| Which colour a piece takes | `scopeRoles.json`: VS Code's Dark+ selectors, each under the role whose colour Dark+ gives it. Shiki matches a piece's scopes against them as VS Code does, through a theme of stand-in colours, one a role, read back as the role. Agent's mapping, from Dark+'s own rules |
+| The colours | Twelve `code_*` roles in a theme, all or none; none takes the roles code used before (`CODE_FROM`), so the owner's own themes look as they did. Each must read at 4.5:1 on the background and on removed and added lines. **House D'thorga takes Dark+'s colours**, keywords and tags (#569CD6 → #5CA2DC) and comments (#6A9955 → #78A964) a shade lighter, since Dark+'s own fall below 4.5:1 on a removed line (4.49 and 3.97). Phobos D'thorga and High contrast have their own sets (agent's) |
+| Checked on several games | Real files coloured with the right line count in every case: phobos-rimworld (C#, an XML language file), phobos-ostranauts (C#, JSON), Project Zomboid's PhobosLib and Chemistry Pathways (Lua), phobos-modkit (Python), the Companion (Svelte, Rust, TypeScript, TOML, Markdown) |
+
+**Agent choices, owner to revise:** the twelve roles and their words; mapping Dark+'s regex red to strings and its tag brackets'
+grey to operators; Phobos D'thorga's and High contrast's code colours; comments not italic (VS Code's Dark+ does not italicise
+them; the old colours did). **Not tested on screen.**
 
 ## The Guide (built 20 Nov 2026, 0.34.0)
 

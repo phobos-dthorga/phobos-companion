@@ -199,48 +199,69 @@ h1 {
   color: var(--colour-success);
 }
 
-/* Code coloured by what each piece is (0.26.0: one place for the code viewer and Their code), from the theme's roles. */
-.code-colours code .hljs-comment,
-.code-colours code .hljs-quote,
-.code-colours code .hljs-meta {
+/* Code coloured by what each piece is (0.26.0: one place for the code viewer and Their code; 0.76.0: VS Code's grammars, and the
+   theme's twelve code colours, src/lib/code/scopeRoles.json). Each colour falls back to the role code took before, for a theme
+   drawn before the host has answered. */
+.code-colours code {
+  color: var(--colour-code-plain, var(--colour-text));
+}
+
+.code-colours code .tok-keyword {
+  color: var(--colour-code-keyword, var(--colour-comparison));
+}
+
+.code-colours code .tok-flow {
+  color: var(--colour-code-flow, var(--colour-comparison));
+}
+
+.code-colours code .tok-type {
+  color: var(--colour-code-type, var(--colour-observed));
+}
+
+.code-colours code .tok-function {
+  color: var(--colour-code-function, var(--colour-observed));
+}
+
+.code-colours code .tok-variable {
+  color: var(--colour-code-variable, var(--colour-text));
+}
+
+.code-colours code .tok-constant {
+  color: var(--colour-code-constant, var(--colour-accent));
+}
+
+.code-colours code .tok-string {
+  color: var(--colour-code-string, var(--colour-success));
+}
+
+.code-colours code .tok-number {
+  color: var(--colour-code-number, var(--colour-accent));
+}
+
+.code-colours code .tok-comment {
+  color: var(--colour-code-comment, var(--colour-text-muted));
+}
+
+.code-colours code .tok-tag {
+  color: var(--colour-code-tag, var(--colour-observed));
+}
+
+.code-colours code .tok-punctuation {
+  color: var(--colour-code-punctuation, var(--colour-text));
+}
+
+.code-colours code .tok-italic {
   font-style: italic;
-  color: var(--colour-text-muted);
 }
 
-.code-colours code .hljs-keyword,
-.code-colours code .hljs-selector-tag,
-.code-colours code .hljs-doctag,
-.code-colours code .hljs-section {
-  color: var(--colour-comparison);
-}
-
-.code-colours code .hljs-string,
-.code-colours code .hljs-regexp {
-  color: var(--colour-success);
-}
-
-/* Amber for values and attribute names. The "something went wrong" colour is never used for code: nothing here is a fault. */
-.code-colours code .hljs-number,
-.code-colours code .hljs-literal,
-.code-colours code .hljs-symbol,
-.code-colours code .hljs-bullet,
-.code-colours code .hljs-attr,
-.code-colours code .hljs-attribute {
-  color: var(--colour-accent);
-}
-
-.code-colours code .hljs-type,
-.code-colours code .hljs-built_in,
-.code-colours code .hljs-title,
-.code-colours code .hljs-name,
-.code-colours code .hljs-tag {
-  color: var(--colour-observed);
-}
-
-.code-colours code .hljs-strong {
+.code-colours code .tok-bold {
   font-weight: 600;
 }
 
-.code-colours code .hljs-emphasis {
-  font-style: italic;
+.code-colours code .tok-underline {
+  text-decoration: underline;
+}
+
+.code-colours code .tok-strikethrough {
+  text-decoration: line-through;
 }

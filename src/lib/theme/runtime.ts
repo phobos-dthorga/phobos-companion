@@ -1,17 +1,19 @@
-import { ROLES, validColour } from "./presentation";
+import { ALL_ROLES, validColour, withCodeColours } from "./presentation";
 
 export type ThemeColours = Record<string, string>;
 
 /**
  * Each role becomes a CSS variable, so components name a role and never a colour. Only the theme roles are set, and only as
- * `#RRGGBB`: a theme is data and can never write anything else into the page (0.33.0, after OnAir's data-only themes).
+ * `#RRGGBB`: a theme is data and can never write anything else into the page (0.33.0, after OnAir's data-only themes). The code
+ * colours (0.76.0) become `--colour-code-<role>`, taken from the other roles for a theme kept before they existed.
  */
 export function applyTheme(
   colours: ThemeColours,
   target: HTMLElement = document.documentElement,
 ): void {
-  for (const role of ROLES) {
-    const value = colours[role];
+  const given = withCodeColours(colours);
+  for (const role of ALL_ROLES) {
+    const value = given[role];
     if (typeof value === "string" && validColour(value))
       target.style.setProperty(`--colour-${role.replaceAll("_", "-")}`, value);
   }

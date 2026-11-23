@@ -1,9 +1,10 @@
 //! Themes (0.33.0; the owner, 20 Nov 2026: themes "as OnAir has them", after onair-wyrmgrid's ADR-0009 "Data-only community
 //! themes"). A theme is data, never CSS: a version, an id, a name, an optional author, and exactly the window's colour roles as
-//! `#RRGGBB`. The window turns each role into a CSS variable it already uses, so a theme cannot hide a refusal, fake a control,
-//! load anything or reach any data. This module is the authority: it checks a theme's shape and that every role it names can be
-//! read where the window puts it, keeps the owner's themes and choice in the program's own folder, and falls back to House
-//! D'thorga whenever the chosen theme is missing or no longer passes.
+//! `#RRGGBB`, with the twelve code colours given all together or not at all (0.76.0: a theme without them takes them from its
+//! other roles, as code looked before). The window turns each role into a CSS variable it already uses, so a theme cannot hide a
+//! refusal, fake a control, load anything or reach any data. This module is the authority: it checks a theme's shape and that
+//! every role it names can be read where the window puts it, keeps the owner's themes and choice in the program's own folder, and
+//! falls back to House D'thorga whenever the chosen theme is missing or no longer passes.
 
 use crate::failure::{Failure, FailureCode};
 use serde::Serialize;
@@ -17,7 +18,7 @@ pub const SCHEMA_VERSION: u64 = 1;
 /// Built-in themes' ids start with this; a theme of the owner's may not.
 pub const BUILT_IN_PREFIX: &str = "org.phobosdthorga.companion.";
 pub const DEFAULT_ID: &str = "org.phobosdthorga.companion.house-dthorga";
-/// The largest theme file read, as OnAir's: a theme is twenty colours, so anything larger is not one.
+/// The largest theme file read, as OnAir's: a theme is thirty-two colours at most, so anything larger is not one.
 pub const MAX_BYTES: usize = 32 * 1024;
 pub const MAX_NAME: usize = 64;
 pub const MAX_AUTHOR: usize = 80;
@@ -75,6 +76,40 @@ pub const SHADE_TINTS: [(&str, &str); 5] = [
     ("shade_success", "success"),
     ("shade_risk", "risk"),
 ];
+/// The code colours (0.76.0; docs/code-reading.md, step 1), in the order of the window's `src/lib/code/scopeRoles.json`, which a
+/// test holds to this list. Code is drawn on `canvas` and on removed and added lines, so each must read at 4.5:1 on all three.
+pub const CODE_ROLES: [&str; 12] = [
+    "code_keyword",
+    "code_flow",
+    "code_type",
+    "code_function",
+    "code_variable",
+    "code_constant",
+    "code_string",
+    "code_number",
+    "code_comment",
+    "code_tag",
+    "code_punctuation",
+    "code_plain",
+];
+/// What a theme with no code colours takes for each: the roles code was coloured with before 0.76.0, all of them words that
+/// already read on every surface the code is drawn on.
+pub const CODE_FROM: [(&str, &str); 12] = [
+    ("code_keyword", "comparison"),
+    ("code_flow", "comparison"),
+    ("code_type", "observed"),
+    ("code_function", "observed"),
+    ("code_variable", "text"),
+    ("code_constant", "accent"),
+    ("code_string", "success"),
+    ("code_number", "accent"),
+    ("code_comment", "text_muted"),
+    ("code_tag", "observed"),
+    ("code_punctuation", "text"),
+    ("code_plain", "text"),
+];
+/// What code is drawn on: the background and removed and added lines.
+pub const CODE_GROUNDS: [&str; 3] = ["canvas", "diff_removed", "diff_added"];
 
 const BUILT_INS: [&str; 3] = [
     include_str!("../../../themes/house-dthorga.json"),
@@ -98,10 +133,10 @@ impl Theme {
         self.colours.get(role).map_or("#000000", String::as_str)
     }
 
-    /// The theme as a file: the roles in their order, two-space indents, a last newline.
+    /// The theme as a file: the roles in their order, the code colours last, two-space indents, a last newline.
     pub fn to_file(&self) -> String {
         let mut colours = Map::new();
-        for role in ROLES {
+        for role in ROLES.into_iter().chain(CODE_ROLES) {
             colours.insert(role.to_owned(), Value::String(self.colour(role).to_owned()));
         }
         let mut document = Map::new();
@@ -182,7 +217,7 @@ pub fn parse(text: &str, built_in: bool) -> Result<Theme, String> {
     let given = document.get("colours").and_then(Value::as_object).ok_or("it has no colours")?;
     let mut colours = BTreeMap::new();
     for (role, value) in given {
-        if !ROLES.contains(&role.as_str()) {
+        if !ROLES.contains(&role.as_str()) && !CODE_ROLES.contains(&role.as_str()) {
             return Err(format!("it names a colour {role:?}, which the window has no place for"));
         }
         let colour = value.as_str().unwrap_or_default();
@@ -193,6 +228,17 @@ pub fn parse(text: &str, built_in: bool) -> Result<Theme, String> {
     }
     if let Some(missing) = ROLES.iter().find(|role| !colours.contains_key(**role)) {
         return Err(format!("it has no {missing} colour; a theme gives every one"));
+    }
+    let code_given = CODE_ROLES.iter().filter(|role| colours.contains_key(**role)).count();
+    if code_given == 0 {
+        for (role, from) in CODE_FROM {
+            let colour = colours[from].clone();
+            colours.insert(role.to_owned(), colour);
+        }
+    } else if let Some(missing) = CODE_ROLES.iter().find(|role| !colours.contains_key(**role)) {
+        return Err(format!(
+            "it gives {code_given} of the twelve code colours but not {missing}; a theme gives all twelve or none"
+        ));
     }
     Ok(Theme { schema_version: SCHEMA_VERSION, id: id.to_owned(), name: name.trim().to_owned(), author, colours })
 }
@@ -228,7 +274,16 @@ pub struct Problem {
     pub needs: f64,
 }
 
-/// Every pair that fails: words on surfaces at 4.5:1, chart colours at 3:1, lines at 1.5:1. Empty for a theme that can be read.
+/// The colour of something code is drawn on: the background, or a removed or added line's tint over it.
+fn code_ground(theme: &Theme, ground: &str) -> String {
+    match DIFF_TINTS.iter().find(|(name, _)| *name == ground) {
+        Some((_, tint)) => mix(theme.colour(tint), theme.colour("canvas"), DIFF_SHARE),
+        None => theme.colour(ground).to_owned(),
+    }
+}
+
+/// Every pair that fails: words on surfaces at 4.5:1, chart colours at 3:1, lines at 1.5:1, and code colours at 4.5:1 wherever
+/// code is drawn. Empty for a theme that can be read.
 pub fn contrast_problems(theme: &Theme) -> Vec<Problem> {
     let mut found = Vec::new();
     for on in SURFACES {
@@ -257,6 +312,20 @@ pub fn contrast_problems(theme: &Theme) -> Vec<Problem> {
         let background = mix(theme.colour(tint), theme.colour(base), share);
         for role in READABLE {
             let ratio = contrast(theme.colour(role), &background);
+            if ratio < TEXT_MIN {
+                found.push(Problem {
+                    role: role.to_owned(),
+                    on: on.to_owned(),
+                    ratio: (ratio * 100.0).round() / 100.0,
+                    needs: TEXT_MIN,
+                });
+            }
+        }
+    }
+    for on in CODE_GROUNDS {
+        let ground = code_ground(theme, on);
+        for role in CODE_ROLES {
+            let ratio = contrast(theme.colour(role), &ground);
             if ratio < TEXT_MIN {
                 found.push(Problem {
                     role: role.to_owned(),

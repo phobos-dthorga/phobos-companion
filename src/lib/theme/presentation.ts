@@ -1,3 +1,4 @@
+import table from "../code/scopeRoles.json";
 import { contrast, mix } from "./contrast";
 import type { Problem, Theme } from "./types";
 
@@ -76,6 +77,43 @@ const MIXED: [number, Role, [string, Role][]][] = [
   [SHADE_SHARE, "surface_raised", SHADE_TINTS],
 ];
 
+/**
+ * The code colours (0.76.0; docs/code-reading.md, step 1), in `scopeRoles.json`'s order, as the host's `CODE_ROLES` lists them. A
+ * theme gives all twelve or none; with none, each takes the role in `CODE_FROM`, as code was coloured before.
+ */
+export const CODE_ROLES: string[] = table.roles.map((role) => `code_${role}`);
+export const CODE_FROM: Record<string, Role> = {
+  code_keyword: "comparison",
+  code_flow: "comparison",
+  code_type: "observed",
+  code_function: "observed",
+  code_variable: "text",
+  code_constant: "accent",
+  code_string: "success",
+  code_number: "accent",
+  code_comment: "text_muted",
+  code_tag: "observed",
+  code_punctuation: "text",
+  code_plain: "text",
+};
+/** Every colour a theme file lists, in its order: the roles, then the code colours. */
+export const ALL_ROLES: string[] = [...ROLES, ...CODE_ROLES];
+/** What code is drawn on: the background, and removed and added lines. */
+export const CODE_GROUNDS = ["canvas", "diff_removed", "diff_added"];
+
+/** A theme's colours with its code colours, taken from its other roles when it has none. */
+export function withCodeColours(
+  colours: Record<string, string>,
+): Record<string, string> {
+  if (CODE_ROLES.some((role) => role in colours)) return colours;
+  return {
+    ...colours,
+    ...Object.fromEntries(
+      CODE_ROLES.map((role) => [role, colours[CODE_FROM[role]]]),
+    ),
+  };
+}
+
 export function validColour(value: string): boolean {
   return /^#[0-9A-Fa-f]{6}$/.test(value);
 }
@@ -118,6 +156,25 @@ export function problems(colours: Record<string, string>): Problem[] {
       }
     }
   }
+  if (!validColour(colours.canvas ?? "")) return found;
+  for (const on of CODE_GROUNDS) {
+    const tint = DIFF_TINTS.find(([name]) => name === on)?.[1];
+    if (tint && !validColour(colours[tint] ?? "")) continue;
+    const ground = tint
+      ? mix(colours[tint], colours.canvas, DIFF_SHARE)
+      : colours.canvas;
+    for (const role of CODE_ROLES) {
+      if (!validColour(colours[role] ?? "")) continue;
+      const ratio = contrast(colours[role], ground);
+      if (ratio < TEXT_MIN)
+        found.push({
+          role,
+          on,
+          ratio: Math.round(ratio * 100) / 100,
+          needs: TEXT_MIN,
+        });
+    }
+  }
   return found;
 }
 
@@ -133,10 +190,11 @@ export function idFor(name: string): string {
   return id.length >= 3 ? id : `${id || "my"}-theme`;
 }
 
-/** The theme as a file, as the host writes one: its roles in order. */
+/** The theme as a file, as the host writes one: its roles in order, then its code colours. */
 export function themeFile(theme: Theme): string {
+  const given = withCodeColours(theme.colours);
   const colours: Record<string, string> = {};
-  for (const role of ROLES) colours[role] = theme.colours[role];
+  for (const role of ALL_ROLES) colours[role] = given[role];
   const document: Record<string, unknown> = {
     schema_version: 1,
     id: theme.id,

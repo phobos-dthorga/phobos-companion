@@ -13,6 +13,8 @@ see: term-theme
 2. Change any colour with its colour box, or type its code. The preview follows, and each pair that can't be read is listed.
    Words must also read on removed and added code, whose backgrounds are a little of **Something went wrong** and **It worked**
    over the **Background**.
-3. **Keep and use** when every colour can be read. **Save as a file…** keeps a draft at any time.
+3. The **Code** group holds the twelve colours code is drawn in, and the preview shows a few lines of code in them, a removed and
+   an added line among them. House D'thorga uses VS Code's Dark+ colours.
+4. **Keep and use** when every colour can be read. **Save as a file…** keeps a draft at any time.
 
 **Bring in a theme file…** and **Save a copy…** share themes as files.

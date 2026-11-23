@@ -130,6 +130,46 @@ fn a_broken_chosen_theme_falls_back_and_says_why() {
 }
 
 #[test]
+fn the_code_colours_are_the_windows_roles_in_its_order() {
+    let table: Value = serde_json::from_str(include_str!("../../../../src/lib/code/scopeRoles.json")).unwrap();
+    let roles: Vec<String> =
+        table["roles"].as_array().unwrap().iter().map(|role| format!("code_{}", role.as_str().unwrap())).collect();
+    assert_eq!(roles, CODE_ROLES);
+    assert_eq!(CODE_FROM.map(|(role, _)| role), CODE_ROLES);
+}
+
+#[test]
+fn a_theme_without_code_colours_takes_them_from_its_other_roles() {
+    let mut text = mine("old.theme");
+    for role in CODE_ROLES {
+        let line = text.lines().find(|line| line.contains(&format!("\"{role}\""))).unwrap().to_owned();
+        text = text.replace(&format!("{line}\n"), "");
+    }
+    let text = text.replace("\"series_8\": \"#E66767\",", "\"series_8\": \"#E66767\"");
+    let theme = usable(&text, false).unwrap();
+    assert_eq!(theme.colour("code_keyword"), theme.colour("comparison"));
+    assert_eq!(theme.colour("code_string"), theme.colour("success"));
+    assert_eq!(theme.colour("code_comment"), theme.colour("text_muted"));
+    assert!(theme.to_file().contains("\"code_plain\""));
+}
+
+#[test]
+fn a_theme_gives_all_twelve_code_colours_or_none() {
+    let text = mine("some.theme").replace("    \"code_flow\": \"#C586C0\",\n", "");
+    let why = parse(&text, false).unwrap_err();
+    assert!(why.contains("11 of the twelve") && why.contains("code_flow"), "{why}");
+}
+
+#[test]
+fn a_code_colour_must_read_on_the_background_and_on_changed_lines() {
+    // Dark+'s own comment green reads on the background, but not on removed and added lines' tints (about 4.2:1 and 3.9:1).
+    let dim = mine("dim-code.theme").replace("\"code_comment\": \"#78A964\"", "\"code_comment\": \"#6A9955\"");
+    let problems = contrast_problems(&parse(&dim, false).unwrap());
+    let found: Vec<String> = problems.iter().map(|p| format!("{}/{}", p.role, p.on)).collect();
+    assert_eq!(found, ["code_comment/diff_removed", "code_comment/diff_added"], "{problems:?}");
+}
+
+#[test]
 fn a_theme_file_writes_its_roles_in_order_and_reads_back_the_same() {
     let theme = built_ins().remove(1);
     let text = theme.to_file();

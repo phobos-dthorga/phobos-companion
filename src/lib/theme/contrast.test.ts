@@ -3,13 +3,16 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { contrast, mix } from "./contrast";
 import {
+  ALL_ROLES,
   BUILT_IN_PREFIX,
+  CODE_ROLES,
   idFor,
   problems,
   READABLE,
   ROLES,
   SURFACES,
   themeFile,
+  withCodeColours,
 } from "./presentation";
 import type { Theme } from "./types";
 
@@ -42,8 +45,8 @@ describe("the Companion's own themes", () => {
   });
 
   for (const theme of themes) {
-    it(`${theme.name} gives every role, and nothing else`, () => {
-      expect(Object.keys(theme.colours).sort()).toEqual([...ROLES].sort());
+    it(`${theme.name} gives every role and every code colour, and nothing else`, () => {
+      expect(Object.keys(theme.colours).sort()).toEqual([...ALL_ROLES].sort());
       expect(theme.id.startsWith(BUILT_IN_PREFIX)).toBe(true);
     });
 
@@ -89,6 +92,27 @@ describe("checking a theme being made", () => {
       "text_muted/shade_success",
       "text_muted/shade_risk",
     ]);
+  });
+
+  it("holds code colours to the background and to removed and added lines, as the host does", () => {
+    const house = themes.find((theme) => theme.name === "House D'thorga")!;
+    const dim = { ...house.colours, code_comment: "#6A9955" };
+    expect(problems(dim).map((p) => `${p.role}/${p.on}`)).toEqual([
+      "code_comment/diff_removed",
+      "code_comment/diff_added",
+    ]);
+  });
+
+  it("gives a theme kept before code colours existed the roles code took then", () => {
+    const house = themes.find((theme) => theme.name === "House D'thorga")!;
+    const old = Object.fromEntries(
+      ROLES.map((role) => [role, house.colours[role]]),
+    );
+    const given = withCodeColours(old);
+    expect(CODE_ROLES.every((role) => role in given)).toBe(true);
+    expect(given.code_keyword).toBe(house.colours.comparison);
+    expect(given.code_comment).toBe(house.colours.text_muted);
+    expect(problems(given)).toEqual([]);
   });
 
   it("gives a made theme a plain id, never the program's own", () => {

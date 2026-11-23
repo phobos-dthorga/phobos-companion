@@ -19,6 +19,9 @@ export default defineConfig({
     ],
   },
   clearScreen: false,
+  // The code viewer's highlighter runs in a worker that fetches each grammar on first use (0.76.0), so the worker is built as a
+  // module, which can be split into files.
+  worker: { format: "es" },
   build: {
     // ECharts is one file of about 560 kB (190 kB compressed), loaded only when a report has a chart, from this PC.
     chunkSizeWarningLimit: 600,

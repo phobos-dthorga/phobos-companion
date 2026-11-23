@@ -1,6 +1,6 @@
 {
   "name": "phobos-companion",
-  "version": "0.75.0",
+  "version": "0.76.0",
   "private": true,
   "description": "D'thorga Companion: one desktop program for every game you mod.",
   "license": "MIT",
@@ -20,10 +20,11 @@
   },
   "dependencies": {
     "@fluent/bundle": "0.19.1",
+    "@shikijs/langs": "4.6.0",
     "@tauri-apps/api": "2.12.4",
     "echarts": "6.1.0",
-    "highlight.js": "11.11.1",
     "html-to-image": "1.11.13",
+    "shiki": "4.6.0",
     "svelte": "^5.56.6",
     "three": "0.186.1"
   },

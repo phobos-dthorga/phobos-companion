@@ -713,6 +713,26 @@ D'thorga's `#5CA2DC`.
 accent bar and bold accent numbers, not by colour alone; **Shift + N** for The code as it was, since every single letter is taken.
 **Not built here:** calls gone and added and the ring finder (step 6), which wait for the owner's word.
 
+## Names to follow in C# (built 24 Nov 2026, 0.79.0)
+
+**The owner chose "Roslyn for C#, by name elsewhere" by card** (24 Nov 2026): step 4 of [Reading code closer](code-reading.md),
+on phobos-modkit 1.111.0's `connections names` (its names reader, Microsoft's Roslyn, the kit's second C# package).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Press any name in C# code and see what it is, its signature and where it is declared, then go there, see how it connects, or read the game's or another mod's code for it |
+| What does it stop them doing? | Searching by hand, or opening an editor, to learn what a name is and where it comes from |
+| How does it change the way they work? | A changelog entry leads to its code, and the code leads on to whatever it names, from the keyboard as well as the pointer |
+| What outside it notices? | The kit (its names reader, built on first use with the .NET SDK), the connections picture (How … connects) and Their code (Read their code) |
+
+**Agent choices, owner to revise:** the card above the lines rather than a step of the trail, so no Back is needed (the design had
+"a step of the trail"); Go to its declaration moves within the lines when they show it and opens its lines on the card otherwise;
+uses ringed by outline, never a background, to keep the code's contrast; **F12** beside **Enter**, as in VS Code; the arrow keys
+act only once a name is chosen, so they still scroll the code otherwise; **Read their code** offered for the game's and other
+mods' assemblies, never .NET's own. **Risks:** the reader needs the .NET SDK (without it a line says so and the code still shows);
+about 3 to 7 s a file, not yet cached by the kit; other files are read as they stand now, not as they stood at the commit. **Not
+built here:** names by name for Lua, Python and XML (step 5). **Not tested on screen**, nor through the window with the real reader.
+
 ## The Guide (built 20 Nov 2026, 0.34.0)
 
 **The owner asked for "documentation, or an encyclopedia, into the Companion, so I know what to do or how to find something"**,

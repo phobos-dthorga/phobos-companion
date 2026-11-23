@@ -80,6 +80,53 @@
       "asked": "2026-11-24"
     },
     {
+      "id": "code-jump-plain-strings",
+      "question": "In RimWorld C#, should any plain string that is exactly the name of one of your translation keys or Defs be a name you can press?",
+      "context": "Most keys are read where the code asks for them (\"X\".Translate()). But 233 more in phobos-rimworld are written as plain strings and passed on, such as const string KitDefName = \"...\" or Wake(\"PhobosBunk_WokenFire\"). Counted before building: 0 of the 233 were wrong once save labels were left out. It is built this way now. In Ostranauts the same rule was wrong often (short keys such as \"status\"), so it is left out there.",
+      "options": [
+        {
+          "id": "keep",
+          "label": "Keep them",
+          "detail": "Any string of 8 letters or more that is a key's or a Def's name can be pressed; its card says it was found by that rule"
+        },
+        {
+          "id": "known-places-only",
+          "label": "Only where the code asks",
+          "detail": "Only what .Translate() is called on, DefDatabase lookups and DefOf fields; a name passed on as a plain string cannot be pressed"
+        }
+      ],
+      "lean": "keep",
+      "why": "It is how your code names 45 Defs and 188 keys, none read wrongly, and each card says which rule found it",
+      "from": "docs/design-record.md, Jumps between data files and code",
+      "asked": "2026-11-24"
+    },
+    {
+      "id": "code-jump-nothing-here",
+      "question": "Should a name that nothing in the repository has (the game's own key, another mod's Def, or a mistake) still be a name you can press?",
+      "context": "Where a rule reads a translation key or a Def that the repository does not declare, the card can only say so: there is nowhere to go. In phobos-rimworld that is 15 keys asked for, 26 Defs looked up and many of the game's classes in Defs (those offer Read their code). It is built this way now.",
+      "options": [
+        {
+          "id": "show",
+          "label": "Yes, and say so on the card",
+          "detail": "The card says it is the game's own, another mod's, or a mistake; a class offers Read their code. A mistyped key shows up this way"
+        },
+        {
+          "id": "classes-only",
+          "label": "Only classes",
+          "detail": "Only a class another author's code may hold can be pressed, for Read their code; other names of nothing here are left as plain text"
+        },
+        {
+          "id": "hide",
+          "label": "No",
+          "detail": "Only names that lead somewhere in the repository can be pressed"
+        }
+      ],
+      "lean": "show",
+      "why": "A key the code asks for that no English line gives is a real fault, and this is the only place it would be seen",
+      "from": "docs/design-record.md, Jumps between data files and code",
+      "asked": "2026-11-24"
+    },
+    {
       "id": "chat-commands",
       "question": "On the Chat page, may an agent run commands through the Companion, with your yes on each?",
       "context": "Since 0.75.0 an agent may change a file through the Companion, shown to you line by line, only on your yes. Running a command (a build, a test, git) through the Companion is still refused. An agent can always run commands with its own tools, outside the Companion's view; through the Companion each would be shown first and its output kept on the page.",

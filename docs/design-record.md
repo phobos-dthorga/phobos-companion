@@ -774,6 +774,37 @@ ours and through the game's methods a change hands on to. Checked on phobos-rimw
 cut, `AvailableOnNow → AvailableReport → the game's RecipeWorker.AvailableReport`, and 6 calls moved into `Check`. **Not tested on
 screen.**
 
+## Jumps between data files and code (built 24 Nov 2026, 0.83.0)
+
+**The owner said "go ahead with Step #7"** (24 Nov 2026), having chosen "jumps between XML and C#" from the picture card: step 7
+of [Reading code closer](code-reading.md), on phobos-modkit 1.117.0's `connections --game` and `connections jumps`.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Press a translation key in code and read its English words; press a class, a Def or a parent in a data file and land on it; press a DefOf field and see its Def; from an English line or a Def, see every method that names it |
+| What does it stop them doing? | Searching by hand for the line a key or a Def is declared on, or for the code that uses one; not noticing a key the code asks for that no English line gives |
+| How does it change the way they work? | Data and code read as one body: a change to a Def leads to the class that runs it, and a change to an English line to the code that says it |
+| What outside it notices? | The Code map and How it connects (translation keys and data objects are things, with what uses them), a thing's history, Go to anything, and the changed things of a commit (a changed English line is its key) |
+
+**Counted first, as the design asked.** Every rule was run on phobos-rimworld and phobos-ostranauts before it was kept: about
+9,400 names in the first and 4,400 in the second. The count threw out or narrowed eight rules, the worst being `.Named("X")`
+read as a Def's name (2,013 of 2,019 were the arguments of translations) and "any string that is a translation key" in
+Ostranauts (short keys such as `status`). The figures and what was left out are in phobos-modkit's `docs/connections.md`,
+"What the count found". **A rule that could not be counted is not kept.**
+
+**Owner choices:** jumps between a game's data files and its code (the picture card); the count before building (this design's
+own rule, agreed with the record). **Agent choices, owner to revise:** which rules each game has (the kit's two tables); a name a
+rule found says so on its card, with the rule's own words, and that a rule can be wrong; a C# name read exactly keeps that
+reading and gains what it also stands for beneath it, never in its place; any plain string that is a key's or a Def's name can be
+pressed in RimWorld C# (decision `code-jump-plain-strings`); a name of nothing here can still be pressed and says so (decision
+`code-jump-nothing-here`); every `connections` question names the game, so the Code map shows the same things the viewer does; a
+translation file's prose is never read word by word; the name card keeps to half its pane and scrolls within itself. **Risks:** a
+rule reads text, so a name passed about in a variable is read where its string is written and a key built from pieces is not read
+at all; with the game named the kit keeps a second store for the repository, read once (about 17 s for phobos-rimworld); the
+game's own Defs and translation lines are not opened ("the Def as patched" in the first design needs a Defs page the Companion
+does not have); Project Zomboid has no table yet (it needs only one). **Risk grade: none to the person's things**: it only reads.
+**Not tested on screen.**
+
 ## The Guide (built 20 Nov 2026, 0.34.0)
 
 **The owner asked for "documentation, or an encyclopedia, into the Companion, so I know what to do or how to find something"**,

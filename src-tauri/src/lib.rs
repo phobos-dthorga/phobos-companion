@@ -353,7 +353,7 @@ async fn connections(
     on_progress: Channel<kit::Progress>,
 ) -> Result<connections_page::Answer, Failure> {
     blocking(move || {
-        let question = connections_page::question(&game, &kind, value, depth, commit)?;
+        let question = connections_page::question(&kind, value, depth, commit)?;
         connections_page::ask(&game, &repository, &question, Some(&hearing(on_progress)))
     })
     .await

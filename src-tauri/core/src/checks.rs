@@ -76,9 +76,10 @@ mod tests;
 pub const MAX_NODE: usize = 400;
 pub const MAX_PATTERN: usize = 120;
 
-/// A thing's id in the tools' connections: a language prefix (cs, def, lua, py), a colon, and one line of text.
+/// A thing's id in the tools' connections: a prefix (cs, def, lua, py for a language's things; data for a thing a game's data
+/// files declare, kit 1.117.0), a colon, and one line of text.
 pub fn node_id(id: &str) -> bool {
-    let known = ["cs:", "def:", "lua:", "py:"].iter().any(|prefix| id.starts_with(prefix));
+    let known = ["cs:", "def:", "lua:", "py:", "data:"].iter().any(|prefix| id.starts_with(prefix));
     known && id.len() <= MAX_NODE && !id.contains(['\n', '\r', '\0'])
 }
 

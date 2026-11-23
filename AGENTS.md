@@ -179,7 +179,9 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   game or mod folders or settings. **Never start a clean-up by itself**, and install backups start unchosen. Home's note only
   reads, at most every half hour.
 - **How it connects and the Code map only read.** Their pictures' geometry is in `src/lib/connections/layout.ts`, tested without a
-  screen.
+  screen. **Every question to the kit's `connections` names the game** (0.83.0), so a game whose adapter has a table of the names
+  between its data files and its code shows the same things in the viewer and on the map; **which text counts as such a name is
+  the kit's table, never a rule written here.**
 - **Keyboard shortcuts** are written only from the Settings page's shortcuts dialog, whole and checked.
 - **Features for AI agent sessions are offered, never assumed** (0.37.0; the owner, 20 Nov 2026: "Hidden unless switched on, or
   otherwise detected"). Something's off, the Decisions page and its note, open screen notes and the claims board show only by the

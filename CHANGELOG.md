@@ -16,6 +16,27 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.83.0] - 2026-11-24
+
+### Added
+
+- **Jumps between a game's data files and its code** (the owner's go, 24 Nov 2026: "go ahead with Step #7";
+  `docs/code-reading.md`, step 7). In the code viewer a translation key in code opens its English line, a class, a Def or a
+  parent in a data file opens what it names, a DefOf field says the Def it stands for, and a translation file's keys lead to the
+  code that asks for them; translation keys and data objects are things on the Code map. The names are read by the tool kit's
+  rules for RimWorld and Ostranauts, each counted on real mods before it was kept; a card says which rule found a name, and when
+  nothing in the repository has it. A new Guide word, **Rule (for names between data and code)**. **Not tested on screen.**
+
+### Changed
+
+- **Every question about how code connects names the game**, so the Code map and the code viewer show the same things; a game
+  with no rules is read as before. The tool kit pin moves to v1.117.0.
+
+### Fixed
+
+- **A tall name card no longer covers the code it is about.** The card keeps to half the height of its pane and scrolls within
+  itself; in a narrow window, or with a declaration's lines open, it used to hide every name beneath it.
+
 ## [0.82.0] - 2026-11-24
 
 ### Added

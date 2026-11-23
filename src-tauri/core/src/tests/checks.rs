@@ -79,6 +79,8 @@ fn a_node_is_a_language_prefixed_id_on_one_line() {
     assert!(node_id("def:ThingDef/Lamp"));
     assert!(node_id("lua:file:lua/lamps.lua"));
     assert!(node_id("py:tools.keeper.Keeper.run"));
+    assert!(node_id("data:key/Lamps_Lit"));
+    assert!(node_id("data:key/PhobosBank/Plugin.loaded"));
     assert!(!node_id("--all"));
     assert!(!node_id("rs:main"));
     assert!(!node_id("cs:A\nB"));

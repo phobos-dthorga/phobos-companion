@@ -165,9 +165,18 @@ export type Candidate = {
   end: number;
 };
 
+/** What a C# name also stands for in the game's data, as a rule read its declaration (kit 1.117.0): a DefOf field's Def. */
+export type Also = {
+  rule: string;
+  ruleWords: string;
+  candidates: Candidate[];
+  more: number;
+};
+
 /**
  * One name in a file: in C# as the kit's names reader read it with Roslyn; in Lua, Python and XML by name from the connections
- * (kit 1.115.0, `exact` false, with the things it may stand for). `line` counts from 1, `column` from 0.
+ * (kit 1.115.0, `exact` false, with the things it may stand for); and, where the game has a table of them, a name that crosses
+ * between its data files and its code, read by a rule (kit 1.117.0). `line` counts from 1, `column` from 0.
  */
 export type CodeName = {
   line: number;
@@ -185,6 +194,14 @@ export type CodeName = {
   exact?: boolean;
   candidates?: Candidate[];
   more?: number;
+  /** Read by one of the game's rules for names between data files and code: which, and what it reads, in words. */
+  rule?: string | null;
+  ruleWords?: string | null;
+  /** No thing of this repository has the name: the game's own, another mod's, or a mistake. `declared` is then empty. */
+  outside?: boolean;
+  /** The name to look for in another author's code: a class a data file names that is not this repository's. */
+  their?: string | null;
+  also?: Also;
 };
 
 /** A declaration of this repository's, with its lines, its comment above it included; `cut` when there are more. */
@@ -210,6 +227,8 @@ export type Names = {
   seconds: number;
   commit: string | null;
   limits: string[];
+  /** The game whose rules read the names between data files and code, when it has a table of them (kit 1.117.0). */
+  game?: string;
 };
 
 /** A thing's own history (kit 1.34.0): the commits that changed its lines, each with the changelog entries it wrote. */

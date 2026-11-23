@@ -87,13 +87,42 @@ export function nodeIdOf(name: CodeName): string | null {
   return `cs:${full}`;
 }
 
-/** Two names stand for the same declaration: the same file and line in this repository, or the same id elsewhere. */
+/**
+ * Two names stand for the same declaration: the same file and line in this repository, or the same id elsewhere. Two names of
+ * nothing here (0.83.0) are the same when one rule read the same text for both.
+ */
 export function sameDeclaration(a: CodeName, b: CodeName): boolean {
   if (a.declared.file && b.declared.file)
     return (
       a.declared.file === b.declared.file && a.declared.line === b.declared.line
     );
+  if (a.outside && b.outside) return a.text === b.text && a.rule === b.rule;
   return !!a.id && a.id === b.id;
+}
+
+/**
+ * What a C# name also stands for in the game's data (0.83.0; a DefOf field's Def), as a name of its own: that thing's kind, name,
+ * place and connections id, read by the rule that found it. Null for a name with none.
+ */
+export function asAlso(name: CodeName, index = 0): CodeName | null {
+  const also = name.also;
+  const thing = also?.candidates[index];
+  if (!also || !thing) return null;
+  return {
+    line: name.line,
+    column: name.column,
+    length: name.length,
+    text: name.text,
+    kind: thing.kind,
+    display: thing.name,
+    id: null,
+    node: thing.id,
+    here: false,
+    exact: false,
+    rule: also.rule,
+    ruleWords: also.ruleWords,
+    declared: { file: thing.file, line: thing.line, end: thing.end },
+  };
 }
 
 /**
@@ -116,7 +145,9 @@ export function asCandidate(name: CodeName, index: number): CodeName {
 export function languageOf(file: string): string {
   const suffix = file.slice(file.lastIndexOf(".") + 1).toLowerCase();
   return (
-    { cs: "csharp", lua: "lua", py: "python", xml: "xml" }[suffix] ?? "plain"
+    { cs: "csharp", lua: "lua", py: "python", xml: "xml", json: "json" }[
+      suffix
+    ] ?? "plain"
   );
 }
 

@@ -87,6 +87,10 @@ export function kindMark(thing: Thing): string {
       return "D";
     case "abstract def":
       return "A";
+    case "translation key":
+      return "K";
+    case "data object":
+      return "O";
     default:
       return "C";
   }

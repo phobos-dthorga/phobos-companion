@@ -2,8 +2,8 @@
 title: See the code behind a changelog entry
 kind: task
 go: changes
-words: code, commit, diff, what changed in code, show the code, calls gone, calls added, ring
-see: term-changelog-entry, page-changes, task-compare-pictures-sounds, term-ring-of-calls
+words: code, commit, diff, what changed in code, show the code, calls gone, calls added, ring, translation key, Def, jump, data file
+see: term-changelog-entry, page-changes, task-compare-pictures-sounds, term-ring-of-calls, term-rule-for-names
 ---
 1. Find the entry on **Changes** (the **6** key), or on **Mods**.
 2. Press **Show the code**. The viewer opens on the commit that wrote it.
@@ -25,6 +25,21 @@ Code is coloured as VS Code colours it, with VS Code's own grammars, in your the
 
 C# names are read with Microsoft's Roslyn by the tool kit, which needs the .NET SDK; without it, a line says so and the code
 still shows. Lua, Python and XML names are matched by name against what the tool kit knows of the repository.
+
+### Jump between data files and code
+For a game the tool kit has [rules](term-rule-for-names) for (RimWorld and Ostranauts), names cross between its data files and
+its code:
+
+1. **In C#**, press the text of a translation key (`"Lamps_Lit".Translate()`). Its card says **translation key** and **Found by a
+   rule**; **Go to its declaration** opens its English line on the card, so you read the words the player sees.
+2. **A DefOf field** (`LampDefOf.Lamps_Hum`) keeps its own card, and beneath says **It stands for the def …**: **Show the def**
+   opens the Def's lines; **How the def … connects** shows its picture.
+3. **In a Def or a patch**, press a class to reach the C# class, another Def's name to reach that Def, or a parent's name to reach
+   the Def that has it. A class of the game's or another mod's offers **Read their code**.
+4. **In an English translation file**, each key is a name: press one, then **How … connects** shows every method that asks for it.
+5. **In Ostranauts**, the same for a key in `Text.Get("…")`, a `…Key` in a data file, and a data object named by its `strName`.
+
+A name that nothing in the repository has says so on its card: the game's own, another mod's, or a mistake.
 
 ### See what a change did to its calls
 1. Open **How it connects** on a commit that changed C#. Under the picture, **What this commit did to its calls** follows once the

@@ -7,6 +7,7 @@
   import { theirName } from "../othercode/presentation";
   import NameCard from "./NameCard.svelte";
   import {
+    asAlso,
     asCandidate,
     inside,
     namesByLine,
@@ -64,8 +65,11 @@
 
   /** The most changed lines the tools keep for one file (phobos-modkit `changes`). */
   const FILE_LINE_LIMIT = 600;
-  /** The languages whose names the kit reads: C# exactly (0.79.0), Lua, Python and XML by name (0.81.0). */
-  const NAMED_LANGUAGES = ["csharp", "lua", "python", "xml"];
+  /**
+   * The languages whose names the kit reads: C# exactly (0.79.0), Lua, Python and XML by name (0.81.0), and a data file by the
+   * rules of the game's table, where it has one (0.83.0); a data file no rule reads comes back with no names.
+   */
+  const NAMED_LANGUAGES = ["csharp", "lua", "python", "xml", "json"];
 
   let reading = $state<EntryCodeReading>({ state: "reading" });
   let progress = $state(started());
@@ -159,6 +163,8 @@
   /** The name pressed, by its place in the file's reading, and whether its declaration's lines are open on its card. */
   let nameChosen = $state<number | null>(null);
   let snippetOpen = $state(false);
+  /** Whether the lines of what a name also stands for in the game's data are open on its card (0.83.0). */
+  let alsoOpen = $state(false);
   let pane = $state<HTMLElement | null>(null);
   /** For a name read by name (0.81.0): which of the things it may stand for the card shows. */
   let candidateChosen = $state(0);
@@ -204,8 +210,19 @@
   const connectable = $derived(
     taken && taken.declared.file && !inside(taken) ? nodeIdOf(taken) : null,
   );
-  /** Another author's name for it, for Read their code: only for a game's or another mod's code, never .NET's own. */
+  /** What a C# name also stands for in the game's data (0.83.0): a DefOf field's Def, with its lines when they were kept. */
+  const also = $derived(chosenName ? asAlso(chosenName) : null);
+  const alsoSnippet = $derived(
+    ready && also?.declared.file
+      ? (ready.snippets[`${also.declared.file}:${also.declared.line}`] ?? null)
+      : null,
+  );
+  /**
+   * Another author's name for it, for Read their code: only for a game's or another mod's code, never .NET's own. A class a data
+   * file names that is not this repository's (0.83.0) is looked for by the name as written.
+   */
   const theirs = $derived.by(() => {
+    if (chosenName?.their) return chosenName.their;
     const assembly = chosenName?.declared.assembly ?? "";
     if (!chosenName || !assembly) return null;
     if (/^(System|mscorlib|netstandard|Microsoft\.)/.test(assembly))
@@ -263,6 +280,7 @@
   async function chooseName(index: number | null) {
     nameChosen = index;
     snippetOpen = false;
+    alsoOpen = false;
     candidateChosen = 0;
     await tick();
     pane
@@ -319,6 +337,7 @@
     if (chosen !== next.path) {
       nameChosen = null;
       snippetOpen = false;
+      alsoOpen = false;
     }
     chosen = next.path;
     paint(next);
@@ -660,6 +679,15 @@
                   {snippetOpen}
                   canConnect={connectable !== null}
                   their={theirs}
+                  {also}
+                  {alsoSnippet}
+                  {alsoOpen}
+                  onalso={() => (alsoOpen = !alsoOpen)}
+                  onalsoconnect={() => {
+                    if (!also?.node) return;
+                    thing = also.node;
+                    mode = "connections";
+                  }}
                   ongo={goThere}
                   onconnect={() => {
                     thing = connectable;
@@ -965,7 +993,10 @@
     color: var(--colour-risk);
   }
 
+  /* A size container, so the card of a name pressed can keep to a share of the pane's own height (0.83.0). Its size comes
+     from the grid it sits in, never from its content. */
   .pane {
+    container-type: size;
     overflow: auto;
     min-width: 0;
     padding: 10px 0;

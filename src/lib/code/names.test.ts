@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { CodeName, Names } from "../connections/types";
 import {
+  asAlso,
   asCandidate,
   inside,
   languageOf,
@@ -165,6 +166,78 @@ describe("a name read by name", () => {
     expect(languageOf("lua/spray.lua")).toBe("lua");
     expect(languageOf("Defs/Boats.XML")).toBe("xml");
     expect(languageOf("notes.txt")).toBe("plain");
+    expect(languageOf("translations/Bank/en.json")).toBe("json");
+  });
+});
+
+describe("names between a game's data files and its code (0.83.0)", () => {
+  const key = name({
+    text: "Lamps_Lit",
+    kind: "translation key",
+    node: "data:key/Lamps_Lit",
+    exact: false,
+    rule: "translate-call",
+    ruleWords: "a translation key the code asks for",
+    declared: { file: "Languages/English/Keyed/Lamps.xml", line: 3, end: 3 },
+  });
+
+  it("a rule's name carries its thing's connections id, a data thing's too", () => {
+    expect(nodeIdOf(key)).toBe("data:key/Lamps_Lit");
+  });
+
+  it("two names of nothing here are the same when one rule read the same text", () => {
+    const missing = name({
+      text: "Game_Key",
+      outside: true,
+      rule: "translate-call",
+    });
+    expect(sameDeclaration(missing, { ...missing, line: 9 })).toBe(true);
+    expect(sameDeclaration(missing, { ...missing, text: "Other_Key" })).toBe(
+      false,
+    );
+    expect(sameDeclaration(missing, { ...missing, rule: "name-in-code" })).toBe(
+      false,
+    );
+    expect(sameDeclaration(missing, key)).toBe(false);
+  });
+
+  it("what a C# name also stands for is a name of its own, read by the rule that found it", () => {
+    const field = name({
+      text: "Lamps_Hum",
+      kind: "field",
+      display: "LampDefOf.Lamps_Hum",
+      id: "F:Sample.LampDefOf.Lamps_Hum",
+      declared: { file: "src/LampDefOf.cs", line: 5, end: 5 },
+      also: {
+        rule: "defof-field",
+        ruleWords: "a Def a DefOf class holds",
+        candidates: [
+          {
+            id: "def:SoundDef/Lamps_Hum",
+            name: "Lamps_Hum",
+            kind: "def",
+            file: "Defs/Sounds.xml",
+            line: 4,
+            end: 6,
+          },
+        ],
+        more: 0,
+      },
+    });
+    const also = asAlso(field);
+    expect(also).toMatchObject({
+      kind: "def",
+      display: "Lamps_Hum",
+      node: "def:SoundDef/Lamps_Hum",
+      rule: "defof-field",
+      ruleWords: "a Def a DefOf class holds",
+      declared: { file: "Defs/Sounds.xml", line: 4, end: 6 },
+    });
+    expect(also?.also).toBeUndefined();
+    expect(nodeIdOf(also!)).toBe("def:SoundDef/Lamps_Hum");
+    expect(nodeIdOf(field)).toBe("cs:Sample.LampDefOf.Lamps_Hum");
+    expect(asAlso(key)).toBeNull();
+    expect(asAlso(field, 3)).toBeNull();
   });
 });
 

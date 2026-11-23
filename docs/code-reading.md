@@ -6,9 +6,10 @@ asked to be told clearly before step 7, for which they will give the resources i
 built** (0.78.0; "Lines and pictures lit together" there), and **step 4 is built** (0.79.0, on phobos-modkit 1.111.0's
 `connections names`; "Names to follow in C#" there). The owner then said "proceed with steps 5 and 6": **step 5 is built**
 (0.81.0, on kit 1.115.0; "Names found by name in Lua, Python and XML" there), and **step 6 is built** (0.82.0, on kit 1.116.0's
-`connections calls`; "Calls gone and added, and the ring finder" there). **Step 7 waits for the owner's word and the resources
-they will give.** When a step is built, its design moves into `design-record.md` and `later.md`
-keeps one line pointing there.
+`connections calls`; "Calls gone and added, and the ring finder" there). The owner then said "go ahead with Step #7": **step 7
+is built** (0.83.0, on kit 1.117.0's `connections --game`; "Jumps between data files and code" there), after the count of false
+matches this design asked for. **Every step is built; none is tested on screen.** When a step is built, its design moves into
+`design-record.md` and `later.md` keeps one line pointing there.
 
 **The owner's request** (24 Nov 2026): "What can we do to improve the syntax highlighting, etc. of Companion? I want to bring it
 more inline with that of VS Code, if at all possible. Maybe even have the possibility of clicking on variables, etc. and you are
@@ -124,7 +125,9 @@ fetches its package from nuget.org once, which is to be treated as the heap read
 
 ### Jumps between a game's data files and its code
 
-**The owner chose this from the picture card.** It is an idea beyond what VS Code does, and it is untested.
+**The owner chose this from the picture card.** It is an idea beyond what VS Code does. **Built in 0.83.0** as below, with two
+differences found on the way: a Def named in code opens the Def as written (the Companion has no page for a Def as patched), and
+a translation file's keys are names too, so an English line leads to the code that asks for it. It is untested on screen.
 
 - **From XML to C#:** a Def's `thingClass`, `compClass`, `workerClass` or a `Class="…"` attribute opens that C# type.
 - **From C# to XML:** a translation key in code opens its English line; a Def named in code opens the Def as patched.
@@ -133,7 +136,9 @@ fetches its package from nuget.org once, which is to be treated as the heap read
 **Generic first.** The core rule is "a piece of text in a data file that names a thing the code map knows". Which elements and
 calls count is a table in the game's adapter, never in the core: RimWorld's lists the elements above. **A next game needs only its
 own table** (Ostranauts: its JSON data and C#; Project Zomboid: its scripts and Lua). **Before it is built, count the false matches
-on two games' repositories**; a rule that matches wrongly more than rarely is left out.
+on two games' repositories**; a rule that matches wrongly more than rarely is left out. **The count was run** on phobos-rimworld
+and phobos-ostranauts (24 Nov 2026), and left out or narrowed eight rules; RimWorld's and Ostranauts' tables are in the kit, and
+`connections jumps` repeats the count on any repository (the kit's `docs/connections.md`, "What the count found").
 
 ## A change as a picture
 
@@ -176,7 +181,7 @@ Agent's proposal. Each step is a version of its own and waits for the owner's wo
 | 4 | The C# source reader and its command; names as buttons in the code viewer, for C# | phobos-modkit, then Companion |
 | 5 | Names by name for Lua, Python and XML | Companion |
 | 6 | Calls gone and added, moved, and the ring finder | phobos-modkit, then Companion |
-| 7 | Jumps between data files and code, after the count of false matches | phobos-modkit (adapter tables), then Companion |
+| 7 | Jumps between data files and code, after the count of false matches (built, 0.83.0) | phobos-modkit (adapter tables), then Companion |
 
 **Each step is checked on two games' repositories before it is called done** (this repository's rule): the colours on every
 language the list has; the C# reader on phobos-rimworld and phobos-ostranauts.

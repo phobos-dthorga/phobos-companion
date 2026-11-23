@@ -151,6 +151,171 @@ const defs = {
   ],
 };
 
+/** A C# file that names the game's data (0.83.0): a translation key it asks for, a Def through a DefOf class, and a key of the game's own. */
+const lamp = {
+  path: "src/Sample/Lamp.cs",
+  oldPath: null,
+  change: "added",
+  kind: "code",
+  language: "csharp",
+  binary: false,
+  additions: 4,
+  deletions: 0,
+  truncated: false,
+  hunks: [
+    {
+      header: "",
+      lines: [
+        { kind: "+", old: null, new: 1, text: "class Lamp" },
+        {
+          kind: "+",
+          old: null,
+          new: 2,
+          text: '    string Words() => "Lamps_Lit".Translate();',
+        },
+        {
+          kind: "+",
+          old: null,
+          new: 3,
+          text: "    Def Sound => LampDefOf.Lamps_Hum;",
+        },
+        {
+          kind: "+",
+          old: null,
+          new: 4,
+          text: '    string Other() => "Game_Key".Translate();',
+        },
+      ],
+    },
+  ],
+};
+
+function lampCode() {
+  const code = sampleCode();
+  code.result.code.files = [lamp];
+  return code;
+}
+
+/** Lamp.cs as the kit reads it with the game named (kit 1.117.0): the names its rules read, and what a field also stands for. */
+const lampNames = {
+  result: {
+    ok: true,
+    refusal: null,
+    data: {
+      file: "src/Sample/Lamp.cs",
+      project: "Sample",
+      projects: ["Sample"],
+      game: "rimworld",
+      names: [
+        {
+          line: 2,
+          column: 23,
+          length: 9,
+          text: "Lamps_Lit",
+          kind: "translation key",
+          display: "Lamps_Lit",
+          id: null,
+          node: "data:key/Lamps_Lit",
+          exact: false,
+          rule: "translate-call",
+          ruleWords: "a translation key the code asks for",
+          outside: false,
+          their: null,
+          here: false,
+          declared: {
+            file: "Languages/English/Keyed/Lamps.xml",
+            line: 3,
+            end: 3,
+          },
+          candidates: [
+            {
+              id: "data:key/Lamps_Lit",
+              name: "Lamps_Lit",
+              kind: "translation key",
+              file: "Languages/English/Keyed/Lamps.xml",
+              line: 3,
+              end: 3,
+            },
+          ],
+          more: 0,
+        },
+        {
+          line: 3,
+          column: 27,
+          length: 9,
+          text: "Lamps_Hum",
+          kind: "field",
+          display: "LampDefOf.Lamps_Hum",
+          id: "F:Sample.LampDefOf.Lamps_Hum",
+          here: false,
+          declared: { file: "src/Sample/LampDefOf.cs", line: 5, end: 5 },
+          also: {
+            rule: "defof-field",
+            ruleWords: "a Def a DefOf class holds",
+            candidates: [
+              {
+                id: "def:SoundDef/Lamps_Hum",
+                name: "Lamps_Hum",
+                kind: "def",
+                file: "Defs/Sounds.xml",
+                line: 4,
+                end: 6,
+              },
+            ],
+            more: 0,
+          },
+        },
+        {
+          line: 4,
+          column: 23,
+          length: 8,
+          text: "Game_Key",
+          kind: "translation key",
+          display: "Game_Key",
+          id: null,
+          node: null,
+          exact: false,
+          rule: "translate-call",
+          ruleWords: "a translation key the code asks for",
+          outside: true,
+          their: null,
+          here: false,
+          declared: {},
+          candidates: [],
+          more: 0,
+        },
+      ],
+      snippets: {
+        "Languages/English/Keyed/Lamps.xml:3": {
+          file: "Languages/English/Keyed/Lamps.xml",
+          start: 3,
+          end: 3,
+          lines: ["  <Lamps_Lit>The lamp is lit.</Lamps_Lit>"],
+          cut: false,
+        },
+        "Defs/Sounds.xml:4": {
+          file: "Defs/Sounds.xml",
+          start: 4,
+          end: 6,
+          lines: [
+            "  <SoundDef>",
+            "    <defName>Lamps_Hum</defName>",
+            "  </SoundDef>",
+          ],
+          cut: false,
+        },
+      },
+      errors: 0,
+      missingReferences: 0,
+      seconds: 2.4,
+      commit: "4d332ddf0123456789",
+      limits: [
+        "Names between data files and code are read by the rules for rimworld, from the text: each says which rule read it, and one may be wrong.",
+      ],
+    },
+  },
+};
+
 const picture = {
   path: "mods/Sample Mod/Textures/Boat.png",
   oldPath: null,
@@ -897,6 +1062,69 @@ for (const [name, viewport] of [
         "Declared in this repository: src/Sample/Boat.cs, line 1",
       );
       await expect(card).toContainText("class");
+    });
+
+    test("a translation key in code opens its English line, a DefOf field its Def, and a name of nothing here says so (0.83.0)", async ({
+      page,
+    }) => {
+      await open(page, lampCode(), {
+        "connections:names:src/Sample/Lamp.cs": lampNames,
+      });
+      await page
+        .getByRole("button", {
+          name: "Show the code behind: Sample boats float.",
+        })
+        .click();
+      const viewer = page.getByRole("dialog");
+      const pane = viewer.getByRole("region", {
+        name: "The code of src/Sample/Lamp.cs",
+      });
+      await expect(pane.locator(".nm")).toHaveCount(3);
+      // A translation key the code asks for: what it is, which rule read it, and its English words.
+      await pane.locator(".nm", { hasText: "Lamps_Lit" }).click();
+      const key = pane.getByRole("region", { name: "What Lamps_Lit is" });
+      await expect(key).toContainText("translation key");
+      await expect(key).toContainText(
+        "Found by a rule, from the text: a translation key the code asks for.",
+      );
+      await expect(key).toContainText(
+        "Declared in this repository: Languages/English/Keyed/Lamps.xml, line 3",
+      );
+      await key.getByRole("button", { name: "Go to its declaration" }).click();
+      await expect(key).toContainText("The lamp is lit.");
+      await expect(
+        key.getByRole("button", { name: "How Lamps_Lit connects" }),
+      ).toBeVisible();
+      await audit(page);
+      // Its lines put away again, so the card (which stays in view) leaves the code beneath it to press.
+      await key.getByRole("button", { name: "Hide its declaration" }).click();
+      // A DefOf field keeps its exact reading, and says the Def it stands for, with the Def's own lines.
+      await pane.locator(".nm", { hasText: "Lamps_Hum" }).click();
+      const field = pane.getByRole("region", { name: "What Lamps_Hum is" });
+      await expect(field).toContainText("LampDefOf.Lamps_Hum");
+      await expect(field).toContainText(
+        "It stands for the def Lamps_Hum, declared at Defs/Sounds.xml, line 4.",
+      );
+      await expect(field).toContainText("a Def a DefOf class holds");
+      await field.getByRole("button", { name: "Show the def" }).click();
+      await expect(field).toContainText("<defName>Lamps_Hum</defName>");
+      await expect(
+        field.getByRole("button", { name: "How the def Lamps_Hum connects" }),
+      ).toBeVisible();
+      await audit(page);
+      await field.getByRole("button", { name: "Hide the def" }).click();
+      // A key no English line of this repository declares: said in words, with nowhere to go.
+      await pane.locator(".nm", { hasText: "Game_Key" }).click();
+      const other = pane.getByRole("region", { name: "What Game_Key is" });
+      await expect(other).toContainText(
+        "Nothing in this repository has this name",
+      );
+      await expect(
+        other.getByRole("button", { name: "Go to its declaration" }),
+      ).toHaveCount(0);
+      await expect(other.getByRole("button", { name: /connects/ })).toHaveCount(
+        0,
+      );
     });
 
     test("can show only the code as it now stands, and closes", async ({

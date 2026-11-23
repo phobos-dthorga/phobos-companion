@@ -6,19 +6,26 @@
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
   import ConnectionsView from "./ConnectionsView.svelte";
-  import { askConnections } from "./desktopClient";
+  import { askChanged } from "./desktopClient";
   import { startingPoints } from "./presentation";
   import type { Changed, Thing } from "./types";
 
   /**
    * How the code a commit changed connects to the rest: the things its lines changed, most-changed first, and the connections view
-   * centred on the one chosen. For the code viewer's "How it connects".
+   * centred on the one chosen. For the code viewer's "How it connects". The chosen thing is the viewer's (0.78.0), so the viewer can
+   * show its lines beneath the picture; putting something else in the middle chooses it.
    */
   let {
     game,
     repository,
     commit,
-  }: { game: string; repository: string; commit: string | null } = $props();
+    chosen = $bindable(null),
+  }: {
+    game: string;
+    repository: string;
+    commit: string | null;
+    chosen?: string | null;
+  } = $props();
 
   let reading = $state<
     | { state: "reading" }
@@ -27,7 +34,6 @@
     | { state: "failed"; failure: Failure }
   >({ state: "reading" });
   let progress = $state(started());
-  let chosen = $state<string | null>(null);
 
   const points = $derived<Thing[]>(
     reading.state === "ready" ? startingPoints(reading.changed.things) : [],
@@ -44,23 +50,17 @@
     if (!commit) return;
     reading = { state: "reading" };
     progress = started();
-    const asked = await askConnections<Changed>(
-      game,
-      repository,
-      "changed",
-      commit,
-      {
-        onProgress: (message) => {
-          progress = heard(progress, message);
-        },
-      },
-    );
+    const asked = await askChanged(game, repository, commit, (message) => {
+      progress = heard(progress, message);
+    });
     reading =
       asked.state === "failed"
         ? asked
         : asked.answer.ok
           ? { state: "ready", changed: asked.answer.data }
           : { state: "refused", reason: asked.answer.refusal ?? "" };
+    if (reading.state === "ready" && chosen === null)
+      chosen = points[0]?.id ?? null;
   }
 
   onMount(load);
@@ -113,7 +113,13 @@
   </div>
   {#if start}
     {#key start}
-      <ConnectionsView {game} {repository} {start} changed={changedIds} />
+      <ConnectionsView
+        {game}
+        {repository}
+        {start}
+        changed={changedIds}
+        onrecentre={(id) => (chosen = id)}
+      />
     {/key}
   {/if}
 {/if}

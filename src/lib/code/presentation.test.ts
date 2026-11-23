@@ -8,6 +8,7 @@ import {
   isTest,
   pathParts,
   piecesToHtml,
+  linesOf,
   shownLines,
   sides,
   writtenWords,
@@ -138,6 +139,37 @@ describe("a hunk's two sides", () => {
       "+",
     ]);
     expect(shownLines(hunk, "changes")).toHaveLength(4);
+    expect(shownLines(hunk, "old").map((line) => line.kind)).toEqual([
+      " ",
+      "-",
+    ]);
+  });
+});
+
+describe("the lines of one thing a commit changed", () => {
+  // Turn() stood on lines 2 to 3 at the commit; the class on lines 1 to 4.
+  const turn: Hunk = {
+    header: "",
+    lines: [
+      { kind: " ", old: 1, new: 1, text: "class Wheel {" },
+      { kind: "-", old: 2, new: null, text: "  void Turn() { }" },
+      { kind: "+", old: null, new: 2, text: "  void Turn() {" },
+      { kind: "+", old: null, new: 3, text: "    Spin(); }" },
+      { kind: " ", old: 3, new: 4, text: "}" },
+    ],
+  };
+
+  it("are its lines as the code now stands, and the removed lines where it stood", () => {
+    expect([...linesOf(turn, { file: "W.cs", line: 2, end: 3 })]).toEqual([
+      1, 2, 3,
+    ]);
+    expect([...linesOf(turn, { file: "W.cs", line: 1, end: 4 })]).toEqual([
+      0, 1, 2, 3, 4,
+    ]);
+  });
+
+  it("are none when it stood elsewhere", () => {
+    expect(linesOf(turn, { file: "W.cs", line: 40, end: 50 }).size).toBe(0);
   });
 });
 

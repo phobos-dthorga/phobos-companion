@@ -37,6 +37,8 @@ export type Thing = {
   /** For a thing a commit changed: how many of its lines. */
   linesChanged?: number;
   inGraph?: boolean;
+  /** For a thing a commit changed: where it stood at that commit (kit 1.112.0), to light its lines in the commit's changes. */
+  at?: { file: string; line: number; end: number };
 };
 
 export type Group = {

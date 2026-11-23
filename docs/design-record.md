@@ -924,8 +924,31 @@ them; the old colours did). **Not tested on screen.**
 
 **Measured by hand on this PC's VS Code** (an ignored test, `vs_codes_own_themes_on_this_computer_are_read`): Dark Modern 65
 rules, 26 swapped on House D'thorga; Dark 2026 118 and 32; Dark+ 65 and 26; Dark High Contrast 54 and 19; Light Modern 64 and 61.
-Nearly every swap on a dark theme is Dark+'s blue #569CD6 (4.49:1 on a removed line, 0.01 short), which takes House D'thorga's
-#5CA2DC. **Not tested on screen.**
+Nearly every swap on a dark theme is Dark+'s blue, `#569CD6` (4.49:1 on a removed line, 0.01 short), which takes House
+D'thorga's `#5CA2DC`. **Not tested on screen.**
+
+## Lines and pictures lit together (built 24 Nov 2026, 0.78.0)
+
+**The owner chose "Lines and boxes lit together" by card** (24 Nov 2026): step 3 of [Reading code closer](code-reading.md).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See which lines of a change are one method's, and go from those lines to the method's picture and back without losing their place |
+| What does it stop them doing? | Reading a long change as one undivided run of lines, and matching a box in the picture to its code by eye |
+| How does it change the way they work? | "What did this change do to this method?" is two presses: light it, then How it connects |
+| What outside it notices? | The kit (`connections changed` gives `at`, 1.112.0) and the connections picture, which now hands its centre to the viewer |
+
+| Part | How |
+| --- | --- |
+| Where a thing stood | phobos-modkit 1.112.0's `at`: the thing's file and lines as declared at that commit, since its `file` and `line` are where it stands now and may have moved |
+| Which lines are its | `linesOf` (tested without a screen): an unchanged or added line by its number as the code now stands; a removed line by where it was, the line before it |
+| One choice for both views | The viewer holds the chosen thing; the buttons over the lines and the buttons over the picture set it, and putting something in the middle of the picture (`onrecentre`) sets it too |
+| Where the lines sit | Beneath the picture: the lean of the open decision `code-change-layout` (agent's default) |
+| Lit, not by colour alone | An accent bar at the line's end and its numbers bold in the accent, over the added and removed tints; the button's pressed state says which is lit |
+| One reading | `askChanged` keeps each commit's answer for the window's run, so the lines and the picture ask the kit once |
+| The code as it was | A fourth mode (**Shift + N**: every single letter is taken, so Shift with N, the code as it now stands), old numbers only |
+
+**Not built here:** calls gone and added and the ring finder (step 6), which wait for the owner's word. **Not tested on screen.**
 
 ## The Guide (built 20 Nov 2026, 0.34.0)
 

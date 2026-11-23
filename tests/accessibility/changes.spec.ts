@@ -272,6 +272,8 @@ async function open(
               assembly: null,
               linesChanged: 6,
               inGraph: true,
+              // Where it stood at the commit (kit 1.112.0): the class Boat's first four lines in the sample.
+              at: { file: "src/Sample/Boat.cs", line: 1, end: 3 },
             },
             {
               id: "cs:Sample.Boat.Sink",
@@ -286,6 +288,7 @@ async function open(
               assembly: null,
               linesChanged: 2,
               inGraph: false,
+              at: { file: "src/Sample/Boat.cs", line: 4, end: 4 },
             },
           ],
         },
@@ -510,6 +513,49 @@ for (const [name, viewport] of [
       await audit(page);
     });
 
+    test("lights the lines of one thing the commit changed, and goes to how it connects with its lines beneath (0.78.0)", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("button", {
+          name: "Show the code behind: Sample boats float.",
+        })
+        .click();
+      const viewer = page.getByRole("dialog");
+      const pane = viewer.getByRole("region", {
+        name: "The code of src/Sample/Boat.cs",
+      });
+      const things = pane.getByRole("group", {
+        name: "What this commit changed in this file: press one to light its lines",
+      });
+      await things.getByRole("button", { name: /Boat\.Float/ }).click();
+      await expect(
+        things.getByRole("button", { name: /Boat\.Float/ }),
+      ).toHaveAttribute("aria-pressed", "true");
+      await expect(pane.locator(".line.lit")).toHaveCount(3);
+      await expect(pane.locator(".line.lit").first()).toContainText(
+        "class Boat",
+      );
+      await audit(page);
+      await pane
+        .getByRole("button", { name: "How Boat.Float connects" })
+        .click();
+      await expect(
+        viewer.getByRole("button", { name: "How it connects" }),
+      ).toHaveAttribute("aria-pressed", "true");
+      const lines = viewer.getByRole("region", {
+        name: "Boat.Float in this commit: src/Sample/Boat.cs, lines 1 to 3",
+      });
+      await expect(lines.locator(".line")).toHaveCount(3);
+      await expect(lines).toContainText('"Audeamus"');
+      await audit(page);
+      // A second press puts the lines out again.
+      await viewer.getByRole("button", { name: "What changed" }).click();
+      await things.getByRole("button", { name: /Boat\.Float/ }).click();
+      await expect(pane.locator(".line.lit")).toHaveCount(0);
+    });
+
     test("can show only the code as it now stands, and closes", async ({
       page,
     }) => {
@@ -531,6 +577,17 @@ for (const [name, viewport] of [
         .click();
       await expect(pane.locator(".line.diff-removed")).toHaveCount(0);
       await expect(pane).toContainText("void Turn() { Spin(); }");
+      // The code as it was (0.78.0), and its key, Shift with N.
+      await viewer.getByRole("button", { name: "The code as it was" }).click();
+      await expect(pane.locator(".line.diff-added")).toHaveCount(0);
+      await expect(pane).toContainText("void Turn() { }");
+      await viewer
+        .getByRole("button", { name: "The code as it now stands" })
+        .click();
+      await page.keyboard.press("Shift+N");
+      await expect(
+        viewer.getByRole("button", { name: "The code as it was" }),
+      ).toHaveAttribute("aria-pressed", "true");
       await viewer.getByRole("button", { name: /Boat\.png/ }).click();
       await expect(viewer).toContainText("isn't text");
       await viewer.getByRole("button", { name: "Close" }).click();

@@ -4,6 +4,24 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.78.0] - 2026-11-24
+
+### Added
+
+- **Lines and pictures lit together in the code viewer** (the owner's choice by card, 24 Nov 2026: "Lines and boxes lit
+  together"; `docs/code-reading.md`, step 3). Above a file's lines, a button for each method, class or Def the commit changed in
+  that file: press one and its lines are lit, with an accent bar at their end and their numbers in the accent; press again to put
+  them out. **How … connects** then opens its picture with its lines in the commit beneath, picture first (the lean of your open
+  decision `code-change-layout`). Putting something else in the middle of the picture chooses it, and its lines follow; one the
+  commit did not change says so. Both views share one reading of what the commit changed. **Not tested on screen.**
+- **The code as it was** (**Shift + N**), a fourth way to read a change beside What changed, The code as it now stands and How
+  it connects: the lines as they stood before the commit, with their old numbers.
+
+### Changed
+
+- **The kit pin moves from v1.110.0 to v1.112.0**: `connections names` (1.111.0), which step 4 uses, and `connections changed`
+  saying where each changed thing stood at that commit (1.112.0), which lights its lines.
+
 ## [0.77.0] - 2026-11-24
 
 ### Added

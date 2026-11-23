@@ -7,8 +7,39 @@ import type {
   Hunk,
 } from "./types";
 
-/** How the viewer shows a file: everything that changed, or only the code as it now stands. */
-export type ViewMode = "changes" | "new" | "connections";
+/**
+ * How the viewer shows a file: everything that changed, only the code as it now stands, only the code as it was (0.78.0), or how
+ * the things it changed connect.
+ */
+export type ViewMode = "changes" | "new" | "old" | "connections";
+
+/** Whether a mode shows a line: removed lines are left out of the code as it now stands, added lines out of the code as it was. */
+export function showsLine(mode: ViewMode, kind: DiffLine["kind"]): boolean {
+  return mode === "new" ? kind !== "-" : mode === "old" ? kind !== "+" : true;
+}
+
+/** Where a thing a commit changed stood at that commit (phobos-modkit 1.112.0's `at`): its file and its first and last lines. */
+export type At = { file: string; line: number; end: number };
+
+/**
+ * Which lines of a hunk belong to a thing that stood at `at` (0.78.0, docs/code-reading.md step 3), as their places in the hunk:
+ * an unchanged or added line by its number as the code now stands; a removed line by where it was, the line before it.
+ */
+export function linesOf(hunk: Hunk, at: At): Set<number> {
+  const found = new Set<number>();
+  const first = hunk.lines.find((line) => line.new != null)?.new ?? 1;
+  let before = first - 1;
+  hunk.lines.forEach((line, index) => {
+    if (line.kind === "-") {
+      if (before >= at.line - 1 && before <= at.end) found.add(index);
+      return;
+    }
+    const number = line.new ?? before + 1;
+    if (number >= at.line && number <= at.end) found.add(index);
+    before = number;
+  });
+  return found;
+}
 
 /** The kinds of file, in the order they are listed, each with its heading as a message key. */
 export const KIND_WORDS: Record<FileKind, string> = {
@@ -74,11 +105,9 @@ export function firstFile(files: FileChange[]): FileChange | null {
   );
 }
 
-/** The lines a mode shows: removed lines are left out of "the code as it now stands". */
+/** The lines a mode shows. */
 export function shownLines(hunk: Hunk, mode: ViewMode): DiffLine[] {
-  return mode === "new"
-    ? hunk.lines.filter((line) => line.kind !== "-")
-    : hunk.lines;
+  return hunk.lines.filter((line) => showsLine(mode, line.kind));
 }
 
 export function escapeHtml(text: string): string {

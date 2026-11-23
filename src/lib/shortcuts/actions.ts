@@ -294,6 +294,13 @@ export const ACTIONS: Action[] = [
     words: "shortcut-code-new",
   },
   {
+    // The code as it was (0.78.0): Shift with N, the code as it now stands, since every single letter is taken.
+    id: "code.old",
+    scope: "code",
+    defaultKey: "Shift+n",
+    words: "shortcut-code-old",
+  },
+  {
     id: "code.connections",
     scope: "code",
     defaultKey: "h",

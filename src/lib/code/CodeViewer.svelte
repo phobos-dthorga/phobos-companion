@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick, untrack } from "svelte";
   import { LOCALE, t } from "../i18n/runtime";
+  import { askChanged } from "../connections/desktopClient";
+  import type { Thing } from "../connections/types";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import RichText from "../shell/RichText.svelte";
@@ -23,8 +25,10 @@
     hunkHtml,
     KIND_WORDS,
     LINE_MARKS,
+    linesOf,
     pathParts,
     shortHash,
+    showsLine,
     sides,
     writtenWords,
     type ViewMode,
@@ -61,6 +65,32 @@
     code?.files.find((candidate) => candidate.path === chosen) ?? null,
   );
 
+  /** What the commit changed (0.78.0; docs/code-reading.md step 3), each with where it stood: shared with How it connects. */
+  let things = $state<Thing[]>([]);
+  /** The thing chosen: its lines are lit, and How it connects is centred on it, so the lines and the picture follow each other. */
+  let thing = $state<string | null>(null);
+
+  const chosenThing = $derived(things.find((t) => t.id === thing) ?? null);
+  const fileThings = $derived(
+    file ? things.filter((t) => t.at?.file === file.path) : [],
+  );
+  /** For each hunk of the file shown, the places of the chosen thing's lines. */
+  const lit = $derived(
+    file
+      ? file.hunks.map((hunk) =>
+          chosenThing?.at?.file === file.path
+            ? linesOf(hunk, chosenThing.at)
+            : new Set<number>(),
+        )
+      : [],
+  );
+  /** The file the chosen thing is in, for its lines beneath the connections picture. */
+  const thingFile = $derived(
+    chosenThing?.at
+      ? (code?.files.find((f) => f.path === chosenThing.at!.file) ?? null)
+      : null,
+  );
+
   async function load() {
     reading = { state: "reading" };
     progress = started();
@@ -71,12 +101,40 @@
     if (next.state === "ready" && next.found.found) {
       const first = firstFile(next.found.code.files);
       if (first) open(first);
+      const commit = next.found.code.commit?.hash;
+      if (commit) void loadThings(commit);
     }
   }
+
+  /** Reads what the commit changed, quietly: the lines show without it, and the buttons that light a thing come when it does. */
+  async function loadThings(commit: string) {
+    const asked = await askChanged(game, request.repository, commit);
+    if (asked.state === "ready" && asked.answer.ok)
+      things = asked.answer.data.things;
+  }
+
+  /** Lights a thing's lines, or puts them out when it is lit already, and brings its first line into view. */
+  async function light(candidate: Thing) {
+    thing = thing === candidate.id ? null : candidate.id;
+    await tick();
+    document
+      .querySelector(".code-viewer-pane .line.lit")
+      ?.scrollIntoView({ block: "center" });
+  }
+
+  // The chosen thing's file is coloured too, for its lines beneath the picture.
+  $effect(() => {
+    const shown = thingFile;
+    if (mode === "connections" && shown) untrack(() => paint(shown));
+  });
 
   /** Shows a file at once as plain text, then colours it when its grammar has loaded. */
   function open(next: FileChange) {
     chosen = next.path;
+    paint(next);
+  }
+
+  function paint(next: FileChange) {
     if (painted[next.path]) return;
     painted[next.path] = next.hunks.map((hunk) => hunkHtml(hunk, null, null));
     void Promise.all(
@@ -119,6 +177,7 @@
       run: {
         "code.changes": () => (mode = "changes"),
         "code.new": () => (mode = "new"),
+        "code.old": () => (mode = "old"),
         "code.connections": () => (mode = "connections"),
         "code.next-file": () => stepFile(1),
         "code.previous-file": () => stepFile(-1),
@@ -215,6 +274,12 @@
         <button
           type="button"
           class="toggle"
+          aria-pressed={mode === "old"}
+          onclick={() => (mode = "old")}>{t("code-mode-old")}</button
+        >
+        <button
+          type="button"
+          class="toggle"
           aria-pressed={mode === "connections"}
           onclick={() => (mode = "connections")}
           >{t("code-mode-connections")}</button
@@ -227,7 +292,62 @@
             {game}
             repository={request.repository}
             commit={code.commit?.hash ?? null}
+            bind:chosen={thing}
           />
+          <!-- The chosen thing's lines in this commit, beneath its picture (0.78.0): the picture first, then the code it is. -->
+          {#if thing && !chosenThing && things.length > 0}
+            <p class="muted note">{t("code-thing-unchanged")}</p>
+          {:else if chosenThing?.at && thingFile}
+            {@const at = chosenThing.at}
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <section
+              class="thing-lines"
+              tabindex="0"
+              aria-label={t("code-thing-lines-title", {
+                name: chosenThing.name,
+                file: at.file,
+                from: at.line,
+                to: at.end,
+              })}
+            >
+              <h3 class="path">
+                {t("code-thing-lines-title", {
+                  name: chosenThing.name,
+                  file: at.file,
+                  from: at.line,
+                  to: at.end,
+                })}
+              </h3>
+              {#each thingFile.hunks as hunk, hunkIndex (hunkIndex)}
+                {@const places = linesOf(hunk, at)}
+                {#if places.size > 0}
+                  <div class="lines code-colours">
+                    {#each hunk.lines as line, lineIndex (lineIndex)}
+                      {#if places.has(lineIndex)}
+                        <div
+                          class="line"
+                          class:diff-added={line.kind === "+"}
+                          class:diff-removed={line.kind === "-"}
+                        >
+                          <span class="number">{line.old ?? ""}</span>
+                          <span class="number">{line.new ?? ""}</span>
+                          <span class="mark diff-sign"
+                            >{LINE_MARKS[line.kind]}</span
+                          >
+                          <!-- eslint-disable-next-line svelte/no-at-html-tags -- escaped by the highlighter, or by hunkHtml -->
+                          <code
+                            >{@html painted[thingFile.path]?.[hunkIndex]?.[
+                              lineIndex
+                            ] ?? ""}</code
+                          >
+                        </div>
+                      {/if}
+                    {/each}
+                  </div>
+                {/if}
+              {/each}
+            </section>
+          {/if}
         </div>
       {:else}
         <div class="body">
@@ -282,11 +402,46 @@
           {#if file}
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <section
-              class="pane"
+              class="pane code-viewer-pane"
               tabindex="0"
               aria-label={t("code-pane-label", { path: file.path })}
             >
               <h3 class="path">{file.path}</h3>
+              {#if fileThings.length > 0}
+                <!-- What the commit changed in this file (0.78.0): press one to light its lines, then see how it connects. -->
+                <div class="things">
+                  <div
+                    class="toggles"
+                    role="group"
+                    aria-label={t("code-things-label")}
+                  >
+                    {#each fileThings as candidate (candidate.id)}
+                      <button
+                        type="button"
+                        class="toggle"
+                        aria-pressed={thing === candidate.id}
+                        onclick={() => light(candidate)}
+                        >{candidate.name}
+                        <span class="muted small"
+                          >{t("connections-lines-changed", {
+                            count: candidate.linesChanged ?? 0,
+                          })}</span
+                        ></button
+                      >
+                    {/each}
+                  </div>
+                  {#if chosenThing && fileThings.includes(chosenThing) && chosenThing.inGraph !== false}
+                    <button
+                      type="button"
+                      class="action"
+                      onclick={() => (mode = "connections")}
+                      >{t("code-thing-connections", {
+                        name: chosenThing.name,
+                      })}</button
+                    >
+                  {/if}
+                </div>
+              {/if}
               {#if file.oldPath && file.oldPath !== file.path}
                 <p class="muted note">
                   {t("code-renamed-from", { path: file.oldPath })}
@@ -318,16 +473,19 @@
                 </p>
                 <div class="lines code-colours">
                   {#each hunk.lines as line, lineIndex (lineIndex)}
-                    {#if mode === "changes" || line.kind !== "-"}
+                    {#if showsLine(mode, line.kind)}
                       <div
                         class="line"
                         class:diff-added={line.kind === "+"}
                         class:diff-removed={line.kind === "-"}
+                        class:lit={lit[hunkIndex]?.has(lineIndex)}
                       >
-                        {#if mode === "changes"}
+                        {#if mode !== "new"}
                           <span class="number">{line.old ?? ""}</span>
                         {/if}
-                        <span class="number">{line.new ?? ""}</span>
+                        {#if mode !== "old"}
+                          <span class="number">{line.new ?? ""}</span>
+                        {/if}
                         <span class="mark diff-sign"
                           >{LINE_MARKS[line.kind]}</span
                         >
@@ -360,6 +518,40 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+  }
+
+  /* What the commit changed in the file shown (0.78.0), and the lines of the one chosen: an accent bar at the line's end and its
+     numbers in the accent, so a lit line never rests on colour alone over the added and removed tints. */
+  .things {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 12px 8px;
+  }
+
+  .things .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .line.lit {
+    box-shadow: inset -4px 0 0 var(--colour-accent);
+  }
+
+  .line.lit .number {
+    color: var(--colour-accent);
+    font-weight: 700;
+  }
+
+  .thing-lines {
+    margin-top: 12px;
+    padding: 10px 0;
+    overflow-x: auto;
+    background: var(--colour-canvas);
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
   }
 
   .entry-rest {

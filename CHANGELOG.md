@@ -10,6 +10,23 @@ Maintained from 9 November 2026.
   what the program is, what it needs before the window opens, how to install it and its first steps, then "press F1"; its "Read
   this first" bullets moved into the Guide's entries for their pages, or were dropped where the Guide already said them.
 
+## [0.79.0] - 2026-11-24
+
+### Added
+
+- **Names to follow in C# code** (the owner's choice by card, 24 Nov 2026: "Roslyn for C#, by name elsewhere";
+  `docs/code-reading.md`, step 4). In the code viewer, every name in a C# file becomes something to press, once the kit's names
+  reader has read the file with Roslyn (a few seconds; the code shows at once, and a line says the names are being read). Press a
+  name and a card says what it is (a class, a method, a field, a parameter…), its signature, where it is declared (a file and
+  line of this repository, or the game's or another mod's assembly), and how often the lines shown name it, each use ringed.
+  **Go to its declaration** moves to its line when the change shows it, or opens its lines on the card; **How … connects** opens
+  its picture; **Read their code** opens the game's or another mod's code for it. With a name chosen, **←** and **→** move along
+  the names, **↑** and **↓** between lines, **Enter** (or **F12**, as in VS Code) goes to its declaration, and **Escape** lets it go;
+  **Step through the names** starts from the keyboard. The file is read as it stood at the commit; a removed line's names are not
+  read. Other languages are not read this way yet (step 5). The kit's reader checked on phobos-rimworld (`FieldKitchen.cs`: 350
+  names, 0 errors) and phobos-ostranauts (`StoryPack.cs`: 2,897 names, 0 errors). **Not tested on screen**, and not yet run
+  through the window with the real reader.
+
 ## [0.78.0] - 2026-11-24
 
 ### Added

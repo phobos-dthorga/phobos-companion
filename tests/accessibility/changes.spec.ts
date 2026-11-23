@@ -294,6 +294,48 @@ async function open(
         },
       },
     },
+    // The names in Boat.cs, as the kit's names reader would give them (0.79.0): the class, and its field.
+    "connections:names": {
+      result: {
+        ok: true,
+        refusal: null,
+        data: {
+          file: "src/Sample/Boat.cs",
+          project: "Sample",
+          projects: ["Sample"],
+          names: [
+            {
+              line: 1,
+              column: 6,
+              length: 4,
+              text: "Boat",
+              kind: "class",
+              display: "Boat",
+              id: "T:Sample.Boat",
+              here: true,
+              declared: { file: "src/Sample/Boat.cs", line: 1, end: 4 },
+            },
+            {
+              line: 3,
+              column: 11,
+              length: 4,
+              text: "name",
+              kind: "field",
+              display: "Boat.name",
+              id: "F:Sample.Boat.name",
+              here: true,
+              declared: { file: "src/Sample/Boat.cs", line: 3, end: 3 },
+            },
+          ],
+          snippets: {},
+          errors: 0,
+          missingReferences: 0,
+          seconds: 3.1,
+          commit: "4d332ddf0123456789",
+          limits: [],
+        },
+      },
+    },
     "connections:around": {
       result: {
         ok: true,
@@ -554,6 +596,50 @@ for (const [name, viewport] of [
       await viewer.getByRole("button", { name: "What changed" }).click();
       await things.getByRole("button", { name: /Boat\.Float/ }).click();
       await expect(pane.locator(".line.lit")).toHaveCount(0);
+    });
+
+    test("a name in C# is pressed to see what it is, stepped through with the keys, and let go (0.79.0)", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("button", {
+          name: "Show the code behind: Sample boats float.",
+        })
+        .click();
+      const viewer = page.getByRole("dialog");
+      const pane = viewer.getByRole("region", {
+        name: "The code of src/Sample/Boat.cs",
+      });
+      await expect(pane.locator(".nm")).toHaveCount(2);
+      await pane.locator(".nm", { hasText: "Boat" }).click();
+      const card = pane.getByRole("region", { name: "What Boat is" });
+      await expect(card).toContainText("class");
+      await expect(card).toContainText(
+        "Declared in this repository: src/Sample/Boat.cs, line 1",
+      );
+      await expect(
+        card.getByRole("button", { name: "How Boat connects" }),
+      ).toBeVisible();
+      await expect(pane.locator(".nm-chosen")).toHaveText("Boat");
+      await audit(page);
+      await pane.press("ArrowDown");
+      await expect(pane.locator(".nm-chosen")).toHaveText("name");
+      await expect(
+        pane.getByRole("region", { name: "What name is" }),
+      ).toContainText("Boat.name");
+      await pane.press("Escape");
+      await expect(pane.locator(".nm-chosen")).toHaveCount(0);
+      await expect(viewer).toBeVisible();
+      // From the keyboard alone: Step through the names starts on the first.
+      await pane
+        .getByRole("button", { name: "Step through the names" })
+        .click();
+      await expect(pane.locator(".nm-chosen")).toHaveText("Boat");
+      await card.getByRole("button", { name: "How Boat connects" }).click();
+      await expect(
+        viewer.getByRole("button", { name: "How it connects" }),
+      ).toHaveAttribute("aria-pressed", "true");
     });
 
     test("can show only the code as it now stands, and closes", async ({

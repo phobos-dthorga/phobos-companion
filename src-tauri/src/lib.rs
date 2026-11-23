@@ -340,7 +340,8 @@ async fn set_setting(
     blocking(move || settings_page::set(&key, value.as_deref(), Some(&hearing(on_progress)))).await
 }
 
-/// One question about how a repository's code connects: summary, find, around, flow or changed. The host checks it first.
+/// One question about how a repository's code connects: summary, find, around, flow, changed, history, or the names in one C#
+/// file (0.79.0, with the commit to read it at). The host checks it first.
 #[tauri::command]
 async fn connections(
     game: String,
@@ -348,10 +349,11 @@ async fn connections(
     kind: String,
     value: Option<String>,
     depth: Option<u8>,
+    commit: Option<String>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<connections_page::Answer, Failure> {
     blocking(move || {
-        let question = connections_page::question(&kind, value, depth)?;
+        let question = connections_page::question(&kind, value, depth, commit)?;
         connections_page::ask(&game, &repository, &question, Some(&hearing(on_progress)))
     })
     .await

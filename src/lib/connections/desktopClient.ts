@@ -1,7 +1,7 @@
 import { ask, progressChannel } from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
-import type { Answer, Changed, Question } from "./types";
+import type { Answer, Changed, Names, Question } from "./types";
 import type { PatchTargets } from "./patches";
 
 /**
@@ -13,7 +13,7 @@ export async function askConnections<T>(
   repository: string,
   kind: Question,
   value: string | null,
-  options: { depth?: number; onProgress?: OnProgress } = {},
+  options: { depth?: number; commit?: string; onProgress?: OnProgress } = {},
 ): Promise<{ state: "ready"; answer: Answer<T> } | Failed> {
   return ask<Answer<T>, { state: "ready"; answer: Answer<T> }>(
     "connections",
@@ -23,6 +23,7 @@ export async function askConnections<T>(
       kind,
       value,
       depth: options.depth ?? null,
+      commit: options.commit ?? null,
       onProgress: progressChannel(options.onProgress),
     },
     (answer) => ({ state: "ready", answer }),
@@ -51,6 +52,33 @@ export function askChanged(
     changedAsked.set(key, asked);
     void asked.then((answer) => {
       if (answer.state === "failed") changedAsked.delete(key);
+    });
+  }
+  return asked;
+}
+
+type NamesAsked = { state: "ready"; answer: Answer<Names> } | Failed;
+const namesAsked = new Map<string, Promise<NamesAsked>>();
+
+/**
+ * Every name in one C# file, at a commit or as it stands (0.79.0; kit 1.111.0's names reader, Roslyn): read once a window's run for
+ * each file and commit, since a reading takes a few seconds. A failure is not kept.
+ */
+export function askNames(
+  game: string,
+  repository: string,
+  file: string,
+  commit: string | null,
+): Promise<NamesAsked> {
+  const key = JSON.stringify([game, repository, file, commit]);
+  let asked = namesAsked.get(key);
+  if (!asked) {
+    asked = askConnections<Names>(game, repository, "names", file, {
+      commit: commit ?? undefined,
+    });
+    namesAsked.set(key, asked);
+    void asked.then((answer) => {
+      if (answer.state === "failed") namesAsked.delete(key);
     });
   }
   return asked;

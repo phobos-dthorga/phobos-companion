@@ -35,9 +35,33 @@ fn a_malformed_question_never_runs() {
     assert!(arguments(root, &Question::Flow("cs:A".to_owned(), 9)).is_err());
     assert!(arguments(root, &Question::Find("a\nb".to_owned())).is_err());
     assert!(arguments(root, &Question::Changed("HEAD~1".to_owned())).is_err());
-    assert!(question("delete", None, None).is_err());
-    assert!(question("around", None, None).is_err());
-    assert_eq!(question("flow", Some("cs:A".to_owned()), None).unwrap(), Question::Flow("cs:A".to_owned(), 2));
+    assert!(question("delete", None, None, None).is_err());
+    assert!(question("around", None, None, None).is_err());
+    assert_eq!(question("flow", Some("cs:A".to_owned()), None, None).unwrap(), Question::Flow("cs:A".to_owned(), 2));
+}
+
+#[test]
+fn names_are_asked_of_one_c_sharp_file_and_a_commit_only() {
+    let root = Path::new("repo");
+    let names = |file: &str, commit: Option<&str>| {
+        arguments(root, &Question::Names(file.to_owned(), commit.map(str::to_owned)))
+    };
+    assert_eq!(
+        names("src/Mod/Sail.cs", Some("401c6a93")).unwrap(),
+        ["connections", "names", "--root", "repo", "--file=src/Mod/Sail.cs", "--commit=401c6a93", "--json"]
+    );
+    assert_eq!(
+        names("src/Mod/Sail.cs", None).unwrap(),
+        ["connections", "names", "--root", "repo", "--file=src/Mod/Sail.cs", "--json"]
+    );
+    for refused in ["../outside/A.cs", "/abs/A.cs", "--all.cs", "src\\A.cs", "Defs/Boats.xml"] {
+        assert!(names(refused, None).is_err(), "{refused}");
+    }
+    assert!(names("src/A.cs", Some("HEAD~1")).is_err());
+    assert_eq!(
+        question("names", Some("src/A.cs".to_owned()), None, Some("401c6a93".to_owned())).unwrap(),
+        Question::Names("src/A.cs".to_owned(), Some("401c6a93".to_owned()))
+    );
 }
 
 #[test]

@@ -1,8 +1,19 @@
 <script lang="ts">
   import { onMount, tick, untrack } from "svelte";
   import { LOCALE, t } from "../i18n/runtime";
-  import { askChanged } from "../connections/desktopClient";
-  import type { Thing } from "../connections/types";
+  import { askChanged, askNames } from "../connections/desktopClient";
+  import type { Names, Thing } from "../connections/types";
+  import { openTheirCode } from "../othercode/navigation";
+  import { theirName } from "../othercode/presentation";
+  import NameCard from "./NameCard.svelte";
+  import {
+    inside,
+    namesByLine,
+    nodeIdOf,
+    sameDeclaration,
+    step as stepName,
+    wrapNames,
+  } from "./names";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import RichText from "../shell/RichText.svelte";
@@ -33,7 +44,12 @@
     writtenWords,
     type ViewMode,
   } from "./presentation";
-  import type { EntryCodeReading, EntryRequest, FileChange } from "./types";
+  import type {
+    DiffLine,
+    EntryCodeReading,
+    EntryRequest,
+    FileChange,
+  } from "./types";
 
   /**
    * The code behind one changelog entry, over the whole window: the commit that wrote the entry, the files it changed with code
@@ -128,10 +144,175 @@
     if (mode === "connections" && shown) untrack(() => paint(shown));
   });
 
-  /** Shows a file at once as plain text, then colours it when its grammar has loaded. */
+  /** Each C# file's names (0.79.0; docs/code-reading.md step 4): read by the kit's names reader in the background. */
+  let names = $state<
+    Record<
+      string,
+      | { state: "reading" }
+      | { state: "ready"; names: Names }
+      | { state: "failed"; reason: string }
+    >
+  >({});
+  /** The name pressed, by its place in the file's reading, and whether its declaration's lines are open on its card. */
+  let nameChosen = $state<number | null>(null);
+  let snippetOpen = $state(false);
+  let pane = $state<HTMLElement | null>(null);
+
+  const fileNames = $derived(file ? names[file.path] : undefined);
+  const ready = $derived(fileNames?.state === "ready" ? fileNames.names : null);
+  const byLine = $derived(ready ? namesByLine(ready) : new Map());
+  const chosenName = $derived(
+    ready && nameChosen !== null ? (ready.names[nameChosen] ?? null) : null,
+  );
+  /** The names on the lines the mode shows, in reading order, for the arrow keys. */
+  const shownNames = $derived.by(() => {
+    const found: { index: number; row: number; column: number }[] = [];
+    if (!file || !ready) return found;
+    let row = 0;
+    for (const hunk of file.hunks)
+      for (const line of hunk.lines) {
+        if (!showsLine(mode, line.kind)) continue;
+        row++;
+        if (line.kind === "-" || line.new == null) continue;
+        for (const range of byLine.get(line.new) ?? [])
+          found.push({ index: range.index, row, column: range.start });
+      }
+    return found;
+  });
+  const uses = $derived(
+    ready && chosenName
+      ? shownNames.filter((s) =>
+          sameDeclaration(ready.names[s.index], chosenName),
+        ).length
+      : 0,
+  );
+  const snippet = $derived(
+    ready && chosenName?.declared.file
+      ? (ready.snippets[
+          `${chosenName.declared.file}:${chosenName.declared.line}`
+        ] ?? null)
+      : null,
+  );
+  const connectable = $derived(
+    chosenName && chosenName.declared.file && !inside(chosenName)
+      ? nodeIdOf(chosenName)
+      : null,
+  );
+  /** Another author's name for it, for Read their code: only for a game's or another mod's code, never .NET's own. */
+  const theirs = $derived.by(() => {
+    const assembly = chosenName?.declared.assembly ?? "";
+    if (!chosenName || !assembly) return null;
+    if (/^(System|mscorlib|netstandard|Microsoft\.)/.test(assembly))
+      return null;
+    const id = nodeIdOf(chosenName);
+    return id ? theirName(id) : null;
+  });
+
+  /** Reads a C# file's names, quietly and once: the code shows without them, and its names become buttons when they come. */
+  function readNames(next: FileChange) {
+    if (
+      next.language !== "csharp" ||
+      next.binary ||
+      next.change === "removed" ||
+      names[next.path]
+    )
+      return;
+    names[next.path] = { state: "reading" };
+    void askNames(
+      game,
+      request.repository,
+      next.path,
+      code?.commit?.hash ?? null,
+    ).then((asked) => {
+      names[next.path] =
+        asked.state === "failed"
+          ? { state: "failed", reason: asked.failure.detail }
+          : asked.answer.ok
+            ? { state: "ready", names: asked.answer.data }
+            : { state: "failed", reason: asked.answer.refusal ?? "" };
+    });
+  }
+
+  /** A line of the file shown, coloured, with its names marked when they have been read. */
+  function lineHtml(
+    shown: FileChange,
+    hunkIndex: number,
+    lineIndex: number,
+    line: DiffLine,
+  ): string {
+    const html = painted[shown.path]?.[hunkIndex]?.[lineIndex] ?? "";
+    if (!ready || line.kind === "-" || line.new == null) return html;
+    return wrapNames(html, byLine.get(line.new) ?? [], (index) =>
+      index === nameChosen
+        ? "nm-chosen"
+        : chosenName && sameDeclaration(ready.names[index], chosenName)
+          ? "nm-same"
+          : "",
+    );
+  }
+
+  async function chooseName(index: number | null) {
+    nameChosen = index;
+    snippetOpen = false;
+    await tick();
+    pane
+      ?.querySelector(".nm-chosen")
+      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+
+  function pressName(event: MouseEvent) {
+    const mark = (event.target as Element | null)?.closest?.(".nm");
+    if (mark instanceof HTMLElement && mark.dataset.name)
+      void chooseName(Number(mark.dataset.name));
+  }
+
+  /** With a name chosen, the arrow keys move between names, Enter goes to its declaration and Escape lets it go. */
+  function nameKeys(event: KeyboardEvent) {
+    if (nameChosen === null) return;
+    const moves: Record<string, "next" | "previous" | "up" | "down"> = {
+      ArrowRight: "next",
+      ArrowLeft: "previous",
+      ArrowDown: "down",
+      ArrowUp: "up",
+    };
+    if (moves[event.key]) {
+      const next = stepName(shownNames, nameChosen, moves[event.key]);
+      if (next !== null) void chooseName(next);
+    } else if (event.key === "Enter" || event.key === "F12") goThere();
+    else if (event.key === "Escape") void chooseName(null);
+    else return;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /** Goes to where the chosen name is declared: its line, when the lines shown hold it; otherwise its lines open on its card. */
+  function goThere() {
+    if (!ready || !chosenName?.declared.file) return;
+    const declaration = shownNames.find((s) => {
+      const candidate = ready.names[s.index];
+      return candidate.here && sameDeclaration(candidate, chosenName);
+    });
+    if (declaration && declaration.index !== nameChosen)
+      void chooseName(declaration.index);
+    else snippetOpen = !snippetOpen;
+  }
+
+  /** Starts on the first name shown, from a button, so the names can be reached from the keyboard alone. */
+  function stepThrough() {
+    const first = shownNames[0]?.index ?? null;
+    void chooseName(first);
+    pane?.focus();
+  }
+
+  /** Shows a file at once as plain text, then colours it when its grammar has loaded, and reads its names. */
   function open(next: FileChange) {
+    if (chosen !== next.path) {
+      nameChosen = null;
+      snippetOpen = false;
+    }
     chosen = next.path;
     paint(next);
+    readNames(next);
   }
 
   function paint(next: FileChange) {
@@ -400,11 +581,15 @@
           </nav>
 
           {#if file}
-            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <!-- The pane takes a press on a name, and the keys that move between names once one is chosen (0.79.0). -->
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
             <section
               class="pane code-viewer-pane"
               tabindex="0"
               aria-label={t("code-pane-label", { path: file.path })}
+              bind:this={pane}
+              onclick={pressName}
+              onkeydown={nameKeys}
             >
               <h3 class="path">{file.path}</h3>
               {#if fileThings.length > 0}
@@ -440,6 +625,44 @@
                       })}</button
                     >
                   {/if}
+                </div>
+              {/if}
+              <!-- Names to follow (0.79.0): how far their reading is, or the card of the one pressed. -->
+              {#if fileNames?.state === "reading"}
+                <p class="muted note" role="status">
+                  {t("code-names-reading")}
+                </p>
+              {:else if fileNames?.state === "failed"}
+                <p class="muted note">
+                  {t("code-names-failed", { reason: fileNames.reason })}
+                </p>
+              {:else if ready && chosenName}
+                <NameCard
+                  name={chosenName}
+                  {uses}
+                  {snippet}
+                  {snippetOpen}
+                  canConnect={connectable !== null}
+                  their={theirs}
+                  ongo={goThere}
+                  onconnect={() => {
+                    thing = connectable;
+                    mode = "connections";
+                  }}
+                  ontheir={() => {
+                    if (theirs) openTheirCode(game, request.repository, theirs);
+                  }}
+                  onletgo={() => {
+                    void chooseName(null);
+                    pane?.focus();
+                  }}
+                />
+              {:else if ready && shownNames.length > 0}
+                <div class="names-help">
+                  <p class="muted small">{t("code-names-help")}</p>
+                  <button type="button" class="action" onclick={stepThrough}
+                    >{t("code-names-start")}</button
+                  >
                 </div>
               {/if}
               {#if file.oldPath && file.oldPath !== file.path}
@@ -489,11 +712,14 @@
                         <span class="mark diff-sign"
                           >{LINE_MARKS[line.kind]}</span
                         >
-                        <!-- eslint-disable-next-line svelte/no-at-html-tags -- escaped by the highlighter, or by hunkHtml -->
+                        <!-- eslint-disable-next-line svelte/no-at-html-tags -- escaped by the highlighter or hunkHtml; names marked by wrapNames -->
                         <code
-                          >{@html painted[file.path]?.[hunkIndex]?.[
-                            lineIndex
-                          ] ?? ""}</code
+                          >{@html lineHtml(
+                            file,
+                            hunkIndex,
+                            lineIndex,
+                            line,
+                          )}</code
                         >
                       </div>
                     {/if}
@@ -538,6 +764,40 @@
 
   .line.lit {
     box-shadow: inset -4px 0 0 var(--colour-accent);
+  }
+
+  /* Names to follow (0.79.0), marked inside the coloured HTML, so styled through :global. Outlines only, never a background, so
+     the code keeps its contrast: a pressed name ringed in the accent, its other uses ringed dotted in the read-from-files colour. */
+  .lines :global(.nm) {
+    cursor: pointer;
+    border-radius: 2px;
+  }
+
+  .lines :global(.nm:hover) {
+    text-decoration: underline dotted;
+  }
+
+  .lines :global(.nm-same) {
+    outline: 1px dotted var(--colour-observed);
+    outline-offset: 1px;
+  }
+
+  .lines :global(.nm-chosen) {
+    outline: 2px solid var(--colour-accent);
+    outline-offset: 1px;
+  }
+
+  .names-help {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 12px 8px;
+  }
+
+  .names-help p {
+    margin: 0;
+    max-width: 80ch;
   }
 
   .line.lit .number {

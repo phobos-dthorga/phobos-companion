@@ -90,7 +90,53 @@ export type Asked<T> =
   | { state: "failed"; failure: Failure };
 
 export type Question =
-  "summary" | "find" | "around" | "flow" | "changed" | "history";
+  "summary" | "find" | "around" | "flow" | "changed" | "history" | "names";
+
+/** Where a name is declared (kit 1.111.0): a file and lines of this repository, or another assembly. */
+export type Declared = {
+  file?: string;
+  line?: number;
+  end?: number;
+  assembly?: string;
+};
+
+/** One name in a C# file, as the kit's names reader read it with Roslyn. `line` counts from 1, `column` from 0. */
+export type CodeName = {
+  line: number;
+  column: number;
+  length: number;
+  text: string;
+  kind: string;
+  display: string;
+  id?: string;
+  /** Whether this is the name's own declaration. */
+  here: boolean;
+  declared: Declared;
+};
+
+/** A declaration of this repository's, with its lines, its comment above it included; `cut` when there are more. */
+export type Snippet = {
+  file: string;
+  start: number;
+  end: number;
+  lines: string[];
+  cut: boolean;
+};
+
+/** Every name in one C# file (kit 1.111.0's `connections names`). */
+export type Names = {
+  file: string;
+  project: string;
+  projects: string[];
+  names: CodeName[];
+  /** Declarations of this repository the file names, by "file:line". */
+  snippets: Record<string, Snippet>;
+  errors: number;
+  missingReferences: number;
+  seconds: number;
+  commit: string | null;
+  limits: string[];
+};
 
 /** A thing's own history (kit 1.34.0): the commits that changed its lines, each with the changelog entries it wrote. */
 export type History = {

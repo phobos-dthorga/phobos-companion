@@ -35,6 +35,9 @@ pub enum Question {
     Flow(String, u8),
     Changed(String),
     History(String),
+    /// Every name in one C# file, and where each is declared (0.79.0; kit 1.111.0's names reader): the file, and the commit to
+    /// read it at, or none for the file as it stands.
+    Names(String, Option<String>),
 }
 
 pub fn arguments(root: &Path, question: &Question) -> Result<Vec<String>, String> {
@@ -58,6 +61,18 @@ pub fn arguments(root: &Path, question: &Question) -> Result<Vec<String>, String
             Args::new(TOOL, "changed").root(root).given("--commit", commit)
         }
         Question::Changed(_) => return Err("that is not a commit".to_owned()),
+        Question::Names(file, commit)
+            if checks::repository_file(file)
+                && file.to_ascii_lowercase().ends_with(".cs")
+                && commit.as_deref().is_none_or(checks::commit_hash) =>
+        {
+            let named = Args::new(TOOL, "names").root(root).given("--file", file);
+            match commit {
+                Some(commit) => named.given("--commit", commit),
+                None => named,
+            }
+        }
+        Question::Names(..) => return Err("names are read from one C# file of the repository, at a commit".to_owned()),
     };
     Ok(arguments.json())
 }
@@ -80,8 +95,13 @@ fn answer_of(answer: &Value) -> Answer {
     Answer { ok: outcome.ok, refusal: outcome.refusal, data: answer["data"].clone() }
 }
 
-/// The question the window named, with its words checked by `arguments` before it runs.
-pub fn question(kind: &str, value: Option<String>, depth: Option<u8>) -> Result<Question, Failure> {
+/// The question the window named, with its words checked by `arguments` before it runs. `commit` is only for names.
+pub fn question(
+    kind: &str,
+    value: Option<String>,
+    depth: Option<u8>,
+    commit: Option<String>,
+) -> Result<Question, Failure> {
     let value = || value.clone().ok_or_else(|| Failure::refused(format!("{kind} needs something to ask about")));
     Ok(match kind {
         "summary" => Question::Summary,
@@ -90,6 +110,7 @@ pub fn question(kind: &str, value: Option<String>, depth: Option<u8>) -> Result<
         "flow" => Question::Flow(value()?, depth.unwrap_or(2)),
         "changed" => Question::Changed(value()?),
         "history" => Question::History(value()?),
+        "names" => Question::Names(value()?, commit),
         other => return Err(Failure::refused(format!("{other:?} is not a question the tools answer"))),
     })
 }

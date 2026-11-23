@@ -38,10 +38,6 @@ reads them.
   - **Nothing personal is built in.** No path, game name, repository name or account of the owner's in code, words or tests;
     they come from `.local/games.json` and the kit's settings. Words name "your mods" and "the repository", not one game's terms.
   - **Removing is a change for every game.** Before taking a page or a field away, say which games lose it.
-- Practical working slices over speculative frameworks. Explain what works, what was checked and what remains uncertain. Never
-  invent hour estimates.
-- **Nothing counts as tested on screen until the owner says so.** A build, a test or a browser audit is not that.
-- **Never control the owner's mouse or keyboard.** Never edit, replace or delete saves.
 - **Read the owner's screen notes at the start of every session** (owner's go-ahead, 19 Nov 2026: the "something's off" key,
   `docs/later.md` item 1): `python -m phobos_modkit screen-notes list`, run from `external/phobos-modkit/python`. Each is a page the
   owner flagged, with its picture (`picture.png` in the note's folder: read it), its address and their words. Raise them with the
@@ -52,10 +48,8 @@ reads them.
   your lean and why. Read the answers at the start of a session with `python -m phobos_modkit decisions list --root ../../..`
   (from `external/phobos-modkit/python`), **act on each answer and remove its decision from the file in the same commit.** Design
   records still label agent choices as now.
-- Every new behaviour says, in the design record, what it lets the person do, what it stops them doing and how it changes the
-  way they work. Owner choices, agent defaults and agent choices are labelled as such.
-- Write plainly: answer first, short sentences, **bold** for must-dos, tables for comparisons. Diagrams are Mermaid. Never use
-  Figma.
+- Every new behaviour's design record answers the shared `rules/designs.md` questions; how to work with the owner (slices, testing
+  on screen, mouse and saves, labels, plain writing) is in the shared `every-session.md`.
 
 ## What the program may do
 
@@ -297,13 +291,11 @@ reads them.
 
 ## Names
 
-**D'thorga is the brand**: names people see are `D'thorga <Plain Word>`. Every public page also carries the spelling "dthorga",
-without the apostrophe, so a search spelled either way finds it.
+Names people see, and every public page, follow the shared `external/phobos-modkit/rules/brand.md`.
 
 ## Checks
 
-**Before every commit, run `python scripts/check-all.py` and chain the commit on its exit code**
-(`python scripts/check-all.py && git commit ...`). It runs the steps in `config/gate.json` and prints only what failed. After
+**This repository's gate is `python scripts/check-all.py`** (the shared rule: chain the commit on it). It runs the steps in `config/gate.json` and prints only what failed. After
 cloning, run `git submodule update --init` and `npm ci`; the browser check also needs `npx playwright install chromium`.
 
 Build output stays out of the repository: `scripts/with-target.mjs` and the gate send it to `%LOCALAPPDATA%\phobos-modkit\target`.
@@ -311,10 +303,7 @@ Build output stays out of the repository: `scripts/with-target.mjs` and the gate
 ## Git and versions
 
 - **Public, MIT** (agent default, matching its siblings). Never change the repository's visibility.
-- Commit and push directly to `main`; no pull requests unless the owner asks. Never force-push or rewrite history. Several
-  sessions may share a tree: commit explicit paths and leave others' work alone.
-- Versions: a fix raises the last number, new functionality the middle, an incompatible change the first. Every change updates
-  `CHANGELOG.md` in the same commit. The version lives in `package.json` and `src-tauri/Cargo.toml`, and a test keeps them equal.
+- The version lives in `package.json` and `src-tauri/Cargo.toml`, and a test keeps them equal.
 - **Build the installer for the owner after every new version** (owner, 18 Nov 2026: "build it ahead of time for me"): once the
   version is committed, run `npm run installer` and tell the owner the setup file's full path
   (`%LOCALAPPDATA%\phobos-modkit\target\release\bundle\nsis\D’thorga Companion_<version>_x64-setup.exe`), so all they do is run
@@ -322,4 +311,3 @@ Build output stays out of the repository: `scripts/with-target.mjs` and the gate
   (its esbuild helper and rollup's native module), so `npm ci` fails with EPERM while it runs, after deleting most of
   `node_modules`: stop only that server first (a `Code.exe` whose command line names `svelte-language-server`, never a filter that
   matches the stopping command itself), then run `npm ci` at once; it restarts itself when a `.svelte` file is next opened.
-- Never commit credentials, personal paths, saves, logs or game files.

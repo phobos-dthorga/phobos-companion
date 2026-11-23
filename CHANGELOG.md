@@ -4,6 +4,13 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+### Changed
+
+- **The kit pin moves from v1.102.0 to v1.105.1, and the shared rules it brings replace this repository's copies** (the owner's
+  docs rewrite, step 2, 23 Nov 2026: "Move all 12 now"). AGENTS.md drops what the kit's every-session, brand and changelog rules
+  now say; publishing.md points to the kit's own publishing guide for how the kit publishes, and debugging.md to its heap reader
+  guide, so each is explained in one place. The kit also brings steam-publish's build output on standard error (1.105.1).
+
 ### Fixed
 
 - **The README and the Guide describe the window as it is now** (the owner's docs rewrite, step 1, 23 Nov 2026). The README

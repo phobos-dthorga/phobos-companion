@@ -54,58 +54,9 @@ published that should not be. Once public, subscribers download it at once; a fi
 Private first, then a second press, and every check runs before each. By the shared design rule, a moderate risk has its own setting
 that **starts on**: **Workshop uploads** on the Settings page, which hides the upload buttons when off (reading and preparing stay).
 
-## Generic first: the game is data
+## How the kit publishes (moved to the kit's docs, 23 Nov 2026)
 
-The owner's word, and the shared rule "build for every game from the start". **Nothing in the core names a game.** The core is
-everything Steam's Workshop does the same for every game; a game is a small data file saying where its mods keep what Steam needs.
-
-```mermaid
-flowchart LR
-    Game["Game file (data)<br/>metadata, cover, tags, ID file"] --> Core
-    Repo["Repository catalogue<br/>mods, holds, item numbers, layout"] --> Core
-    Core["Kit core (game-free)<br/>notes, checks, staging, receipts, rules"] --> Client["Sender: Steam client<br/>(Steamworks, no password)"]
-    Core --> Cmd["Sender: SteamCMD<br/>(own console)"]
-    Core --> Page["Companion Publish page<br/>(game-free)"]
-```
-
-| Layer | Holds | Where |
-| --- | --- | --- |
-| **Core** | Changelog to BBCode, page checks, Steam's limits (title 128 bytes, text 8,000 bytes, our 7,500 budget), staging with hashes, receipts, the publishing rules, reading Steam back, change-note worksheets | phobos-modkit `steam/publish/` |
-| **Senders** | Two ways to hand a staged item to Steam, behind one interface: the same candidate, receipt and records either way | phobos-modkit `steam/` |
-| **Game file** | One JSON file per game: app number, how a mod folder is recognised, where its title and version are read, the cover, the folder uploaded, tags, the ID file the game keeps, reminders | phobos-modkit `games/<game>/workshop.json` |
-| **Code hook** | Only where a game's format cannot be said as data (a binary header, say): one small function the game file names | phobos-modkit `games/<game>/publish.py`, only if needed |
-| **Repository policy** | Which mods, holds, item numbers, the layout of its folders, what a package must hold (a payload hook) | each repository's `config/workshop-publishing.json` and wrapper |
-| **The page** | One page for every game; it reads the kit's JSON and knows no game | Companion |
-
-**The game file says, as data** (agent's design):
-
-- `appId`; `metadata`: the file that marks a mod folder, its format (`xml`, `json`, `ini`, `keyvalue` lines) and the fields giving
-  the title and version.
-- `preview`: the cover's path, its expected size if the game has one, and the formats allowed.
-- `content`: the folder uploaded, as a pattern (for a game whose Workshop item wraps the mod, such as `Contents/mods/{mod}`).
-- `tags`: fixed tags, and tags read from a metadata field through a map (RimWorld's supported versions become `1.6`, `1.7`).
-- `idFile`: where the game writes the item number and in what format, so the kit can keep it in step and refuse a disagreement.
-- `reminders`: what the owner must still do on Steam for this game.
-
-RimWorld's and Ostranauts' Python adapters become game files first, and must give byte-for-byte the same results as now (the
-Ostranauts check of 8 November is run again). A game a person adds that nobody has written a file for gets a **plain-folder** game:
-the folder uploaded as it is, title and version typed on the page.
-
-### The two senders
-
-| | Steam client (default) | SteamCMD (beside it) |
-| --- | --- | --- |
-| Login | The running, signed-in client; nothing asked | The owner types it in SteamCMD's own console window |
-| Library | That game's own `steam_api64.dll`, found from its install, as Subscribe does | Valve's SteamCMD, installed by the owner |
-| Tags | Set (`SetItemTags`) | Not settable: a reminder |
-| Required items | Set (`AddDependency` for each) | Not settable: a reminder lists them |
-| Progress | A bar (`GetItemUpdateProgress`) | SteamCMD's own window |
-| Agreement | Says when Steam needs the Workshop legal agreement accepted, and opens it | SteamCMD says so in its output |
-| Proof | Steam's result code and the item number from the call's own result | SteamCMD's log; still "unverified" |
-
-**The Steam client route reads two of Steam's result structures** (`CreateItemResult_t`, `SubmitItemUpdateResult_t`), which the
-Subscribe code avoided. Their layout comes from Valve's headers (8-byte packing on 64-bit Windows); a test holds it, and the first
-real run confirms it. **Both routes still end "unverified"** until Steam is read back.
+**How publishing works for every game is phobos-modkit's `docs/workshop-publishing.md`, its one home**: the game files and what they say as data, the repository's catalogue, the two senders (the Steam client by default, SteamCMD beside it), Steam's limits and our 7,500-byte budget, staging, receipts and reading Steam back. This page's design of those, written before they were built, was taken out in the docs rewrite (the owner's word of 23 Nov 2026: one home per topic); it is in this file's history. This page keeps what is the Companion's own: the owner's choices, the Publish page, its rules and what was built here.
 
 ## The Publish page (agent's layout, owner to revise)
 

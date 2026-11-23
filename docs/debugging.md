@@ -23,7 +23,7 @@ code analysis, etc. see things like relationships between things, and so much mo
 - **It only reads.** Layers 1 and 2 never write into the game. Changing values in a running game is left out, for the same reason
   the Save explorer leaves out save editing: it is risky, and a wrong write can corrupt a colony.
 - **Every attach asks first, every time**, and asks the person to save, as perf recordings and the memory watch already do.
-- **A snapshot pauses the game for about half a second** (431 and 449 ms on the owner's game with a colony loaded). The game then
+- **A snapshot pauses the game for about half a second** (the kit's `docs/heap-reader.md` gives the measured figures and the reader's limits). The game then
   runs on while the snapshot is read.
 - **A held snapshot costs memory as the game runs on.** Windows keeps the snapshot by copying each page the game changes
   afterwards, so the longer it is held, the more memory it takes. It is released when the page closes, after a time limit, or on
@@ -113,9 +113,7 @@ a thing's label from its kind, and the mod behind each kind, all through the kit
 
 | Part | How |
 | --- | --- |
-| The reader | **phobos-modkit first, then the pin.** A C# reader under the kit's `dotnet/`, built outside the repository like the metadata reader, using ClrMD (to add to the kit's `THIRD_PARTY_NOTICES.md`). A game-free core command takes a process and a trusted runtime folder; the RimWorld adapter names the process (`RimWorld.exe`), the install folder whose memory-reading library it trusts, and the friendly groups. It answers in the kit's JSON envelope and speaks progress lines |
-| Holding the snapshot | The reader stays running while the page is open, holding the snapshot, and answers one request at a time; **released** on Let it go, when the page closes, or after the time limit. The overview is kept in the kit's cache so it can be compared later; objects are not |
-| What holds it | Found on request by walking the heap once (about 12 s), with a bar; a second walk is not needed while the snapshot is held |
+| The reader | Built in phobos-modkit (the heap reader, kit 1.65.0, served by `look-serve`): how it reads a snapshot, what one costs, what it holds and its limits are in the kit's `docs/heap-reader.md`, the one home for them. The page holds one snapshot at a time and lets it go on Let it go, on leaving the page, when the program closes, or after ten minutes |
 | The host | `AGENTS.md`'s "What the program may do" gains a line in the change that builds it: an attach only on a press and a confirmation, only to the process the game adapter names, only reading |
 | Moving | Every press goes through the trail; focus keys `snapshot`, `kind` and `object`, listed in `cross-links.md` when built |
 | The Guide | A page entry, "Find out what is using my game's memory" and "Find why something is still in memory", in the same change |

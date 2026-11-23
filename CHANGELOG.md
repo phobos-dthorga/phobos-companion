@@ -16,6 +16,22 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.81.0] - 2026-11-24
+
+### Added
+
+- **Names to follow in Lua, Python and XML, found by name** (the owner's go, 24 Nov 2026: "proceed with steps 5 and 6";
+  `docs/code-reading.md`, step 5). In the code viewer, a word in a Lua, Python or XML file that names one of the repository's
+  things (a function, a class, a Def, a C# class a Def names) can be pressed as in C#: the card says **Found by name**, and when
+  the name may stand for several things it lists them to choose from, each with its file and line; the one chosen drives **Go to
+  its declaration** and **How … connects**. Comments and strings are never read as names, and in XML only element text and
+  attribute values. The kit's reading checked on phobos-rimworld (a Def file, a Python script) and Project Zomboid's PhobosLib (a
+  Lua file). **Not tested on screen.**
+
+### Changed
+
+- **The kit pin moves from v1.114.0 to v1.115.0**, for `connections names` reading Lua, Python and XML by name.
+
 ## [0.80.0] - 2026-11-24
 
 ### Added

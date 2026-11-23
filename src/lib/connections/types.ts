@@ -100,7 +100,20 @@ export type Declared = {
   assembly?: string;
 };
 
-/** One name in a C# file, as the kit's names reader read it with Roslyn. `line` counts from 1, `column` from 0. */
+/** One of the things a name read by name may stand for (kit 1.115.0). */
+export type Candidate = {
+  id: string;
+  name: string;
+  kind: string;
+  file: string;
+  line: number;
+  end: number;
+};
+
+/**
+ * One name in a file: in C# as the kit's names reader read it with Roslyn; in Lua, Python and XML by name from the connections
+ * (kit 1.115.0, `exact` false, with the things it may stand for). `line` counts from 1, `column` from 0.
+ */
 export type CodeName = {
   line: number;
   column: number;
@@ -108,10 +121,15 @@ export type CodeName = {
   text: string;
   kind: string;
   display: string;
-  id?: string;
+  id?: string | null;
   /** Whether this is the name's own declaration. */
   here: boolean;
   declared: Declared;
+  /** By name: the first thing's connections id, the things it may stand for, and how many more there are. */
+  node?: string;
+  exact?: boolean;
+  candidates?: Candidate[];
+  more?: number;
 };
 
 /** A declaration of this repository's, with its lines, its comment above it included; `cut` when there are more. */
@@ -123,11 +141,12 @@ export type Snippet = {
   cut: boolean;
 };
 
-/** Every name in one C# file (kit 1.111.0's `connections names`). */
+/** Every name in one file (kit 1.111.0's `connections names`; Lua, Python and XML by name from 1.115.0, `exact` false). */
 export type Names = {
   file: string;
-  project: string;
+  project: string | null;
   projects: string[];
+  exact?: boolean;
   names: CodeName[];
   /** Declarations of this repository the file names, by "file:line". */
   snippets: Record<string, Snippet>;

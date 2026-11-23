@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { CodeName, Names } from "../connections/types";
 import {
+  asCandidate,
   inside,
+  languageOf,
   namesByLine,
   nodeIdOf,
   sameDeclaration,
@@ -81,6 +83,10 @@ describe("what a name stands for", () => {
     );
     expect(nodeIdOf(name({ id: "M:A.B.Make``1(``0)" }))).toBe("cs:A.B.Make");
     expect(nodeIdOf(name({ id: undefined, kind: "local" }))).toBeNull();
+    // A name read by name (Lua, Python, XML) carries its thing's id.
+    expect(nodeIdOf(name({ id: null, node: "lua:Lamps.shine" }))).toBe(
+      "lua:Lamps.shine",
+    );
   });
 
   it("is one declaration when its file and line agree, or its id outside this repository", () => {
@@ -111,6 +117,54 @@ describe("what a name stands for", () => {
     ).toBe(true);
     expect(inside(name({ kind: "parameter" }))).toBe(true);
     expect(inside(name({ kind: "class" }))).toBe(false);
+  });
+});
+
+describe("a name read by name", () => {
+  const count = name({
+    text: "count",
+    kind: "function",
+    display: "RegistryMT:count",
+    node: "lua:RegistryMT:count",
+    exact: false,
+    declared: { file: "lua/registry.lua", line: 4, end: 9 },
+    candidates: [
+      {
+        id: "lua:RegistryMT:count",
+        name: "RegistryMT:count",
+        kind: "function",
+        file: "lua/registry.lua",
+        line: 4,
+        end: 9,
+      },
+      {
+        id: "lua:Spray.count",
+        name: "Spray.count",
+        kind: "function",
+        file: "lua/spray.lua",
+        line: 30,
+        end: 33,
+      },
+    ],
+  });
+
+  it("is taken as the thing chosen from those it may stand for", () => {
+    const second = asCandidate(count, 1);
+    expect(second.display).toBe("Spray.count");
+    expect(second.declared).toEqual({
+      file: "lua/spray.lua",
+      line: 30,
+      end: 33,
+    });
+    expect(nodeIdOf(second)).toBe("lua:Spray.count");
+    expect(asCandidate(count, 9)).toBe(count);
+  });
+
+  it("shows a declaration's lines in its own file's language", () => {
+    expect(languageOf("src/Boat.cs")).toBe("csharp");
+    expect(languageOf("lua/spray.lua")).toBe("lua");
+    expect(languageOf("Defs/Boats.XML")).toBe("xml");
+    expect(languageOf("notes.txt")).toBe("plain");
   });
 });
 

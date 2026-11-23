@@ -54,8 +54,12 @@ fn names_are_asked_of_one_c_sharp_file_and_a_commit_only() {
         names("src/Mod/Sail.cs", None).unwrap(),
         ["connections", "names", "--root", "repo", "--file=src/Mod/Sail.cs", "--json"]
     );
-    for refused in ["../outside/A.cs", "/abs/A.cs", "--all.cs", "src\\A.cs", "Defs/Boats.xml"] {
+    for refused in ["../outside/A.cs", "/abs/A.cs", "--all.cs", "src\\A.cs", "Textures/Boat.png", "notes.md"] {
         assert!(names(refused, None).is_err(), "{refused}");
+    }
+    // Lua, Python and XML are read by name (kit 1.115.0).
+    for by_name in ["Defs/Boats.xml", "lua/lamps.lua", "tools/keeper.py"] {
+        assert!(names(by_name, None).is_ok(), "{by_name}");
     }
     assert!(names("src/A.cs", Some("HEAD~1")).is_err());
     assert_eq!(

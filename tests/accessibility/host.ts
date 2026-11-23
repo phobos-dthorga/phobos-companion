@@ -173,11 +173,20 @@ export async function mockHost(
         // One command asked several kinds of question (connections) may have an answer for each kind: "command:kind"; a question
         // sent whole (the Explorer's) is told apart by its op.
         const asked = args as
-          | { kind?: string; side?: string; request?: { op?: string } }
+          | {
+              kind?: string;
+              side?: string;
+              value?: string | null;
+              request?: { op?: string };
+            }
           | undefined;
         // The code viewer's two sides of a changed file (0.50.0) are told apart by their side.
         const kind = asked?.kind ?? asked?.request?.op ?? asked?.side;
+        // One kind asked of several things (a file's names, 0.81.0) may have an answer for each: "command:kind:value".
         const answer =
+          (kind && asked?.value
+            ? given[`${command}:${kind}:${asked.value}`]
+            : undefined) ??
           (kind ? given[`${command}:${kind}`] : undefined) ??
           given[more ? "run_report_more" : command];
         for (const message of answer.progress ?? []) {

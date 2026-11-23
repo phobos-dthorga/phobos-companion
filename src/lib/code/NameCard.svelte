@@ -2,14 +2,18 @@
   import { t } from "../i18n/runtime";
   import type { CodeName, Snippet } from "../connections/types";
   import CodeLines from "./CodeLines.svelte";
+  import { languageOf } from "./names";
 
   /**
-   * What a name pressed in C# code is (0.79.0; docs/code-reading.md step 4), as the kit's names reader read it with Roslyn: its
-   * kind and signature, where it is declared, and how often the lines shown name it; then Go there, How it connects and Read their
-   * code, each only where it can lead somewhere. Presentation only: every move is the viewer's.
+   * What a name pressed in code is (0.79.0; docs/code-reading.md steps 4 and 5): in C# as the kit's names reader read it with
+   * Roslyn; in Lua, Python and XML by name (0.81.0), with the things it may stand for to choose from. Its kind and signature, where
+   * it is declared, and how often the lines shown name it; then Go there, How it connects and Read their code, each only where it
+   * can lead somewhere. Presentation only: every move is the viewer's. `name` is the thing chosen; `pressed` the name as read.
    */
   let {
     name,
+    pressed,
+    chosenCandidate,
     uses,
     snippet,
     snippetOpen,
@@ -19,8 +23,11 @@
     onconnect,
     ontheir,
     onletgo,
+    onchoose,
   }: {
     name: CodeName;
+    pressed: CodeName;
+    chosenCandidate: number;
     uses: number;
     /** The lines of its declaration, when it is this repository's and the reader kept them. */
     snippet: Snippet | null;
@@ -32,7 +39,10 @@
     onconnect: () => void;
     ontheir: () => void;
     onletgo: () => void;
+    onchoose: (index: number) => void;
   } = $props();
+
+  const candidates = $derived(pressed.candidates ?? []);
 
   const where = $derived(
     name.declared.file
@@ -56,6 +66,42 @@
   </p>
   <p class="signature"><code>{name.display}</code></p>
   <p class="small">{where}</p>
+  {#if pressed.exact === false}
+    <!-- Read by name (0.81.0): what it may stand for, to choose from when there is more than one. -->
+    <p class="small muted">
+      {t("code-name-by-name", {
+        count: candidates.length + (pressed.more ?? 0),
+      })}
+    </p>
+    {#if candidates.length > 1}
+      <div
+        class="toggles candidates"
+        role="group"
+        aria-label={t("code-name-candidates", { name: pressed.text })}
+      >
+        {#each candidates as candidate, index (candidate.id)}
+          <button
+            type="button"
+            class="toggle"
+            aria-pressed={chosenCandidate === index}
+            onclick={() => onchoose(index)}
+            >{candidate.name}
+            <span class="muted small"
+              >{t("code-name-candidate-where", {
+                file: candidate.file,
+                line: candidate.line,
+              })}</span
+            ></button
+          >
+        {/each}
+      </div>
+      {#if (pressed.more ?? 0) > 0}
+        <p class="small muted">
+          {t("code-name-candidates-more", { count: pressed.more ?? 0 })}
+        </p>
+      {/if}
+    {/if}
+  {/if}
   <p class="small muted">{t("code-name-uses", { count: uses })}</p>
   <div class="buttons">
     {#if name.declared.file && !name.here}
@@ -81,7 +127,7 @@
     <CodeLines
       lines={snippet.lines}
       numbers={snippet.lines.map((_, index) => snippet.start + index)}
-      language="csharp"
+      language={languageOf(snippet.file)}
       label={t("code-name-snippet", {
         name: name.text,
         file: snippet.file,
@@ -142,5 +188,15 @@
     flex-wrap: wrap;
     gap: 6px;
     margin: 6px 0;
+  }
+
+  .candidates {
+    margin: 4px 0;
+  }
+
+  .candidates .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
 </style>

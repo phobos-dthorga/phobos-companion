@@ -294,6 +294,64 @@ async function open(
         },
       },
     },
+    // The names in Boats.xml, found by name (0.81.0): "Boat" may be the Def or the C# class.
+    "connections:names:mods/Sample Mod/Defs/Boats.xml": {
+      result: {
+        ok: true,
+        refusal: null,
+        data: {
+          file: "mods/Sample Mod/Defs/Boats.xml",
+          project: null,
+          projects: [],
+          exact: false,
+          names: [
+            {
+              // "  <defName>Boat</defName>": Boat starts at column 11.
+              line: 2,
+              column: 11,
+              length: 4,
+              text: "Boat",
+              kind: "def",
+              display: "Boat",
+              id: null,
+              node: "def:ThingDef/Boat",
+              exact: false,
+              here: false,
+              declared: {
+                file: "mods/Sample Mod/Defs/Boats.xml",
+                line: 2,
+                end: 2,
+              },
+              candidates: [
+                {
+                  id: "def:ThingDef/Boat",
+                  name: "Boat",
+                  kind: "def",
+                  file: "mods/Sample Mod/Defs/Boats.xml",
+                  line: 2,
+                  end: 2,
+                },
+                {
+                  id: "cs:Sample.Boat",
+                  name: "Boat",
+                  kind: "class",
+                  file: "src/Sample/Boat.cs",
+                  line: 1,
+                  end: 4,
+                },
+              ],
+              more: 0,
+            },
+          ],
+          snippets: {},
+          errors: 0,
+          missingReferences: 0,
+          seconds: 0,
+          commit: "4d332ddf0123456789",
+          limits: [],
+        },
+      },
+    },
     // The names in Boat.cs, as the kit's names reader would give them (0.79.0): the class, and its field.
     "connections:names": {
       result: {
@@ -640,6 +698,42 @@ for (const [name, viewport] of [
       await expect(
         viewer.getByRole("button", { name: "How it connects" }),
       ).toHaveAttribute("aria-pressed", "true");
+    });
+
+    test("a name in a Def file is found by name, and one of the things it may stand for is chosen (0.81.0)", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("button", {
+          name: "Show the code behind: Sample boats float.",
+        })
+        .click();
+      const viewer = page.getByRole("dialog");
+      await viewer.getByRole("button", { name: /Boats\.xml/ }).click();
+      const pane = viewer.getByRole("region", {
+        name: "The code of mods/Sample Mod/Defs/Boats.xml",
+      });
+      await pane.locator(".nm", { hasText: "Boat" }).click();
+      const card = pane.getByRole("region", { name: "What Boat is" });
+      await expect(card).toContainText(
+        "Found by name: it may be any of 2 things",
+      );
+      const choices = card.getByRole("group", {
+        name: "The things Boat may stand for",
+      });
+      await expect(choices.getByRole("button").first()).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await audit(page);
+      await choices
+        .getByRole("button", { name: /src\/Sample\/Boat\.cs/ })
+        .click();
+      await expect(card).toContainText(
+        "Declared in this repository: src/Sample/Boat.cs, line 1",
+      );
+      await expect(card).toContainText("class");
     });
 
     test("can show only the code as it now stands, and closes", async ({

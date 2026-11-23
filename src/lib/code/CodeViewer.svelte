@@ -7,6 +7,7 @@
   import { theirName } from "../othercode/presentation";
   import NameCard from "./NameCard.svelte";
   import {
+    asCandidate,
     inside,
     namesByLine,
     nodeIdOf,
@@ -63,6 +64,8 @@
 
   /** The most changed lines the tools keep for one file (phobos-modkit `changes`). */
   const FILE_LINE_LIMIT = 600;
+  /** The languages whose names the kit reads: C# exactly (0.79.0), Lua, Python and XML by name (0.81.0). */
+  const NAMED_LANGUAGES = ["csharp", "lua", "python", "xml"];
 
   let reading = $state<EntryCodeReading>({ state: "reading" });
   let progress = $state(started());
@@ -157,6 +160,8 @@
   let nameChosen = $state<number | null>(null);
   let snippetOpen = $state(false);
   let pane = $state<HTMLElement | null>(null);
+  /** For a name read by name (0.81.0): which of the things it may stand for the card shows. */
+  let candidateChosen = $state(0);
 
   const fileNames = $derived(file ? names[file.path] : undefined);
   const ready = $derived(fileNames?.state === "ready" ? fileNames.names : null);
@@ -186,17 +191,18 @@
         ).length
       : 0,
   );
+  /** The name pressed, as the thing chosen from those it may stand for when it was read by name. */
+  const taken = $derived(
+    chosenName ? asCandidate(chosenName, candidateChosen) : null,
+  );
   const snippet = $derived(
-    ready && chosenName?.declared.file
-      ? (ready.snippets[
-          `${chosenName.declared.file}:${chosenName.declared.line}`
-        ] ?? null)
+    ready && taken?.declared.file
+      ? (ready.snippets[`${taken.declared.file}:${taken.declared.line}`] ??
+          null)
       : null,
   );
   const connectable = $derived(
-    chosenName && chosenName.declared.file && !inside(chosenName)
-      ? nodeIdOf(chosenName)
-      : null,
+    taken && taken.declared.file && !inside(taken) ? nodeIdOf(taken) : null,
   );
   /** Another author's name for it, for Read their code: only for a game's or another mod's code, never .NET's own. */
   const theirs = $derived.by(() => {
@@ -208,10 +214,13 @@
     return id ? theirName(id) : null;
   });
 
-  /** Reads a C# file's names, quietly and once: the code shows without them, and its names become buttons when they come. */
+  /**
+   * Reads a file's names, quietly and once: C# exactly, Lua, Python and XML by name (0.81.0). The code shows without them, and its
+   * names become buttons when they come.
+   */
   function readNames(next: FileChange) {
     if (
-      next.language !== "csharp" ||
+      !NAMED_LANGUAGES.includes(next.language) ||
       next.binary ||
       next.change === "removed" ||
       names[next.path]
@@ -254,6 +263,7 @@
   async function chooseName(index: number | null) {
     nameChosen = index;
     snippetOpen = false;
+    candidateChosen = 0;
     await tick();
     pane
       ?.querySelector(".nm-chosen")
@@ -287,10 +297,10 @@
 
   /** Goes to where the chosen name is declared: its line, when the lines shown hold it; otherwise its lines open on its card. */
   function goThere() {
-    if (!ready || !chosenName?.declared.file) return;
+    if (!ready || !taken?.declared.file) return;
     const declaration = shownNames.find((s) => {
       const candidate = ready.names[s.index];
-      return candidate.here && sameDeclaration(candidate, chosenName);
+      return candidate.here && sameDeclaration(candidate, taken);
     });
     if (declaration && declaration.index !== nameChosen)
       void chooseName(declaration.index);
@@ -636,9 +646,15 @@
                 <p class="muted note">
                   {t("code-names-failed", { reason: fileNames.reason })}
                 </p>
-              {:else if ready && chosenName}
+              {:else if ready && chosenName && taken}
                 <NameCard
-                  name={chosenName}
+                  name={taken}
+                  pressed={chosenName}
+                  chosenCandidate={candidateChosen}
+                  onchoose={(index) => {
+                    candidateChosen = index;
+                    snippetOpen = false;
+                  }}
                   {uses}
                   {snippet}
                   {snippetOpen}

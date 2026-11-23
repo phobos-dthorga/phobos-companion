@@ -733,6 +733,24 @@ mods' assemblies, never .NET's own. **Risks:** the reader needs the .NET SDK (wi
 about 3 to 7 s a file, not yet cached by the kit; other files are read as they stand now, not as they stood at the commit. **Not
 built here:** names by name for Lua, Python and XML (step 5). **Not tested on screen**, nor through the window with the real reader.
 
+## Names found by name in Lua, Python and XML (built 24 Nov 2026, 0.81.0)
+
+**The owner said "proceed with steps 5 and 6"** (24 Nov 2026): step 5 of [Reading code closer](code-reading.md), on
+phobos-modkit 1.115.0, where `connections names` reads Lua, Python and XML by name from the connections graph.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Follow a name in a Lua script, a Python tool or a Def file to what it names, as in C# |
+| What does it stop them doing? | Searching the Code map by hand for a function or Def a line names |
+| How does it change the way they work? | One way to follow a name in every language their mods are written in, with the same card and keys |
+| What outside it notices? | The kit's connections graph, which it reads; nothing new is written |
+
+**Agent choices, owner to revise:** the kit's `names` answers every language (rather than the window asking `find` word by word,
+as the design had it), so the card, marks and keys are one for all; a dotted name matched whole first, then each part; up to
+eight things listed for a name that may stand for several, the first chosen. **Risks:** a common word that is also a function's
+name is marked (by name means it may be wrong, and the card says so); the things are read as the repository now stands, the file
+as it stood at the commit. **Not tested on screen.**
+
 ## The Guide (built 20 Nov 2026, 0.34.0)
 
 **The owner asked for "documentation, or an encyclopedia, into the Companion, so I know what to do or how to find something"**,

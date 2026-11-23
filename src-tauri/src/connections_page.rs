@@ -17,6 +17,8 @@ use std::path::Path;
 const TOOL: &str = "connections";
 /// How many commits of a thing's history the window can page through (kit 1.40.0's --limit).
 const HISTORY_LIMIT: &str = "200";
+/// The files whose names the kit reads: C# exactly (1.111.0), Lua, Python and XML by name (1.115.0).
+const NAMED: [&str; 4] = [".cs", ".lua", ".py", ".xml"];
 
 /// What the kit answered, or why it refused.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -63,7 +65,7 @@ pub fn arguments(root: &Path, question: &Question) -> Result<Vec<String>, String
         Question::Changed(_) => return Err("that is not a commit".to_owned()),
         Question::Names(file, commit)
             if checks::repository_file(file)
-                && file.to_ascii_lowercase().ends_with(".cs")
+                && NAMED.iter().any(|suffix| file.to_ascii_lowercase().ends_with(suffix))
                 && commit.as_deref().is_none_or(checks::commit_hash) =>
         {
             let named = Args::new(TOOL, "names").root(root).given("--file", file);
@@ -72,7 +74,9 @@ pub fn arguments(root: &Path, question: &Question) -> Result<Vec<String>, String
                 None => named,
             }
         }
-        Question::Names(..) => return Err("names are read from one C# file of the repository, at a commit".to_owned()),
+        Question::Names(..) => {
+            return Err("names are read from one C#, Lua, Python or XML file of the repository, at a commit".to_owned());
+        }
     };
     Ok(arguments.json())
 }

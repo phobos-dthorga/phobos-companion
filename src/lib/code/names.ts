@@ -72,6 +72,8 @@ export function wrapNames(
  * (`M:Phobos.Boat.Float(System.Int32)`), for How it connects; null for a name with none (a parameter, a local).
  */
 export function nodeIdOf(name: CodeName): string | null {
+  // A name read by name (Lua, Python, XML) carries its thing's connections id already.
+  if (name.node) return name.node;
   const id = name.id;
   if (!id || !/^[TMPFE]:/.test(id)) return null;
   let full = id
@@ -92,6 +94,30 @@ export function sameDeclaration(a: CodeName, b: CodeName): boolean {
       a.declared.file === b.declared.file && a.declared.line === b.declared.line
     );
   return !!a.id && a.id === b.id;
+}
+
+/**
+ * A name read by name, taken as one of the things it may stand for (0.81.0): that thing's kind, name, place and id. A name with no
+ * such choice, or a place out of range, is given back as it is.
+ */
+export function asCandidate(name: CodeName, index: number): CodeName {
+  const thing = name.candidates?.[index];
+  if (!thing) return name;
+  return {
+    ...name,
+    kind: thing.kind,
+    display: thing.name,
+    node: thing.id,
+    declared: { file: thing.file, line: thing.line, end: thing.end },
+  };
+}
+
+/** The language a file's lines are coloured in, by its suffix, for a declaration's lines shown on a card. */
+export function languageOf(file: string): string {
+  const suffix = file.slice(file.lastIndexOf(".") + 1).toLowerCase();
+  return (
+    { cs: "csharp", lua: "lua", py: "python", xml: "xml" }[suffix] ?? "plain"
+  );
 }
 
 /** Whether a name lives only inside a member (a parameter, a local): nothing to connect, and no lines kept for it. */

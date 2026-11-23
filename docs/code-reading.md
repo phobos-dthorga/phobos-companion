@@ -5,8 +5,9 @@ asked to be told clearly before step 7, for which they will give the resources i
 `design-record.md`, "Code in VS Code's colours"), **step 2 is built** (0.77.0; "Code colours from VS Code" there), **step 3 is
 built** (0.78.0; "Lines and pictures lit together" there), and **step 4 is built** (0.79.0, on phobos-modkit 1.111.0's
 `connections names`; "Names to follow in C#" there). The owner then said "proceed with steps 5 and 6": **step 5 is built**
-(0.81.0, on kit 1.115.0; "Names found by name in Lua, Python and XML" there), and step 6 is being built. Step 7 waits for the
-owner's word and the resources they will give. When a step is built, its design moves into `design-record.md` and `later.md`
+(0.81.0, on kit 1.115.0; "Names found by name in Lua, Python and XML" there), and **step 6 is built** (0.82.0, on kit 1.116.0's
+`connections calls`; "Calls gone and added, and the ring finder" there). **Step 7 waits for the owner's word and the resources
+they will give.** When a step is built, its design moves into `design-record.md` and `later.md`
 keeps one line pointing there.
 
 **The owner's request** (24 Nov 2026): "What can we do to improve the syntax highlighting, etc. of Companion? I want to bring it

@@ -16,6 +16,23 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.82.0] - 2026-11-24
+
+### Added
+
+- **What a commit did to its calls, and the rings of calls it made or cut** (the owner's go, 24 Nov 2026: "proceed with steps 5
+  and 6"; `docs/code-reading.md`, step 6). Under the code viewer's How it connects picture, for a commit that changed C#: a ring
+  of calls the commit **cut** is drawn dashed and one it **made** solid, each said in words round from the method it changed; and
+  the calls of what is in the middle of the picture, **gone**, **new** and **kept**, with **Before**, **After** and **The change**,
+  **moved to** where calls left one method whole for another, and **through base** and the assembly of a call that leaves our
+  code. Pressing one of our calls puts it in the middle. A ring through the game's own code is seen by reading the game's methods
+  a change hands on to, from its install, as files. On phobos-rimworld's stove-bills fix the kit finds the one ring cut, the loop
+  behind the crashes of 23 Nov 2026. A new Guide word, **Ring of calls**. **Not tested on screen.**
+
+### Changed
+
+- **The kit pin moves from v1.115.0 to v1.116.0**, for `connections calls`.
+
 ## [0.81.0] - 2026-11-24
 
 ### Added

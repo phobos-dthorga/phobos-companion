@@ -751,6 +751,29 @@ eight things listed for a name that may stand for several, the first chosen. **R
 name is marked (by name means it may be wrong, and the card says so); the things are read as the repository now stands, the file
 as it stood at the commit. **Not tested on screen.**
 
+## Calls gone and added, and the ring finder (built 24 Nov 2026, 0.82.0)
+
+**The owner said "proceed with steps 5 and 6"** (24 Nov 2026), having chosen "calls gone and calls added" and "a ring finder"
+from the picture card: step 6 of [Reading code closer](code-reading.md), on phobos-modkit 1.116.0's `connections calls`.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See which calls a commit took away from a method, which it added and which moved whole to another, and whether it made or cut a ring of calls, before reading its lines |
+| What does it stop them doing? | Reading a change line by line and missing what it did to the shape: the ring behind the crashes of 23 Nov 2026 was one call from our override to the game's and one back |
+| How does it change the way they work? | "Did this fix break the loop?" is answered by a drawing and a sentence under the picture |
+| What outside it notices? | The kit (its names reader, run on the commit's files before and after it; its assembly reader, for the game's methods a change hands on to, from the game's install) and the connections picture, which shares its middle with the calls shown |
+
+**Agent choices, owner to revise:** the calls sit under the picture (with `code-change-layout` still open, the lean of the
+lines-beneath choice in step 3); only rings a commit made or cut are drawn, those it left standing are counted in one line; a ring
+cut is dashed, one made solid and heavy, with the words "cut" and "made" in its middle; a call gone dashed and struck through, a
+new one heavy, a kept one thin, each with its word; Before, After and The change belong to the calls, not yet to the lines; the
+game named for every commit, so a game with no reader of its assemblies gets the kit's limit line rather than silence. **Risks:**
+about 7 s a commit (the methods read twice; the game's for about 2 s of it), not cached by the kit; files the commit did not
+change are read as they stand now; at most 12 changed files are read; a ring is followed only one level into a base method of
+ours and through the game's methods a change hands on to. Checked on phobos-rimworld's stove-bills fix (`5c122faf`): one ring
+cut, `AvailableOnNow → AvailableReport → the game's RecipeWorker.AvailableReport`, and 6 calls moved into `Check`. **Not tested on
+screen.**
+
 ## The Guide (built 20 Nov 2026, 0.34.0)
 
 **The owner asked for "documentation, or an encyclopedia, into the Companion, so I know what to do or how to find something"**,

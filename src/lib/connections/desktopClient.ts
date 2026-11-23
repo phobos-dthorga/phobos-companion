@@ -1,7 +1,7 @@
 import { ask, progressChannel } from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
-import type { Answer, Changed, Names, Question } from "./types";
+import type { Answer, Calls, Changed, Names, Question } from "./types";
 import type { PatchTargets } from "./patches";
 
 /**
@@ -79,6 +79,34 @@ export function askNames(
     namesAsked.set(key, asked);
     void asked.then((answer) => {
       if (answer.state === "failed") namesAsked.delete(key);
+    });
+  }
+  return asked;
+}
+
+type CallsAsked = { state: "ready"; answer: Answer<Calls> } | Failed;
+const callsAsked = new Map<string, Promise<CallsAsked>>();
+
+/**
+ * What a commit did to its C# methods' calls, and the rings it made or cut (0.82.0; kit 1.116.0): read once a window's run for each
+ * commit, since the methods are read twice with Roslyn. The host names the game, so its own assemblies may be read. A failure is
+ * not kept.
+ */
+export function askCalls(
+  game: string,
+  repository: string,
+  commit: string,
+  onProgress?: OnProgress,
+): Promise<CallsAsked> {
+  const key = JSON.stringify([game, repository, commit]);
+  let asked = callsAsked.get(key);
+  if (!asked) {
+    asked = askConnections<Calls>(game, repository, "calls", commit, {
+      onProgress,
+    });
+    callsAsked.set(key, asked);
+    void asked.then((answer) => {
+      if (answer.state === "failed") callsAsked.delete(key);
     });
   }
   return asked;

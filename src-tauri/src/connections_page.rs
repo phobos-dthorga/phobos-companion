@@ -1,7 +1,8 @@
 //! How code connects: the code viewer's "How it connects" view and the Code map page.
 //!
-//! Every request runs the kit's `connections`, which only reads and names no game: any repository of any game is read the same way,
-//! C# exactly from its built assemblies, XML Defs, Lua and Python by their own rules, each connection marked exact or by name. The
+//! Every request runs the kit's `connections`, which only reads: any repository of any game is read the same way, C# exactly from
+//! its built assemblies, XML Defs, Lua and Python by their own rules, each connection marked exact or by name. Only `calls` names
+//! the game, so the kit may read the game's own assemblies, as files, where the game's adapter offers them. The
 //! host checks every request before the kit sees it: the repository must be one of the game's, a thing's id must have the tools'
 //! shape, a commit must be a commit, and a search one line of a sane length.
 
@@ -40,6 +41,9 @@ pub enum Question {
     /// Every name in one C# file, and where each is declared (0.79.0; kit 1.111.0's names reader): the file, and the commit to
     /// read it at, or none for the file as it stands.
     Names(String, Option<String>),
+    /// What one commit did to its C# methods' calls, and the rings of calls it made or cut (0.82.0; kit 1.116.0): the commit, and
+    /// the game whose own assemblies the kit may read for the game's side of a ring (a game with no reader gets a limit line).
+    Calls(String, String),
 }
 
 pub fn arguments(root: &Path, question: &Question) -> Result<Vec<String>, String> {
@@ -77,6 +81,10 @@ pub fn arguments(root: &Path, question: &Question) -> Result<Vec<String>, String
         Question::Names(..) => {
             return Err("names are read from one C#, Lua, Python or XML file of the repository, at a commit".to_owned());
         }
+        Question::Calls(commit, game) if checks::commit_hash(commit) && games::valid_id(game) => {
+            Args::new(TOOL, "calls").root(root).given("--commit", commit).given("--game", game)
+        }
+        Question::Calls(..) => return Err("calls are read from one commit of one game's repository".to_owned()),
     };
     Ok(arguments.json())
 }
@@ -99,8 +107,10 @@ fn answer_of(answer: &Value) -> Answer {
     Answer { ok: outcome.ok, refusal: outcome.refusal, data: answer["data"].clone() }
 }
 
-/// The question the window named, with its words checked by `arguments` before it runs. `commit` is only for names.
+/// The question the window named, with its words checked by `arguments` before it runs. `commit` is only for names; `game` is
+/// the game asked about, for calls.
 pub fn question(
+    game: &str,
     kind: &str,
     value: Option<String>,
     depth: Option<u8>,
@@ -115,6 +125,7 @@ pub fn question(
         "changed" => Question::Changed(value()?),
         "history" => Question::History(value()?),
         "names" => Question::Names(value()?, commit),
+        "calls" => Question::Calls(value()?, game.to_owned()),
         other => return Err(Failure::refused(format!("{other:?} is not a question the tools answer"))),
     })
 }

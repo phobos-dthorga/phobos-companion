@@ -394,6 +394,122 @@ async function open(
         },
       },
     },
+    // What the commit did to its calls (0.82.0; kit 1.116.0): Float's call to Sink moved into Moor, and a ring through the
+    // game's Thing.Tick, back into Float, is cut.
+    "connections:calls": {
+      result: {
+        ok: true,
+        refusal: null,
+        data: {
+          commit: {
+            hash: "4d332ddf0123456789",
+            subject: "Sample Mod 1.3.0: boats",
+          },
+          files: [
+            { before: "src/Sample/Boat.cs", after: "src/Sample/Boat.cs" },
+          ],
+          methods: [
+            {
+              key: "M:Sample.Boat.Float",
+              id: "M:Sample.Boat.Float",
+              node: "cs:Sample.Boat.Float",
+              display: "Boat.Float()",
+              file: "src/Sample/Boat.cs",
+              line: 4,
+              end: 9,
+              status: "changed",
+              gone: [
+                {
+                  key: "M:Sample.Boat.Sink",
+                  display: "Boat.Sink()",
+                  viaBase: false,
+                  file: "src/Sample/Boat.cs",
+                  line: 12,
+                  node: "cs:Sample.Boat.Sink",
+                },
+                {
+                  key: "M:Verse.Thing.Tick",
+                  display: "Thing.Tick()",
+                  viaBase: true,
+                  assembly: "Assembly-CSharp",
+                },
+              ],
+              new: [
+                {
+                  key: "M:Sample.Boat.Moor",
+                  display: "Boat.Moor()",
+                  viaBase: false,
+                  file: "src/Sample/Boat.cs",
+                  line: 16,
+                  node: "cs:Sample.Boat.Moor",
+                },
+              ],
+              kept: [],
+              movedTo: [
+                {
+                  key: "M:Sample.Boat.Moor",
+                  display: "Boat.Moor()",
+                  calls: ["M:Sample.Boat.Sink"],
+                },
+              ],
+            },
+            {
+              key: "M:Sample.Boat.Moor",
+              id: "M:Sample.Boat.Moor",
+              node: "cs:Sample.Boat.Moor",
+              display: "Boat.Moor()",
+              file: "src/Sample/Boat.cs",
+              line: 16,
+              end: 18,
+              status: "added",
+              gone: [],
+              new: [
+                {
+                  key: "M:Sample.Boat.Sink",
+                  display: "Boat.Sink()",
+                  viaBase: false,
+                  file: "src/Sample/Boat.cs",
+                  line: 12,
+                  node: "cs:Sample.Boat.Sink",
+                },
+              ],
+              kept: [],
+              movedFrom: [
+                {
+                  key: "M:Sample.Boat.Float",
+                  display: "Boat.Float()",
+                  calls: ["M:Sample.Boat.Sink"],
+                },
+              ],
+            },
+          ],
+          rings: {
+            made: [],
+            cut: [
+              [
+                {
+                  key: "M:Sample.Boat.Float",
+                  display: "Boat.Float()",
+                  outside: false,
+                },
+                {
+                  key: "M:Verse.Thing.Tick",
+                  display: "Thing.Tick()",
+                  outside: true,
+                },
+              ],
+            ],
+            standing: [],
+          },
+          game: "first",
+          gameRead: ["Assembly-CSharp"],
+          seconds: 6.8,
+          limits: [
+            "Every file the commit did not change is read as it stands now.",
+          ],
+        },
+      },
+    },
     "connections:around": {
       result: {
         ok: true,
@@ -610,6 +726,53 @@ for (const [name, viewport] of [
       await expect(
         picture.getByRole("button", { name: /^Harbour\.Launch, method/ }),
       ).toBeVisible();
+      await audit(page);
+    });
+
+    test("shows the calls a commit took away and added, and the ring it cut (0.82.0)", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("button", {
+          name: "Show the code behind: Sample boats float.",
+        })
+        .click();
+      const viewer = page.getByRole("dialog");
+      await viewer.getByRole("button", { name: "How it connects" }).click();
+      const calls = viewer.getByRole("region", {
+        name: "What this commit did to its calls",
+      });
+      await expect(
+        calls.getByRole("img", {
+          name: /^Ring cut: Boat\.Float\(\) → Thing\.Tick\(\) \(the game's\) → Boat\.Float\(\)/,
+        }),
+      ).toBeVisible();
+      const float = calls.getByRole("group", {
+        name: "The calls Boat.Float() makes",
+      });
+      await expect(float).toContainText("gone");
+      await expect(float).toContainText("through base");
+      await expect(float).toContainText("moved to Boat.Moor()");
+      await expect(float.locator(".call.new")).toHaveCount(1);
+      await expect(calls).toContainText(
+        "The game's own code was read from Assembly-CSharp, as files.",
+      );
+      await audit(page);
+      // Before the commit: no new calls; after it: none gone.
+      await calls.getByRole("button", { name: "Before", exact: true }).click();
+      await expect(float.locator(".call.new")).toHaveCount(0);
+      await expect(float.locator(".call.gone")).toHaveCount(2);
+      await calls.getByRole("button", { name: "After", exact: true }).click();
+      await expect(float.locator(".call.gone")).toHaveCount(0);
+      // A call of ours, pressed, goes in the middle of the picture.
+      await calls.getByRole("button", { name: "The change" }).click();
+      await float
+        .getByRole("button", { name: "Put Boat.Moor() in the middle" })
+        .click();
+      await expect(
+        calls.getByRole("group", { name: "The calls Boat.Moor() makes" }),
+      ).toContainText("moved from Boat.Float()");
       await audit(page);
     });
 

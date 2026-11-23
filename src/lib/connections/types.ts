@@ -90,7 +90,62 @@ export type Asked<T> =
   | { state: "failed"; failure: Failure };
 
 export type Question =
-  "summary" | "find" | "around" | "flow" | "changed" | "history" | "names";
+  | "summary"
+  | "find"
+  | "around"
+  | "flow"
+  | "changed"
+  | "history"
+  | "names"
+  | "calls";
+
+/** One call a method makes (kit 1.116.0): to a method of ours (`file`, `node`) or of another assembly (`assembly`). */
+export type Call = {
+  key: string;
+  display: string;
+  /** Made through `base`. */
+  viaBase: boolean;
+  file?: string;
+  line?: number;
+  node?: string | null;
+  assembly?: string | null;
+};
+
+/** Calls that moved whole between two of the commit's methods. */
+export type Moved = { key: string; display: string; calls: string[] };
+
+/** A method whose calls the commit changed, or one it added or removed. */
+export type CallsMethod = {
+  key: string;
+  id: string | null;
+  node: string | null;
+  display: string;
+  file: string;
+  line: number;
+  end: number;
+  status: "changed" | "added" | "removed";
+  gone: Call[];
+  new: Call[];
+  kept: Call[];
+  movedTo?: Moved[];
+  movedFrom?: Moved[];
+};
+
+/** One step of a ring of calls; `outside` for a game method. The last step calls the first. */
+export type RingStep = { key: string; display: string; outside: boolean };
+
+/** What a commit did to its C# methods' calls, and the rings of calls it made or cut (kit 1.116.0's `connections calls`). */
+export type Calls = {
+  commit: { hash: string; subject: string };
+  files: { before: string | null; after: string | null }[];
+  methods: CallsMethod[];
+  rings: { made: RingStep[][]; cut: RingStep[][]; standing: RingStep[][] };
+  game: string | null;
+  /** The game's assemblies read for the game's side of a ring. */
+  gameRead: string[];
+  seconds: number;
+  limits: string[];
+};
 
 /** Where a name is declared (kit 1.111.0): a file and lines of this repository, or another assembly. */
 export type Declared = {

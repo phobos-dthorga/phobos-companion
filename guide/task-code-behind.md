@@ -2,8 +2,8 @@
 title: See the code behind a changelog entry
 kind: task
 go: changes
-words: code, commit, diff, what changed in code, show the code
-see: term-changelog-entry, page-changes, task-compare-pictures-sounds
+words: code, commit, diff, what changed in code, show the code, calls gone, calls added, ring
+see: term-changelog-entry, page-changes, task-compare-pictures-sounds, term-ring-of-calls
 ---
 1. Find the entry on **Changes** (the **6** key), or on **Mods**.
 2. Press **Show the code**. The viewer opens on the commit that wrote it.
@@ -25,6 +25,19 @@ Code is coloured as VS Code colours it, with VS Code's own grammars, in your the
 
 C# names are read with Microsoft's Roslyn by the tool kit, which needs the .NET SDK; without it, a line says so and the code
 still shows. Lua, Python and XML names are matched by name against what the tool kit knows of the repository.
+
+### See what a change did to its calls
+1. Open **How it connects** on a commit that changed C#. Under the picture, **What this commit did to its calls** follows once the
+   methods have been read before and after the commit (several seconds).
+2. A [ring of calls](term-ring-of-calls) the commit **cut** is drawn dashed; one it **made** is drawn solid and heavy. Each is
+   also said in words, round from the method the commit changed and back.
+3. Below, the calls of what is in the middle of the picture: **gone** (dashed, struck through), **new** (heavy) and **kept**.
+   **Before**, **After** and **The change** choose which to show. A call that went whole to another method says **moved to** it;
+   **through base** and **in Assembly-CSharp** say how and where a call goes.
+4. Press one of our calls to put it in the middle, or one of **Other methods whose calls changed**.
+
+For a ring through the game's own code, the tool kit reads the game's methods a change hands on to, from the game's installed
+files; it never loads or runs them. A game the tool kit cannot read that way gets a line saying so.
 
 An entry not yet committed shows every change not yet committed, new files included. A commit that wrote several entries is shown whole, and says so. In the viewer: **C**, **N**, **Shift + N** and **H** switch the views, **J** and **K** step through the files.
 

@@ -5,6 +5,7 @@
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
+  import CommitCalls from "./CommitCalls.svelte";
   import ConnectionsView from "./ConnectionsView.svelte";
   import { askChanged } from "./desktopClient";
   import { startingPoints } from "./presentation";
@@ -13,7 +14,8 @@
   /**
    * How the code a commit changed connects to the rest: the things its lines changed, most-changed first, and the connections view
    * centred on the one chosen. For the code viewer's "How it connects". The chosen thing is the viewer's (0.78.0), so the viewer can
-   * show its lines beneath the picture; putting something else in the middle chooses it.
+   * show its lines beneath the picture; putting something else in the middle chooses it. Beneath it, for a commit that changed C#,
+   * what the commit did to its calls and the rings of calls it made or cut (0.82.0).
    */
   let {
     game,
@@ -45,6 +47,11 @@
   );
   const changedIds = $derived(new Set(points.map((p) => p.id)));
   const start = $derived(chosen ?? points[0]?.id ?? null);
+  /** Calls are read from C# only (0.82.0; kit 1.116.0). */
+  const readsCalls = $derived(
+    reading.state === "ready" &&
+      reading.changed.files.some((f) => f.file.toLowerCase().endsWith(".cs")),
+  );
 
   async function load() {
     if (!commit) return;
@@ -121,6 +128,15 @@
         onrecentre={(id) => (chosen = id)}
       />
     {/key}
+  {/if}
+  {#if commit && readsCalls}
+    <CommitCalls
+      {game}
+      {repository}
+      {commit}
+      chosen={start}
+      onchoose={(node) => (chosen = node)}
+    />
   {/if}
 {/if}
 

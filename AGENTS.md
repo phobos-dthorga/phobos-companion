@@ -250,7 +250,7 @@ The layers, the folder map, a page's parts, how the kit runs and how to add a pa
   `@tauri-apps/*` (`src/lib/shell/tauriImports.test.ts` holds it). Tauri commands stay thin: one line of delegation each, through
   `blocking` in `src-tauri/src/lib.rs`. **The one exception is a command sent raw bytes** (`save_picture`, `save_screen_note`): a
   raw body comes only with the request itself, so the command takes the bytes and its one header out first, then delegates.
-- **Code more than one part uses lives once** (owner, 19 Nov 2026; `docs/shared-code-audit.md`): in the host, the `companion-core`
+- **Code more than one part uses lives once** (owner, 19 Nov 2026; `docs/history/shared-code-audit.md`): in the host, the `companion-core`
   crate (`src-tauri/core`), which holds no Tauri; in the window, `src/lib/shell/`, `src/lib/changelog/` and `src/app.css`. A
   page's own module keeps only what is its own. Every request goes through `ask` (and `BROWSER` outside the program), every kit
   answer through `Outcome`, every change through `allowed_by_manifest`, the window's text to the kit always as one argument

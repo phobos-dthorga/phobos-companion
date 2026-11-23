@@ -1,6 +1,7 @@
 # Release audit: what stands between the Companion and another person (20 Nov 2026)
 
-**Status (20 Nov 2026):** written at the owner's request. **A1, A2, A3 and A5 are built in Companion 0.36.0** (the installer carries its own Python and tool kit, the games list starts on First steps, and a missing git is said plainly); not yet tried on a clean PC. **B1 and B3 are built in 0.37.0, and B4 in part** (the Guide's entries from the kit and each repository are not); see "Built in 0.37.0" below. **A4 and B7 are built in 0.38.0** (the kit's compiled tools come ready-built; About leads to which other programs the tools use). The rest is not built. The owner answered four of the questions below. Written after
+**Status (20 Nov 2026):** written at the owner's request. **A1, A2, A3 and A5 are built in Companion 0.36.0** (the installer carries its own Python and tool kit, the games list starts on First steps, and a missing git is said plainly); not yet tried on a clean PC. **B1 and B3 are built in 0.37.0, and B4 in part** (the Guide's entries from the kit and each repository are not); see "Built in 0.37.0" below. **A4 and B7 are built in 0.38.0** (the kit's compiled tools come ready-built; About leads to which other programs the tools use). **C3 is built in 0.61.0** (About lists what the Companion contacts). The rest is not built (checked 24 Nov 2026). The owner
+answered four of the questions below. Written after
 the owner said: "eventually, I wish to make Companion available to others. That's the greater view we should be taking with regard
 to everything revolving around the Companion." The rule that follows from it is in `AGENTS.md` ("Design for a stranger").
 

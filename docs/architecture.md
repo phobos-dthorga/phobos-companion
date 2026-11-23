@@ -65,7 +65,7 @@ flowchart LR
 | `companion-core` (`src-tauri/core`) | Everything shared: games list, kit runner, checks, failures, prefs | Anything Tauri |
 | The kit (`external/phobos-modkit`) | The actual work, and the manifest saying what each report does | Knows about the window |
 
-`companion-core` holds no Tauri so a second front end could use it whole (owner, 19 Nov 2026; `docs/shared-code-audit.md`).
+`companion-core` holds no Tauri so a second front end could use it whole (owner, 19 Nov 2026; `docs/history/shared-code-audit.md`).
 
 ## Folder map
 
@@ -737,8 +737,9 @@ A checklist, in the order the work usually goes. Each item is something a test o
 - **The design record** (`docs/design-record.md`): a decision log: what the owner asked for, what they chose, the agent's
   choices for them to revise, and the risks.
 - **The kit's manifest and envelope** (`external/phobos-modkit/docs/manifest.md`): effects, surfaces, progress lines, blocks.
-- **Cross-links** (`docs/cross-links.md`): the trail, addresses and every page's focus keys.
+- **Cross-links** (`docs/cross-links.md`): the ids N1 to S5, the address form and every page's focus keys.
 - **Going online** (`docs/online.md`), **Publishing** (`docs/publishing.md`), **Debugging** (`docs/debugging.md`): the designs
   behind the switches, the Publish page and the Explorer.
-- **Shared code** (`docs/shared-code-audit.md`): what moved into `companion-core` and `src/lib/shell/`, and why.
+- **History** (`docs/history/`): finished plans and handoffs, such as the shared code audit (what moved into `companion-core`
+  and `src/lib/shell/`, and why), the cross-links proposal and the Publish page's plan.
 - **Release audit** (`docs/release-audit.md`): what stands between the program and another person.

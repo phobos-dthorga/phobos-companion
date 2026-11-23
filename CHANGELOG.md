@@ -12,6 +12,9 @@ Maintained from 9 November 2026.
 - **The design record is a decision log** (the owner's docs rewrite, step 7, 24 Nov 2026). Each section keeps the request, the
   owner's choices, the agent's choices and the risk; its tables of how each part works moved to `docs/architecture.md`, "How each
   part works", and "Who chose what" points at the sections instead of stopping at 19 Nov.
+- **Finished plans move to `docs/history/`** (the owner's docs rewrite, step 7, 24 Nov 2026): the mood report handoff and the
+  shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
+  and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
 ## [0.80.0] - 2026-11-24
 

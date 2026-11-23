@@ -1,6 +1,6 @@
 # Search: everything, overview first (design, 21 Nov 2026)
 
-**Status (21 Nov 2026):** designed, nothing built. Waits for the owner's word to build. When it is built, its design moves into
+**Status (checked 24 Nov 2026):** designed, nothing built. Waits for the owner's word to build. When it is built, its design moves into
 `design-record.md` and `later.md` keeps one line pointing there.
 
 **The owner's request** (21 Nov 2026): "some sort of global, search functionality". They like the RimWorld mod Needle (ZIPender,

@@ -6,7 +6,7 @@
 //! may make by itself (`online`), starting processes without a console (`process`), a kit command that stays
 //! running and answers requests (`serve`) and times as the kit reads them (`time`), and AI services for help on pages (`ai`, its
 //! requests `ai_client` and its keys `ai_keys`, 0.71.0). The program's Tauri commands and its pages' own modules live in the
-//! program; a second front end could use this crate whole (owner, 19 Nov 2026: `docs/shared-code-audit.md`).
+//! program; a second front end could use this crate whole (owner, 19 Nov 2026: `docs/history/shared-code-audit.md`).
 
 pub mod acp;
 pub mod agents;

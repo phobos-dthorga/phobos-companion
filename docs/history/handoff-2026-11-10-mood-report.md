@@ -2,7 +2,7 @@
 
 **Delivered the same day: the save route is built** (phobos-modkit 1.5.0, `rimworld-save mood`; D'thorga Companion 0.4.0). What was
 built, what changed from this proposal and the questions still open are in the
-[design record](design-record.md#colony-mood-built-10-nov-2026). This handoff is kept as it was written.
+[design record](../design-record.md#colony-mood-built-10-nov-2026). This handoff is kept as it was written.
 
 From the phobos-rimworld session (phobos-rimworld-b2), for the next Companion session. **Owner's request (10 Nov 2026):** "That might
 be actually worthwhile integrating into our Companion, to see where you are lacking mood-wise." It came from a play session where

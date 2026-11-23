@@ -9,7 +9,7 @@
 
   /**
    * A dialog over the whole window, opened as soon as it is shown: a kicker, a title that names the dialog, a Close button, and
-   * whatever it holds. The code viewer and the changelog as it stood are both one (docs/shared-code-audit.md, W4).
+   * whatever it holds. The code viewer and the changelog as it stood are both one (docs/history/shared-code-audit.md, W4).
    */
   let {
     kicker,

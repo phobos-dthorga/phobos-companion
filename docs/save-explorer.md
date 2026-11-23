@@ -1,6 +1,6 @@
 # Save explorer: design (20 Nov 2026)
 
-**Status (20 Nov 2026):** designed, nothing built. The first slice (the explorer and one thing in full) waits for the owner's word
+**Status (checked 24 Nov 2026):** designed, nothing built. The first slice (the explorer and one thing in full) waits for the owner's word
 to build; the slices after it are listed at the end. When it is built, its design moves into `design-record.md` and `later.md`
 keeps one line pointing there.
 

@@ -1,6 +1,6 @@
 //! What each repository's changelogs have not released yet, for the Home page: entries with no version yet, and versions still in
 //! draft. The tool kit reads the changelogs (`changes pending`, kit 1.32.0) for every repository in one run, with no git, so the
-//! Home page and every other page read a changelog the same way (docs/shared-code-audit.md, X1).
+//! Home page and every other page read a changelog the same way (docs/history/shared-code-audit.md, X1).
 
 use companion_core::args::Args;
 use companion_core::games::Repository;

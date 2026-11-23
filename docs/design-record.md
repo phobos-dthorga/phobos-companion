@@ -3,7 +3,7 @@
 **Status (24 Nov 2026): a decision log, through 0.78.0.** Each section is one piece of work: what the owner asked, what they
 chose, what the agent chose for them to revise, and the risk where one was graded. **How each piece works is in
 [architecture.md](architecture.md)** ("How each part works"); what each version delivered is in the [changelog](../CHANGELOG.md);
-how to use it is the Guide (F1 in the program).
+how to use it is the Guide (F1 in the program). Planning documents of finished work are in [history/](history/README.md).
 
 - **Nothing counts as tested on screen until the owner says so.** The owner approved the mock-up on 9 Nov 2026 ("I like the
   purple vibe") and has used the window since 0.66.0; a section says where the owner has seen something work.
@@ -147,7 +147,7 @@ option builder and in the browser; and when it fails the table shows.
 **Owner's request (10 Nov 2026), from a play session showing "Extreme break risk x29":** "That might be actually worthwhile
 integrating into our Companion, to see where you are lacking mood-wise." They handle mood mostly "with extreme amounts of drugs and
 their addictions". The proposal came as a handoff from a phobos-rimworld session
-([handoff-2026-11-10-mood-report.md](handoff-2026-11-10-mood-report.md)).
+([history/handoff-2026-11-10-mood-report.md](history/handoff-2026-11-10-mood-report.md)).
 
 **Gotcha: a save holds only half of a colonist's mood.** The game saves remembered events (a death, a meal off the floor, a party)
 and works out situational thoughts (bedrooms, pain, cold, beliefs, a drug's high) while it runs. So the report counts remembered
@@ -317,7 +317,7 @@ where everything or at least, most, of these sorts of things are managed".
 
 **Owner's choices (19 Nov 2026):** both views (the lanes and the day-by-day list); the history log in this program's own folder,
 with a central settings page to change it; installs recorded from now on, not recovered from backups; the first-class citizens
-written up as a design to edit (phobos-modkit's `rules/first-class.md`: Change, Version, Product, Install and Event; nothing there
+written up as a design to edit (phobos-modkit's `docs/first-class.md`: Change, Version, Product, Install and Event; nothing there
 is a rule until the owner says so). Read it as it stood gained Show the code in 0.15.0, after the owner found it missing, and
 mods moved together became one row in 0.15.1, at their request.
 
@@ -362,7 +362,8 @@ allowed a key to repeat where never on screen together and to be held with Shift
 ## Cross-links (built 19 Nov 2026, 0.19.0)
 
 **The owner asked for the whole proposed order of cross-links to be built overnight: "Proceed with your entire proposed order,
-step-wise if necessary".** The proposal, its order, where each build differed, the address form and each page's keys are in
+step-wise if necessary".** The proposal, its order and where each build differed are in
+[history/cross-links-proposal.md](history/cross-links-proposal.md); the address form and each page's keys stay in
 [cross-links.md](cross-links.md).
 
 | Item | What does it let the person do? | What does it stop them doing? | How does it change the way they work? |
@@ -384,7 +385,7 @@ the key G; a red dotted ring for a method three or more other mods patch; S1 and
 prose is noisy enough to want the owner's view first; S5 needs rules given ids, the owner's to settle). Both are in
 [later.md](later.md).
 
-**Shared code, on the owner's word** (19 Nov 2026): an audit ([shared-code-audit.md](shared-code-audit.md)) found code written 3 to 17
+**Shared code, on the owner's word** (19 Nov 2026): an audit ([shared-code-audit.md](history/shared-code-audit.md)) found code written 3 to 17
 times across the host and the window; the owner chose a `companion-core` library crate for the host and a grown
 `src/lib/shell/` for the window, all four steps, built in 0.16.0.
 
@@ -812,7 +813,7 @@ adopts `config/installs.json` gets it.
 
 **The owner's request** (20 Nov 2026: debugging tools "that you can attach to the games (supported) ... see things like
 relationships between things ... While looking at variables in memory"). The design, its three layers and the owner's choices are
-in [debugging.md](debugging.md), with the probe and layer 1's plan.
+in [debugging.md](debugging.md); the probe and layer 1's plan are in [history/debugging-layer-1.md](history/debugging-layer-1.md).
 This is layer 1, "Look inside", on the page the Save explorer will share (the owner's choice of one explorer for saves and the
 running game).
 

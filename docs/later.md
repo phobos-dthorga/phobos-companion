@@ -1,15 +1,15 @@
 # Kept for later: everything proposed and not yet built
 
-**Status (20 Nov 2026):** items 1 to 5 are built in Companion 0.22.0, untested on screen; of item 5's rest, adding a game from
-Steam and better data-folder guesses are built in 0.31.0, the screenshot gallery on the Timeline in 0.32.0, and the launch
-before last in 0.28.0; the RimWorld extras are still to come (below). The records backup copies itself from 0.29.0. The owner said yes to all of it ("Absolutely with all of these and
+**Status (24 Nov 2026):** the build list's items 1 to 5 are built (0.22.0 to 0.32.0), untested on screen, except item 5's
+RimWorld extras (below). Under "Not on the build list yet", going online is designed and four slices built
+([online.md](online.md)), reading code closer is built to step 3, and the rest waits for the owner's word. The owner said yes to all of it ("Absolutely with all of these and
 for what we are not implementing just yet, make sure to document and record those for later so that they are not lost"), in the
 order of the build list below. Each item's status changes here in the change that builds it; once built, its design moves to
 `design-record.md` and this record keeps one line pointing there.
 
 ## Read this first (gotchas)
 
-- **Build order is the owner's go-ahead, not a schedule.** Items 1 to 5 are being built in Companion 0.22.0 onwards; everything under
+- **Build order is the owner's go-ahead, not a schedule.** Items 1 to 5 are built (Companion 0.22.0 onwards); everything under
   "Not on the build list yet" waits for the owner's word.
 - **Every item still answers the three questions when it is built** (what it lets the person do, what it stops, how it changes the
   way they work), in `design-record.md`.
@@ -107,8 +107,8 @@ screenshots as a list, and where the space goes; places and the Steam app ID in 
 | --- | --- | --- |
 | **Deleting old autosaves or Real Ruins files** from the Companion | Game-files discussion, 19 Nov 2026 | **The owner's decision.** Until then, sizes only |
 | **Running the Companion on another machine, or for someone else** | Limits in `design-record.md`; the owner's word of 20 Nov 2026 that it is to be released for others | **The [release audit](release-audit.md)**: every finding, in the order a stranger would hit them, with the owner's questions |
-| **S1: design records joined to code** | `cross-links.md` | A way to tie a design record's sections to the code that builds them |
-| **S5: rules joined to the checks that enforce them** | `cross-links.md` | A list tying each rule to its check script |
+| **S1: design records joined to code** | [history/cross-links-proposal.md](history/cross-links-proposal.md) | A way to tie a design record's sections to the code that builds them |
+| **S5: rules joined to the checks that enforce them** | [history/cross-links-proposal.md](history/cross-links-proposal.md) | A list tying each rule to its check script |
 | **Size as installed** on Make-up | Make-up, 0.20.0 | Each game's install records read for sizes |
 | **Prefs, KeyPrefs and Knowledge views** | Game-files discussion | Low value; build only if the owner asks |
 | **Saves backup** (15 GB) | Records backup discussion | Its own decision: where, how often, how many |
@@ -121,7 +121,7 @@ screenshots as a list, and where the space goes; places and the Steam app ID in 
 | **Debugging the running game**: layer 1, look inside a snapshot, is **built** (0.41.0, the Explorer); then a live view through D'thorga Framework, then a debugger | The owner's ask of 20 Nov 2026; the order, the debugger protocol, the off-by-default setting and the test attach are the owner's choices | **Layer 1 built**: [design-record.md](design-record.md), Explorer. Layers 2 and 3: [debugging.md](debugging.md), designed in outline; layer 3 waits for a second probe |
 | **Theming, round two**: the rest of the theme ideas from the owner's other programs, OnAir WyrmGrid and Republic Observatory (list below) | The owner's wish of 21 Nov 2026: "eventually" implement "the rest of the theming ideas from my other Svelte, etc. projects like OnAir" | Not designed; waits for the owner's word. [Theming, round two](#theming-round-two) lists what is left |
 | **Reading code closer**: code coloured by VS Code's own grammars, with a VS Code theme brought in for the colours; any name pressed to reach its declaration (exact for C#, by name elsewhere); a change shown as lines and picture together, with the calls it took away and added, and a ring finder; jumps between a game's data files and its code | The owner's ask of 24 Nov 2026; the grammar switch with a theme brought in, Roslyn for C#, and all four picture parts are the owner's choices by card | **Steps 1 to 4 on the owner's go** (24 Nov 2026): [code-reading.md](code-reading.md). **Step 1 built**, 0.76.0 (VS Code's grammars and code colours); **step 2 built**, 0.77.0 (code colours from VS Code); **step 3 built**, 0.78.0 (lines and pictures lit together); **step 4 built**, 0.79.0 (names to follow in C#, on kit 1.111.0); see `design-record.md`. Steps 5 to 7 wait for the owner's word, step 7 with resources they will give |
-| **Going online**: releases and an updater, data feeds, a nightly watch of other authors' public source, report links and gate lights, an off-site copy in a bucket, and a signed installer (list below) | The owner's question of 23 Nov 2026 ("Are there any (further) online capabilities we can/should add to Companion?"), and their answers by card the same day: all four GitHub-side additions, both off-site routes, SignPath Foundation | Not designed; **on the list, each waits for the owner's word to build**. [Going online](#going-online) lists them, with what each needs first |
+| **Going online**: releases and an updater, data feeds, a nightly watch of other authors' public source, report links and gate lights, an off-site copy in a bucket, and a signed installer (list below) | The owner's question of 23 Nov 2026 ("Are there any (further) online capabilities we can/should add to Companion?"), and their answers by card the same day: all four GitHub-side additions, both off-site routes, SignPath Foundation | **O2 to O4 designed** in [online.md](online.md), and four slices built (0.61.0 to 0.65.0: gate lights and the switches, the nightly watch, known problems, report links); O1, O5 and O6 wait for the owner's word. [Going online](#going-online) lists them |
 
 ## Going online
 

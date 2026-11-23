@@ -151,7 +151,8 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   functionality"; `docs/online.md`). **Off means off**: no call of that kind, on a press or by itself. A report is passed the flag
   that takes it online only while the manifest calls it `reads-online`; a look the program makes by itself says so
   (`--automatic`), keeping the hour's last keyless GitHub calls for a press. **Nothing is ever sent about the person**: calls only
-  read public pages, keyless. Settings → Going online and About show the same list of kinds. **A new kind joins
+  read public pages, keyless. Settings → Going online and About show the same list of kinds: today five (Gate lights, Nightly
+  watch, Known problems, Their reports and Workshop pages; `docs/architecture.md` says what each contacts). **A new kind joins
   `companion_core::online::KINDS`, the window's words and the Guide's Going online entry in one change.**
 - **Report links open GitHub in the browser, and never post** (0.65.0; the owner's choice of 23 Nov 2026: the Logs page only).
   Only an address for a repository the kit named: our repository's new-issue form filled in, another author's blank form, or one
@@ -175,7 +176,16 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   - **Restore** (0.43.0), into a folder the owner picked, and **Let go**, for one copy the kit lists as no longer taken: each only
     after the owner's yes on the card, while the manifest calls it `writes`. Restore never replaces a different file unless the
     owner then presses Replace older files, and never a newer one; Let go never touches the file the copy was made from;
-  - **Decide** (0.22.0): the owner's answer, appended in this program's folder.
+  - **Decide** (0.22.0): the owner's answer, appended in this program's folder;
+  - **Looked at** on a setting the Mods page lists as new (Settings to look at): the mark, appended per repository in this
+    program's folder; nothing in a repository or a game changes;
+  - **Workshop uploads** (Settings, Publishing; 0.69.0): the owner's On or Off, in this program's folder;
+  - **Save a picture** (P) and **Something's off** (!): a picture of the page into the owner's Pictures folder (a D'thorga
+    Companion folder) and the clipboard, or into a screen note above;
+  - **First steps** (0.35.0): a new, empty games list where there is none, naming the projects folder the owner chose; it
+    refuses when a list is already there. Adding a game to it is the Settings page's, above;
+  - **The daily run of safe copies** (Settings; the owner's word of 22 Nov 2026): the kit's `safe-copies schedule`, which sets or
+    removes the owner's one Windows scheduled task, "D'thorga Safe Copies", and no other.
 
   **The Game files page only reads**; Show in folder opens the file manager on a file inside a folder the last report named, and
   nothing else.
@@ -192,7 +202,9 @@ The layers, the folder map, a page's parts, how the kit runs and how to add a pa
 [`docs/architecture.md`](docs/architecture.md). The rules:
 
 - **The window presents, the host decides.** Svelte components show what they are given. Only a `desktopClient.ts` may import
-  `@tauri-apps/*`. Tauri commands stay thin: one line of delegation each, through `blocking` in `src-tauri/src/lib.rs`.
+  `@tauri-apps/*` (`src/lib/shell/tauriImports.test.ts` holds it). Tauri commands stay thin: one line of delegation each, through
+  `blocking` in `src-tauri/src/lib.rs`. **The one exception is a command sent raw bytes** (`save_picture`, `save_screen_note`): a
+  raw body comes only with the request itself, so the command takes the bytes and its one header out first, then delegates.
 - **Code more than one part uses lives once** (owner, 19 Nov 2026; `docs/shared-code-audit.md`): in the host, the `companion-core`
   crate (`src-tauri/core`), which holds no Tauri; in the window, `src/lib/shell/`, `src/lib/changelog/` and `src/app.css`. A
   page's own module keeps only what is its own. Every request goes through `ask` (and `BROWSER` outside the program), every kit

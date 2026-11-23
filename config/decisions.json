@@ -367,6 +367,105 @@
       "why": "The same answer from anywhere, as the page gives; nothing waiting can be missed",
       "from": "docs/picks-page.md, round two",
       "asked": "2026-11-23"
+    },
+    {
+      "id": "ai-credentials-rule",
+      "question": "How far should the rule \"the program never holds credentials\" bend for AI services?",
+      "context": "Online models (Claude, ChatGPT, Gemini) need a key. You said on 23 Nov 2026 you are willing to bend the rule, and that the Companion should work on every operating system. Help on pages (A2) is the only part that needs a key; the chat page's agents keep their own logins.",
+      "options": [
+        {
+          "id": "ai-keys-only",
+          "label": "Keys for AI services only",
+          "detail": "The rule stays, with one exception: a key you add for an AI service, kept in the operating system's own key store (or read from an environment variable), never in a file of ours. Steam passwords stay never held"
+        },
+        {
+          "id": "any-key-store",
+          "label": "Any key, in the key store",
+          "detail": "The rule becomes \"credentials are kept only in the operating system's key store\". A GitHub token or others could follow later without asking again"
+        },
+        {
+          "id": "no-keys",
+          "label": "No keys after all",
+          "detail": "Only models on your own computer; the rule stays as it is"
+        }
+      ],
+      "lean": "ai-keys-only",
+      "why": "It gives the big services with the smallest change to a rule that has kept the program safe; a wider change can be asked for when something needs it",
+      "from": "docs/ai.md, A2",
+      "asked": "2026-11-23"
+    },
+    {
+      "id": "ai-what-is-sent",
+      "question": "What may the Companion send to an online AI service?",
+      "context": "The rule today is \"nothing is ever sent about the person\". Your answer on the card was \"Read before.\", which I read as \"see my answer on the card before\" (this rule may bend too); it may also mean \"I read it before it is sent\". Both lead to the first option. The text is always the kit's redacted answer, never a raw file.",
+      "options": [
+        {
+          "id": "shown-first",
+          "label": "Shown first, then my press",
+          "detail": "Each question shows exactly what will be sent and to which service, and goes only when you press Send. AI services is a switch under Going online, off until you turn it on"
+        },
+        {
+          "id": "on-a-press",
+          "label": "Sent on a press, no preview",
+          "detail": "Pressing the button is the yes; the service is named beside the button"
+        },
+        {
+          "id": "never-online",
+          "label": "Never online; local models only",
+          "detail": "Nothing leaves the computer, and the rule stays as it is"
+        }
+      ],
+      "lean": "shown-first",
+      "why": "You see what leaves the computer every time, which also catches a redaction that missed something",
+      "from": "docs/ai.md, A2",
+      "asked": "2026-11-23"
+    },
+    {
+      "id": "ai-mcp-server",
+      "question": "Should the kit's MCP server be a small one of our own, or use the official Python package?",
+      "context": "MCP is how other AI programs would ask the kit's read-only reports (A1). The kit's Python is standard library only, and the installer ships Python with no extra packages. MCP changed shape in its 2026-07-28 revision, and the official package was rewritten for it.",
+      "options": [
+        {
+          "id": "own",
+          "label": "A small one of our own",
+          "detail": "Standard library only, tools only, over standard input and output. We follow the specification ourselves when it changes"
+        },
+        {
+          "id": "official",
+          "label": "The official package",
+          "detail": "The kit's first Python dependency, with its own dependencies, bundled by the installer. It follows the specification for us"
+        }
+      ],
+      "lean": "own",
+      "why": "A server that offers only three tools is small, and it keeps the kit's rule and the installer simple; the cost is reading the specification when it next changes",
+      "from": "docs/ai.md, A1",
+      "asked": "2026-11-23"
+    },
+    {
+      "id": "ai-chat-changes",
+      "question": "On the chat page, may an agent change files through the Companion?",
+      "context": "An agent (Claude, Gemini CLI, Codex) is its own program with your own access to the disk: it can change files by itself, as it does in a terminal, and the Companion cannot stop that. This is only about the changes it asks the Companion to make for it, and the commands it asks the Companion to run.",
+      "options": [
+        {
+          "id": "reads-first",
+          "label": "Reads only at first, then a yes on each",
+          "detail": "The first build refuses writes and commands through the Companion. A later one allows each only after your yes on a card"
+        },
+        {
+          "id": "yes-on-each",
+          "label": "A yes on each, from the start",
+          "detail": "Writes and commands through the Companion are built with the page, each behind a confirm card"
+        },
+        {
+          "id": "never",
+          "label": "Never through the Companion",
+          "detail": "The Companion only shows the conversation; the agent does everything with its own tools"
+        }
+      ],
+      "lean": "reads-first",
+      "why": "A smaller first slice to test on screen, and the confirm cards are built once the page itself is known to work",
+      "from": "docs/ai.md, A3",
+      "asked": "2026-11-23"
     }
   ]
 }

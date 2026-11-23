@@ -6,6 +6,10 @@ Maintained from 9 November 2026.
 
 ### Changed
 
+- **AGENTS.md names everything the program writes**, as the architecture page found it (the owner, 23 Nov 2026: "fix those
+  AGENTS gaps too"): the Looked at marks, the Workshop uploads switch, Save a picture, First steps' new games list and the
+  daily safe copies' scheduled task join the list; the five kinds of going online are named; the two commands sent raw bytes
+  are the stated exception to one-line commands; and a test now holds the rule that only a desktopClient.ts imports Tauri.
 - **The kit pin moves from v1.102.0 to v1.105.1, and the shared rules it brings replace this repository's copies** (the owner's
   docs rewrite, step 2, 23 Nov 2026: "Move all 12 now"). AGENTS.md drops what the kit's every-session, brand and changelog rules
   now say; publishing.md points to the kit's own publishing guide for how the kit publishes, and debugging.md to its heap reader

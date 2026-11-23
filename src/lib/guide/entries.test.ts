@@ -36,6 +36,7 @@ const FOCUS_KEYS: Partial<Record<PageName, string[]>> = {
     "page",
   ],
   reports: ["command", "report"],
+  chat: ["repository"],
   guide: ["entry"],
 };
 /** The panels each page's tabs hold, from the one list of tabs (0.70.0: a hand-kept copy here had fallen behind). */

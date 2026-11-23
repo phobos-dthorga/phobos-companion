@@ -74,6 +74,7 @@ build differs from its proposal.
 | Settings | `tab` (0.66.0): `look`, `games`, `folders`, `online`, `backups`, `agents`, `publishing` (0.69.0), `ai` (0.70.0); `key` opens that setting on `folders`; `show` (`all`, `every`, `needs` or a game's id) chooses which settings `folders` lists; `panel` still lands on the tab holding it and brings it into view: `records`, `cleanup`, `themes`, `games`, `agents`, `online` (0.37.0), `publishing` (0.69.0), `ai-programs` (0.70.0), `ai-services` (0.71.0) |
 | Mods | `tab` (0.66.0): `before`, `installed`, `textures`; `repository`, and `mod` or `changelog` (on `installed`); `before` (a moment) marks the newest backup from before it; `panel=settings` lands on `before` and brings the settings to look at into view (0.21.0) |
 | Logs | `signature` |
+| Chat | `repository` (0.74.0) |
 | Memory | `watch` (a kept watch's name, such as `20261119-205419-reload-test-2`; 0.23.0) |
 | Explorer | `view` (`kind` or `object`; none for the overview), `kind` (a type's full name, such as `Verse.Pawn`), with `match` (a word filter), `largest` (`yes`) and `page`; `object` (a token such as `o7`, never a memory address) with `snapshot` (the snapshot's number in this run of the program): a step back to an object from a snapshot let go says it is gone and offers the overview; `start` (`yes`: asks at once whether to take a snapshot, as Go to anything's **Look inside the running game** does) |
 | Reports | `command`, `report` |

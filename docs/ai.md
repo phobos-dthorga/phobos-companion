@@ -7,8 +7,10 @@ owner, 23 Nov 2026: "go ahead with A2"): Settings → AI services, **Explain thi
 and the AI services kind of going online. Checked by tests and a real listing of the models of the owner's running Ollama;
 **no real question has been sent yet, and nothing tested on screen.** **Slice 3's buttons built** in Companion 0.72.0 (the owner,
 23 Nov 2026: "You can proceed with the others"): **Summarise this version** on Changes and **What does this mean for my
-mods?** under the Mods page's update check, through one shared card; the kit's tools for the model wait for a slice of their
-own. A3 is a design only. The owner asked for "AI integration
+mods?** under the Mods page's update check, through one shared card. **Slice 3b built** in Companion 0.73.0 with phobos-modkit
+1.110.0: the model may ask the kit's read-only reports. **Slice 4 (A3's first slice) built** in Companion 0.74.0: the Chat page,
+its switch off until turned on; **no real agent started yet** (none is on the owner's computer), and nothing tested on screen.
+Slice 5 (changes through the Companion with a yes on each) waits. The owner asked for "AI integration
 directly into Companion", through an open framework that reaches "a multitude of services, preferably with some of the bigger
 ones at least", chose all three parts below by card the same day, and then took the agent's lean on all four open questions
 ("go with your leans on all four and start building"). Agent choices are labelled so the owner can revise them.
@@ -196,6 +198,24 @@ the owner to revise):
 
 ## A3: a chat page (ACP)
 
+**As built (0.74.0; the owner, 23 Nov 2026: "go ahead with A3")**, where it differs from the table below (agent choices, to
+revise):
+
+- **No ACP library: a small client of our own** (`companion_core::acp`), not the `agent-client-protocol` crate. The protocol is
+  one JSON-RPC message a line, and the page needs seven kinds of message; the crate is asynchronous and far larger. Tested
+  against a stand-in agent on in-memory pipes (handshake, a streamed turn, reads in and out of the repository, a refused write
+  and command, permissions answered only with an offered option, stopping, the agent ending).
+- **The agents** (`config/chat-agents.json`): Claude (`claude-agent-acp`), Codex (`codex-acp`), Gemini CLI (`gemini --acp`),
+  GitHub Copilot (`copilot --acp`) and Goose (`goose acp`), each its command as its own pages gave it on 23 Nov 2026. **Never
+  `npx -y`**, which would install a package by itself. On Windows an npm command is found as its `.cmd` file.
+- **The kit's reports are handed over from the first slice**: the agent's conversation starts with the kit's MCP server (from
+  `mcp setup`), so it can ask the reports that read. Changes through the Companion stay refused (slice 5).
+- **The page shows** the agent's answer, its thinking folded away, each step with its status, its plan, each file read through
+  the Companion, each refused change or command, and permission cards with the agent's own choices and **Neither**.
+- **Process trees on Linux and macOS**: the agent starts as the leader of a process group of its own, and ending it ends the
+  group (`process::own_group`, `end_tree`). Written, **not yet built or tried** there.
+- **None of the agents is on the owner's computer** on 23 Nov 2026, so no real agent has been started.
+
 **What it is.** A page where the person talks to an agent they already have installed. The Companion is an ACP *client*: it
 starts the agent as a process, in a repository from the games list, and shows what it says and asks.
 
@@ -246,7 +266,7 @@ Each slice is a working thing by itself, with its own version and commit.
 | 2 | **A2, first button**: `companion_core::ai`, services, the key store, the `ai-services` kind, Settings → AI services, **Explain this fault** on Logs, a local model and one online service | phobos-companion | Credentials; what is sent; a new online kind |
 | 3 | **A2, the other buttons** (built, 0.72.0) | phobos-companion | None |
 | 3b | **The kit's tools for the model** (built, 0.73.0 with phobos-modkit 1.110.0): the model may ask A1's read-only reports while it answers, with each call shown | phobos-modkit, then phobos-companion | None |
-| 4 | **A3, first slice**: one agent, the chat page, permission cards, reads only through the Companion | phobos-companion | A new page; process tree ending on every system |
+| 4 | **A3, first slice** (built, 0.74.0): one agent, the chat page, permission cards, reads only through the Companion | phobos-companion | A new page; process tree ending on every system |
 | 5 | **A3 with the kit's tools**, and changes through the Companion with a yes on each | phobos-companion | None |
 
 ## Open, for the owner to revise

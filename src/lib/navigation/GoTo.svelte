@@ -33,8 +33,8 @@
     type Candidate,
     type Kind,
   } from "./goto";
-  import { FOR_AGENTS_PAGES, type Place } from "./place";
-  import { agents } from "../agents/state.svelte";
+  import type { Place } from "./place";
+  import { hiddenPages } from "./hidden.svelte";
   import { ENTRIES, GUIDE_KIND_WORDS } from "../guide/entries";
   import { pageServes } from "../home/kinds";
 
@@ -91,11 +91,7 @@
   );
   const candidates = $derived([
     ...fromAddress(query, t("goto-open-address")),
-    ...fromPages(
-      game?.id ?? null,
-      (page) => t(`page-${page}`),
-      agents.shown ? [] : FOR_AGENTS_PAGES,
-    ),
+    ...fromPages(game?.id ?? null, (page) => t(`page-${page}`), hiddenPages()),
     ...fromTabs(game?.id ?? null, (page) => t(`page-${page}`), t),
     ...fromActions(
       game?.id ?? null,

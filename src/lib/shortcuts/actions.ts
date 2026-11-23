@@ -114,6 +114,12 @@ export const ACTIONS: Action[] = [
     forAgents: true,
   },
   {
+    id: "page.chat",
+    scope: "everywhere",
+    defaultKey: "Shift+c",
+    words: "shortcut-page-chat",
+  },
+  {
     id: "page.publish",
     scope: "everywhere",
     defaultKey: "Shift+w",

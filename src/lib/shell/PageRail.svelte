@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { agents } from "../agents/state.svelte";
+  import { hiddenPages } from "../navigation/hidden.svelte";
   import { pageServes, type GameKind } from "../home/kinds";
   import { t } from "../i18n/runtime";
-  import { FOR_AGENTS_PAGES, type PageName } from "../navigation/place";
+  import type { PageName } from "../navigation/place";
   import { keyWords } from "../shortcuts/keys";
   import { keyFor } from "../shortcuts/state.svelte";
 
@@ -43,6 +43,7 @@
     codemap: "page-codemap",
     makeup: "page-makeup",
     reports: "page-reports",
+    chat: "page-chat",
     settings: "page-settings",
     decisions: "page-decisions",
     picks: "page-picks",
@@ -81,7 +82,15 @@
     {
       id: "tools",
       words: "pages-group-tools",
-      pages: ["reports", "settings", "decisions", "picks", "about", "guide"],
+      pages: [
+        "reports",
+        "chat",
+        "settings",
+        "decisions",
+        "picks",
+        "about",
+        "guide",
+      ],
     },
   ];
 </script>
@@ -90,7 +99,7 @@
   {#each GROUPS as group (group.id)}
     <div class="group" role="group" aria-labelledby={`pages-${group.id}`}>
       <span class="group-name" id={`pages-${group.id}`}>{t(group.words)}</span>
-      {#each group.pages.filter((p) => agents.shown || !FOR_AGENTS_PAGES.includes(p)) as next (next)}
+      {#each group.pages.filter((p) => !hiddenPages().includes(p)) as next (next)}
         {@const key = keyFor(`page.${next}`)}
         {@const count = counts[next]}
         {@const mark = count ? undefined : marks[next]}

@@ -4,6 +4,28 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.74.0] - 2026-11-23
+
+### Added
+
+- **The Chat page: talk to a whole agent while it works in one of your repositories** (the owner, 23 Nov 2026: "go ahead with
+  A3"; `docs/ai.md`, A3). Claude, Codex, Gemini CLI, GitHub Copilot or Goose, installed and logged in with its own program, runs
+  in the repository you choose, through the Agent Client Protocol. Before a first start the page says plainly that the agent is
+  its own program and may change files by itself; through the Companion it may only read files in that repository (each one
+  listed) and ask your permission, on cards with its own choices and **Neither**. Any change or command it asks the Companion to
+  make is refused, and the page says so. It sees the tool kit's reports that read. **Stop** stops its turn; **End**, leaving the
+  page or closing the program ends it with everything it started. Guide: "Chat" and "Chat with an agent in a repository".
+  **None of the agents is on this computer yet, so no real agent has been started, and nothing is tested on screen.**
+- **Settings → AI: Chat with an agent, Off until you turn it on**, and the agent it starts, each saying whether it is on this
+  computer and where to get it. Off hides the page and ends any agent running. The Companion never installs an agent.
+
+### Changed
+
+- **One list of hidden pages** (`src/lib/navigation/hidden.svelte.ts`): the page list, Go to anything and the page keys now hide
+  the pages for agent sessions and the Chat page from one function, rather than each checking on its own.
+- **companion-core 0.19.0** gains `acp` (the protocol's client side, tested against a stand-in agent) and `process::own_group`,
+  so ending a process ends everything it started on Linux and macOS too (written, not yet built there).
+
 ## [0.73.0] - 2026-11-23
 
 ### Added

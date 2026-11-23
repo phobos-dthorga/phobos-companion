@@ -9,6 +9,7 @@ mod ai_programs;
 mod ai_tools;
 mod changed_files;
 mod changes_page;
+mod chat_page;
 mod claims_board;
 mod cleanup_page;
 mod connections_page;
@@ -769,6 +770,64 @@ async fn ai_answer_call(
 async fn ai_choose_tools(app: tauri::AppHandle, on: bool) -> Result<companion_core::ai::Status, Failure> {
     let data = data_folder(&app)?;
     blocking(move || companion_core::ai::choose_tools(&data, on)).await
+}
+
+/// The Chat page's switch, the agents with whether each is on this computer, and the one running (0.74.0). Only reads.
+#[tauri::command]
+async fn chat_status(app: tauri::AppHandle) -> Result<chat_page::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || Ok(chat_page::status(&data))).await
+}
+
+/// Switches the Chat page on or off; off also ends an agent that is running.
+#[tauri::command]
+async fn chat_switch(app: tauri::AppHandle, on: bool) -> Result<chat_page::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || chat_page::switch(&data, on)).await
+}
+
+/// Keeps the chosen agent.
+#[tauri::command]
+async fn chat_choose(app: tauri::AppHandle, agent: String) -> Result<chat_page::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || chat_page::choose(&data, &agent)).await
+}
+
+/// Starts the chosen agent in a repository of the game, on the person's press; what it says comes through the channel.
+#[tauri::command]
+async fn chat_start(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    on_event: Channel<companion_core::acp::Event>,
+) -> Result<chat_page::Started, Failure> {
+    let data = data_folder(&app)?;
+    let hear: companion_core::acp::OnEvent = std::sync::Arc::new(move |event| drop(on_event.send(event)));
+    blocking(move || chat_page::start(&data, &game, &repository, hear)).await
+}
+
+/// One message from the person; answers when the agent's turn ends, with why it ended.
+#[tauri::command]
+async fn chat_prompt(text: String) -> Result<String, Failure> {
+    blocking(move || chat_page::prompt(&text)).await
+}
+
+/// Asks the agent to stop its turn.
+#[tauri::command]
+async fn chat_cancel() -> Result<(), Failure> {
+    blocking(chat_page::cancel).await
+}
+
+/// The person's answer to a permission the agent asked: one of the options it offered, or none.
+#[tauri::command]
+async fn chat_permission(request: String, option: Option<String>) -> Result<(), Failure> {
+    blocking(move || chat_page::answer_permission(&request, option.as_deref())).await
+}
+
+/// Ends the agent running, with every process it started.
+#[tauri::command]
+async fn chat_end() -> Result<(), Failure> {
+    blocking(chat_page::end).await
 }
 
 /// Records the owner's answer to one decision, once they press Decide.
@@ -1554,6 +1613,14 @@ pub fn run() {
             ai_send,
             ai_answer_call,
             ai_choose_tools,
+            chat_status,
+            chat_switch,
+            chat_choose,
+            chat_start,
+            chat_prompt,
+            chat_cancel,
+            chat_permission,
+            chat_end,
             picks_list,
             publish_read,
             publish_waiting,
@@ -1626,6 +1693,7 @@ pub fn run() {
             // A snapshot of the running game is never left held when the program closes (owner's choice, 20 Nov 2026).
             if let tauri::RunEvent::Exit = event {
                 explorer_page::release_at_exit();
+                let _ = chat_page::end();
             }
         });
 }

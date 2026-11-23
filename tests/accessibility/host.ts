@@ -102,11 +102,13 @@ export function sampleHome() {
   };
 }
 
-/** What the stand-in host answers: a result or a failure, after any progress messages, each sent a pause apart. */
+/** What the stand-in host answers: a result or a failure, after any progress messages, each sent a pause apart. `events` go to
+ *  the last event channel a request handed over (0.74.0: the Chat page's agent speaks through the channel its start gave). */
 type Answer = {
   result?: unknown;
   failure?: unknown;
   progress?: unknown[];
+  events?: unknown[];
   pauseMs?: number;
 };
 
@@ -142,6 +144,7 @@ export async function mockHost(
     const scope = window as unknown as Record<string, unknown>;
     scope.isTauri = true;
     let callbacks = 0;
+    let events: { onmessage?: (message: unknown) => void } | undefined;
     const pause = (ms: number) =>
       new Promise((resolve) => setTimeout(resolve, ms));
     scope.__TAURI_INTERNALS__ = {
@@ -152,8 +155,10 @@ export async function mockHost(
         args?: {
           top?: number;
           onProgress?: { onmessage?: (message: unknown) => void };
+          onEvent?: { onmessage?: (message: unknown) => void };
         },
       ) => {
+        if (args?.onEvent) events = args.onEvent;
         const more = command === "run_report" && (args?.top ?? 0) > 100;
         // One command asked several kinds of question (connections) may have an answer for each kind: "command:kind"; a question
         // sent whole (the Explorer's) is told apart by its op.
@@ -167,6 +172,10 @@ export async function mockHost(
           given[more ? "run_report_more" : command];
         for (const message of answer.progress ?? []) {
           args?.onProgress?.onmessage?.(message);
+          await pause(answer.pauseMs ?? 0);
+        }
+        for (const message of answer.events ?? []) {
+          events?.onmessage?.(message);
           await pause(answer.pauseMs ?? 0);
         }
         if (answer.failure) throw answer.failure;

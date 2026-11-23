@@ -5,7 +5,6 @@
   import PictureViewer from "./lib/gamefiles/PictureViewer.svelte";
   import {
     addressOf,
-    FOR_AGENTS_PAGES,
     place as placeAt,
     type PageName,
   } from "./lib/navigation/place";
@@ -55,6 +54,8 @@
   import PicksPage from "./lib/picks/PicksPage.svelte";
   import PublishPage from "./lib/publish/PublishPage.svelte";
   import { agents } from "./lib/agents/state.svelte";
+  import { hiddenPages } from "./lib/navigation/hidden.svelte";
+  import ChatPage from "./lib/chat/ChatPage.svelte";
   import AboutPage from "./lib/about/AboutPage.svelte";
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
   import ModListPage from "./lib/modlist/ModListPage.svelte";
@@ -144,6 +145,7 @@
     ["page.makeup", "makeup"],
     ["page.decisions", "decisions"],
     ["page.picks", "picks"],
+    ["page.chat", "chat"],
     ["page.publish", "publish"],
     ["page.about", "about"],
     ["page.gamefiles", "gamefiles"],
@@ -172,10 +174,9 @@
         ...Object.fromEntries(
           PAGES.map(([id, next]) => [
             id,
-            // A page for agent sessions has no key while they are hidden (0.37.0).
+            // A page for agent sessions, or the Chat page, has no key while it is hidden (0.37.0, 0.74.0).
             () => {
-              if (agents.shown || !FOR_AGENTS_PAGES.includes(next))
-                goPage(next);
+              if (!hiddenPages().includes(next)) goPage(next);
             },
           ]),
         ),
@@ -369,6 +370,10 @@
         {#key selected.id}
           <ExplorerPage game={selected} />
         {/key}
+      {:else if selected && page === "chat"}
+        {#key selected.id}
+          <ChatPage game={selected} />
+        {/key}
       {:else if selected && page === "logs"}
         {#key selected.id}
           <LogsPage game={selected} />
@@ -416,27 +421,29 @@
                 ? t("source-body-settings")
                 : page === "codemap"
                   ? t("source-body-codemap")
-                  : page === "logs"
-                    ? t("source-body-logs")
-                    : page === "makeup"
-                      ? t("source-body-makeup")
-                      : page === "decisions"
-                        ? t("source-body-decisions")
-                        : page === "picks"
-                          ? t("source-body-picks")
-                          : page === "about"
-                            ? t("source-body-about")
-                            : page === "gamefiles"
-                              ? t("source-body-gamefiles")
-                              : page === "modlist"
-                                ? t("source-body-modlist")
-                                : page === "publish"
-                                  ? t("source-body-publish")
-                                  : page === "memory"
-                                    ? t("source-body-memory")
-                                    : page === "explorer"
-                                      ? t("source-body-explorer")
-                                      : t("source-body")}
+                  : page === "chat"
+                    ? t("source-body-chat")
+                    : page === "logs"
+                      ? t("source-body-logs")
+                      : page === "makeup"
+                        ? t("source-body-makeup")
+                        : page === "decisions"
+                          ? t("source-body-decisions")
+                          : page === "picks"
+                            ? t("source-body-picks")
+                            : page === "about"
+                              ? t("source-body-about")
+                              : page === "gamefiles"
+                                ? t("source-body-gamefiles")
+                                : page === "modlist"
+                                  ? t("source-body-modlist")
+                                  : page === "publish"
+                                    ? t("source-body-publish")
+                                    : page === "memory"
+                                      ? t("source-body-memory")
+                                      : page === "explorer"
+                                        ? t("source-body-explorer")
+                                        : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

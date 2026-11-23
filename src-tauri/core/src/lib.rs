@@ -8,6 +8,7 @@
 //! requests `ai_client` and its keys `ai_keys`, 0.71.0). The program's Tauri commands and its pages' own modules live in the
 //! program; a second front end could use this crate whole (owner, 19 Nov 2026: `docs/shared-code-audit.md`).
 
+pub mod acp;
 pub mod agents;
 pub mod ai;
 pub mod ai_client;

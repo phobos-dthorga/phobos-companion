@@ -26,12 +26,34 @@ pub fn open_address(address: &str) -> std::io::Result<()> {
     started.map(|_| ())
 }
 
+/// Starts a process as the leader of a process group of its own (0.74.0), so `end_tree` can end everything it starts on Linux and
+/// macOS too: an agent on the Chat page starts helpers of its own. On Windows `taskkill /T` follows the tree without it.
+#[cfg(unix)]
+pub fn own_group(command: &mut Command) {
+    use std::os::unix::process::CommandExt;
+    command.process_group(0);
+}
+
+#[cfg(not(unix))]
+pub fn own_group(_command: &mut Command) {}
+
 /// Ends a process and every process it started. A kit command that holds something (a snapshot of a running game) may have
 /// started a helper of its own, which ending the kit's Python alone would leave running until it noticed. On Windows that is
-/// Windows' own `taskkill` from the system folder, with no console; elsewhere the process alone.
+/// Windows' own `taskkill` from the system folder, with no console. Elsewhere (0.74.0) the system's `kill` ends the process
+/// group a process started with `own_group` leads; for any other process that finds no group, and the process alone is ended.
+/// **Not yet built or tried on Linux or macOS.**
 pub fn end_tree(child: &mut std::process::Child) {
     if matches!(child.try_wait(), Ok(Some(_))) {
         return;
+    }
+    #[cfg(unix)]
+    {
+        let _ = Command::new("kill")
+            .args(["-TERM", &format!("-{}", child.id())])
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .status();
     }
     #[cfg(windows)]
     {

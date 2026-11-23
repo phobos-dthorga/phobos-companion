@@ -32,6 +32,7 @@
   import OnlinePanel from "../online/OnlinePanel.svelte";
   import AiProgramsPanel from "../ai/AiProgramsPanel.svelte";
   import AiServicesPanel from "../ai/AiServicesPanel.svelte";
+  import ChatPanel from "../chat/ChatPanel.svelte";
   import type { Setting, SettingsReading } from "./types";
 
   /**
@@ -283,6 +284,7 @@
     {:else if tab === "ai"}
       <AiServicesPanel />
       <AiProgramsPanel />
+      <ChatPanel />
     {:else}
       {@render folders()}
     {/if}

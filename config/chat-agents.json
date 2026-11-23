@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "description": "The agents the Chat page can start (0.74.0, docs/ai.md, A3). Data, checked by the host: a new agent is a row. Each is its own program the person installs and logs in to with its own tools; the Companion only starts the command named here, by name from the system's search path, never installs anything, and never passes a login. get: where the person gets it, in words. Commands read from each agent's own pages on 23 Nov 2026.",
+  "agents": [
+    {
+      "id": "claude",
+      "name": "Claude (Claude Agent)",
+      "command": "claude-agent-acp",
+      "args": [],
+      "get": "Install Node.js, then run: npm install -g @agentclientprotocol/claude-agent-acp. It uses your Claude login."
+    },
+    {
+      "id": "codex",
+      "name": "Codex",
+      "command": "codex-acp",
+      "args": [],
+      "get": "Install Node.js, then run: npm install -g @agentclientprotocol/codex-acp. It uses your ChatGPT login or an OpenAI key."
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini CLI",
+      "command": "gemini",
+      "args": ["--acp"],
+      "get": "Install Gemini CLI (npm install -g @google/gemini-cli) and sign in with it once."
+    },
+    {
+      "id": "copilot",
+      "name": "GitHub Copilot CLI",
+      "command": "copilot",
+      "args": ["--acp"],
+      "get": "Install GitHub Copilot CLI and sign in with it once."
+    },
+    {
+      "id": "goose",
+      "name": "Goose",
+      "command": "goose",
+      "args": ["acp"],
+      "get": "Install Goose and set up its model provider once."
+    }
+  ]
+}

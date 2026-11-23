@@ -5,6 +5,7 @@ import { applyTheme, rememberedTheme, useTheme } from "./lib/theme/runtime";
 import { readThemes } from "./lib/theme/desktopClient";
 import houseDthorga from "../themes/house-dthorga.json";
 import { loadAgents } from "./lib/agents/state.svelte";
+import { loadChat } from "./lib/chat/state.svelte";
 
 const target = document.getElementById("app");
 
@@ -21,3 +22,5 @@ void readThemes().then((answer) => {
 });
 // Whether features for agent sessions show (0.37.0): hidden, or as last time, until the host answers.
 void loadAgents();
+// Whether the Chat page shows (0.74.0): hidden, or as last time, until the host answers.
+void loadChat();

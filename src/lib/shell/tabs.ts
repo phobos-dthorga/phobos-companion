@@ -44,7 +44,7 @@ export const PAGE_TABS: Partial<Record<PageName, Tab[]>> = {
     {
       id: "ai",
       words: "settings-tab-ai",
-      panels: ["ai-services", "ai-programs"],
+      panels: ["ai-services", "ai-programs", "chat"],
     },
   ],
   mods: [

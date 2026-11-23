@@ -151,6 +151,16 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   person's Send this report** (`Step::Waiting`); a no tells the model it was declined. **Never give the model a tool that writes,
   runs code or goes online.** Its answer is shown as text, never acted on, never put into `{@html}`. Each answer's token count is appended to `ai-usage.jsonl`. **Agents and tests never send a real question**:
   tests stand in the service, and a question to a model on the owner's computer loads their graphics card, so ask first.
+- **Chat page: a whole agent in a repository, on the person's press, with its switch off until turned on** (0.74.0; the owner,
+  23 Nov 2026: "go ahead with A3", and of the switch starting off: "a very good choice"; `docs/ai.md`, A3). The program starts
+  only an agent `config/chat-agents.json` names, by its command found on the search path, in a repository from the games list;
+  **it never installs an agent, never passes a login and holds no key for one**. Through the Companion the agent may only read
+  text files inside that repository (each read shown) and ask the person's permission (answered only by the person, only with
+  an option it offered); writing a file and running a command through it are not offered, and each request is refused and
+  shown (`companion_core::acp`). It is handed the kit's MCP server (reports that read). **The agent is its own program with the
+  person's own access to the disk**, and may change files by itself: the page says so before a first start. One runs at a time;
+  leaving the page, starting another, switching off or closing the program ends its whole process tree. **Agents and tests
+  never start a real agent on the owner's computer**: tests stand in the agent on pipes; ask the owner first.
 - **Settings adds to the games list on one press** (0.31.0, Add a game from Steam; `docs/later.md` item 5, the owner's yes of 19
   Nov 2026): one new entry in `.local/games.json`, after the window showed it whole, with every field checked again, the list's
   order kept and the list as it was kept beside it; nothing is written when a check fails. **It never changes or removes an entry

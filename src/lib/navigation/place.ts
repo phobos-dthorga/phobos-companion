@@ -18,6 +18,7 @@ export const PAGE_NAMES = [
   "codemap",
   "makeup",
   "reports",
+  "chat",
   "settings",
   "decisions",
   "picks",

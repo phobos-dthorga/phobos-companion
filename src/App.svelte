@@ -53,6 +53,7 @@
   import MakeupPage from "./lib/makeup/MakeupPage.svelte";
   import DecisionsPage from "./lib/decisions/DecisionsPage.svelte";
   import PicksPage from "./lib/picks/PicksPage.svelte";
+  import PublishPage from "./lib/publish/PublishPage.svelte";
   import { agents } from "./lib/agents/state.svelte";
   import AboutPage from "./lib/about/AboutPage.svelte";
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
@@ -143,6 +144,7 @@
     ["page.makeup", "makeup"],
     ["page.decisions", "decisions"],
     ["page.picks", "picks"],
+    ["page.publish", "publish"],
     ["page.about", "about"],
     ["page.gamefiles", "gamefiles"],
     ["page.memory", "memory"],
@@ -347,6 +349,10 @@
         {#key selected.id}
           <MakeupPage game={selected} />
         {/key}
+      {:else if selected && page === "publish"}
+        {#key selected.id}
+          <PublishPage game={selected} />
+        {/key}
       {:else if selected && page === "modlist"}
         {#key selected.id}
           <ModListPage game={selected} />
@@ -424,11 +430,13 @@
                               ? t("source-body-gamefiles")
                               : page === "modlist"
                                 ? t("source-body-modlist")
-                                : page === "memory"
-                                  ? t("source-body-memory")
-                                  : page === "explorer"
-                                    ? t("source-body-explorer")
-                                    : t("source-body")}
+                                : page === "publish"
+                                  ? t("source-body-publish")
+                                  : page === "memory"
+                                    ? t("source-body-memory")
+                                    : page === "explorer"
+                                      ? t("source-body-explorer")
+                                      : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

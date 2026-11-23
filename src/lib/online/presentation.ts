@@ -63,6 +63,11 @@ export function lightKey(state: LightState): string {
 type KindWords = { name: string; body: string; loss: string };
 
 const KIND_WORDS: Record<string, KindWords> = {
+  "workshop-pages": {
+    name: "online-workshop-pages-name",
+    body: "online-workshop-pages-body",
+    loss: "online-workshop-pages-loss",
+  },
   "their-reports": {
     name: "online-their-reports-name",
     body: "online-their-reports-body",

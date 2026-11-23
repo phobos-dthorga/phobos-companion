@@ -1421,11 +1421,35 @@ Mods' things to do, Logs' new errors, Mods' updates that touch ours, and a mark 
 check is asked without Steam (no call to the internet); a scan's readings show in the activity strip like any other. **Risk
 (agent's grade): none**: nothing is written.
 
-## Kept for later
+## Publish (built 23 Nov 2026, 0.69.0)
+
+**The owner's request** (23 Nov 2026): Ostranauts' Workshop publishing scripts brought "over to the Companion now, especially in a
+visual way for the user to modify and upload their mods easily", and "The Steam Workshop uploader should be genericized as far as
+is possible". The whole design, the owner's card answers and what was built against it are in [publishing.md](publishing.md); the
+tool is phobos-modkit's `steam-publish` (1.97.0 games as data, 1.98.0 the Steam client sender and `owner-press`, 1.99.0 `page` and
+`show`, 1.100.0 Project Zomboid, Kenshi and Workers & Resources, 1.101.0 answers a program can read).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See every mod's Workshop state for any game; edit its Workshop page beside Steam's look; read the exact change note; prepare, upload privately, make public, update every waiting item and read Steam back, from buttons and keys |
+| What does it stop them doing? | Uploading without a yes; going public without a second; uploading while the setting is off or the kit no longer calls it the owner's to press; saving a page with problems; any upload wider than private from uncommitted work, a second create, or a version already sent (the kit's rules) |
+| How does it change the way they work? | No console or password on the default route; one card shows the next step; the changelog's Released date comes from Steam, not by hand |
+| What outside it notices? | Steam (the item and every subscriber); the repository (page, release notes, catalogue, the game's ID file, the changelog); Home's note |
+
+**Risk (agent's grade, owner confirmed the default on 23 Nov 2026): moderate.** A broken version can reach players, and public is
+not undone by a press; never sudden (private first, two yeses for public). **Workshop uploads** (Settings, Publishing) starts on.
+
+| Part | How |
+| --- | --- |
+| The host | `src-tauri/src/publish_page.rs`: the repository is one of the game's and keeps a catalogue; a mod is one the last reading named; Open in Steam only a number the last card named. `kit::allowed_on_press` before every upload, `allowed_by_manifest` before every write, `online::is_on` before Read Steam back |
+| The page's text | Sent on the kit's standard input (`kit::run_with_input`), never as an argument; at most 64 KB |
+| The preview | `src/lib/publish/bbcode.ts` parses the kit's tags into a tree, drawn by Svelte as elements and text (never `{@html}`) |
+| Home | `PublishNote.svelte`: the kit's `pending` per repository, at most every half hour |
+
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the
 game-files views, and the open questions behind them) is in [later.md](later.md), with each item's status. **Publishing to
-the Steam Workshop** (designed 23 Nov 2026, the owner's choices on question cards; not built) is in [publishing.md](publishing.md).
+the Steam Workshop** (designed and built 23 Nov 2026, 0.69.0) is in [publishing.md](publishing.md).
 
 ## Limits
 

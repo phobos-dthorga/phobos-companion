@@ -25,6 +25,7 @@
   import ClaimsPanel from "../claims/ClaimsPanel.svelte";
   import DecisionsNote from "../decisions/DecisionsNote.svelte";
   import PicksNote from "../picks/PicksNote.svelte";
+  import PublishNote from "../publish/PublishNote.svelte";
   import { agents } from "../agents/state.svelte";
   import GateLights from "../online/GateLights.svelte";
   import TheirCodeChanged from "../online/TheirCodeChanged.svelte";
@@ -236,6 +237,7 @@
 {#if pageServes(game.kind, "modlist")}
   {#key game.id}<ModListNote game={game.id} />{/key}
 {/if}
+{#key game.id}<PublishNote game={game.id} />{/key}
 <CleanupNote game={game.id} />
 
 {#if agents.shown && notes && (notes.open.length > 0 || notes.dealt_count > 0)}

@@ -6,6 +6,7 @@ export const PAGE_NAMES = [
   "home",
   "mods",
   "modlist",
+  "publish",
   "tests",
   "logs",
   "memory",

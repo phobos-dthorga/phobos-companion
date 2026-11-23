@@ -28,6 +28,7 @@
   import AddGamePanel from "../games/AddGamePanel.svelte";
   import ThemesPanel from "../theme/ThemesPanel.svelte";
   import AgentsPanel from "../agents/AgentsPanel.svelte";
+  import PublishingPanel from "../publish/PublishingPanel.svelte";
   import OnlinePanel from "../online/OnlinePanel.svelte";
   import type { Setting, SettingsReading } from "./types";
 
@@ -275,6 +276,8 @@
       <CleanupPanel />
     {:else if tab === "agents"}
       <AgentsPanel />
+    {:else if tab === "publishing"}
+      <PublishingPanel />
     {:else}
       {@render folders()}
     {/if}

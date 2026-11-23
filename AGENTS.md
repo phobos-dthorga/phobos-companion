@@ -96,6 +96,19 @@ reads them.
   credentials are held. Subscribe runs on the owner's press, for any well-formed Workshop number (it only adds); **Unsubscribe only
   after the owner's yes in the window**, only for mods the last listing or check named, and it switches them off first. **Agents
   never press either on the owner's account**, in a test or otherwise (the Workshop rule): browser tests stand in a host.
+- **The Publish page sends mods to the Steam Workshop, only on the owner's press and yes** (0.69.0; the owner, 23 Nov 2026,
+  for "a visual way for the user to modify and upload their mods easily"; `src-tauri/src/publish_page.rs`, `docs/publishing.md`).
+  The kit's `steam-publish upload` and `update` run **only while the manifest calls them `owner-press`**, only while the owner's
+  **Workshop uploads** setting is on (Settings, Publishing; on by default), and only after the owner's yes in the window; making
+  an item public is an update with `--confirm-public`, sent only after a second, stronger yes naming item, version and everyone.
+  **Never by itself, and never in a test: agents never press it** (the Workshop rule); browser tests stand in a host. The
+  Steam client route speaks to the client already signed in; SteamCMD runs in a window of its own (`--new-console`), where the
+  owner types the login, so no credentials are held. **Save the page** runs `page --write` (the text on standard input) and
+  **Prepare** runs `notes --write` and `prepare`, on a press while the manifest calls them `writes` and `runs`; they write only
+  the page, release notes and the kit's staging. **Read Steam back** runs `pull --write`, only while the **Workshop pages** kind
+  of going online is on. **Open in Steam** hands the system only `steam://url/CommunityFilePage/<number>` for a number the last
+  card named. Names are checked: a repository of the game that keeps `config/workshop-publishing.json`, a mod the last reading
+  named.
 - **The Memory page starts a watch of the running game only on the owner's press and confirmation** (owner, 19 Nov 2026: memory
   profiling "will be done from the Companion"; `src-tauri/src/memory_page.rs`, design record "Memory"): the kit's watch, found by
   the manifest's `memory-watch` surface, attaches Microsoft's dotnet-counters to the game once unless the owner chose Windows' figures

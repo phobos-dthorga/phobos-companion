@@ -3,7 +3,8 @@
 **Answer first.** A **Publish** page in D'thorga Companion takes any game's mods to the Steam Workshop: each mod's state on
 Steam, its Workshop page edited with a live preview, the change note built from its changelog, and buttons to prepare, upload
 privately, make public and read Steam back. It sits on phobos-modkit's `steam-publish`, which came from phobos-ostranauts'
-scripts on 8 November 2026. **Designed 23 November 2026; not built.** Nothing here has reached Steam yet.
+scripts on 8 November 2026. **Designed and built 23 November 2026 (Companion 0.69.0, kit 1.97.0 to 1.102.0).** Not yet tested
+on screen, and **nothing has been sent to Steam from it yet**: the first real upload is the owner's press.
 
 ## The owner's request and choices
 
@@ -167,10 +168,38 @@ lifted and every mod held; editing in the Companion; Project Zomboid, Kenshi and
 **Agent choices, owner to revise:** the game file as data with code only where needed, and the plain-folder game; `owner-press`; the
 page's layout, tabs and buttons; the risk grade (moderate) and the Workshop uploads setting starting on; the build order.
 
+## Answered (question cards, 23 Nov 2026)
+
+| Question | The owner's answer |
+| --- | --- |
+| Retire Ostranauts' PowerShell uploader once the kit has made a real upload? | **Yes, after proof**: one private upload and one public update that work |
+| Write a Workshop page draft for each RimWorld mod now, every mod held? | **Yes**: agent-written drafts, held for the owner's review |
+| Workshop uploads setting: on or off at first? | **On** |
+| When to build | **All six steps in one run** |
+
+## As built (0.69.0)
+
+| Planned | Built |
+| --- | --- |
+| A card per mod with cover size | The card names the item, versions, visibility, blockers and next step. **The cover's size is not shown**: the kit's answers carry the cover's path and blockers (missing, over budget, and from kit 1.100.0 a game's own size rules), not its size. A next step if wanted |
+| The game and repository at the top | The game is the one chosen, as on every page; a repository choice shows when more than one of the game's repositories keeps a catalogue |
+| Upload, Make public | **Upload privately** (a new item) or **Send the update** (an item with a newer version), one yes; **Make public** for an up-to-date private item, two: **Go on**, then **Make it public for everyone**, naming the item and version |
+| Update all waiting | The kit's `update`, which builds each due item unless told not to, then prepares and sends it, dependencies first, stopping at the first failure |
+| Read Steam back | The kit's `pull --visibility --changelog --write`, under a new going-online kind, **Workshop pages** (`api.steampowered.com`, small loss), on by default as every kind is |
+| Timeline marks for uploads | **Not built.** Uploads are recorded in each repository's receipts (`.local/workshop-receipts/`) and the catalogue's commits, not in the history log the Timeline reads; the kit would first have to write a history fact per upload. Shown meanwhile on the mod's **Uploads** tab |
+| Every action has a key | **Shift + W** the page; **J**/**K** mods; **E** Prepare; **Shift + U** Upload or Send the update (asks first); **Shift + M** Make public (asks twice); **B** Read Steam back; **Shift + A** Update all waiting (asks first); **O** Open in Steam (agent's defaults, changeable in Settings) |
+
+**Checked**: the host's names, arguments and refusals (Rust tests: an upload is refused while the setting is off before the kit is
+asked; public only with `--confirm-public` after the window's second yes; SteamCMD always in its own window); the BBCode preview's
+parser (only the kit's tags become anything, a link is never followed, nothing is drawn as HTML); the cards' next steps; and the
+page against a stand-in host in the browser, both widths, with the accessibility audit: an update asks first and nothing is asked
+of the host until the yes, making public asks twice, and the editor shows the tools' problems and keeps Save off. The kit's
+manifest at the pin was read to say `upload` and `update` are `owner-press`, `page`, `notes` and `pull` `writes`, `prepare` `runs`.
+
 ## Open questions for the owner
 
 | Question | Agent lean |
 | --- | --- |
-| Retire Ostranauts' PowerShell uploader once the kit has made a real upload? | Yes, after one Private and one public update work |
-| Should a Workshop page draft for each RimWorld mod be written now, while every mod is held? | Yes, held for the owner's review, with the EULA's words and the "dthorga" spelling |
-| Does the Workshop uploads setting need to start off instead? | On: Private first and two presses already guard it |
+| Show each cover's size on its card? The kit would first have to report it | Only if the blockers' words are not enough |
+| Timeline marks for uploads? The kit would first have to write a history fact per upload | Yes, once uploads have run a few times |
+| Do the page's keys suit you (Shift + W, E, Shift + U, Shift + M, B, Shift + A, O)? | Keep them until you change them in Settings |

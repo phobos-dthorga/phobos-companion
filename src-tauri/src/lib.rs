@@ -31,6 +31,7 @@ mod pending;
 mod pick;
 mod picks_page;
 mod pictures;
+mod publish_page;
 mod records_backup;
 mod repo_status;
 mod report_links;
@@ -670,6 +671,128 @@ async fn answer_pick(
     blocking(move || picks_page::answer(&repository, &id, &pick, &words)).await
 }
 
+/// Every repository of the game that keeps a Workshop catalogue, with its status and what waits (0.69.0). Only reads.
+#[tauri::command]
+async fn publish_read(app: tauri::AppHandle, game: String) -> Result<serde_json::Value, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || publish_page::read(&game, &data)).await
+}
+
+/// How many versions wait for an upload across the game's repositories, for Home's note (0.69.0). Only reads.
+#[tauri::command]
+async fn publish_waiting(game: String) -> Result<serde_json::Value, Failure> {
+    blocking(move || publish_page::waiting(&game)).await
+}
+
+/// One mod's card: the change note Steam would get, tags, Required items, receipts (0.69.0). Only reads.
+#[tauri::command]
+async fn publish_show(game: String, repository: String, mod_name: String) -> Result<serde_json::Value, Failure> {
+    blocking(move || publish_page::show(&game, &repository, &mod_name)).await
+}
+
+/// A mod's Workshop page as text, with every problem (0.69.0). Only reads.
+#[tauri::command]
+async fn publish_page_text(game: String, repository: String, mod_name: String) -> Result<serde_json::Value, Failure> {
+    blocking(move || publish_page::page(&game, &repository, &mod_name)).await
+}
+
+/// Checks a page's text without writing anything (0.69.0).
+#[tauri::command]
+async fn publish_check_page(
+    game: String,
+    repository: String,
+    mod_name: String,
+    text: String,
+) -> Result<serde_json::Value, Failure> {
+    blocking(move || publish_page::check_page(&game, &repository, &mod_name, &text)).await
+}
+
+/// Saves a page's text on the owner's press; the kit refuses one with problems (0.69.0).
+#[tauri::command]
+async fn publish_save_page(
+    game: String,
+    repository: String,
+    mod_name: String,
+    text: String,
+) -> Result<publish_page::PressResult, Failure> {
+    blocking(move || publish_page::save_page(&game, &repository, &mod_name, &text)).await
+}
+
+/// Writes a mod's release notes and stages a checked candidate, offline, on the owner's press (0.69.0).
+#[tauri::command]
+async fn publish_prepare(
+    game: String,
+    repository: String,
+    mod_name: String,
+    build: bool,
+    on_progress: Channel<kit::Progress>,
+) -> Result<publish_page::PressResult, Failure> {
+    blocking(move || publish_page::prepare(&game, &repository, &mod_name, build, Some(&hearing(on_progress)))).await
+}
+
+/// Sends a mod to the Workshop, only on the owner's press and their yes, while the setting is on (0.69.0).
+#[tauri::command]
+async fn publish_upload(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    mod_name: String,
+    kind: String,
+    via: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<publish_page::PressResult, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || {
+        publish_page::upload(&game, &repository, &mod_name, &kind, &via, &data, Some(&hearing(on_progress)))
+    })
+    .await
+}
+
+/// Updates every item with a newer version, on the owner's press and their yes, while the setting is on (0.69.0).
+#[tauri::command]
+async fn publish_update_all(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    via: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<publish_page::PressResult, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || publish_page::update_all(&game, &repository, &via, &data, Some(&hearing(on_progress)))).await
+}
+
+/// Reads each item back from Steam's public pages and writes what they show, on the owner's press (0.69.0).
+#[tauri::command]
+async fn publish_pull(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<publish_page::PressResult, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || publish_page::pull(&game, &repository, &data, Some(&hearing(on_progress)))).await
+}
+
+/// Opens an item the last card named in the Steam client (0.69.0).
+#[tauri::command]
+async fn publish_open_in_steam(number: String) -> Result<(), Failure> {
+    blocking(move || publish_page::open_in_steam(&number)).await
+}
+
+/// Whether the owner lets this program upload to the Workshop (0.69.0; on by default).
+#[tauri::command]
+async fn publish_uploads_setting(app: tauri::AppHandle) -> Result<bool, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || Ok(publish_page::uploads_on(&data))).await
+}
+
+/// Keeps the owner's Workshop uploads setting (0.69.0).
+#[tauri::command]
+async fn publish_choose_uploads(app: tauri::AppHandle, on: bool) -> Result<bool, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || publish_page::choose_uploads(&data, on)).await
+}
+
 /// What a game writes and what Steam records about it: what changed since the last launch, saves, screenshots and space.
 #[tauri::command]
 async fn game_files(game: String, since: Option<String>) -> Result<serde_json::Value, Failure> {
@@ -1290,6 +1413,19 @@ pub fn run() {
             claims_list,
             decisions_list,
             picks_list,
+            publish_read,
+            publish_waiting,
+            publish_show,
+            publish_page_text,
+            publish_check_page,
+            publish_save_page,
+            publish_prepare,
+            publish_upload,
+            publish_update_all,
+            publish_pull,
+            publish_open_in_steam,
+            publish_uploads_setting,
+            publish_choose_uploads,
             answer_pick,
             answer_decision,
             game_files,

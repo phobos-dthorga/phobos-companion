@@ -36,6 +36,11 @@ export const PAGE_TABS: Partial<Record<PageName, Tab[]>> = {
       panels: ["records", "cleanup"],
     },
     { id: "agents", words: "settings-tab-agents", panels: ["agents"] },
+    {
+      id: "publishing",
+      words: "settings-tab-publishing",
+      panels: ["publishing"],
+    },
   ],
   mods: [
     { id: "before", words: "mods-tab-before", panels: ["settings"] },
@@ -45,6 +50,12 @@ export const PAGE_TABS: Partial<Record<PageName, Tab[]>> = {
       keys: ["mod", "changelog", "before"],
     },
     { id: "textures", words: "mods-tab-textures" },
+  ],
+  publish: [
+    { id: "page", words: "publish-tab-page" },
+    { id: "note", words: "publish-tab-note" },
+    { id: "steam", words: "publish-tab-steam" },
+    { id: "history", words: "publish-tab-history" },
   ],
   about: [
     { id: "version", words: "about-tab-version" },

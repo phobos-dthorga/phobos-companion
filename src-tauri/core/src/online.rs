@@ -34,7 +34,7 @@ pub struct Kind {
 }
 
 /// Every kind, in the order the panel lists them. A new kind joins here, in the locale file and in the Guide in one change.
-pub const KINDS: [Kind; 4] = [
+pub const KINDS: [Kind; 5] = [
     Kind { id: "gate-lights", contacts: "api.github.com", loss: Loss::Severe },
     // The nightly watch's findings, read from each repository's results branch (0.63.0, `docs/online.md` O3).
     Kind { id: "nightly-watch", contacts: "raw.githubusercontent.com", loss: Loss::Severe },
@@ -43,6 +43,9 @@ pub const KINDS: [Kind; 4] = [
     // Another author's existing issues, listed on a press on the Logs page (0.65.0, O4). Opening a new-issue form is the
     // browser's own visit, not a call of the program's, so it has no switch.
     Kind { id: "their-reports", contacts: "api.github.com", loss: Loss::Small },
+    // Each Workshop item read back from Steam's public API (keyless) on the Publish page's Read Steam back (0.69.0,
+    // `docs/publishing.md`): its visibility and the day it went public. Uploading is the owner's press, not a call of this kind.
+    Kind { id: "workshop-pages", contacts: "api.steampowered.com", loss: Loss::Small },
 ];
 
 /// One kind as it stands: on or off, and whether that is the person's choice or the default.

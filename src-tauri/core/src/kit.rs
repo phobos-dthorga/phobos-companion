@@ -149,7 +149,33 @@ pub(crate) fn not_started(problem: std::io::Error) -> Failure {
 /// Runs a kit command as `run` does, and passes each progress line it writes to the listener while it works. Standard output is
 /// read on its own thread, so a tool that fills one pipe never waits on the other.
 pub fn run_hearing(tool: &str, arguments: &[String], listener: Option<Listener>) -> Result<Value, Failure> {
-    let mut child = kit_command(arguments, listener.is_some())?.spawn().map_err(not_started)?;
+    run_with_input(tool, arguments, listener, None)
+}
+
+/// Runs a kit command as `run_hearing` does, handing it `input` on its standard input (0.69.0: a Workshop page's text, which may
+/// run to thousands of characters over many lines, so it never travels as an argument). Standard input is written on its own
+/// thread and closed, so a tool that answers before reading it all never waits on the program.
+pub fn run_with_input(
+    tool: &str,
+    arguments: &[String],
+    listener: Option<Listener>,
+    input: Option<&[u8]>,
+) -> Result<Value, Failure> {
+    let mut command = kit_command(arguments, listener.is_some())?;
+    if input.is_some() {
+        command.stdin(Stdio::piped());
+    }
+    let mut child = command.spawn().map_err(not_started)?;
+    let writer = match (input, child.stdin.take()) {
+        (Some(bytes), Some(mut stdin)) => {
+            let bytes = bytes.to_vec();
+            Some(thread::spawn(move || {
+                use std::io::Write;
+                let _ = stdin.write_all(&bytes);
+            }))
+        }
+        _ => None,
+    };
     let failed = |problem: std::io::Error| Failure::new(FailureCode::ToolFailed, problem.to_string());
     let mut stdout = child.stdout.take().expect("standard output was piped");
     let stderr = child.stderr.take().expect("standard error was piped");
@@ -170,6 +196,9 @@ pub fn run_hearing(tool: &str, arguments: &[String], listener: Option<Listener>)
         raw.clear();
     }
     let status = child.wait().map_err(failed)?;
+    if let Some(writer) = writer {
+        let _ = writer.join();
+    }
     let bytes = answer.join().map_err(|_| Failure::new(FailureCode::ToolFailed, "the answer could not be read"))?;
     match parse_envelope(&bytes.map_err(failed)?, tool) {
         Err(_) if !status.success() => Err(Failure::new(FailureCode::ToolFailed, said)),
@@ -220,6 +249,27 @@ pub fn allowed_by_manifest(manifest: &Value, command: &str, report: &str) -> Res
         Ok(())
     } else {
         Err(format!("the tool kit says {command} {report} is {effect:?}, which this program does not run"))
+    }
+}
+
+const OWNER_PRESS: &str = "owner-press";
+
+/// The kit's manifest still says this report is the owner's to press (`owner-press`, phobos-modkit 1.98.0: the Workshop uploader):
+/// checked before the program runs it, only on the owner's press and their yes in the window (0.69.0, `docs/publishing.md`).
+/// `owner-only` is never run, and a report that came to mean anything else is refused.
+pub fn allowed_on_press(manifest: &Value, command: &str, report: &str) -> Result<(), String> {
+    let commands = manifest["data"]["commands"].as_array().map_or(&[][..], Vec::as_slice);
+    let effect = commands
+        .iter()
+        .find(|c| c["name"].as_str() == Some(command))
+        .and_then(|c| c["reports"].as_array())
+        .and_then(|reports| reports.iter().find(|r| r["name"].as_str() == Some(report)))
+        .map(|r| r["effect"].as_str().unwrap_or_default().to_owned())
+        .ok_or_else(|| format!("the tool kit has no {command} {report}"))?;
+    if effect == OWNER_PRESS {
+        Ok(())
+    } else {
+        Err(format!("the tool kit says {command} {report} is {effect:?}, not one the owner presses"))
     }
 }
 

@@ -163,3 +163,18 @@ fn the_kit_is_found_beside_its_repository_first_then_where_the_installer_put_it(
     assert!(installed.python.ends_with("python.exe"));
     std::fs::remove_dir_all(&runtime).unwrap();
 }
+
+#[test]
+fn only_a_report_the_owner_presses_is_run_on_a_press() {
+    let manifest = serde_json::json!({"data": {"commands": [
+        {"name": "steam-publish", "reports": [
+            {"name": "upload", "effect": "owner-press"},
+            {"name": "old", "effect": "owner-only"},
+            {"name": "page", "effect": "writes"}]}]}});
+    assert!(allowed_on_press(&manifest, "steam-publish", "upload").is_ok());
+    assert!(allowed_on_press(&manifest, "steam-publish", "old").is_err());
+    assert!(allowed_on_press(&manifest, "steam-publish", "page").is_err());
+    assert!(allowed_on_press(&manifest, "steam-publish", "nothing").is_err());
+    // A report the owner presses is never one the program runs as a plain change.
+    assert!(allowed_by_manifest(&manifest, "steam-publish", "upload").is_err());
+}

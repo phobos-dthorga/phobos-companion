@@ -3,13 +3,15 @@ title: Choose what the Companion asks the internet
 kind: task
 go: settings?panel=online
 words: online, internet, GitHub, network, privacy, gate lights, checks, switch off, offline
-see: page-settings, page-home, page-about, page-logs, page-modlist
+see: page-settings, page-home, page-about, page-logs, page-modlist, page-publish
 ---
 **The Companion asks the internet only for what Settings lists under Going online**, and only reads public pages: nothing about you is sent. Each kind is **on** for the repositories on your list, and you can switch any of them off.
 
 1. Open **Settings** (the **9** key), on the **Going online** tab.
 2. Each kind says what it does and the address it contacts. Press **On** or **Off**.
 3. Switching off a kind you would miss a lot asks first, and says what stops working. Press **Switch it off** or **Keep it on**.
+
+**Workshop pages**: on the [Publish](page-publish) page, **Read Steam back** asks Steam's public pages, without an account, how each of your Workshop items stands: whether it is public, and the day it went public, which it writes into the changelog. Only when you press it.
 
 **Their reports**: on the [Logs](page-logs) page, lists another author's existing issues for a fault in their mod, only when you press it. Opening a new-issue form is your browser's own visit, so it has no switch.
 

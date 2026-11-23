@@ -12,7 +12,9 @@ export type Scope =
   /** A picture or a sound being compared (0.55.0): in the code viewer, on the Mods page, a screenshot, the Picks page. */
   | "media"
   /** The Picks page (0.55.0). */
-  | "picks";
+  | "picks"
+  /** The Publish page (0.69.0). */
+  | "publish";
 
 export type Action = {
   id: string;
@@ -110,6 +112,12 @@ export const ACTIONS: Action[] = [
     defaultKey: "Shift+p",
     words: "shortcut-page-picks",
     forAgents: true,
+  },
+  {
+    id: "page.publish",
+    scope: "everywhere",
+    defaultKey: "Shift+w",
+    words: "shortcut-page-publish",
   },
   {
     id: "page.about",
@@ -359,6 +367,54 @@ export const ACTIONS: Action[] = [
     forAgents: true,
   },
   {
+    id: "publish.next-mod",
+    scope: "publish",
+    defaultKey: "j",
+    words: "shortcut-publish-next-mod",
+  },
+  {
+    id: "publish.previous-mod",
+    scope: "publish",
+    defaultKey: "k",
+    words: "shortcut-publish-previous-mod",
+  },
+  {
+    id: "publish.prepare",
+    scope: "publish",
+    defaultKey: "e",
+    words: "shortcut-publish-prepare",
+  },
+  {
+    id: "publish.upload",
+    scope: "publish",
+    defaultKey: "Shift+u",
+    words: "shortcut-publish-upload",
+  },
+  {
+    id: "publish.public",
+    scope: "publish",
+    defaultKey: "Shift+m",
+    words: "shortcut-publish-public",
+  },
+  {
+    id: "publish.read-back",
+    scope: "publish",
+    defaultKey: "b",
+    words: "shortcut-publish-read-back",
+  },
+  {
+    id: "publish.update-all",
+    scope: "publish",
+    defaultKey: "Shift+a",
+    words: "shortcut-publish-update-all",
+  },
+  {
+    id: "publish.open-steam",
+    scope: "publish",
+    defaultKey: "o",
+    words: "shortcut-publish-open-steam",
+  },
+  {
     id: "connections.around",
     scope: "connections",
     defaultKey: "a",
@@ -447,6 +503,7 @@ export const SCOPES: { scope: Scope; words: string }[] = [
   { scope: "explorer", words: "shortcut-scope-explorer" },
   { scope: "media", words: "shortcut-scope-media" },
   { scope: "picks", words: "shortcut-scope-picks" },
+  { scope: "publish", words: "shortcut-scope-publish" },
 ];
 
 /**
@@ -463,6 +520,7 @@ const TOGETHER: Record<Scope, Scope[]> = {
     "explorer",
     "media",
     "picks",
+    "publish",
   ],
   code: ["everywhere", "code", "connections", "media"],
   connections: ["everywhere", "code", "connections"],
@@ -470,6 +528,7 @@ const TOGETHER: Record<Scope, Scope[]> = {
   explorer: ["everywhere", "explorer"],
   media: ["everywhere", "code", "media", "picks"],
   picks: ["everywhere", "media", "picks"],
+  publish: ["everywhere", "publish"],
 };
 
 /** Whether two scopes' keys can work at the same moment, so may not share a key. */

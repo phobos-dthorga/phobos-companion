@@ -4,6 +4,46 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.69.0] - 2026-11-23
+
+A Publish page for the Steam Workshop, for any game. Kit pin v1.96.0 to v1.102.0.
+
+### Added
+
+- **Publish** (the owner, 23 Nov 2026: Ostranauts' publishing scripts brought over "in a visual way for the user to modify and
+  upload their mods easily", "genericized as far as is possible"; the owner's choices on question cards: both senders chosen per
+  upload, editing in the Companion, Workshop uploads starting on; `docs/publishing.md`). For every repository of the game that keeps
+  a Workshop catalogue (`config/workshop-publishing.json`): a card per mod, dependencies first, with its item or **Not on Steam
+  yet**, the version here against the one on Steam, its visibility, what holds it back and its one next step. The mod's own view
+  has four tabs: **Workshop page** (the page's BBCode beside Steam's look, a byte counter against the budget, and every problem
+  the tools find a moment after typing stops; **Save the page** writes the file only when it has none), **Change note** (exactly
+  what Steam will get), **On Steam** (item, visibility, tags, Required items, cover, hold, what is still to do on Steam) and
+  **Uploads** (each receipt). Keys: **Shift + W** opens it; **J** and **K** step through the mods.
+- **Prepare** (**E**) writes the mod's release notes and stages a checked candidate, building it first unless **Build first** is
+  unpressed; nothing reaches Steam.
+- **Upload privately**, **Send the update** (**Shift + U**), **Make public** (**Shift + M**) and **Update all waiting**
+  (**Shift + A**), each only after a yes; **making an item public asks twice**, the second naming everyone. The host runs them only
+  while the kit's manifest calls them `owner-press` and the Workshop uploads setting is on. **How uploads reach Steam**: **The
+  Steam client** (signed in, no password; sets tags and Required items) or **SteamCMD** in a window of its own, where you type your
+  login. **Nothing has been sent to Steam from the Companion yet.**
+- **Read Steam back** (**B**) reads each item from Steam's public pages, without an account, and marks its version Released in
+  the changelog; **Open in Steam** (**O**) opens the item.
+- **Workshop uploads**, a new setting on **Settings**, on the new **Publishing** tab: **On** (the default) or **Off**. Off hides
+  Upload, Make public and Update all waiting, and the host refuses an upload; reading, editing pages and preparing stay.
+- **Workshop pages**, a new kind under **Settings**, **Going online**: Read Steam back's call to Steam's public API. On by
+  default, as every kind is.
+- **Home says when Workshop updates wait**, read at most every half hour, with **Go to Publish**.
+- **Guide**: the Publish page, and Put a mod on the Steam Workshop, or update one.
+
+### Changed
+
+- **The core can hand a tool text on its standard input** (`kit::run_with_input`), so a page's text never travels as an
+  argument, and **checks a report is the owner's to press** (`kit::allowed_on_press`) before the program runs one.
+
+Checked on two games' repositories, read only: the tools' `steam-publish status` at the new pin reads phobos-rimworld (8 mods,
+every one held) and phobos-ostranauts (10 items already on the Workshop, 4 held). The page was checked in the browser against a
+stand-in host. Not yet tested on screen, and nothing has been sent to Steam from it.
+
 ## [0.68.1] - 2026-11-23
 
 ### Fixed

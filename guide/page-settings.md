@@ -3,7 +3,7 @@ title: Settings
 kind: page
 page: settings
 go: settings
-words: options, preferences, folders, paths, keys, theme, backup, games, agents, online, internet
+words: options, preferences, folders, paths, keys, theme, backup, games, agents, online, internet, workshop uploads, publishing
 see: task-change-folder, task-change-key, task-change-theme, task-agent-features, task-going-online, task-records-backup, task-add-game, task-clean-up
 ---
 **How the Companion works for you, and where the tools keep and find things**, in six tabs:
@@ -14,6 +14,7 @@ see: task-change-folder, task-change-key, task-change-theme, task-agent-features
 - **Going online:** [what the Companion asks the internet, and switching each kind off](task-going-online).
 - **Backups and space:** [where copies of your records go, and how fresh they are](task-records-backup), and [clean up what the tools left behind](task-clean-up).
 - **Agent sessions:** [show or hide the features for AI agent sessions](task-agent-features).
+- **Publishing:** **Workshop uploads**, **On** or **Off**: whether the [Publish](page-publish) page offers Upload, Make public and Update all waiting. On by default.
 
 ### Keys
 - **9** opens Settings.

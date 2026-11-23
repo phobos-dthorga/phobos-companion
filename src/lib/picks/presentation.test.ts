@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { allPicks, keyOf, nextWaiting, stepped } from "./presentation";
+import {
+  allPicks,
+  keyOf,
+  nextWaiting,
+  stepped,
+  wordsShown,
+} from "./presentation";
 import type { Pick, PicksList } from "./types";
 
 function pick(id: string, answered = false): Pick {
@@ -53,5 +59,20 @@ describe("picks on the page", () => {
     const placed = allPicks(list);
     expect(nextWaiting(placed, "other/lamp")?.pick.id).toBe("heater");
     expect(nextWaiting(placed, "other/heater")?.pick.id).toBe("tent");
+  });
+
+  it("shows the owner's words in the list on one line, cut at a word when long", () => {
+    expect(wordsShown(undefined)).toBe("");
+    expect(wordsShown("  Offer both\n as alternate models  ")).toBe(
+      "Offer both as alternate models",
+    );
+    const long =
+      "Both with varying specs, just like real life, and a second one too ".repeat(
+        3,
+      );
+    const shown = wordsShown(long, 40);
+    expect(shown.endsWith("…")).toBe(true);
+    expect(shown.length).toBeLessThanOrEqual(41);
+    expect(long.replace(/\s+/g, " ").startsWith(shown.slice(0, -1))).toBe(true);
   });
 });

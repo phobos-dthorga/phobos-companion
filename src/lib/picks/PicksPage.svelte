@@ -13,6 +13,7 @@
     keyOf,
     nextWaiting,
     stepped,
+    wordsShown,
     type Placed,
   } from "./presentation";
   import { NONE, type PicksList, type PickTry } from "./types";
@@ -33,6 +34,17 @@
   let told = $state<{ ok: boolean; words: string } | null>(null);
   /** The try in focus for each pick, by its key. */
   let tryOf = $state<Record<string, string>>({});
+  /**
+   * What the owner has typed for each pick, by its key, until it is kept (0.76.1; the owner, 24 Nov 2026: one of three comments
+   * was lost). Held here rather than in the pick's view, so moving to another pick and back keeps it, and the keyboard's "pick"
+   * and "none of these" send it as the buttons do; they used to send nothing.
+   */
+  let wordsOf = $state<Record<string, string>>({});
+
+  /** The words typed for the pick open now. */
+  function typed(): string {
+    return chosen ? (wordsOf[keyOf(chosen)] ?? "") : "";
+  }
 
   const placed = $derived(
     reading.state === "ready" ? allPicks(reading.list) : [],
@@ -97,13 +109,17 @@
     }
     const label =
       was.pick.tries.find((found) => found.id === pick)?.label ?? pick;
+    // Say what was kept, the words with it (0.76.1); the list below is read back from the kept file, so it shows they were saved.
+    const kept = wordsShown(words);
     told = {
       ok: true,
       words:
-        pick === NONE
+        (pick === NONE
           ? t("picks-done-none", { title: was.pick.title })
-          : t("picks-done", { title: was.pick.title, label }),
+          : t("picks-done", { title: was.pick.title, label })) +
+        (kept ? " " + t("picks-done-words", { words: kept }) : ""),
     };
+    delete wordsOf[keyOf(was)];
     await load();
     open(nextWaiting(placed, keyOf(was)), false);
   }
@@ -119,9 +135,9 @@
         "picks.next-pick": () => stepPick(1),
         "picks.previous-pick": () => stepPick(-1),
         "picks.choose": () => {
-          if (focus?.there) void keep(focus.id, "");
+          if (focus?.there) void keep(focus.id, typed());
         },
-        "picks.none": () => void keep(NONE, ""),
+        "picks.none": () => void keep(NONE, typed()),
       },
     });
   });
@@ -172,6 +188,11 @@
                   ? t("picks-state-answered")
                   : t("picks-state-waiting")}</span
               >
+              {#if wordsShown(entry.pick.answer?.words)}
+                <span class="said small"
+                  >“{wordsShown(entry.pick.answer?.words)}”</span
+                >
+              {/if}
             </button>
           </li>
         {/each}
@@ -182,6 +203,12 @@
         placed={chosen}
         {focus}
         {busy}
+        bind:words={
+          typed,
+          (value) => {
+            if (chosen) wordsOf[keyOf(chosen)] = value;
+          }
+        }
         onfocus={(found) => {
           if (chosen) tryOf[keyOf(chosen)] = found.id;
         }}
@@ -251,6 +278,13 @@
 
   .state.done {
     color: var(--colour-success);
+  }
+
+  /* The owner's words with an answered pick (0.76.1): read back from the kept answers, so they show they were saved. */
+  .said {
+    color: var(--colour-text-muted);
+    font-style: italic;
+    overflow-wrap: anywhere;
   }
 
   .told {

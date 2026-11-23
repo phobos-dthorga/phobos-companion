@@ -36,6 +36,25 @@ export function stepped<T>(list: T[], at: number, step: 1 | -1): T | undefined {
   return list[(at + step + list.length) % list.length];
 }
 
+/** The longest a pick's words are shown in the list beside it, in characters; the whole shows on the pick itself. */
+export const LIST_WORDS = 80;
+
+/**
+ * The owner's words for the list beside a pick (0.76.1; the owner, 24 Nov 2026: "The Companion should show the comments you have
+ * recorded, as it feels like they weren't saved otherwise"): trimmed, on one line, cut at a word with an ellipsis when long; "" when
+ * there are none.
+ */
+export function wordsShown(
+  words: string | undefined,
+  limit = LIST_WORDS,
+): string {
+  const flat = (words ?? "").replace(/\s+/g, " ").trim();
+  if (flat.length <= limit) return flat;
+  const cut = flat.slice(0, limit);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > limit / 2 ? cut.slice(0, space) : cut).trimEnd()}…`;
+}
+
 /** The next pick still waiting after one just answered, else none. */
 export function nextWaiting(list: Placed[], after: string): Placed | undefined {
   const at = list.findIndex((p) => keyOf(p) === after);

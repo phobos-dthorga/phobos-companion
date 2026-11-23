@@ -4,6 +4,16 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.76.1] - 2026-11-24
+
+### Fixed
+
+- **Your words on a pick are no longer lost** (the owner, 24 Nov 2026: of three comments on the Picks page, one never arrived). The
+  keys that pick a try (**Ctrl + Enter**) and say none of these (**Shift + N**) sent an empty comment, and moving to another pick
+  emptied the box. Your words now stay with each pick until it is kept, and go with it whichever way you pick.
+- **The Picks page shows the words you kept**: the line at the top repeats them, and the list shows them beside each answered pick,
+  read back from where they are kept. **Not tested on screen.**
+
 ## [0.76.0] - 2026-11-24
 
 ### Changed

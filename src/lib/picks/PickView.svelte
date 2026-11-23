@@ -18,6 +18,7 @@
     placed,
     focus,
     busy,
+    words = $bindable(""),
     onfocus,
     onpick,
   }: {
@@ -25,12 +26,16 @@
     /** The try in focus. */
     focus: PickTry;
     busy: boolean;
+    /**
+     * What the owner has typed for this pick, kept by the page per pick (0.76.1; the owner, 24 Nov 2026: of three comments, one was
+     * lost): moving to another pick and back keeps it, and the page's keyboard shortcuts send it too.
+     */
+    words?: string;
     onfocus: (found: PickTry) => void;
     /** A try's id, or "none"; with the owner's words. */
     onpick: (pick: string, words: string) => void;
   } = $props();
 
-  let words = $state("");
   /** What the try in focus is set against (0.57.0): "in-use", another try's id, or "" for the one in use, else the first other try. */
   let against = $state("");
   let thumbnails = $state<Record<string, string | null>>({});
@@ -60,9 +65,9 @@
     });
   });
 
+  // A new pick starts with its own comparison. Its words are the page's, kept per pick (0.76.1), so they are not cleared here.
   $effect(() => {
     void pick.id;
-    words = "";
     against = "";
   });
 

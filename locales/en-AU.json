@@ -855,6 +855,7 @@
     "picks-none": "None of these",
     "picks-done": "Kept: { $label } for { $title }. An agent session applies it next.",
     "picks-done-none": "Kept: none of these for { $title }. An agent session reads your words next.",
+    "picks-done-words": "Your words were kept with it: “{ $words }”",
     "picks-failed": "Your pick could not be kept: { $reason }",
     "picks-how": "Your picks are kept in the Companion's own folder; an agent session applies each one (exports it, records it) and then it leaves this list.",
     "picks-note-title": "Picks",

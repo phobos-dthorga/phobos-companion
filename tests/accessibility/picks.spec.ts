@@ -163,6 +163,40 @@ for (const [name, viewport] of [
         page.getByRole("status").filter({ hasText: "Kept:" }),
       ).toHaveCount(0);
     });
+    test("your words stay with a pick when you look at another, and go with it from the keyboard (0.76.1)", async ({
+      page,
+    }) => {
+      await open(page);
+      await page.keyboard.press("Shift+P");
+      await expect(
+        page.getByRole("heading", { level: 2, name: "The billy kettle" }),
+      ).toBeVisible();
+      await page
+        .getByRole("textbox", { name: /Anything to add/ })
+        .fill("Both, with different specs");
+      // Out of the box, so the page's keys work again; to the other pick and back.
+      await page
+        .getByRole("heading", { level: 2, name: "The billy kettle" })
+        .click();
+      await page.keyboard.press("Shift+J");
+      await expect(
+        page.getByRole("heading", { level: 2, name: "The tent lamp" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("textbox", { name: /Anything to add/ }),
+      ).toHaveValue("");
+      await page.keyboard.press("Shift+K");
+      await expect(
+        page.getByRole("textbox", { name: /Anything to add/ }),
+      ).toHaveValue("Both, with different specs");
+      // The keyboard's pick sends the words, as the button does; they used to be dropped.
+      await page.keyboard.press("Control+Enter");
+      await expect(
+        page.getByRole("status").filter({ hasText: "Kept: Try 3" }),
+      ).toContainText(
+        "Your words were kept with it: “Both, with different specs”",
+      );
+    });
     test("which sound Y plays starts again on each sound, never carried from the last (0.68.1)", async ({
       page,
     }) => {

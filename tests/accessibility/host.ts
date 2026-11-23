@@ -189,6 +189,36 @@ export const agentsShown: Answer = {
   },
 };
 
+/** AI services (0.71.0): a model on this computer chosen and ready, and an online service with no key yet. Invented. */
+export const sampleAiStatus = {
+  services: [
+    {
+      id: "ollama",
+      name: "Ollama",
+      api: "openai",
+      local: true,
+      needsKey: false,
+      key: { from: "none" },
+      model: "sample-model:8b",
+    },
+    {
+      id: "anthropic",
+      name: "Claude (Anthropic)",
+      api: "anthropic",
+      local: false,
+      needsKey: true,
+      key: { from: "none" },
+      model: null,
+    },
+  ],
+  chosen: "ollama",
+  length: "short",
+  onlineOn: false,
+  keyStore: "Windows Credential Manager",
+  ready: true,
+  month: { month: "2026-11", answers: 3, inputTokens: 1200, outputTokens: 400 },
+};
+
 /** Nothing on this PC shows agent sessions at work, so their features are hidden. */
 export const agentsHidden: Answer = {
   result: { choice: "found", shown: false, signs: [] },

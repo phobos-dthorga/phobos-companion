@@ -4,6 +4,7 @@
 //! request checks, failures. This file holds the Tauri commands, each one line of delegation on a worker thread.
 
 mod about_page;
+mod ai_help;
 mod ai_programs;
 mod changed_files;
 mod changes_page;
@@ -648,6 +649,85 @@ async fn decisions_list() -> Result<serde_json::Value, Failure> {
 #[tauri::command]
 async fn ai_programs_setup() -> Result<serde_json::Value, Failure> {
     blocking(ai_programs::read).await
+}
+
+/// AI services for help on pages (0.71.0, Settings → AI): the services, the person's choices, where each key comes from, and the
+/// month's count. Only reads.
+#[tauri::command]
+async fn ai_status(app: tauri::AppHandle) -> Result<companion_core::ai::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || Ok(companion_core::ai::status(&data))).await
+}
+
+/// Keeps the person's choice of AI service.
+#[tauri::command]
+async fn ai_choose_service(app: tauri::AppHandle, service: String) -> Result<companion_core::ai::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || companion_core::ai::choose_service(&data, &service)).await
+}
+
+/// Keeps the person's choice of model for one service.
+#[tauri::command]
+async fn ai_choose_model(
+    app: tauri::AppHandle,
+    service: String,
+    model: String,
+) -> Result<companion_core::ai::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || companion_core::ai::choose_model(&data, &service, &model)).await
+}
+
+/// Keeps the person's choice of answer length.
+#[tauri::command]
+async fn ai_choose_length(
+    app: tauri::AppHandle,
+    length: companion_core::ai::Length,
+) -> Result<companion_core::ai::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || companion_core::ai::choose_length(&data, length)).await
+}
+
+/// Keeps a key the person typed in the operating system's key store; it never comes back to the window.
+#[tauri::command]
+async fn ai_keep_key(
+    app: tauri::AppHandle,
+    service: String,
+    key: String,
+) -> Result<companion_core::ai::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || companion_core::ai::keep_key(&data, &service, &key)).await
+}
+
+/// Forgets a service's kept key.
+#[tauri::command]
+async fn ai_forget_key(app: tauri::AppHandle, service: String) -> Result<companion_core::ai::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || companion_core::ai::forget_key(&data, &service)).await
+}
+
+/// A service's own list of models, on a press, through the same gate as a question.
+#[tauri::command]
+async fn ai_models(app: tauri::AppHandle, service: String) -> Result<Vec<String>, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || companion_core::ai::models(&data, &service)).await
+}
+
+/// What Explain this fault would send, built by the host from the fault the Logs page last read; nothing is sent yet.
+#[tauri::command]
+async fn ai_prepare_fault(app: tauri::AppHandle, game: String, fault: String) -> Result<ai_help::Prepared, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || ai_help::prepare_fault(&data, &game, &fault)).await
+}
+
+/// Sends the question last prepared, on the person's press, streaming the answer's text through the window's channel.
+#[tauri::command]
+async fn ai_send(
+    app: tauri::AppHandle,
+    id: u64,
+    on_text: Channel<String>,
+) -> Result<companion_core::ai_client::Answer, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || ai_help::send(&data, id, &mut |text| drop(on_text.send(text.to_owned())))).await
 }
 
 /// Records the owner's answer to one decision, once they press Decide.
@@ -1420,6 +1500,15 @@ pub fn run() {
             claims_list,
             decisions_list,
             ai_programs_setup,
+            ai_status,
+            ai_choose_service,
+            ai_choose_model,
+            ai_choose_length,
+            ai_keep_key,
+            ai_forget_key,
+            ai_models,
+            ai_prepare_fault,
+            ai_send,
             picks_list,
             publish_read,
             publish_waiting,

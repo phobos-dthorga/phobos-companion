@@ -58,8 +58,10 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
 
 - **The host decides what may run, from the kit's manifest, and checks again when asked to run it**: the window can only request.
   The report viewer runs only reports marked `reads`, with a `question` and nothing required; `reads-online` and typed inputs come
-  next; anything else needs a design record and a confirmation step. **`owner-only` is never run**, and the program never holds
-  credentials.
+  next; anything else needs a design record and a confirmation step. **`owner-only` is never run**, and **the program holds no
+  credentials but keys for AI services the person adds** (0.71.0; the owner, 23 Nov 2026, of the old rule: "willing to bend this
+  rule now", and "keys for AI services only"): kept in the operating system's own key store, never in a file, never shown again
+  and never sent to the window (`companion_core::ai_keys`). **Steam passwords and every other credential stay never held.**
 - **Mods page: the one place the program changes a game's files** (owner, 18 Nov 2026: a part "dedicated to the updating,
   reversing changes, making backups"). May: the kit's `installs build`, `install`, `backup` and `restore` for a repository with
   `config/installs.json`, and the game's texture `encode`, found by the manifest's `textures` surface, never by name, writing into
@@ -129,6 +131,18 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   name real folders. **The server is started by the AI program the person sets up, never by this program**, and runs only the
   kit's reports the manifest calls `reads` (phobos-modkit `docs/mcp.md`). **Before asking a running AI program anything about
   the kit's reports, read that doc**; never hand a model the kit's `--no-redact` output.
+- **Settings → AI services keeps the person's choices and their key** (0.71.0; `docs/ai.md`, A2): the service, its model and the
+  answer length in `ai.json`, written whole, on a press; a key only in the system's key store, on **Keep this key**, and gone on
+  **Forget this key**. **The services are data** (`config/ai-services.json`), checked by `companion_core::ai` before use: a
+  loopback one runs on this computer, any other must be https and needs a key. **Read the models** asks a service on a press,
+  through the same gate as a question.
+- **Logs: Explain this fault sends only what the person was shown, on their press** (0.71.0; the owner's choice of 23 Nov 2026:
+  "shown first, then my press"; `docs/ai.md`, A2). The host builds the question from a fault the page's last reading named, by
+  its id, and an instruction file kept with the program (`prompts/`); the window never adds words. **Send** sends that question
+  and nothing else, only the one last prepared, after `companion_core::ai::ready` checks the service, its key and, for an online
+  one, AI services in Going online. **The model is given no tools**, and its answer is shown as text, never acted on, never put
+  into `{@html}`. Each answer's token count is appended to `ai-usage.jsonl`. **Agents and tests never send a real question**:
+  tests stand in the service, and a question to a model on the owner's computer loads their graphics card, so ask first.
 - **Settings adds to the games list on one press** (0.31.0, Add a game from Steam; `docs/later.md` item 5, the owner's yes of 19
   Nov 2026): one new entry in `.local/games.json`, after the window showed it whole, with every field checked again, the list's
   order kept and the list as it was kept beside it; nothing is written when a check fails. **It never changes or removes an entry
@@ -155,10 +169,12 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   2026: "On for listed repositories with a setting to disable otherwise, with applicable warnings of severe loss of
   functionality"; `docs/online.md`). **Off means off**: no call of that kind, on a press or by itself. A report is passed the flag
   that takes it online only while the manifest calls it `reads-online`; a look the program makes by itself says so
-  (`--automatic`), keeping the hour's last keyless GitHub calls for a press. **Nothing is ever sent about the person**: calls only
-  read public pages, keyless. Settings → Going online and About show the same list of kinds: today five (Gate lights, Nightly
-  watch, Known problems, Their reports and Workshop pages; `docs/architecture.md` says what each contacts). **A new kind joins
-  `companion_core::online::KINDS`, the window's words and the Guide's Going online entry in one change.**
+  (`--automatic`), keeping the hour's last keyless GitHub calls for a press. **Nothing is ever sent about the person by
+  itself**: calls only read public pages, keyless, **except AI services** (0.71.0; the owner's choice of 23 Nov 2026), which sends
+  only text the person was shown and chose to send, with their key, on their press; **it starts off** (`Kind::starts_on`), the
+  only kind that does. Settings → Going online and About show the same list of kinds: today six (Gate lights, Nightly watch,
+  Known problems, Their reports, Workshop pages and AI services; `docs/architecture.md` says what each contacts). **A new kind
+  joins `companion_core::online::KINDS`, the window's words and the Guide's Going online entry in one change.**
 - **Report links open GitHub in the browser, and never post** (0.65.0; the owner's choice of 23 Nov 2026: the Logs page only).
   Only an address for a repository the kit named: our repository's new-issue form filled in, another author's blank form, or one
   of their issues. **Another author's form is never filled in**: drafts to them go through the owner's tracker (phobos-modkit

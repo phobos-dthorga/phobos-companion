@@ -205,6 +205,9 @@ under the same manifest check as the press.
 | `features.json` | Core, `agents.rs` | Settings → Agents | One of the known choices; `prefs` |
 | `online.json` | Core, `online.rs` | Settings → Going online | A kind from `KINDS`; `prefs` |
 | `publishing.json` | Host, `publish_page.rs` | Settings → Publishing | `prefs` |
+| `ai.json` | Core, `ai.rs` | Settings → AI services: a service, a model, a length | A service from `config/ai-services.json`; a model of one line; `prefs` |
+| `ai-usage.jsonl` | Core, `ai.rs` | Each answer to **Send** | Appended: time, service, model, tokens; never the text |
+| The system's key store | Core, `ai_keys.rs` | **Keep this key**, **Forget this key** | Keys for AI services only, under "D'thorga Companion"; never in a file |
 | `themes/<id>.json`, `chosen.json` | Core, `themes.rs` | Keep, Import, Remove, Use | Shape, ≤ 32 KB, contrast on every surface |
 | `opened-copies/` | Host, `changed_files.rs` | **Open with its own program** | A media kind the kit named, ≤ 64 MB |
 | `report-drafts/report.md` | Host, `report_links.rs` | A report link to our repository | Overwritten each time |
@@ -230,7 +233,8 @@ under the same manifest check as the press.
 | The Steam Workshop | Kit, `steam-publish`, `mod-list` | Upload, update, subscribe | `owner-press` or `writes`; a yes |
 
 **In memory, for one run:** files a kit answer named (`viewable.rs:32`), the Publish page's last mods and items, the Mod list's
-last listing, the Explorer's snapshot. A press is refused for anything this run was not shown.
+last listing, the Explorer's snapshot, each game's last log faults (`logs_page::remember`) and the one question last prepared for
+an AI service (`ai_help.rs`). A press is refused for anything this run was not shown.
 
 ## The security gates
 
@@ -255,15 +259,20 @@ Each change passes every gate below that applies to it, in the host, at the mome
 - **The owner's press and yes.** The window shows the confirm card; the host takes only what a reading named.
 - **The Workshop uploads setting** (`publishing.json`, `uploads_on` in `publish_page.rs:70`) is read before `upload` and
   `update`.
+- **An AI service's gate** (0.71.0): `companion_core::ai::allowed` before every call to one, a question or **Read the models**: a
+  loopback service always; any other only while AI services is on and with a key. **Send** takes only the question
+  `ai_help::prepare_fault` built and showed, from a fault the Logs page's last reading named; the model is given no tools.
 
 **The manifest check, step by step:** read `manifest --json` fresh; find the command and the named report (an empty name is a
 command's one unnamed report, as `cleanup` has); refuse unless its `effect` is one the press allows. `offered` adds the game and
 the `surface`, so a page finds "the game's `look-inside` report", never a tool name, and is told in words when there is none.
 
-**The online kinds** (`companion_core::online::KINDS`, `online.rs:37`), each kept on or off in `online.json`:
+**The online kinds** (`companion_core::online::KINDS`, `online.rs:37`), each kept on or off in `online.json`. Each starts on but
+AI services, which starts off (`starts_on`):
 
 | Kind | Contacts | Losing it | Used by |
 | --- | --- | --- | --- |
+| AI services | The AI service the person chose | Small | Logs, `ai_help.rs`: **Explain this fault**, on **Send**; Settings, **Read the models** |
 | Gate lights | api.github.com | Severe | Home, `repo_status.rs`: the kit's `repos status` |
 | Nightly watch | raw.githubusercontent.com | Severe | Home, `nightly.rs`: `feeds read --root`, each `companion-results` branch |
 | Known problems | raw.githubusercontent.com | Severe | Mod list, `mod_list_page.rs`: `feeds read --from published` |

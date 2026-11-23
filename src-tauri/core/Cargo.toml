@@ -1,6 +1,6 @@
 [package]
 name = "companion-core"
-version = "0.16.0"
+version = "0.17.0"
 description = "D'thorga Companion's shared core: the games list, the tool kit runner, request checks and failures, with no window"
 authors = ["Phobos A. D'thorga"]
 edition = "2024"
@@ -12,3 +12,16 @@ publish = false
 [dependencies]
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.145", features = ["preserve_order"] }
+# AI services (0.71.0, `docs/ai.md`, A2): one small blocking HTTP client with Rust's own TLS, so no system TLS library is needed on
+# any system; and the operating system's own key store for the keys a person adds.
+ureq = { version = "3.5.2", default-features = false, features = ["rustls"] }
+keyring-core = "1.1.0"
+
+[target.'cfg(windows)'.dependencies]
+windows-native-keyring-store = { version = "1.1.0", default-features = false }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+apple-native-keyring-store = { version = "1.0.3", features = ["keychain"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus-secret-service-keyring-store = { version = "1.0.1", features = ["rt-async-io-crypto-rust"] }

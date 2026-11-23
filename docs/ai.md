@@ -2,7 +2,10 @@
 
 **Status (23 Nov 2026):** **slice 1 (A1) built** in Companion 0.70.0 with phobos-modkit 1.109.0: the kit's `mcp serve` and
 `mcp setup`, and Settings → AI. Checked by tests and one real run of the server over standard input and output; **not yet tried
-from any AI program, and the panel not yet tested on screen.** A2 and A3 are designs only. The owner asked for "AI integration
+from any AI program, and the panel not yet tested on screen.** **Slice 2 (A2's first button) built** in Companion 0.71.0 (the
+owner, 23 Nov 2026: "go ahead with A2"): Settings → AI services, **Explain this fault** on Logs, keys in the system's key store,
+and the AI services kind of going online. Checked by tests and a real listing of the models of the owner's running Ollama;
+**no real question has been sent yet, and nothing tested on screen.** A3 is a design only. The owner asked for "AI integration
 directly into Companion", through an open framework that reaches "a multitude of services, preferably with some of the bigger
 ones at least", chose all three parts below by card the same day, and then took the agent's lean on all four open questions
 ("go with your leans on all four and start building"). Agent choices are labelled so the owner can revise them.
@@ -131,12 +134,36 @@ person chose, and shows the answer beneath as it arrives.
 **The first buttons (agent's proposal, `ai-first-buttons`):** **Explain this fault** on Logs, then **Summarise what changed**
 on Changes and **What does this update mean for my mods?** on What did an update change.
 
-**The two rules, as they would read once A2 is built** (the owner's word needed on the wording):
+**The two rules, as they read since A2 was built** (AGENTS.md, 0.71.0, on the owner's answers; the wording is the agent's, for
+the owner to revise):
 
-- "The program never holds credentials, **except keys for AI services the person adds**, kept in the operating system's key
-  store and never in a file. Steam passwords are never held."
-- "Nothing is ever sent about the person **by itself**. Text goes to an AI service only when the person has switched AI
-  services on, chosen the service, been shown the text and pressed Send."
+- "The program holds no credentials but keys for AI services the person adds: kept in the operating system's own key store,
+  never in a file, never shown again and never sent to the window. Steam passwords and every other credential stay never held."
+- "Nothing is ever sent about the person by itself: calls only read public pages, keyless, except AI services, which sends only
+  text the person was shown and chose to send, with their key, on their press; it starts off."
+
+**As built (0.71.0), where it differs from the table above** (agent choices):
+
+- **No AI library: `ureq` and two request shapes of our own** (`companion_core::ai_client`), not `genai`. Two shapes cover
+  every service: Claude's own Messages API (Rust has no official Anthropic library, and Anthropic documents its API as plain
+  HTTPS), and the chat completions API OpenAI, Gemini, Ollama and LM Studio all offer. Far less is carried in, and what is sent
+  is in plain view in one file.
+- **Claude's requests use API version `2026-10-21`**: no `temperature` or other sampling field, no `thinking` field (each model
+  then thinks as it does by default), and `max_tokens` from the answer length (4,000, 8,000 or 16,000, thinking included). A
+  `refusal` stop is said in words. **Claude's server-side fallbacks are not asked for**: they need a beta header and a model that
+  allows them, and the person picks the model; a later slice can add them for the models that do.
+- **The chat completions request sets no length**, since OpenAI's newer models refuse `max_tokens`: the instruction asks for the
+  length instead. Token counts are asked for only where the services file says the service gives them in a stream (OpenAI's);
+  elsewhere an answer may say the service did not count them.
+- **Five services, two of them on this computer**: Ollama and LM Studio at their usual addresses, then Claude, OpenAI and Gemini.
+  **No typed address yet**, for a local server on another port or another service: a later slice, with its own checks.
+- **The question is built by the host, by the fault's id**, from the Logs page's last reading (`logs_page::remember`); the window
+  sends no words of its own. At most 12,000 characters, cut with a note.
+- **No Stop button yet** while an answer streams: a long one can only be waited out (10 minutes at most, then it fails in words).
+- **Linux and macOS key stores are chosen and written but not yet built or tried**: the Companion is built on Windows only today
+  (`docs/release-audit.md`, C2).
+- **A question to a model on the owner's computer loads their graphics card**, so no agent sends one without the owner's word;
+  only the model list (which loads nothing) was read for real.
 
 ## A3: a chat page (ACP)
 
@@ -163,7 +190,7 @@ starts the agent as a process, in a repository from the games list, and shows wh
 | --- | --- | --- | --- | --- |
 | A1's server | Yes | Yes | Yes | Standard-library Python over stdio |
 | A2's calls | Yes | Yes | Yes | rustls, no system TLS library |
-| A2's key store | Credential Manager | Secret Service or keyutils; else the environment variable | Keychain | The page says which is in use |
+| A2's key store | Credential Manager (built and tested) | Secret Service through a pure-Rust store, else the environment variable (not yet built) | Keychain (not yet built) | The page says which is in use |
 | A3's agents | Yes | Yes | Yes | Each agent's own support decides |
 | Ending a process tree | `taskkill /T` | **To build** | **To build** | `process::end_tree` is Windows-only today (`docs/release-audit.md`, C2) |
 
@@ -194,7 +221,8 @@ Each slice is a working thing by itself, with its own version and commit.
 
 ## Open, for the owner to revise
 
-The four questions are answered (above). Smaller agent choices, revisable here: genai over rig (`ai-library`); the ACP crate over a reader of our own
+The four questions are answered (above). Smaller agent choices, revisable here: `ureq` and our own two request shapes over
+genai or rig (`ai-library`, changed while building A2); the ACP crate over a reader of our own
 (`ai-chat-library`); the first buttons (`ai-first-buttons`); three MCP tools in place of one for each report; every switch
 starting off; local models listed first; a month's token total kept.
 

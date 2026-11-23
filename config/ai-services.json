@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "description": "The AI services the Companion can ask for help on pages (0.71.0, docs/ai.md, A2). Data, checked by the host: a new service is a row. A service at a loopback address runs on this computer and needs no key and no Going online switch; any other must be https and needs a key. api: anthropic (Claude's own Messages API) or openai (the chat completions API most others offer). streamUsage: whether the service counts tokens in a stream when asked (stream_options).",
+  "services": [
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "api": "openai",
+      "address": "http://127.0.0.1:11434/v1",
+      "keyVariable": null,
+      "streamUsage": false
+    },
+    {
+      "id": "lm-studio",
+      "name": "LM Studio",
+      "api": "openai",
+      "address": "http://127.0.0.1:1234/v1",
+      "keyVariable": null,
+      "streamUsage": false
+    },
+    {
+      "id": "anthropic",
+      "name": "Claude (Anthropic)",
+      "api": "anthropic",
+      "address": "https://api.anthropic.com/v1",
+      "keyVariable": "ANTHROPIC_API_KEY",
+      "streamUsage": true
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "api": "openai",
+      "address": "https://api.openai.com/v1",
+      "keyVariable": "OPENAI_API_KEY",
+      "streamUsage": true
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini (Google)",
+      "api": "openai",
+      "address": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "keyVariable": "GEMINI_API_KEY",
+      "streamUsage": false
+    }
+  ]
+}

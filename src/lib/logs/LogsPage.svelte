@@ -1,6 +1,6 @@
 <script lang="ts">
   import Placeholder from "../shell/Placeholder.svelte";
-  import { untrack } from "svelte";
+  import { onMount, untrack } from "svelte";
   import Pager from "../shell/Pager.svelte";
   import { pageHolding, pageOf } from "../shell/paging";
   import { t } from "../i18n/runtime";
@@ -24,6 +24,11 @@
   import ReportLinks from "../online/ReportLinks.svelte";
   import { readReportPlaces } from "../online/desktopClient";
   import type { ReportPlace } from "../online/types";
+  import ExplainFault from "../ai/ExplainFault.svelte";
+  import { ai, loadAi } from "../ai/state.svelte";
+
+  /** Explain this fault shows only once an AI service and its model are ready (0.71.0, Settings → AI). */
+  onMount(() => void loadAi());
 
   /**
    * The Logs page (cross-links L1): the game's log as its tools group it, compared with the run before, and each message's stack
@@ -334,6 +339,9 @@
                 {clueWords(signature)}
               </p>
               <ReportLinks game={game.id} {signature} {places} log={data.log} />
+            {/if}
+            {#if ai.status?.ready}
+              <ExplainFault game={game.id} fault={signature.id} />
             {/if}
             {#if (signature.frames ?? []).length > 0}
               <h3>{t("logs-stack-title")}</h3>

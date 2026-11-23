@@ -4,6 +4,34 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.71.0] - 2026-11-23
+
+### Added
+
+- **Explain this fault: the Logs page asks an AI you chose what a fault means** (the owner, 23 Nov 2026: "go ahead with A2";
+  `docs/ai.md`, A2). Open a fault and press **Explain this fault**: a card shows where it would go (the service and model), the
+  instruction and the fault itself, word for word, and only **Send** sends it. The answer appears as it comes, as plain text,
+  with the tokens the service counted and a reminder that an AI's answer can be wrong. The host builds the question from the fault
+  it last read, by its id, so the window never adds words; the model is given no tools. The button shows only once a service and
+  its model are ready. Guide: "Have a fault in the log explained". **Not yet tested on screen, and no real question sent yet.**
+- **Settings → AI services: choose the AI, its model, its key and the answer length.** Ollama and LM Studio on this computer
+  (free, nothing leaves it), or Claude, OpenAI and Gemini online with your own key. **Read the models** lists a service's own
+  models; **Keep this key** puts a key in the system's own key store (Windows Credential Manager here) and it is never shown again;
+  **Forget this key** removes it; a key in the service's environment variable is used first. **Short**, **Medium** or **Long**
+  answers; **This month** counts answers and tokens. Guide: "Choose the AI that explains things". The services are data
+  (`config/ai-services.json`), checked by the host. Checked against your running Ollama, whose 18 models it listed.
+- **Going online gains a sixth kind, AI services, which starts off**, the only kind that does: it sends text you chose, with your
+  key. A model on this computer is not going online and works either way.
+
+### Changed
+
+- **Two of the program's rules change, on the owner's answers of 23 Nov 2026**: it holds no credentials but keys for AI services
+  the person adds, kept in the system's key store and never in a file (Steam passwords stay never held); and nothing is sent
+  about the person by itself, except what they were shown and chose to send to an AI service. AGENTS.md, the architecture page,
+  the release audit's privacy line and the Going online entry say so.
+- **companion-core 0.17.0** carries the AI services (`ai`, `ai_client`, `ai_keys`) with two new libraries, `ureq` and
+  `keyring-core` with a store for each system (`THIRD_PARTY_NOTICES.md`). The Linux and macOS stores are written but not yet built.
+
 ## [0.70.0] - 2026-11-23
 
 ### Added

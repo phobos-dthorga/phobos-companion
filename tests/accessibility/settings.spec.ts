@@ -1,7 +1,13 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, openTab, sampleHome } from "./host";
+import {
+  healthyKit,
+  mockHost,
+  openTab,
+  sampleAiStatus,
+  sampleHome,
+} from "./host";
 
 const CONTROL_MIN_PX = 44;
 
@@ -91,6 +97,10 @@ async function open(
     settings_list: { result: sampleSettings },
     set_setting: { result: saved },
     ai_programs_setup: { result: sampleAiSetup },
+    ai_status: { result: sampleAiStatus },
+    ai_choose_service: {
+      result: { ...sampleAiStatus, chosen: "anthropic", ready: false },
+    },
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Settings", exact: true }).click();
@@ -226,6 +236,32 @@ for (const [name, viewport] of [
           document.documentElement.clientWidth,
       );
       expect(overflow).toBeLessThanOrEqual(0);
+    });
+
+    test("the AI tab's services say what runs where, and an online one asks for its key and its switch", async ({
+      page,
+    }) => {
+      await open(page);
+      await openTab(page, "AI");
+      const panel = page.locator("#settings-ai-services");
+      await expect(
+        page.getByRole("heading", { name: "AI services" }),
+      ).toBeVisible();
+      await expect(panel).toContainText("Model: sample-model:8b");
+      await expect(panel).toContainText(
+        "Ready: Explain this fault shows on the Logs page.",
+      );
+      await expect(panel).toContainText("This month: 3 answers");
+      await audit(page);
+      await panel
+        .getByRole("button", { name: /^Claude \(Anthropic\)/ })
+        .click();
+      await expect(panel).toContainText("Online services are switched off.");
+      await expect(panel).toContainText("No key yet.");
+      await expect(
+        panel.getByLabel("A key for Claude (Anthropic)"),
+      ).toHaveAttribute("type", "password");
+      await audit(page);
     });
 
     test("a refusal is shown in words and nothing is called saved", async ({

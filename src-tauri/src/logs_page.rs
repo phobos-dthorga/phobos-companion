@@ -9,6 +9,12 @@ use companion_core::failure::Failure;
 use companion_core::kit;
 use serde::Serialize;
 use serde_json::Value;
+use std::sync::Mutex;
+
+/// The faults each game's last reading named (0.71.0): Explain this fault asks about one by its id, and the host takes its text from
+/// here, so the window can never put words of its own into what an AI service is sent.
+static SEEN: Mutex<Vec<(String, Value)>> = Mutex::new(Vec::new());
+const MAX_ID: usize = 80;
 
 const LOG_SURFACE: &str = "log";
 const BRIEF_OPTION: &str = "--brief";
@@ -50,7 +56,31 @@ pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<LogReading, F
     };
     let command = arguments[0].clone();
     let answer = kit::run_hearing(&command, &arguments, listener)?;
+    remember(game, &answer["data"]);
     Ok(LogReading { available: true, data: answer["data"].clone(), command_line })
+}
+
+/// Keeps a game's faults from its latest reading, in place of the last.
+pub fn remember(game: &str, data: &Value) {
+    if let Ok(mut seen) = SEEN.lock() {
+        seen.retain(|(g, _)| g != game);
+        for group in data["groups"].as_array().map_or(&[][..], Vec::as_slice) {
+            seen.push((game.to_owned(), group.clone()));
+        }
+    }
+}
+
+/// One fault the game's latest reading named, by its id.
+pub fn remembered(game: &str, id: &str) -> Result<Value, Failure> {
+    if id.is_empty() || id.len() > MAX_ID || id.chars().any(char::is_control) {
+        return Err(Failure::refused("that is not a fault's id"));
+    }
+    SEEN.lock()
+        .ok()
+        .and_then(|seen| {
+            seen.iter().find(|(g, group)| g == game && group["id"].as_str() == Some(id)).map(|(_, group)| group.clone())
+        })
+        .ok_or_else(|| Failure::refused("that fault is not in the log as last read: read the log again"))
 }
 
 #[cfg(test)]

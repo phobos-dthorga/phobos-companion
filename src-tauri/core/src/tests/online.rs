@@ -17,12 +17,13 @@ fn scratch() -> PathBuf {
 }
 
 #[test]
-fn every_kind_starts_on_as_the_owner_chose() {
+fn every_kind_starts_on_as_the_owner_chose_but_ai_services_starts_off() {
     let data = scratch();
     let answer = status(&data);
     assert!(!answer.kinds.is_empty());
-    assert!(answer.kinds.iter().all(|kind| kind.on && !kind.chosen));
+    assert!(answer.kinds.iter().all(|kind| kind.on == (kind.id != "ai-services") && !kind.chosen));
     assert!(is_on(&data, "gate-lights"));
+    assert!(!is_on(&data, "ai-services"));
     fs::remove_dir_all(&data).unwrap();
 }
 

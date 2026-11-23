@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, sampleAiStatus, sampleHome } from "./host";
 
 const CONTROL_MIN_PX = 44;
 
@@ -149,8 +149,10 @@ async function open(
   page: Page,
   log: object = sampleLog,
   found: object[] = [hull],
+  more: Record<string, { result: unknown }> = {},
 ) {
   await mockHost(page, {
+    ...more,
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
     read_log: { result: log },
@@ -226,6 +228,65 @@ for (const [name, viewport] of [
           document.documentElement.clientWidth,
       );
       expect(overflow).toBeLessThanOrEqual(0);
+    });
+
+    test("Explain this fault shows what goes first, sends on a press, and shows the answer as text", async ({
+      page,
+    }) => {
+      await open(page, sampleLog, [hull], {
+        ai_status: { result: sampleAiStatus },
+        ai_prepare_fault: {
+          result: {
+            id: 7,
+            what: "explain-fault",
+            service: "Ollama",
+            model: "sample-model:8b",
+            local: true,
+            instruction: "You help a person who plays and mods PC games.",
+            text: "Game: First Sample\nMessage:\nException ticking Boat",
+            characters: 49,
+          },
+        },
+        ai_send: {
+          result: {
+            text: "A boat's hull was missing. <b>Check Sample Boats.</b>",
+            stop: "finished",
+            problem: null,
+            inputTokens: 300,
+            outputTokens: 60,
+          },
+        },
+      });
+      await page.locator("#log-bdd7badf > summary").click();
+      await page.getByRole("button", { name: "Explain this fault" }).click();
+      const main = page.locator("main");
+      await expect(main).toContainText("This is what would be sent");
+      await expect(main).toContainText(
+        "To Ollama on this computer, model sample-model:8b. Nothing leaves the computer.",
+      );
+      await expect(main).toContainText("Exception ticking Boat");
+      await audit(page);
+      await page.getByRole("button", { name: "Send", exact: true }).click();
+      await expect(main).toContainText("Ollama (sample-model:8b) says");
+      // The answer is text: markup in it is shown, never drawn.
+      await expect(main).toContainText("<b>Check Sample Boats.</b>");
+      await expect(main.locator("b")).toHaveCount(0);
+      await expect(main).toContainText("300 tokens sent, 60 received.");
+      await audit(page);
+      expect(await smallControls(page)).toBe(0);
+    });
+
+    test("no AI service ready means no Explain this fault", async ({
+      page,
+    }) => {
+      await open(page, sampleLog, [hull], {
+        ai_status: { result: { ...sampleAiStatus, ready: false } },
+      });
+      await page.locator("#log-bdd7badf > summary").click();
+      await expect(page.locator("main")).toContainText("Hull.cs:307");
+      await expect(
+        page.getByRole("button", { name: "Explain this fault" }),
+      ).toHaveCount(0);
     });
 
     test("a stack frame found in the code opens on the Code map, and Back returns", async ({

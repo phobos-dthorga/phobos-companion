@@ -31,21 +31,27 @@ pub struct Kind {
     /// The address it contacts, as a person would recognise it.
     pub contacts: &'static str,
     pub loss: Loss,
+    /// Whether it is on until the person chooses (0.71.0): every kind but AI services, which sends text the person chose to send.
+    pub starts_on: bool,
 }
 
 /// Every kind, in the order the panel lists them. A new kind joins here, in the locale file and in the Guide in one change.
-pub const KINDS: [Kind; 5] = [
-    Kind { id: "gate-lights", contacts: "api.github.com", loss: Loss::Severe },
+pub const KINDS: [Kind; 6] = [
+    Kind { id: "gate-lights", contacts: "api.github.com", loss: Loss::Severe, starts_on: true },
     // The nightly watch's findings, read from each repository's results branch (0.63.0, `docs/online.md` O3).
-    Kind { id: "nightly-watch", contacts: "raw.githubusercontent.com", loss: Loss::Severe },
+    Kind { id: "nightly-watch", contacts: "raw.githubusercontent.com", loss: Loss::Severe, starts_on: true },
     // Known problems between mods, read from each repository's published feeds/ for the Mod list check (0.64.0, O2).
-    Kind { id: "known-problems", contacts: "raw.githubusercontent.com", loss: Loss::Severe },
+    Kind { id: "known-problems", contacts: "raw.githubusercontent.com", loss: Loss::Severe, starts_on: true },
     // Another author's existing issues, listed on a press on the Logs page (0.65.0, O4). Opening a new-issue form is the
     // browser's own visit, not a call of the program's, so it has no switch.
-    Kind { id: "their-reports", contacts: "api.github.com", loss: Loss::Small },
+    Kind { id: "their-reports", contacts: "api.github.com", loss: Loss::Small, starts_on: true },
     // Each Workshop item read back from Steam's public API (keyless) on the Publish page's Read Steam back (0.69.0,
     // `docs/publishing.md`): its visibility and the day it went public. Uploading is the owner's press, not a call of this kind.
-    Kind { id: "workshop-pages", contacts: "api.steampowered.com", loss: Loss::Small },
+    Kind { id: "workshop-pages", contacts: "api.steampowered.com", loss: Loss::Small, starts_on: true },
+    // An online AI service the person chose, asked on their press after they were shown what goes (0.71.0, `docs/ai.md`, A2;
+    // the owner's choice of 23 Nov 2026: shown first, then a press, the switch off until turned on). Unlike every kind above it
+    // sends the person's own text and their key, so it **starts off**. A model on this computer is not going online.
+    Kind { id: "ai-services", contacts: "the AI service you chose", loss: Loss::Small, starts_on: false },
 ];
 
 /// One kind as it stands: on or off, and whether that is the person's choice or the default.
@@ -70,8 +76,8 @@ fn kept(data: &Path) -> serde_json::Map<String, serde_json::Value> {
     }
 }
 
-/// Each kind, on unless the person switched it off. A file that can't be read leaves every kind at its default: on, as the owner
-/// chose; the next choice writes the file whole.
+/// Each kind as the person chose, else as it starts. A file that can't be read leaves every kind as it starts (on, as the owner
+/// chose, but AI services off); the next choice writes the file whole.
 pub fn status(data: &Path) -> Status {
     let choices = kept(data).get(KEY).and_then(|v| v.as_object()).cloned().unwrap_or_default();
     let kinds = KINDS
@@ -82,7 +88,7 @@ pub fn status(data: &Path) -> Status {
                 id: kind.id.to_owned(),
                 contacts: kind.contacts.to_owned(),
                 loss: kind.loss,
-                on: chosen.unwrap_or(true),
+                on: chosen.unwrap_or(kind.starts_on),
                 chosen: chosen.is_some(),
             }
         })

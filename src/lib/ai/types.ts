@@ -17,3 +17,70 @@ export type AiProgramsReading =
   | { state: "browser" }
   | { state: "ready"; setup: AiProgramsSetup }
   | Failed;
+
+/** Where a service's key comes from now (0.71.0). The key itself never reaches the window. */
+export type AiKeySource =
+  | { from: "environment"; variable: string }
+  | { from: "store" }
+  | { from: "none" };
+
+export type AiLength = "short" | "medium" | "long";
+
+export type AiServiceStatus = {
+  id: string;
+  name: string;
+  api: "anthropic" | "openai";
+  /** It runs on this computer: nothing leaves it, and it needs no key. */
+  local: boolean;
+  needsKey: boolean;
+  key: AiKeySource;
+  model: string | null;
+};
+
+export type AiMonth = {
+  month: string;
+  answers: number;
+  inputTokens: number;
+  outputTokens: number;
+};
+
+/** AI services for help on pages (0.71.0, `docs/ai.md`, A2), as the host keeps them. */
+export type AiStatus = {
+  services: AiServiceStatus[];
+  chosen: string | null;
+  length: AiLength;
+  /** Whether AI services is on in Settings → Going online. */
+  onlineOn: boolean;
+  /** The key store's name, or null when this computer has none the program can use. */
+  keyStore: string | null;
+  ready: boolean;
+  month: AiMonth;
+};
+
+export type AiStatusReading =
+  | { state: "reading" }
+  | { state: "browser" }
+  | { state: "ready"; status: AiStatus }
+  | Failed;
+
+/** What a press of Send would send, built and shown by the host first. */
+export type AiPrepared = {
+  id: number;
+  what: string;
+  service: string;
+  model: string;
+  local: boolean;
+  instruction: string;
+  text: string;
+  characters: number;
+};
+
+export type AiStop = "finished" | "cut" | "refused" | "failed";
+
+export type AiAnswer = {
+  text: string;
+  stop: AiStop;
+  problem: string | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+};

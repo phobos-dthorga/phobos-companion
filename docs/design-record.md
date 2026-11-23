@@ -1424,7 +1424,8 @@ check is asked without Steam (no call to the internet); a scan's readings show i
 ## Kept for later
 
 Everything proposed and agreed but not yet built (screen notes, a records backup, a claims board, a Decisions page, the
-game-files views, and the open questions behind them) is in [later.md](later.md), with each item's status.
+game-files views, and the open questions behind them) is in [later.md](later.md), with each item's status. **Publishing to
+the Steam Workshop** (designed 23 Nov 2026, the owner's choices on question cards; not built) is in [publishing.md](publishing.md).
 
 ## Limits
 

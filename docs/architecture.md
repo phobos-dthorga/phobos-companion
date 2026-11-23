@@ -3,7 +3,8 @@
 **Status (23 Nov 2026): describes the code as of 0.69.2, written fresh from it** (the owner's docs rewrite, step 4). The
 rules live in [`AGENTS.md`](../AGENTS.md); this page says how the code carries them out. When the two disagree, the rule wins
 and this page is wrong: fix it in the change that finds it. Paths are from the repository's root; `path:line` points at the
-line as of 0.69.2.
+line as of 0.69.2. **"How each part works" was moved here from the design record on 24 Nov 2026** (step 7), and is as each
+piece was built, through 0.78.0.
 
 **In one line:** a Svelte 5 window asks a Rust host; the host checks the request and runs the pinned phobos-modkit as a Python
 process; the kit does the work and answers in one JSON shape. The window never decides, and never touches a file.
@@ -341,6 +342,331 @@ The mechanism behind each page's rule in `AGENTS.md`. Every change also passes t
 **Addresses** reach the system only through `open_address`: `steam://url/CommunityFilePage/<number>` for a number a reading
 named, a Workshop search for the game's own app id, or a GitHub address for a repository the kit's `issue-links where` named.
 
+## How each part works
+
+**Moved here from the design record** (24 Nov 2026, the owner's docs rewrite, step 7), which now keeps only the requests, the
+choices and the risks. Each table is the piece as it was built, with its version; where a later version changed it, the row says
+so. What this page already says above (the kit runner, progress, the state table, the gates and each page's host checks) is not
+repeated here.
+
+### Home ("where was I?", 0.2.0)
+
+| On the page | Where it comes from |
+| --- | --- |
+| Games, most recently worked on first | The newest commit across the game's repositories |
+| The opening sentence and the last thing done | That newest commit |
+| Left unfinished | `git status`: files changed but not committed, only when there are some |
+| The latest work | The newest eight commits, across the game's repositories |
+| Not released yet | Each changelog, the repository's own and one per mod in `mods/`: entries under Unreleased, and the newest version marked Draft |
+| Open work | `docs/development/outstanding-work.md`, where a repository has one: tables with Item and Status columns, counting statuses that begin open, in progress, waits, waiting, blocked, proposed or done except |
+| Couldn't be read | Any repository that is missing or has no history; the rest of the page still shows |
+
+`PHOBOS_COMPANION_GAMES` names a games list other than `.local/games.json`. A test proves a git read leaves the index unchanged.
+Dates read from a repository are drawn in the `observed` colour; "how long ago", worked out from them, in `comparison`.
+
+### Reports and charts (0.3.0, 0.4.0)
+
+| Part | How |
+| --- | --- |
+| Tables | Numbers sort as numbers, through the `values` the kit adds beside each table (kit 1.1.0); a column that isn't all numbers in one unit sorts as words. Columns take the width their words need and the table scrolls sideways. **Show more** asks the tool for five times as many rows, up to 5,000 |
+| Charts | A chart block in a kit report (kit 1.5.0, `docs/manifest.md`): bars or a line, series and reference lines, each with a role, never a colour. `chartOptions.ts` turns it into ECharts options as plain data, tested without a browser. SVG, loaded only when a report has a chart; a failed load shows the numbers instead. ECharts costs one file of 562 kB (192 kB compressed) |
+| Facts (0.24.0) | A report's `facts` (kit 1.48.0, label and value), drawn by `ReportView` as a strip of small cards above the opening lines |
+
+### Atlas (0.6.0)
+
+| Part | How |
+| --- | --- |
+| Data | `rimworld-save atlas` (kit 1.7.0): one globe block of tile positions, each tile's neighbours in order, one value per tile per layer, places, lines, tags and region labels; about 45 MB of JSON and 1.1 s for the owner's world once the save is indexed |
+| Drawing | Every tile a flat-coloured fan of triangles; one texture holds every tile's colour, another the overlay, so a new view rewrites a texture, never the geometry. It draws only when something changes. 423 ms from data to picture in a software renderer |
+| Picking | The point under the pointer on the sphere, then a walk from a nearby tile to whichever neighbour is nearer until none is; on tiles made this way that always ends at the nearest |
+| Colours | Biomes and hills bring the kit's own colours (`atlas-palette.json`). Temperature and elevation are two hues meeting at a light grey at 0 °C and sea level; rainfall and swampiness one hue, light to dark; pollution the game's four bands. Water shows as having no value where a layer leaves it out. The same ramps serve light and dark |
+| Labels | Your own colonies always; every place once a tile spans 5 pixels; region names at the size the game gives them. More important first, none on top of another |
+| Moving | Buttons for north, south, east, west, closer, further, the whole planet and the tile in the middle; the arrow keys, + and - and Enter do the same. Drag and the wheel are shortcuts. Flights are instant when motion is reduced |
+| The page's top (0.24.0) | The header holds the title and Read again on one line, and the globe's description as the lead (`globeCaption={false}`). The globe block is a container: at 960 px wide or more the tile panel and the key stand in a column beside the globe (300 to 380 px); narrower, they stack beneath it |
+
+### Tests (0.7.0)
+
+| Part | How |
+| --- | --- |
+| Reading | `test-pass report --all --json` (kit 1.9.0) for every repository of the game with `config/test-evidence.json`: the rows, the game's seen-in-play notes and the verdicts so far |
+| Shelves | Seen working first (a note, no verdict), then waiting, your verdicts not yet in the list, and done; preset buttons with counts |
+| Verdicts | Passed, Failed (with an optional note under 300 characters) and Take it back; one JSON line appended to `test-verdicts/<repository>.jsonl` |
+| Into the test list | Not by this program: the kit's `test-pass apply --apply`, run by an agent session or the owner |
+| Joined to code (0.19.0, L3) | A row's code comes from kit 1.36.0's `test-pass code`: every string in the code that is a mapped key, or starts with a mapped prefix, placed in the thing holding it; a type watches what its members note. Waiting rows are shown by version (a row names the versions it covers), for the products the test list's `versionNames` names |
+
+### Installer (0.8.0, 0.36.0, 0.38.0)
+
+| Part | How |
+| --- | --- |
+| The bundle | Tauri's NSIS target (`bundle.targets: ["nsis"]`), run by `npm run installer` with build output outside the repository; for the current user, no administrator. `productName` carries a curly apostrophe, since Tauri's NSIS script quotes the shortcut name with straight ones. The gate builds with `--no-bundle` |
+| The runtime | `scripts/installer.mjs`: Python 3.14.10's portable build, pinned to python.org's SHA-256, unpacked with a `._pth` naming the kit beside it, and the kit's package copied from the submodule. All in the build folder, outside the repository |
+| Into the installer | NSIS installer hooks copy it to `<install folder>\runtime` and remove it on uninstall. Not Tauri's resources: Tauri drops the drive letter from an absolute resource path, and a copy inside the repository would be synced |
+| The compiled tools | `installer.mjs` runs the repository's own kit, `programs bundle --out <runtime>\tools`, with this PC's cargo and .NET 10 SDK; a failure stops the installer before anything is built. The installed kit's `native.bundled_dir` is `<install folder>\runtime\tools`, looked in first. The reader is framework-dependent (about 0.25 MB, needing the .NET 10 runtime) |
+| The games list | `games::list_path_from`: the same order as `kit::locate`; on another PC, `games.json` in the person's own data folder. `games::start` begins an empty one |
+| First steps | `FirstSteps.svelte`, on Home while no game is listed: the folder projects are kept in (or none), then Add a game from Steam |
+| git | `git::available`, on Home's reading; a line above every page when it is missing |
+| What else is needed | The kit's `programs status`, a read-only report with a question, so Reports lists it; About's "Which other programs do the tools use, and are they here?" opens it |
+
+The window's content policy allows `blob:` pictures (0.36.0) and sounds (`media-src 'self' blob:`, 0.50.0).
+
+### Mods (0.10.0, 0.11.0, 0.39.0)
+
+| Part | How |
+| --- | --- |
+| Reading | `installs status --json` for every repository of the game with `config/installs.json`; again when the window regains focus (after 15 s) or on Read again. Read unredacted since 0.53.0, for the folders |
+| Gains and losses | From the changelog each copy carries: an entry one has and the other lacks. Matched by text, so an Unreleased entry that later gets a version is neither |
+| Moves | Install from the repository, Back up the installed copy, Go back to this. Each opens a confirmation in words on the card, with the keyboard moved to it |
+| Safety | Going back and installing wait for the game to close (the button says so); nothing is deleted: the replaced install becomes a backup and the backup stays |
+| Before you play | Built from both readings: needs a build, changes not installed, mods never installed (0.39.0), textures stale or never encoded, the game running; Ready to play when nothing is left. Each line carries the button that does it |
+| Build | `installs build` (the repository's `deploy.py --build-only`); writes only inside the repository, so no question, and allowed while the game runs |
+| Install everything that changed | Mods whose changelog, files or build differ, one `installs install` per repository with every mod named: one run, one restart |
+| Side by side | Installed now (version, where it came from, entries lost) beside After installing (version, needs a build, entries gained, files, settings, rows to look out for); save notes above both |
+| Textures | The kit command for this game whose status has the `textures` surface (`rimworld-textures` today), with the settings file a repository names |
+| A mod never installed (0.39.0) | `presentation.newMods` and a `mods-pre-new` line in `preflight`, marked ● as worth knowing, not ◆ as left to do. Its button uses the same confirmation as Install everything that changed (`Asking` `all`, with `fresh`), worded for a first install. Both installs of several mods warn, naming them, when any has uncommitted changes |
+| Settings list at once (0.27.0) | The last list read for a game is kept in the window's own storage (`ledgerMemory.ts`) and shown at once while the read checks it |
+
+### Changes and the code viewer (0.12.0, 0.13.0)
+
+| Part | How |
+| --- | --- |
+| Finding the code | The kit's `changes entry`: the oldest commit in which the entry's opening appears in its changelog (`git log -S`), then that commit's diff. Every entry has its commit from `git blame` by version, so one button stands for each run of entries one commit wrote |
+| Order | Code, then data and definitions, then words, then other files; the viewer opens the code file with the most new lines, and the code before its tests |
+| Views | What changed (both line numbers, a `+` or `−` mark), The code as it now stands (removed lines left out), How it connects, and from 0.78.0 The code as it was (old numbers only) |
+| Rich text | `RichText.svelte` shows `**bold**` and `` `code` `` as such, never as markup |
+| Rebuilds | The kit marks an assembly whose own sources are unchanged as only rebuilt, and names the sources when they did change: two states, Only rebuilt and Files differ |
+| Code colours (0.76.0) | Shiki 4.6.0 with VS Code's grammars and its JavaScript engine (no WebAssembly), in `shikiCore.ts`; each grammar a file of its own, fetched on first use. `highlightCore.ts` asks a worker (`highlight.worker.ts`); where none starts, the window reads it itself. Plain text shows first. Measured: 217 lines of C# 127 ms; the first Svelte file 851 ms while its embedded grammars load |
+| Which colour a piece takes | `scopeRoles.json`: VS Code's Dark+ selectors, each under the role whose colour Dark+ gives it. Shiki matches a piece's scopes against them through a theme of stand-in colours, one a role, read back as the role |
+| Lines lit (0.78.0) | Kit 1.112.0's `at`: a thing's file and lines as declared at that commit. `linesOf` (tested without a screen): an unchanged or added line by its number as the code now stands; a removed line by where it was, the line before it. The viewer holds the chosen thing; the buttons over the lines, the buttons over the picture and recentring the picture (`onrecentre`) all set it. Lit lines carry an accent bar and bold accent numbers over the tints. `askChanged` keeps each commit's answer for the run |
+
+### Timeline and Settings (0.14.0)
+
+| Part | How |
+| --- | --- |
+| Facts from git | The kit's `history timeline` reads every commit that touched a changelog, back to the first, once, and keeps the facts in its cache (about 4 s the first time for phobos-rimworld, under a second after) |
+| Facts from this PC | The history log, one JSON line a fact, one file a game, in this program's own folder by default; the kit's installs, deploy and texture encoding write it as they work |
+| The overview | One lane a product, one column a day anything happened; quiet days left out. Each cell is a 44 px button with the strongest mark of the day and a count |
+| Day by day | Newest first, ten days at a time; each fact names its product, version and time, its version's summary, and its entries under their sections (up to eight). Mods installed, backed up or taken back together (one repository, one minute) are one row of buttons (0.15.1). The repository is named only for a game with several |
+| As it stood | `history at`: the changelog at the fact's commit, or, for a fact from this PC, at its moment; each entry marked kept, reworded or taken out since, with the commit that wrote it then (0.15.0) |
+| What was I running then? (0.19.0, L4) | Every mod's installed version at the end of a day, from the history log |
+| Merges (S3) | An ended lane says "(merged into X)", and **Follow it into X** shows X's lane; the lane names' column is a fixed 160 px |
+| Screenshots (0.32.0) | `game-files screenshots` (kit 1.59.0) lists the game's folder and Steam's without sizing the data folder (0.3 s for 330 pictures). `screenshot` hands one picture's bytes over raw, only for a file a list named in this run, under 64 MB. Small pictures are drawn in the window: decoded, shrunk to 360 pixels wide as a JPEG, kept for the run, two at a time, only once scrolled into view (`src/lib/gamefiles/shots.ts`). A `picture` dialog the App draws from the trail shows one whole |
+| Settings | `settings list` names every repository on the owner's list, so a repository's own settings show; `settings set` writes only the central file. Since 0.66.0 each setting is one line that opens (kit 1.95.0 gives each a short `name`) |
+| Pickers (0.29.0) | `pick.rs` (Tauri's dialog plugin, host only) opens at the setting's value or the nearest folder above it and answers with a path |
+
+### How code connects and the Code map (0.17.0)
+
+| Part | How |
+| --- | --- |
+| The facts | The kit's `connections` (1.33.0): C# exact from the built assemblies through the kit's assembly reader (calls, fields, inheritance, overrides, Harmony patches), placed in the source by its scanner; XML Defs, Lua and Python by their own rules; every connection marked exact or by name. .NET's own library is left out |
+| The layouts | Around it (hubs by kind, up to 14 members fanned beyond each, the rest on a "more" node that opens the list), a flow of calls (columns from callers to callees, two steps each way), and a list |
+| Drawing | SVG, from `layout.ts`. Each kind of connection has a theme colour and always its words and count; dashed lines are by name, dashed circles outside the repository, rings mark what the commit changed. Every node is a button with its words; zoom has buttons; drag and scroll are shortcuts |
+| A thing's history (L2) | **Show its history**: the kit's `connections history` (1.34.0), git following its lines back; newest 25 commits |
+| Patch badges (L5) | For the thing in the middle, each method it patches with the other active mods on it (kit 1.37.0's `rimworld-patches targets`) and what the newest update changed in it (the last 30 days), found by the `patch-targets` surface. A red dotted ring marks a method three or more other mods patch, or one the last update changed |
+| Their code (0.26.0) | `kit::offered` finds the command by surface. Kit 1.49.0's `rimworld-code show` (public clones first, then `.local/decompiled`, then the kit's own decompiles; each line's own number kept), `holder` (the assembly and mod) and `decompile` (on a press, into the kit's cache). The panel stands above the Code map's results, under the focus key `their`; the first 400 lines are shown |
+| Updates (0.26.0) | `rimworld-archive list` and `compare`, optionally `--show` one declaration, under `update`, `owner` and `member` |
+
+### Keyboard shortcuts (0.18.0)
+
+| Part | How |
+| --- | --- |
+| When a key acts | `registry.ts`: a view offers its moves while it is on screen; a press goes to the newest view offering it; never in a text box or in a part that takes keys itself (the globe), never when something else handled the press, and outside a dialog only while no dialog is open |
+| Changing them | The Settings page's "Change keyboard shortcuts" dialog. A key another action has is refused in words; Tab, Enter, Space and Escape are kept |
+| Keeping them | `shortcuts.json` holds only what differs from the defaults, so new defaults still arrive |
+| Shared keys (0.55.0) | `TOGETHER` in `actions.ts` says which scopes work at once, and the shortcut check refuses a shared key only between those. `keyOf` names Shift before a letter |
+
+### Cross-links (0.19.0)
+
+| Part | How |
+| --- | --- |
+| Back and Forward (N1) | The trail keeps page, game and open dialog as one; the , and . keys and the mouse's side buttons walk it. A link to a dialog on another page arrives in two steps, so Back closes the dialog first. On the Code map each new thing in the middle is a step |
+| Go to anything (N2) | The / key; the tools' existing searches asked together. Timeline facts are searched as versions written, released, installed or gone back to |
+| Addresses (N3) | `dthorga://page/game?key=value`; the keys each page reads are in [cross-links.md](cross-links.md) |
+| The log chain (L1) | The Logs page shows the kit's grouping (the 60 most serious kinds, kit 1.35.0's `--brief`); **Find in the code** searches every repository of the game for a stack step's method; **backups from before this** opens the Mods page at that mod's newest backup from before the change |
+| Tool kit pins (S2) | Home's panel per game, from kit 1.38.0's `pins status` (the pin HEAD records, read against the kit's own changelog) |
+| Home's links (S4) | A latest commit opens its code (the host sends each commit's hash); a mod not yet released opens Changes at its changelog (`product` in an address) |
+
+### Make-up (0.20.0)
+
+| Part | How |
+| --- | --- |
+| The facts | The kit's `makeup` (1.39.0: now, growth, churn, census): committed files only, products from changelog folders and each C# project's `<ModFolder>`, kinds by extension and folder |
+| The pictures | ECharts treemap, stacked bars and stacked area through `OptionChart.svelte`, the one component that talks to ECharts. One fixed colour a kind, the reference categorical order validated on the chart surface (worst adjacent CVD ΔE 8.4, normal vision 19.3, every colour 3:1); heat is one blue ramp |
+
+### Features for agent sessions (0.22.0, 0.37.0)
+
+| Part | How |
+| --- | --- |
+| Screen notes | The picture is drawn before the dialog opens, so it shows the page, not the dialog. The host writes `picture.png` and `note.json` whole, into a folder made beside its place and then moved; the id is the owner's local time (`20261119-101500`), the time inside is UTC. Sessions read them with the kit's `screen-notes list` (1.41.0); Home shows open notes and the newest five dealt with |
+| Claims board | The kit's `claims` (1.44.0): one file (`claimsPath`), changed under a lock file and written whole; a thing is its words, ignoring case and spacing. Home only reads it |
+| Decisions | Each repository's `config/decisions.json`, read by kit 1.45.0's `decisions list` over every repository on the list and this program's own; the last answer line decides, so an answer can change until an agent acts on it. One card a question: radio buttons (the lean chosen first), Something else with words, Decide |
+| Shown or hidden | `companion_core::agents::signs`; `features.json` holds `found` (the default), `on` or `off`; an unreadable file reads as the default. `src/lib/agents/state.svelte.ts` keeps them hidden until the host answers, then as last time at the next start, so nothing blinks |
+| The Guide | `for: agents` marks an entry; it says so at its top with "Show them, in Settings" while they are hidden, and is listed last |
+| Empty pages | `GuideLink.svelte`: Changes, Mods and Tests lead to "Make a repository ready for the Companion" |
+
+### Records backup (0.22.0, 0.29.0)
+
+| Part | How |
+| --- | --- |
+| What is copied | The kit's `records` (1.43.0): everything in this program's folder but WebView2's cache (`EBWebView`, about 79 MB of the owner's 80), so a new kind of record is included without a change; any record a setting keeps elsewhere too |
+| Where | A new folder named for the local time, inside `recordsBackupPath`, written whole with a `backup.json`; a folder inside the records is refused |
+| By itself | `records_backup::start` looks every 10 minutes (20 s after start); `records_automatic` is the last attempt this run, which the Settings panel asks each minute while on screen and Home's note shows when it failed |
+| Home | A note when there is no copy, or the newest is at least seven days old |
+
+### Game files (0.22.0, 0.28.0, 0.31.0)
+
+| Part | How |
+| --- | --- |
+| The facts | The kit's `game-files report` (1.46.0): Steam's app manifest and Workshop records, the game's saves and screenshots folders and Steam's, sizes by folder |
+| Places | Guessed by the game's name; the games list may name `data`, `saves` and `screenshots`, and `steam_app_id` (`games::places_of`) |
+| The page | What changed (since the last launch, a day or a week), saves (ten a page), screenshots, space as bars. Show in folder reaches at most two levels down (a group of saves) |
+| The launch before last (0.28.0) | `--since previous` while the game runs: Steam keeps only the latest launch, so the kit remembers each launch it sees (`game-files/launches-<id>.json` in its cache) |
+| Add a game (0.31.0) | `game-files steam-games` (kit 1.58.0): each game with up to three `dataGuesses`, surest first. `games_page::listed_as` matches by Steam app ID, else by name. `games::unlisted_repositories`: folders under the list's root holding `.git` that no game names. `games::with_game` builds the new text with serde_json's `preserve_order`, so the list keeps its order (the owner's list round-trips byte for byte). The window then reads Home again |
+
+### Since you last played and the update check (0.28.0, 0.35.0)
+
+| Part | How |
+| --- | --- |
+| Which are ours to check | The archive's kept files (`rimworld-archive list`), matched by name to the updated items: the mods our code ties into, and the game's own file when the game updated |
+| What changed in what we patch | `rimworld-patches targets --updates`, each change with `newestKept`; counted only when kept since the moment compared with and from an update since (`src/lib/mods/sinceLastPlayed.ts`) |
+| Not kept yet | A tied update whose newest kept build is older than that moment; Keep the new builds runs `rimworld-archive snapshot`, then checks again |
+| The check (0.35.0) | Kit 1.61.1's `rimworld-update-check`, found by its `update-check` surface; `other_code_page::update_check`, with `--since` the moment Since you last played compares with. What is ours: the repository's `config/update-check.json` and `config/temporary-patches.json`. `summariseCheck` decides what is shown; five updates before "and N smaller ones" |
+| Shared reading (0.67.0) | `src/lib/mods/sinceReading.ts`, asked by the Mods page and the page list's scan alike |
+
+### Memory (0.23.0)
+
+| Part | How |
+| --- | --- |
+| Finding the watch | The `memory-watch` surface (kit 1.47.0) on `watch`, `watch-report`, `watch-status`, `watch-stop` and `watch-mark` (`memory_page.rs`) |
+| Following it | The window reads `watch-status` (about 0.2 s) every 5 seconds while a watch runs. The request that started it lasts as long as the watch and carries its progress; it is kept outside the page (`watching.svelte.ts`), so changing page loses nothing. A watch started elsewhere is followed the same way, its bar counted from its own clock |
+| Marks | B puts the keyboard in the mark box and takes the moment then, not when Enter is pressed. Five quick marks mark at once. The kit stores them beside the samples, and the report names them beside the jumps |
+| Kept watches | The twenty newest, with their length, state and what they read; choosing one shows its whole report (`ReportView`). They join Go to anything |
+
+### Tools beside the games, and loading (0.24.0)
+
+| Part | How |
+| --- | --- |
+| Kind | An entry may carry `"kind": "tools"` (`GameKind` in `games.rs`, carried to the window on Home's answer). `GAME_ONLY_PAGES` (`src/lib/home/kinds.ts`: Atlas, Logs, Memory, Game files, Mods) show `NotForTools` instead of asking the host, and their buttons have a dashed edge |
+| Loading | Every `ProgressBar` and `Placeholder` carries `data-picture-wait`, and so does the globe while it draws. Save a picture waits while any is on the page, looking every 250 ms, and takes the picture after two looks in a row find none. The Memory page's bar for a running watch passes `holdsPicture={false}` |
+| Placeholders | Under each page's first reading: rows for the Code map, Reports, Settings and Tests; a `globe` shape for the Atlas |
+
+### About (0.25.0)
+
+| Part | How |
+| --- | --- |
+| The version in sight | The status bar's version button, from `package.json` at build time (`__COMPANION_VERSION__` in `vite.config.ts`) |
+| Build facts | `src-tauri/build.rs` records the commit, the moment and the build output folder, and runs again whenever the repository moves to another commit |
+| The page | `about_page.rs` reads the running version, the repository's `package.json` version, its changelog (each version's number, date and opening paragraph), commits since the build, the remote as a web address, the installer for the repository's version (found by its name's ending, so no product name is in code) and the notices' "In the program" table. Whatever cannot be read is left out, never a failure |
+| Where it stands | Newer version waiting, up to date with commits not yet in a version, or up to date (`src/lib/about/presentation.ts`) |
+
+### Clean up (0.27.0)
+
+| Part | How |
+| --- | --- |
+| Listing | The kit's `cleanup` (1.50.0) for every repository with `config/cleanup.json` (else the first on the list, for the kit's own leftovers), items merged by path, groups summed, largest first |
+| Home | `CleanupNote` from 5 GB, from the latest listing shared with the panel (`latest.svelte.ts`), read at most every half hour. `formatSize` gives GB from 1 GB |
+
+### Themes (0.33.0, 0.76.0, 0.77.0)
+
+| Part | How |
+| --- | --- |
+| The format | `themes/*.json`: schema 1, an id, a name, an optional author, twenty roles, and since 0.76.0 twelve code colours, all or none. Built-ins' ids start `org.phobosdthorga.companion.`, which a person's may not |
+| The checks | `companion_core::themes::usable` (the host's, the authority) and `src/lib/theme/presentation.ts`'s `problems` (the window's, for the maker's live list), the same rules, each tested on every theme file |
+| Kept | `themes/<id>.json` and `chosen.json`; a theme with the same id is a revision, the same colours under another id are refused |
+| Drawn | `applyTheme` sets only the roles, only as `#RRGGBB`; the window remembers the colours in its own storage so the next start draws in them at once, and the host's answer confirms them |
+| Open and Save | Windows' own dialogs, opened by the host (`pick::open_file`, `pick::save_file`) |
+| Making one | `ThemeMaker.svelte`: starts from any theme; a colour box and a `#RRGGBB` box per role, in groups; a preview in the draft's colours; each failing pair listed; Keep and use waits until all pass |
+| Code colours from VS Code (0.77.0) | `companion_core::code_colours::from_vscode`: comments and trailing commas taken out first, then `tokenColors` and `editor.foreground`; `#RGB` to `#RRGGBBAA` read as VS Code reads them, a see-through part drawn solid and said so; semantic colours left out. Files it builds on (`include`) followed from the same folder only, at most four, 512 KB each. `installed` lists the extension folders of VS Code, Insiders, VSCodium and Cursor, on Windows, Linux and macOS, with labels from each `package.nls.json`. A colour under 4.5:1 takes the theme's own code colour for its kind (the longest Dark+ selector its own starts with). The worker makes the set a Shiki theme of its own; each piece's colour is written into the HTML only when it is `#RRGGBB` |
+
+### The Guide (0.34.0)
+
+| Part | How |
+| --- | --- |
+| Entries | `guide/*.md`, one file each ([guide-entries.md](guide-entries.md)), built into the window with Vite's `import.meta.glob` |
+| Reading | `src/lib/guide/entries.ts`: header lines, then paragraphs, steps, bullets, small headings, **bold**, `code` and links; nothing else is markup |
+| The page | `GuidePage.svelte`: a search and the entries by kind on the left, the entry on the right with Take me there and See also. Each entry opened is a step of the trail. The search weighs title over search words over text |
+| F1 | `guide.here`: the Guide at `page-<page>` |
+| Go to anything | `fromGuide`: every entry, by title and search words |
+
+### Explorer (0.41.0)
+
+The tool is kit 1.65.1's heap reader, through `rimworld-perf look-serve`; [Running the kit](#running-the-kit) says how the program
+holds it. Addresses are good within one snapshot only: a trail step back to an object from an earlier snapshot says it is gone and
+offers the overview. Trail steps name an object by a token and the snapshot's number, never by its memory address.
+
+### Safe copies (0.42.0 to 0.44.0)
+
+| Part | How |
+| --- | --- |
+| The tools | The kit's `safe-copies status`, `run` and `verify` (1.66.0), through `src-tauri/src/safe_copies.rs` |
+| Which repositories | Those of the game with `config/safe-copies.json`, and from 0.44.0 any repository on the list keeping `config/safe-copies/<game>.json` (each request naming the list with `--game`) |
+| No second yes on Copy now | It never deletes or replaces at the source (from kit 1.68.0 it lets go only older copies beyond the number a set keeps), and puts an earlier copy aside before replacing it |
+
+### Mod list (0.45.0 to 0.49.0)
+
+| Part | How |
+| --- | --- |
+| The tools | The kit's `mod-list` (1.72.0 onwards: `check`, with `--online` when Ask Steam too is on; `fix`, `undo`; 1.73.0 `mods`, `--move`, `--enable`; 1.74.0 `sort`, `rules`; 1.76.0 `lists`, `compare`, `load`, `save`, `forget`, `export`; 1.77.0 `subscribe`, `unsubscribe`) |
+| Games | RimWorld and Project Zomboid (kit adapters); any other game is told in words its list is not read yet |
+| Home | A note when a game's list has problems or warnings, read without Steam at most every half hour. The check is kept in `modlist/latest.svelte.ts`, so Home's note and the page see the same answer |
+| Editing | 40 rows a page; a switched-on mod goes just before the first that needs it, else last; Put it at takes the place number of the row pressed. The carry keys are the list's own (Up, Down, Page Up, Page Down, Home, End, Enter, Escape, Space) |
+| Sort | Loops are broken by strength (yours, own, needs, community), the weakest rule set aside and named. The full re-sort puts the game's own first, then by name. The first 60 moves are shown |
+| Shades | 14 % of a role over the raised surface, worked out from each theme; both theme checks hold words to them |
+| Saved lists | A game start is RimWorld's log's `Started:` line (else the Logs folder's time); the copy is kept only when the list is unchanged more than two minutes after the game last wrote its log. 8 lists shown per source |
+| Steam | Subscribe and Unsubscribe borrow the game's own Steam library; downloads waited for up to 15 minutes with bytes so far; each call up to 30 s; success read back from Steam's own item state; at most 500 items a press |
+
+### Pictures and sounds (0.50.0, 0.53.0, 0.57.0)
+
+| Part | How |
+| --- | --- |
+| The tools | Kit 1.78.0's `changes entry` names each binary file's `media` kind and its `sizeBefore` and `sizeAfter`; the kit never decodes anything. Kit 1.82.0: `installs` names each copy's folder; `changes commits` and `entry --commit` with no changelog; `mod-list mods` names each mod's `preview`; `rimworld-textures pairs` (surface `texture-pairs`) pairs pictures with encoded textures and says they are stored upside down |
+| The host | `changed_files.rs` reads a side's bytes with git (`git cat-file`, no lock) from the commit or its parent, or for changes in no commit yet, the last commit and the file on disk. `viewable.rs` hands over any other file a kit answer named |
+| Pictures | The window decodes PNG, JPEG, GIF, WebP, BMP, ICO, AVIF and SVG (through an image element, so an SVG's scripts never run); `dds.ts` decodes DDS: BC1 to BC5, BC7 and plain 8-bit kinds; BC6H and the rest are named, not drawn. At most 8,192 pixels a side |
+| DDS checks | Bit-exact with Pillow 12.3 on random blocks of every kind (all eight BC7 modes), on 60 of Workers & Resources' DXT1 and DXT5 textures and on 10 of the owner's BC7 RimWorld textures. BC7's partition and anchor tables were derived from Pillow's decoder, not typed from memory; `dds.test.ts` holds known rows |
+| Comparing | `pixels.ts`: two pixels both wholly see-through count as the same; pictures of different sizes are compared from their top-left corners. Changed pixels are drawn solid in the accent colour and the rest dimmed grey (30 %), with a box round them and a count in words. Tolerance (`TOLERANCES` in `viewing.ts`): Exact, 4, 16 or 64 levels |
+| Fit (0.52.0) | `fitScale` in `viewing.ts`: no taller than half the window, enlarged by a whole number when small so pixels stay square, shrunk when large |
+| Sounds | The browser decodes OGG, Opus, WAV, MP3, FLAC, M4A and AAC at 48 kHz; `sound.ts` measures BS.1770 integrated loudness (libebur128's K-weighting for any rate), sample peak, the band above 4 kHz, and the whine search (bands 4 to 20 kHz, a line fitted against log frequency, 12 dB; a band more than 80 dB under the loudest held at that floor). The whine alone is made with Web Audio: twice band-passed, shifted down to 1 kHz, low-passed, levelled to -20 LUFS with its peak under -6 dBFS. The spectrogram is linear in frequency, 90 dB range, marks at 4 and 15 kHz |
+| One compare everywhere | `src/lib/media/MediaCompare.svelte` takes two named sides and shows them as the code viewer does (`source.ts`); `ChangedFile`, `ModFileCompare`, `TexturePairs`, `ModPreview`, the screenshot viewer and `RepositoryCommits` each build one |
+| Remembered (0.57.0) | `viewSettings.svelte.ts`: view, zoom, ground, tolerance, side and marks, per place; kept between runs in the window's storage (`companion.viewSettings`), checked as read back (`viewSettingsKept.ts`). `MediaCompare` keeps the last pictures on screen while the next are read |
+| Loose bits (0.57.0) | `src/lib/media/edges.ts`, ported from phobos-rimworld's `edge_check.py`: specks, loose strokes, joined fringe and haze. Erosion and dilation by a disk through an exact distance transform. Equal to the Python figures on 53 shipped textures; up to 1.7 s on the largest, so worked out only while the marks are on |
+
+### Picks (0.55.0)
+
+| Part | How |
+| --- | --- |
+| The tools | The kit's `picks` (1.83.0): `list` (surface `picks`), `answer`, and `offer` and `settle` for the art tools |
+| The host | `picks_page.rs` asks only repositories that keep `config/picks.json`, unredacted, and remembers every file a pick names (`viewable.rs`); the worked example above follows a press |
+| The window | `src/lib/picks/`: waiting ones first (`presentation.ts`); `PickView.svelte` with every try small and `MediaCompare` against the one in use or any other try; `PicksNote.svelte` on Home. Grounds: a picks file's own colours, after Checks, Dark and Light |
+
+### Going online (0.61.0 to 0.65.0)
+
+| Part | How |
+| --- | --- |
+| Gate lights | `repo_status.rs` runs the kit's `repos status` (1.89.0) for the game's repositories; `src/lib/online/GateLights.svelte` on Home, `OnlinePanel.svelte` in Settings (asks before switching off a severe one), `AboutOnline.svelte` on About |
+| The nightly watch | phobos-rimworld's `.github/workflows/upstream-watch.yml` calls the kit's reusable `nightly-feed.yml` at a tag (`kit-ref`), which runs `rimworld-upstream pending --clone-into --feed` and commits to `companion-results` only when the answer changed. `nightly.rs` reads it with `feeds read --root`; the kit checks each file's size, hash and kind, and keeps the last good copy. `TheirCodeChanged.svelte` on Home. A next game needs its own `upstream` adapter and a caller workflow |
+
+The design and the rest of the slices are in [online.md](online.md).
+
+### The page list, tabs and scans (0.66.0, 0.67.0)
+
+| Part | How |
+| --- | --- |
+| The page list | `src/lib/shell/PageRail.svelte`, in the groups Play, Code and Tools (0.22.0); each page's key from `keyFor` (`src/lib/shortcuts/state.svelte.ts`); 224 px wide |
+| The game picker | `src/lib/home/GamePicker.svelte`; Home's `GamesPanel.svelte` lists every game with its date and **Look at this** |
+| Tabs | `Tabs.svelte` draws any page's row; `tabs.ts` holds `PAGE_TABS` and the rules: the place's `tab` focus key, else the tab holding an older `panel`, else one a focus key names. `goTab` (`navigation.svelte.ts`) makes each change a trail step. Keys `tab.previous` (;), `tab.next` ('), `tab.1` to `tab.9` (Alt + 1 to 9) |
+| Counts | `waiting.svelte.ts`: each a reading a page already makes (`readModList` then a `sortModList` preview, never applied; `readInstalls`, `readTextures` and `preflight`; `readSince` and `readPatches`; `readAbout`; decisions and picks while agent features show; the Tests page's "seen" shelf; settings to look at). A page's number is its parts added up (`waiting.ts`: `withPart`, `counted`); a part that could not be read adds nothing, so unknown shows nothing |
+| When | For each game looked at, each Look again, a change of agent features, and the window's `focus` once the last scan is `SCAN_STALE_MS` old (five minutes). Each scan runs only where the game's page can serve (`pageServes`) |
+| A mark, not a number | `waiting.marks`: About's diamond, its words the button's description |
+
+### Publish (0.69.0)
+
+| Part | How |
+| --- | --- |
+| The preview | `src/lib/publish/bbcode.ts` parses the kit's tags into a tree, drawn by Svelte as elements and text, never `{@html}` |
+| Home | `PublishNote.svelte`: the kit's `pending` per repository, at most every half hour |
+
+The host's checks are under [What each page's host checks](#what-each-pages-host-checks); the design is
+[publishing.md](publishing.md).
+
 ## Tests and the gate
 
 **The gate is `python scripts/check-all.py`**, a thin caller for phobos-modkit's gate reading `config/gate.json`. It prints only
@@ -408,7 +734,8 @@ A checklist, in the order the work usually goes. Each item is something a test o
 ## Where to read more
 
 - **The Guide** (`guide/`, F1 in the program): what each page does, for the person using it.
-- **The design record** (`docs/design-record.md`): why each piece was built, the owner's choices, and the questions it answered.
+- **The design record** (`docs/design-record.md`): a decision log: what the owner asked for, what they chose, the agent's
+  choices for them to revise, and the risks.
 - **The kit's manifest and envelope** (`external/phobos-modkit/docs/manifest.md`): effects, surfaces, progress lines, blocks.
 - **Cross-links** (`docs/cross-links.md`): the trail, addresses and every page's focus keys.
 - **Going online** (`docs/online.md`), **Publishing** (`docs/publishing.md`), **Debugging** (`docs/debugging.md`): the designs

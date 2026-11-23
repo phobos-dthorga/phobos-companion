@@ -9,6 +9,9 @@ Maintained from 9 November 2026.
 - **The README is a front door, and the Guide is the manual** (the owner's docs rewrite, step 7, 24 Nov 2026). The README says
   what the program is, what it needs before the window opens, how to install it and its first steps, then "press F1"; its "Read
   this first" bullets moved into the Guide's entries for their pages, or were dropped where the Guide already said them.
+- **The design record is a decision log** (the owner's docs rewrite, step 7, 24 Nov 2026). Each section keeps the request, the
+  owner's choices, the agent's choices and the risk; its tables of how each part works moved to `docs/architecture.md`, "How each
+  part works", and "Who chose what" points at the sections instead of stopping at 19 Nov.
 
 ## [0.79.0] - 2026-11-24
 

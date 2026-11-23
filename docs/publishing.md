@@ -4,7 +4,9 @@
 Steam, its Workshop page edited with a live preview, the change note built from its changelog, and buttons to prepare, upload
 privately, make public and read Steam back. It sits on phobos-modkit's `steam-publish`, which came from phobos-ostranauts'
 scripts on 8 November 2026. **Designed and built 23 November 2026 (Companion 0.69.0, kit 1.97.0 to 1.102.0).** Not yet tested
-on screen, and **nothing has been sent to Steam from it yet**: the first real upload is the owner's press.
+on screen, and **nothing has been sent to Steam from it yet**: the first real upload is the owner's press. **The owner's
+checklist for the first uploads** (a private and a public Ostranauts update as proof, then a RimWorld mod's first) is
+[first-upload.md](first-upload.md).
 
 ## The owner's request and choices
 

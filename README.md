@@ -5,6 +5,8 @@ what you did, and what your saves and logs say, without typing a command.
 
 ## Read this first (gotchas)
 
+- **Press F1 for the Guide.** It opens at the entry for the page you are on: what each page, tab and button does, and How do
+  I…? answers in numbered steps. It is the manual; this README covers installing and the few things to know first.
 - **Which version is this?** It is in the bottom right of the window; press it for the About page (the I key), which also says
   whether a newer version is waiting in the repository and where its installer is.
 
@@ -22,7 +24,8 @@ what you did, and what your saves and logs say, without typing a command.
   and lists the same facts in tables.
 - **A RimWorld save holds only half of a colonist's mood.** The mood report counts the remembered events exactly and gives the
   rest (rooms, pain, beliefs) as one figure; see the [design record](docs/design-record.md#colony-mood-built-10-nov-2026).
-- **Not yet tested on screen.** It builds and passes its checks; nobody has judged the window yet.
+- **Not yet tested on screen, except where the owner has said so.** It builds and passes its checks, and the owner has used the
+  window since 0.66.0; a page or button counts as tested only once the owner says it works.
 - **The Changes page lists what each changelog says changed, for any game**, and **Show the code** opens the code behind an
   entry: the commit that wrote it, its files with code first, coloured by language. Nothing extra is written in a changelog for
   this. **A commit that wrote several entries is shown whole**, with the others named.
@@ -34,7 +37,7 @@ what you did, and what your saves and logs say, without typing a command.
   with what calls it, what it calls, what it belongs to, builds on, overrides, patches and uses; press anything to put it in the
   middle. **C# is exact from what was last built, so build first**; Lua, and C# with nothing built, are read by name and drawn
   dashed.
-- **Back and Forward work across everything** (the buttons under the page bar, the , and . keys, or the mouse's side buttons),
+- **Back and Forward work across everything** (the buttons in the bar along the top, the , and . keys, or the mouse's side buttons),
   and **/ opens Go to anything**: one search over pages, code, changelog entries, test rows, settings and reports. **Copy address**
   gives a link to where you are, to paste back in later.
 - **The Logs page reads the game's last log** (RimWorld's today): messages grouped, what is new since the run before, and each
@@ -62,15 +65,17 @@ what you did, and what your saves and logs say, without typing a command.
   when the newest copy is a week old.
 - **Who is working on what** (Home): what each agent session holds on the claims board, and for how long.
 - **Decisions** (D): every choice an agent made for you to revise, with its options and the agent's lean chosen to begin
-  with; **Decide** takes it in one press. Home says how many wait. The page bar is grouped into Play, Code and Tools.
+  with; **Decide** takes it in one press. Home says how many wait. The pages are a list down the left, grouped into Play,
+  Code and Tools, each with its key beside it.
 - **Game files** (W): what changed since you last played (the game and its Workshop items), your saves, your screenshots and
   where the space goes, for any Steam game. Read only.
-- **Keyboard shortcuts, one key each**: 1 to 9 for the first nine pages and G for Logs, [ and ] for the games, ? for the full list. They never act while
+- **Keyboard shortcuts**: 1 to 9 open Home, Reports, Atlas, Tests, Mods, Changes, Timeline, Code map and Settings, G opens Logs,
+  F1 the Guide, [ and ] step through the games, and ? shows the full list; the page list shows each page's key. They never act while
   you type in a box. **Change any of them, or turn them off, under Settings, Change keyboard shortcuts.**
 - **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central
   settings file**, for every repository and game; a repository's own settings still win where they set something.
 - **Anything that takes a while shows a progress bar** with what it is doing, the steps already done, and a count where the work
-  can be counted (else about how long is left, from last time). A strip under the page bar follows any work, on any page.
+  can be counted (else about how long is left, from last time). A strip follows any work, on any page.
 - **The Mods page starts with "Before you play"**: ready to play, or what needs building, installing or encoding first, each
   with its button. Each mod shows what it has now beside what installing would bring (changelog entries, files, settings, things
   to look out for in play), and what going back to each backup would take away. **Its buttons change your installed mods and
@@ -78,8 +83,12 @@ what you did, and what your saves and logs say, without typing a command.
   building doesn't. **Remove repeated backups** deletes backups that repeat the one before them, keeping the oldest of each run.
   A repository opts in with `config/installs.json`; see the
   [design record](docs/design-record.md#the-mods-page-built-18-nov-2026).
-- **What it changes, and only when you ask:** your test verdicts, in its own folder; your installed mods and their textures, from
-  the Mods page; the repository's build output when you press Build; and the central settings file, from the Settings page. It never changes a save, and never deletes anything.
+- **What it changes, and only when you ask:** your test verdicts, picks and decisions, in its own folder; your installed mods and
+  their textures, from the Mods page; the repository's build output when you press Build; a game's list of active mods, one
+  change at a time with a backup and an undo, from the Mod list page; your Workshop items, only on your press and yes, from the
+  Publish page; and the central settings file, from the Settings page. **It never changes a save.** It deletes only what you
+  choose and confirm on Clean up, and repeated backups when you press Remove repeated backups. **Back up your records** is the
+  one thing it does by itself (every few hours while it is open). The Guide's entry for each page says exactly what it writes.
 - **It needs git**, to read your projects' history; every page says so if it is missing. **The installer brings its own Python
   and tool kit** (from 0.36.0), **and the kit's compiled tools ready-built** (from 0.38.0: reading a save needs no Rust), so nothing else need be installed. Run beside the repository it was built from, it uses that
   repository's kit and the Python on the PATH instead, as before; `PHOBOS_COMPANION_KIT` and `PHOBOS_COMPANION_PYTHON` still name

@@ -1,8 +1,10 @@
 # D'thorga Companion: design record (9 Nov 2026)
 
-**Steps 1 to 4 of this record are built: the window, its theme, its checks and the "where was I?" home page; so are the report
-viewer's first stage, charts, the colony mood report and the atlas (10 Nov 2026). The owner approved the mock-up on 9 Nov 2026 ("I like the
-purple vibe"); nothing built has been judged on screen yet.** The research behind it, with sources, is phobos-rimworld's
+**Status (23 Nov 2026): everything in this record's sections marked built is built, through 0.69.0; the
+[changelog](../CHANGELOG.md) says what each version delivered.** The record is kept release by release: each section is the design
+and the as-built notes of one piece of work, and the program has written to games, mod lists and the Workshop on the owner's press
+since the Mods page (18 Nov 2026), so "the first version only reads" below is history. The owner approved the mock-up on 9 Nov 2026 ("I like the
+purple vibe") and has used the window since 0.66.0; a page counts as tested on screen only once the owner says so. The research behind it, with sources, is phobos-rimworld's
 [research record](https://github.com/phobos-dthorga/phobos-rimworld/blob/main/docs/development/tools-desktop-research.md). The
 home page mock-up the owner is judging is private to the owner; this record describes what it shows.
 
@@ -1387,7 +1389,7 @@ jump; counts only for what waits on you; the list's rows 40 px; each game's last
 | The game picker | `src/lib/home/GamePicker.svelte`; Home's `GamesPanel.svelte` lists every game with its date and **Look at this** |
 | Tabs | `src/lib/shell/Tabs.svelte` draws any page's row; `src/lib/shell/tabs.ts` holds `PAGE_TABS` (every page's tabs, the one list the pages and Go to anything read) and the rules: the place's `tab` focus key, else the tab holding an older `panel`, else one a focus key names. `goTab` (`navigation.svelte.ts`) makes each change a trail step |
 | Keys | `tab.previous` (;), `tab.next` ('), `tab.1` to `tab.9` (Alt + 1 to 9), in `actions.ts`, offered while a tab row is on screen |
-| Settings | Six tabs; the settings as one line each that opens (kit 1.95.0 gives each a short `name`), with All, Every game, each game, and Needs you |
+| Settings | Six tabs (seven from 0.69.0, with Publishing); the settings as one line each that opens (kit 1.95.0 gives each a short `name`), with All, Every game, each game, and Needs you |
 | Games | Game-free: the list, the picker and the tabs name no game, and a game's own pages keep their places. A tools entry shows the game-only pages dashed, as before |
 
 **Agent choices, owner to revise:** the tabs' names and order; which counts the Tests page gives (the "seen" shelf only); the right
@@ -1453,9 +1455,9 @@ the Steam Workshop** (designed and built 23 Nov 2026, 0.69.0) is in [publishing.
 
 ## Limits
 
-- The packaged program finds the kit by the path it was built from, or `PHOBOS_COMPANION_KIT`. It cannot be handed to anyone else
-  yet.
-- It needs Python on the PATH, or `PHOBOS_COMPANION_PYTHON`.
+- Run beside the repository it was built from, it uses that repository's kit and the Python on the PATH; elsewhere it uses the
+  Python and kit its installer brought (from 0.36.0), or those `PHOBOS_COMPANION_KIT` and `PHOBOS_COMPANION_PYTHON` name. What
+  still stands between it and other people is in the [release audit](release-audit.md).
 - `node_modules` sits inside this repository, in a synced folder if the clone is in one, as Observatory's does.
 - The Timeline finds a game's history log by the game's ID on the owner's list, which must match the name in each repository's
   `config/installs.json`. A game whose tools write no log shows only what its repositories did, and says so.

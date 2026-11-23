@@ -6,7 +6,7 @@ go: settings
 words: options, preferences, folders, paths, keys, theme, backup, games, agents, online, internet, workshop uploads, publishing
 see: task-change-folder, task-change-key, task-change-theme, task-agent-features, task-going-online, task-records-backup, task-add-game, task-clean-up
 ---
-**How the Companion works for you, and where the tools keep and find things**, in six tabs:
+**How the Companion works for you, and where the tools keep and find things**, in seven tabs:
 
 - **Look and keys:** [choose or make a theme](task-change-theme), and [change any key, or turn one off](task-change-key).
 - **Games:** [add a game Steam has installed](task-add-game).

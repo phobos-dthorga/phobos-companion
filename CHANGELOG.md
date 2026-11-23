@@ -4,6 +4,14 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The README and the Guide describe the window as it is now** (the owner's docs rewrite, step 1, 23 Nov 2026). The README
+  opens with F1 and the Guide, names the pages the 1 to 9 keys really open, has the page list down the left in place of the page
+  bar, lists everything the program writes (picks and decisions, the Mod list, the Publish page) and says plainly what it deletes
+  on Clean up; the Guide's Settings entry says seven tabs, not six. The design record's opening and its Limits no longer say
+  nothing has been judged on screen or that it needs Python on the PATH.
+
 ## [0.69.1] - 2026-11-23
 
 A fix from the owner's report of 23 Nov 2026. Not yet tested on screen.
@@ -17,14 +25,6 @@ A fix from the owner's report of 23 Nov 2026. Not yet tested on screen.
   picture, and a failure that does happen says so in words, never as "[object Event]".
 - **The browser checks can run a page under the installed program's security policy** (`useInstalledPolicy`), as they never had:
   the Picks page's picture is checked that way, with its tries readable and with them refused.
-
-### Fixed
-
-- **The README and the Guide describe the window as it is now** (the owner's docs rewrite, step 1, 23 Nov 2026). The README
-  opens with F1 and the Guide, names the pages the 1 to 9 keys really open, has the page list down the left in place of the page
-  bar, lists everything the program writes (picks and decisions, the Mod list, the Publish page) and says plainly what it deletes
-  on Clean up; the Guide's Settings entry says seven tabs, not six. The design record's opening and its Limits no longer say
-  nothing has been judged on screen or that it needs Python on the PATH.
 
 ## [0.69.0] - 2026-11-23
 

@@ -15,6 +15,11 @@ In four tabs:
 - **What it asks the internet:** each kind, the address it contacts and whether it is on, with **Going online settings** to change them (see [choose what the Companion asks the internet](task-going-online)).
 - **Built with:** the libraries it uses, and their licences.
 
+### What the Companion changes
+Only when you ask: your test verdicts, picks and decisions, in its own folder; your installed mods and their textures, from [Mods](page-mods); the repository's build output when you press Build; a game's list of active mods, one change at a time with a backup and an undo, from [Mod list](page-modlist); your Workshop items, only on your press and yes, from [Publish](page-publish); and the central settings file, from [Settings](page-settings).
+
+**It never changes a save.** It deletes only what you choose and confirm on [Clean up](task-clean-up), and repeated backups when you press **Remove repeated backups**. **Backing up your records** is the one thing it does by itself, every few hours while it is open. Each page's entry says exactly what it writes.
+
 ### Keys
 - **I** opens About.
 - **;** and **'** step to the tab before or after; **Alt + 1** to **Alt + 9** jump to a tab by its place. **Left** and **Right** move along the tabs when one has the keyboard. Each tab is a step of the trail, so **Back** returns to the tab you left.

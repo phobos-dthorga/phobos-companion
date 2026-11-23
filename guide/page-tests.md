@@ -18,5 +18,7 @@ The rows are on shelves:
 
 Each row says **What to do** and **What passes**. Press **Passed** or **Failed**, add a note if you like, or **Take it back**.
 
+**Rows are joined to code:** a row names the code that notes it, the [Code map](page-codemap) names the rows a method watches, and each version on [Changes](page-changes) names the tests still waiting on it.
+
 ### Keys
 - **4** opens Tests.

@@ -8,7 +8,7 @@ see: task-log-fault, page-codemap, task-going-online, task-explain-fault
 ---
 **What the game's log says about its last run.** Messages that differ only in names and numbers are grouped, most serious and most frequent first, with what is new since the run before and the mods each one points at.
 
-Open one to see its stack: a step found in your repositories opens on the [Code map](page-codemap), where its history shows the changes that touched it.
+Open one to see its stack: **Find in the code** opens a step found in your repositories on the [Code map](page-codemap), where **Show its history** lists the changes that touched it, and **backups from before this** leads to the Mods page's backup from before a change.
 
 **Reporting a fault.** Under the mods a message points at:
 

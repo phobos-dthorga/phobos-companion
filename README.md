@@ -1,102 +1,32 @@
 # D'thorga Companion
 
-**One desktop program for every game you mod** (search for it as dthorga too). It will show when you last worked on each game,
-what you did, and what your saves and logs say, without typing a command.
+**One desktop program for every game you mod** (search for it as dthorga too). It shows when you last worked on each game, what
+you did, what changed in your mods and their code, what your saves and logs say, and what is ready to play, without typing a
+command. It can also install, back up and publish your mods, always on your press.
 
-## Read this first (gotchas)
+**Press F1 for the Guide.** It opens at the entry for the page you are on: what each page, tab and button does, and How do I…?
+answers in numbered steps. **The Guide is the manual**; this page covers only what you need before the window opens.
 
-- **Press F1 for the Guide.** It opens at the entry for the page you are on: what each page, tab and button does, and How do
-  I…? answers in numbered steps. It is the manual; this README covers installing and the few things to know first.
-- **Which version is this?** It is in the bottom right of the window; press it for the About page (the I key), which also says
-  whether a newer version is waiting in the repository and where its installer is.
-
-- **You need a list of your games first**: `.local/games.json` in this folder, naming each game and its repositories.
-  `config/games.example.json` shows how. Without one, the program says so and shows nothing else. A game may also name its
-  folders (`places`: `data`, `saves`, `screenshots`) and its Steam app ID (`steam_app_id`) for the Game files page. **An entry
-  may be a set of tools instead of a game** (`"kind": "tools"`, 0.24.0): it gets the code and history pages, and the pages about
-  saves, logs, a running game and game files say they have nothing for it. **The Companion 0.23.0 and older refuse a list with
-  `kind` in it**: install 0.24.0 first.
-- **A game's `id` in that list must match the tools' name for it** (`rimworld`) for its reports to appear.
-- **It shows where you left each game, and the reports that need nothing typed**, with charts where a report has them, such as
-  RimWorld's colony mood report. Reports that need an input, read online or change anything aren't offered yet.
-- **The Atlas page draws your newest save's world** as a globe: biomes, climate, terrain, pollution, places, roads and rivers.
-  The first time, reading the save takes a minute; after that, a few seconds. On a PC that cannot draw it, the page says so
-  and lists the same facts in tables.
-- **A RimWorld save holds only half of a colonist's mood.** The mood report counts the remembered events exactly and gives the
-  rest (rooms, pain, beliefs) as one figure; see the [design record](docs/design-record.md#colony-mood-built-10-nov-2026).
-- **Not yet tested on screen, except where the owner has said so.** It builds and passes its checks, and the owner has used the
-  window since 0.66.0; a page or button counts as tested only once the owner says it works.
-- **The Changes page lists what each changelog says changed, for any game**, and **Show the code** opens the code behind an
-  entry: the commit that wrote it, its files with code first, coloured by language. Nothing extra is written in a changelog for
-  this. **A commit that wrote several entries is shown whole**, with the others named.
-- **The Timeline page shows what happened to each game's mods over time**: an at-a-glance row a mod with a mark on each day,
-  and every fact day by day beneath. **Read it as it stood** opens any changelog exactly as it was then, marking what has been
-  reworded or taken out since. Installs, go-backs, backups, builds and encodings are recorded from 19 Nov 2026 on, in the history
-  log in the Companion's own folder.
-- **How code connects**: in the code viewer (How it connects) and on the Code map page, any method, class, Def or function drawn
-  with what calls it, what it calls, what it belongs to, builds on, overrides, patches and uses; press anything to put it in the
-  middle. **C# is exact from what was last built, so build first**; Lua, and C# with nothing built, are read by name and drawn
-  dashed.
-- **Back and Forward work across everything** (the buttons in the bar along the top, the , and . keys, or the mouse's side buttons),
-  and **/ opens Go to anything**: one search over pages, code, changelog entries, test rows, settings and reports. **Copy address**
-  gives a link to where you are, to paste back in later.
-- **The Logs page reads the game's last log** (RimWorld's today): messages grouped, what is new since the run before, and each
-  one's stack. **Find in the code** opens a step of the stack on the Code map, where **Show its history** lists the changes that
-  touched it, and **backups from before this** leads to the Mods page's backup from before a change.
-- **Test rows are joined to code**: a row on the Tests page names the code that notes it, the Code map names the rows a method
-  watches, and each version on the Changes page names the in-game tests still waiting on it.
-- **Patch badges** (RimWorld): under a Code map picture, each method our code patches says how many other mods patch it too and
-  what the last update changed in it; a red dotted ring marks the crowded or changed ones in the picture.
-- **Home says which tool kit each repository uses**, how far behind it is, and what moving its pin would bring.
-- **The Make-up page shows what each repository is made of** (key M): blocks by mod, folder and file, each part's mix, growth
-  since the first commit, how much is tested in game, and what players get. Measure in lines, size on disk or files. The Code
-  map lists the busiest code before you search.
-- **Settings to look at** (Mods page): every setting your mods added, removed or gave a new default, until you mark it as looked
-  at; Home says how many are new, and the Timeline shows each on the day it was made.
-- **Save a picture** (P) draws the whole page, scrolled parts included, into your Pictures (a D'thorga Companion folder) and
-  copies it, ready to paste into a message.
-- **Something's off** (the ! key, or its button beside Save a picture): saves a picture of the page as it is, with its address and
-  a few words of yours (or none), for the next agent session to read when it starts. Home lists the notes still waiting, and what
-  was done about the others. **It, the Decisions page and the claims board are features for AI agent sessions**: from 0.37.0
-  they show only where a repository on your list uses them (an `AGENTS.md`, a `CLAUDE.md`, a `.claude` folder or a
-  `config/decisions.json`), or once you switch them on in Settings.
-- **Back up your records** (Settings page): copies the Companion's own records (verdicts, history log, marks, screen notes,
-  shortcuts, central settings) into a folder you choose, which your backup keeps; **choose that folder first**. Home reminds you
-  when the newest copy is a week old.
-- **Who is working on what** (Home): what each agent session holds on the claims board, and for how long.
-- **Decisions** (D): every choice an agent made for you to revise, with its options and the agent's lean chosen to begin
-  with; **Decide** takes it in one press. Home says how many wait. The pages are a list down the left, grouped into Play,
-  Code and Tools, each with its key beside it.
-- **Game files** (W): what changed since you last played (the game and its Workshop items), your saves, your screenshots and
-  where the space goes, for any Steam game. Read only.
-- **Keyboard shortcuts**: 1 to 9 open Home, Reports, Atlas, Tests, Mods, Changes, Timeline, Code map and Settings, G opens Logs,
-  F1 the Guide, [ and ] step through the games, and ? shows the full list; the page list shows each page's key. They never act while
-  you type in a box. **Change any of them, or turn them off, under Settings, Change keyboard shortcuts.**
-- **The Settings page lists every folder and file the tools read**, and where each value comes from. **Change writes the central
-  settings file**, for every repository and game; a repository's own settings still win where they set something.
-- **Anything that takes a while shows a progress bar** with what it is doing, the steps already done, and a count where the work
-  can be counted (else about how long is left, from last time). A strip follows any work, on any page.
-- **The Mods page starts with "Before you play"**: ready to play, or what needs building, installing or encoding first, each
-  with its button. Each mod shows what it has now beside what installing would bring (changelog entries, files, settings, things
-  to look out for in play), and what going back to each backup would take away. **Its buttons change your installed mods and
-  encode textures** (Workshop mods' too), asking first; installing, going back and encoding wait until the game is closed, and
-  building doesn't. **Remove repeated backups** deletes backups that repeat the one before them, keeping the oldest of each run.
-  A repository opts in with `config/installs.json`; see the
-  [design record](docs/design-record.md#the-mods-page-built-18-nov-2026).
-- **What it changes, and only when you ask:** your test verdicts, picks and decisions, in its own folder; your installed mods and
-  their textures, from the Mods page; the repository's build output when you press Build; a game's list of active mods, one
-  change at a time with a backup and an undo, from the Mod list page; your Workshop items, only on your press and yes, from the
-  Publish page; and the central settings file, from the Settings page. **It never changes a save.** It deletes only what you
-  choose and confirm on Clean up, and repeated backups when you press Remove repeated backups. **Back up your records** is the
-  one thing it does by itself (every few hours while it is open). The Guide's entry for each page says exactly what it writes.
-- **It needs git**, to read your projects' history; every page says so if it is missing. **The installer brings its own Python
-  and tool kit** (from 0.36.0), **and the kit's compiled tools ready-built** (from 0.38.0: reading a save needs no Rust), so nothing else need be installed. Run beside the repository it was built from, it uses that
-  repository's kit and the Python on the PATH instead, as before; `PHOBOS_COMPANION_KIT` and `PHOBOS_COMPANION_PYTHON` still name
-  others, and `PHOBOS_COMPANION_BUNDLED=1` tries what another PC's install does.
-- **Open it from the Start menu once installed** (see [Install it](#install-it-windows)). **The first time on a PC, Home shows
-  First steps**: where your mod projects are, then your first game from Steam.
 - **It isn't released for others yet**: what still stands in the way, and in what order, is the
   [release audit](docs/release-audit.md).
+- **Not yet tested on screen, except where the owner has said so.** It builds and passes its checks; a page or button counts as
+  tested only once the owner says it works.
+
+## Before you start
+
+- **It needs git**, to read your projects' history; every page says so if it is missing.
+- **The installer brings its own Python and tool kit, and the kit's compiled tools ready-built**, so nothing else need be
+  installed. Run beside the repository it was built from, it uses that repository's kit and the Python on the PATH instead;
+  `PHOBOS_COMPANION_KIT` and `PHOBOS_COMPANION_PYTHON` name others, and `PHOBOS_COMPANION_BUNDLED=1` tries what another PC's
+  install does.
+- **It reads a list of your games**: `.local/games.json` beside the repository it was built from, or `games.json` in its own data
+  folder once installed elsewhere. **First steps makes it for you** (below), and **Add a game from Steam** adds to it; to write one
+  by hand, `config/games.example.json` shows how. Each game names its repositories, and may name its folders (`places`: `data`,
+  `saves`, `screenshots`) and its Steam app ID (`steam_app_id`).
+  - **A game's `id` must match the tools' name for it** (`rimworld`) for its reports to appear.
+  - **An entry may be a set of tools instead of a game** (`"kind": "tools"`): it gets the code and history pages, and the pages
+    about saves, logs, a running game and game files say they have nothing for it. The Companion 0.23.0 and older refuse a list
+    with `kind` in it.
 
 ## Install it (Windows)
 
@@ -114,13 +44,19 @@ build and run a newer one over the top; to remove it, use Windows' **Installed a
 - **On the PC it was built on**, the installed program still reads its tools and your games list from the folder it was built in,
   so keep that folder where it is. On any other PC it uses what the installer brought, and keeps your games list in its own
   data folder.
-- **Building the installer needs Rust's cargo and the .NET 10 SDK** (from 0.38.0), to build the kit's compiled tools
-  (`programs bundle`); the installed program needs neither.
+- **Building the installer needs Rust's cargo and the .NET 10 SDK**, to build the kit's compiled tools (`programs bundle`); the
+  installed program needs neither.
 - **Building the installer fetches Python** 3.14.10's portable Windows build from python.org once (about 12 MB), checks it against
   python.org's own checksum, and keeps it outside the repository (`scripts/installer.mjs`).
 - In Windows the name is spelled with a curly apostrophe (D’thorga), because the installer cannot hold a straight one.
 
-## Try it
+## First steps
+
+1. **Open it from the Start menu.** The first time on a PC, Home shows **First steps**.
+2. **Choose where your mod projects are**, then **Add a game from Steam**.
+3. **Press F1** on any page to learn what it does. The Guide's **First steps** entry walks through the rest.
+
+## Try it from source
 
 You need Rust through rustup, Node 22 with npm 10, Python 3.10 or newer, and on Windows the WebView2 runtime.
 
@@ -138,8 +74,9 @@ npx playwright install chromium
 python scripts/check-all.py
 ```
 
-It prints only what failed. The design is in [docs/design-record.md](docs/design-record.md), the rules in [AGENTS.md](AGENTS.md).
-What is proposed and not yet built is kept in [docs/later.md](docs/later.md), so nothing agreed is lost.
+It prints only what failed. How it is built is [docs/architecture.md](docs/architecture.md), the decisions behind it
+[docs/design-record.md](docs/design-record.md), and the rules [AGENTS.md](AGENTS.md). What is proposed and not yet built is kept
+in [docs/later.md](docs/later.md), so nothing agreed is lost.
 
 ## Credits
 

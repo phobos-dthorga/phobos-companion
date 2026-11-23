@@ -16,7 +16,7 @@ Each mod, under its repository:
 
 - **Installed now** and **After installing**, side by side: the [changelog entries](term-changelog-entry) each copy has, the files that would change, settings, and in-game tests to look out for.
 - **Install from the repository** and **Back up the installed copy**. Each asks first, in words.
-- **Backups**, newest first. **What going back changes** shows what you would gain and lose; **Go back to this** does it.
+- **Backups**, newest first. **What going back changes** shows what you would gain and lose; **Go back to this** does it. **Remove repeated backups** deletes backups that repeat the one before them, keeping the oldest of each run.
 
 - **Compare** beside a changed picture or sound in **Show the files**: installed now against **In the repository**, or against a
   backup, with the same views as the code viewer. See [Compare a changed picture or sound](task-compare-pictures-sounds).
@@ -26,7 +26,9 @@ Each mod, under its repository:
 ### Textures
 The active mods whose [textures](term-textures) want encoding, each with how many would show an old picture, how many were never encoded, and how many a picture-loading mod unpacked. **Encode their textures** is on Before you play.
 
-**Installing, going back and encoding wait until the game is closed.** Building does not.
+**Installing, going back and encoding wait until the game is closed.** Building does not. **These buttons change your installed mods and encode textures, Workshop mods' too**, always asking first.
+
+A repository opts in with `config/installs.json`: see [make a repository ready](task-repository-ready).
 
 ### Keys
 - **5** opens Mods.

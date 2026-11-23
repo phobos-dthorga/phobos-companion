@@ -4,6 +4,12 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+### Changed
+
+- **The README is a front door, and the Guide is the manual** (the owner's docs rewrite, step 7, 24 Nov 2026). The README says
+  what the program is, what it needs before the window opens, how to install it and its first steps, then "press F1"; its "Read
+  this first" bullets moved into the Guide's entries for their pages, or were dropped where the Guide already said them.
+
 ## [0.78.0] - 2026-11-24
 
 ### Added

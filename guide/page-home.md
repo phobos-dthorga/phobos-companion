@@ -16,6 +16,7 @@ see: task-first-steps, term-repository, task-repository-ready, task-agent-featur
 - Counts that lead elsewhere: settings to look at, and a note when your records want a backup.
 - **Checks on GitHub**, for each repository: commits not pushed, files changed, and whether its last push passed its checks on GitHub, with any nightly run that has stopped running. **Look now** asks GitHub at once; **Going online settings** switches it off (see [choose what the Companion asks the internet](task-going-online)).
 - **Their code changed**, when a repository's nightly watch found commits in other authors' public source that touch a method your code names: each commit, its date and words, the method, and your line that names it. It is an early warning: read the commit before acting, and the check after an update stays the real one.
+- **Which [tool kit](term-tool-kit) each repository uses**, how far behind the newest it is, and what moving its pin would bring.
 - **Safe copies**, for a repository that lists what cannot be made again: each set, whether it is copied, changed since or never copied, with **Copy now** and **Check the copies** (see [safe copies](task-safe-copies)).
 
 **If you work with [AI agent sessions](task-agent-features)**, Home also shows who is working on what (their [claims](term-claim)), [screen notes](term-screen-note) still waiting for one, and [decisions](term-decision) waiting for you.
@@ -33,6 +34,7 @@ The very first time, with no games listed yet, Home shows [First steps](task-fir
 - **The numbers come from scans made by themselves**, which only read: when the Companion starts, on **Look again**, and when you come back to its window after five minutes or more away, such as after an update.
 - **The game you are looking at is at the top**: press it to choose another, each with when you last worked on it.
 - **Settings, Mods and About are in tabs**, one part at a time; a tab says when something in it needs you.
+- **Anything that takes a while shows a progress bar**: what it is doing, the steps already done, and a count where the work can be counted (else about how long is left, from last time). A strip along the bottom follows any work, on any page.
 
 ### Keys
 - **1** opens Home. **[** and **]** step to the game before or after. **R** reads everything again.

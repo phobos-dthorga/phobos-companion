@@ -273,6 +273,100 @@
       "why": "A warning that a training was never copied belongs where you look first, and the card is small",
       "from": "docs/design-record.md, Safe copies on Home",
       "asked": "2026-11-21"
+    },
+    {
+      "id": "picks-one-slot",
+      "question": "When several cards are tries for the same file, should the Picks page show them as one pick?",
+      "context": "Night 11's purge-button icon came as eight cards (four wordings on two style models). You approved a try on five of them, and only one file can ship, so a session had to ask you again which one.",
+      "options": [
+        {
+          "id": "one-pick",
+          "label": "One pick per file",
+          "detail": "The cards that ship as the same file show together, with every try of every card; you choose once"
+        },
+        {
+          "id": "separate",
+          "label": "Keep cards separate",
+          "detail": "As now: each card is answered on its own, and a session asks again when several are picked"
+        }
+      ],
+      "lean": "one-pick",
+      "why": "You choose once, among everything that could ship there, side by side",
+      "from": "docs/picks-page.md, round two",
+      "asked": "2026-11-23"
+    },
+    {
+      "id": "picks-applied",
+      "question": "When a picked try is already in the game, should the pick clear itself?",
+      "context": "Three fire-fighting pictures were in the game for hours, byte for byte your try 2, and still showed as picked, because the session that shipped them never settled them.",
+      "options": [
+        {
+          "id": "auto",
+          "label": "Settle it by itself",
+          "detail": "When the picked try matches the file in the game, the pick is settled the next time the list is read, and the page says so"
+        },
+        {
+          "id": "button",
+          "label": "Show it, with a Settle button",
+          "detail": "The page marks it \"in the game\" and you press Settle"
+        },
+        {
+          "id": "as-now",
+          "label": "Leave it to the session",
+          "detail": "As now"
+        }
+      ],
+      "lean": "auto",
+      "why": "A byte-for-byte match leaves nothing to judge, and it keeps the list to what really waits",
+      "from": "docs/picks-page.md, round two",
+      "asked": "2026-11-23"
+    },
+    {
+      "id": "picks-none-words",
+      "question": "When you answer \"none of these\", should the page ask what was wrong?",
+      "context": "Two purge cards were answered \"none\" with no words; one other \"none\" said \"They both look like you are POURING INTO a tank\", and that shaped the next wording.",
+      "options": [
+        {
+          "id": "ask",
+          "label": "Ask, but let me skip",
+          "detail": "The words box opens focused, with a few quick reasons to press (wrong subject, wrong style, hard to read small, other); Enter with nothing typed skips"
+        },
+        {
+          "id": "require",
+          "label": "Require a reason",
+          "detail": "\"None\" needs a quick reason or words before it is kept"
+        },
+        {
+          "id": "as-now",
+          "label": "As now",
+          "detail": "The words box is there if you want it"
+        }
+      ],
+      "lean": "ask",
+      "why": "A reason makes the next tries better, and a key press is little to ask; skipping stays easy",
+      "from": "docs/picks-page.md, round two",
+      "asked": "2026-11-23"
+    },
+    {
+      "id": "picks-where",
+      "question": "Should the kit's picks list read every game repository by default?",
+      "context": "Run from the kit's own folder without naming a repository, it said \"0 waiting\" while five sounds waited in phobos-rimworld. This is for agent sessions; the Picks page already reads every repository.",
+      "options": [
+        {
+          "id": "games-list",
+          "label": "Every repository on the games list",
+          "detail": "And it names the folders it read"
+        },
+        {
+          "id": "current",
+          "label": "The current folder, but say so",
+          "detail": "It names the folder it read and warns when that folder has no pick file"
+        }
+      ],
+      "lean": "games-list",
+      "why": "The same answer from anywhere, as the page gives; nothing waiting can be missed",
+      "from": "docs/picks-page.md, round two",
+      "asked": "2026-11-23"
     }
   ]
 }

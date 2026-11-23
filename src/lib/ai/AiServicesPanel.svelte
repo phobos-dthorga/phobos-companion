@@ -6,6 +6,7 @@
   import type { Failure } from "../shell/types";
   import {
     chooseAiLength,
+    chooseAiTools,
     chooseAiModel,
     chooseAiService,
     forgetAiKey,
@@ -275,6 +276,28 @@
               () => chooseAiLength(option.length),
               () => t("ai-services-length-kept", { length: t(option.key) }),
             )}>{t(option.key)}</button
+        >
+      {/each}
+    </div>
+
+    <h3 id="ai-services-tools-title">{t("ai-services-tools-title")}</h3>
+    <p class="small">{t("ai-services-tools-body")}</p>
+    <div class="toggles" role="group" aria-labelledby="ai-services-tools-title">
+      {#each [true, false] as on (on)}
+        <button
+          type="button"
+          class="toggle"
+          aria-pressed={status.tools === on}
+          disabled={busy}
+          onclick={() =>
+            void change(
+              () => chooseAiTools(on),
+              () =>
+                on
+                  ? t("ai-services-tools-kept-on")
+                  : t("ai-services-tools-kept-off"),
+            )}
+          >{on ? t("ai-services-tools-on") : t("ai-services-tools-off")}</button
         >
       {/each}
     </div>

@@ -262,7 +262,9 @@ Each change passes every gate below that applies to it, in the host, at the mome
   `update`.
 - **An AI service's gate** (0.71.0): `companion_core::ai::allowed` before every call to one, a question or **Read the models**: a
   loopback service always; any other only while AI services is on and with a key. **Send** takes only the question
-  `ai_help::prepare_fault` built and showed, from a fault the Logs page's last reading named; the model is given no tools.
+  `ai_help` built and showed, from what the page's last reading named. The model's only tools are the kit's three read-only ones
+  (0.73.0), each call run by the kit's `mcp call` behind its own checks; for an online model each report waits, shown whole, for
+  the person's yes (`ai_help::answer_call`) before it is sent.
 
 **The manifest check, step by step:** read `manifest --json` fresh; find the command and the named report (an empty name is a
 command's one unnamed report, as `cleanup` has); refuse unless its `effect` is one the press allows. `offered` adds the game and

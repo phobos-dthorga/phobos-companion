@@ -216,6 +216,7 @@ export const sampleAiStatus = {
   onlineOn: false,
   keyStore: "Windows Credential Manager",
   ready: true,
+  tools: true,
   month: { month: "2026-11", answers: 3, inputTokens: 1200, outputTokens: 400 },
 };
 

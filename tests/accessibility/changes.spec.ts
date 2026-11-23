@@ -403,11 +403,16 @@ for (const [name, viewport] of [
         },
         ai_send: {
           result: {
-            text: "Boats float now.",
-            stop: "cut",
-            problem: null,
-            inputTokens: null,
-            outputTokens: null,
+            step: "answered",
+            answer: {
+              text: "Boats float now.",
+              stop: "cut",
+              problem: null,
+              inputTokens: null,
+              outputTokens: null,
+            },
+            calls: [],
+            toolsUnavailable: true,
           },
         },
       });
@@ -425,6 +430,9 @@ for (const [name, viewport] of [
       await expect(version).toContainText("was cut off");
       await expect(version).toContainText(
         "The service did not count the tokens.",
+      );
+      await expect(version).toContainText(
+        "This model can't use the tool kit's reports",
       );
       await audit(page);
     });

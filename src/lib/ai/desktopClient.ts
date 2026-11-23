@@ -2,13 +2,14 @@ import { Channel } from "@tauri-apps/api/core";
 import { ask, BROWSER, inBrowser } from "../shell/desktopClient";
 import type { Failed } from "../shell/types";
 import type {
-  AiAnswer,
+  AiEvent,
   AiLength,
   AiPrepared,
   AiProgramsReading,
   AiProgramsSetup,
   AiStatus,
   AiStatusReading,
+  AiStep,
 } from "./types";
 
 /** The lines an AI program needs to start the kit's MCP server (0.70.0). The host only reads them from the kit. */
@@ -106,16 +107,41 @@ export async function prepareUpdateCheck(
   );
 }
 
-/** Sends the question the host last prepared, on the person's press; each piece of the answer goes to onText as it comes. */
+type Stepped = { state: "ready"; step: AiStep } | Failed;
+
+function hearing(onEvent: (event: AiEvent) => void): Channel<AiEvent> {
+  const channel = new Channel<AiEvent>();
+  channel.onmessage = onEvent;
+  return channel;
+}
+
+/** Sends the question the host last prepared, on the person's press. Each piece of the answer, and each report the model asks
+ *  for (0.73.0), goes to onEvent as it comes; it ends answered, or waiting on the person's yes for an online model's report. */
 export async function sendPrepared(
   id: number,
-  onText: (text: string) => void,
-): Promise<{ state: "ready"; answer: AiAnswer } | Failed> {
-  const channel = new Channel<string>();
-  channel.onmessage = onText;
-  return ask<AiAnswer, { state: "ready"; answer: AiAnswer } | Failed>(
+  onEvent: (event: AiEvent) => void,
+): Promise<Stepped> {
+  return ask<AiStep, Stepped>(
     "ai_send",
-    { id, onText: channel },
-    (answer) => ({ state: "ready", answer }),
+    { id, onEvent: hearing(onEvent) },
+    (step) => ({ state: "ready", step }),
   );
+}
+
+/** The person's yes or no to the report an online model asked for, shown whole first (0.73.0); the question then goes on. */
+export async function answerCall(
+  id: number,
+  allow: boolean,
+  onEvent: (event: AiEvent) => void,
+): Promise<Stepped> {
+  return ask<AiStep, Stepped>(
+    "ai_answer_call",
+    { id, allow, onEvent: hearing(onEvent) },
+    (step) => ({ state: "ready", step }),
+  );
+}
+
+/** Keeps whether the model may ask the tool kit's reports while it answers (0.73.0). */
+export async function chooseAiTools(on: boolean): Promise<Status> {
+  return ask<AiStatus, Status>("ai_choose_tools", { on }, ready);
 }

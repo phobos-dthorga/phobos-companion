@@ -4,6 +4,29 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.73.0] - 2026-11-23
+
+### Added
+
+- **The AI may ask the tool kit's reports while it answers** (the owner, 23 Nov 2026: "go ahead with the kit's tools for the
+  model"; `docs/ai.md`, slice 3b). Explain this fault, Summarise this version and What does this mean for my mods? may now look
+  further: the AI may ask the tool kit's read-only reports, at most six a question, through the same three tools and checks the
+  kit's MCP server gives AI programs (only reports that read, repositories by name, no paths, home folders as `~`). **With a model
+  on this computer** each report runs and is listed under **It asked the tool kit**. **With an online service each report runs
+  on your computer first and waits on the card, shown whole, for Send this report or Don't send**, so nothing leaves the computer
+  you have not seen. A model that cannot take tools answers without them, and the card says so. **Not yet tried with a real
+  model, and not yet tested on screen.**
+- **Settings → AI services: Let the AI ask the tool kit's reports, On or Off.** On by default; Off, the AI answers only from what
+  it is sent. Kept in `ai.json` with the other AI choices.
+
+### Changed
+
+- **The kit pin moves from v1.109.0 to v1.110.0**, for `mcp tools` and `mcp call`, which answer one tool call at a time behind
+  the MCP server's own checks. Nothing else the Companion runs changed.
+- **The rule on the model's tools changes**: from "the model is given no tools" to "its only tools are the kit's three read-only
+  ones, and an online model's reports wait for the person's yes". AGENTS.md, the architecture page and the Guide's AI entries say
+  so.
+
 ## [0.72.0] - 2026-11-23
 
 ### Added

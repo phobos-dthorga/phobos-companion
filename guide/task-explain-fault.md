@@ -14,4 +14,6 @@ see: task-ai-services, page-logs, task-log-fault
 
 The answer appears as it comes, with how many tokens the service counted. **An AI's answer can be wrong: check it before acting on it.**
 
-**What is sent:** only the fault as the log reader grouped it (the message, how often, the stack, the mods it points at), with home folders shown as `~`, and the instruction kept with the Companion. Nothing else from your computer. With a model on this computer, nothing leaves it at all.
+**What is sent:** only the fault as the log reader grouped it (the message, how often, the stack, the mods it points at), with home folders shown as `~`, and the instruction kept with the Companion. With a model on this computer, nothing leaves it at all.
+
+**If the AI asks the tool kit for more** (when **Let the AI ask the tool kit's reports** is on): with a model on this computer, each report runs and is listed under **It asked the tool kit**. With an online service, each report runs on your computer first, and the card shows its answer: press **Send this report** to send it, or **Don't send** to let the AI answer without it.

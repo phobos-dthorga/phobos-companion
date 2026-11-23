@@ -16,6 +16,7 @@ see: task-explain-fault, task-going-online, task-ai-programs, page-settings
    - turn on **AI services** in **Going online** (**Open Going online** takes you there). **It starts off.**
 4. Press **Read the models**, then choose one under **The model that answers**.
 5. Choose an **Answer length**: **Short**, **Medium** or **Long**.
+6. **Let the AI ask the tool kit's reports**: **On** (the usual) or **Off**. On, the AI may ask the tool kit's read-only reports for more facts while it answers, at most six a question. With a model on this computer each one runs and is listed. **With an online service each one runs on your computer first, and waits for you**: read its answer, then press **Send this report** or **Don't send**.
 
 When it says **Ready**, three buttons appear, each showing what it would send before **Send**:
 

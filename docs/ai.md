@@ -35,8 +35,10 @@ ones at least", chose all three parts below by card the same day, and then took 
   the agent is its own program with its own login, so it uses whatever that login includes.
 - **An agent in A3 is not bounded by the Companion's gates.** It is another program, started with the person's own access to
   the disk. The Companion answers only the questions the agent chooses to ask. The page says so in words before a first start.
-- **Text from a log or another author's code can be aimed at a model** ("ignore your instructions and ..."). In A2 the model is
-  given no tools, so such text can make an answer wrong but can never make anything happen.
+- **Text from a log or another author's code can be aimed at a model** ("ignore your instructions and ..."). In A2 the model's
+  only tools (since 0.73.0) are the kit's three read-only ones, so such text can make an answer wrong, or make the model ask for
+  another report that only reads, but can never make anything change. For an online model, every report it asks for is shown
+  to the person, whole, before anything of it is sent.
 - **A model's answer is text to show, never anything to act on.** It reaches the page escaped, as file text does; no address in
   it is opened, and nothing in it is run.
 - **Two of this repository's rules change with A2**, on the owner's word (below): "the program never holds credentials" and
@@ -145,6 +147,22 @@ sends that check's report as plain text (`ai_help::report_text`: its title, fact
 and charts by their description). All three buttons share one card (`src/lib/ai/AskAi.svelte`) and one way to prepare
 (`ai_help::keep`); each has its own instruction file.
 
+**The kit's tools for the model, as built (0.73.0, phobos-modkit 1.110.0; the owner, 23 Nov 2026: "go ahead with the kit's tools
+for the model")** (agent choices, to revise):
+
+- **The same three tools and the same checks as A1**, through two new kit commands: `mcp tools` lists them, and `mcp call` answers
+  one call, one process each, so no server runs. The Companion only hands the call over and reads the answer (`ai_tools.rs`).
+- **A model on this computer**: each report runs and is sent at once, and the card lists it. **An online model**: each report runs
+  on this computer first, then waits, shown whole, for **Send this report** or **Don't send**, which tells the model it was
+  declined. This keeps "shown first, then my press" for every word that leaves the computer.
+- **At most six reports a question**; after that the model is told to answer with what it has.
+- **On by default**, with **Let the AI ask the tool kit's reports** (On or Off) in Settings → AI services. Risk graded low: the
+  reports only read, and nothing goes online without a yes.
+- **A model that cannot take tools** (the service refuses the request with a 400 naming tools) is asked again once without them,
+  and the card says so.
+- **Claude's own message goes back unchanged**, its thinking blocks included, as Claude's API requires between tool calls.
+- **Not verified**: whether each local model handles tools well. Not tried with a real model yet.
+
 **The two rules, as they read since A2 was built** (AGENTS.md, 0.71.0, on the owner's answers; the wording is the agent's, for
 the owner to revise):
 
@@ -227,7 +245,7 @@ Each slice is a working thing by itself, with its own version and commit.
 | 1 | **A1**: `mcp serve`, its three tools, both handshakes; Settings → AI programs | phobos-modkit, then phobos-companion | None |
 | 2 | **A2, first button**: `companion_core::ai`, services, the key store, the `ai-services` kind, Settings → AI services, **Explain this fault** on Logs, a local model and one online service | phobos-companion | Credentials; what is sent; a new online kind |
 | 3 | **A2, the other buttons** (built, 0.72.0) | phobos-companion | None |
-| 3b | **The kit's tools for the model**: the model may ask A1's read-only reports while it answers, with each call shown | phobos-companion | None |
+| 3b | **The kit's tools for the model** (built, 0.73.0 with phobos-modkit 1.110.0): the model may ask A1's read-only reports while it answers, with each call shown | phobos-modkit, then phobos-companion | None |
 | 4 | **A3, first slice**: one agent, the chat page, permission cards, reads only through the Companion | phobos-companion | A new page; process tree ending on every system |
 | 5 | **A3 with the kit's tools**, and changes through the Companion with a yes on each | phobos-companion | None |
 

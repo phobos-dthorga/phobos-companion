@@ -142,6 +142,8 @@ struct Choices {
     service: Option<String>,
     models: BTreeMap<String, String>,
     length: Length,
+    /// Whether the person switched off the tool kit's reports for the model (0.73.0); they start on.
+    tools_off: bool,
 }
 
 fn read_choices(data: &Path) -> Choices {
@@ -153,12 +155,13 @@ fn read_choices(data: &Path) -> Choices {
             .map(|m| m.iter().filter_map(|(k, v)| Some((k.clone(), v.as_str()?.to_owned()))).collect())
             .unwrap_or_default(),
         length: serde_json::from_value(file["length"].clone()).unwrap_or_default(),
+        tools_off: file["tools"].as_bool() == Some(false),
     }
 }
 
 fn write_choices(data: &Path, choices: &Choices) -> Result<(), Failure> {
-    let file =
-        json!({"version": VERSION, "service": choices.service, "models": choices.models, "length": choices.length});
+    let file = json!({"version": VERSION, "service": choices.service, "models": choices.models, "length": choices.length,
+                      "tools": !choices.tools_off});
     prefs::write_json(&data.join(CHOICES), &file)
 }
 
@@ -232,6 +235,8 @@ pub struct Status {
     pub services: Vec<ServiceStatus>,
     pub chosen: Option<String>,
     pub length: Length,
+    /// Whether the model may ask the tool kit's reports while it answers (0.73.0; on until the person switches it off).
+    pub tools: bool,
     /// Whether AI services is on in Settings → Going online.
     pub online_on: bool,
     /// The key store's name, or None when this computer has none the program can use.
@@ -274,6 +279,7 @@ pub fn status_with(data: &Path, env: &dyn Fn(&str) -> Option<String>, secrets: &
         services: found,
         chosen: choices.service,
         length: choices.length,
+        tools: !choices.tools_off,
         online_on,
         key_store: secrets.name().map(str::to_owned),
         ready,
@@ -300,6 +306,14 @@ pub fn choose_model(data: &Path, id: &str, model: &str) -> Result<Status, Failur
 pub fn choose_length(data: &Path, length: Length) -> Result<Status, Failure> {
     let mut choices = read_choices(data);
     choices.length = length;
+    write_choices(data, &choices)?;
+    Ok(status(data))
+}
+
+/// Keeps whether the model may ask the tool kit's reports while it answers (0.73.0).
+pub fn choose_tools(data: &Path, on: bool) -> Result<Status, Failure> {
+    let mut choices = read_choices(data);
+    choices.tools_off = !on;
     write_choices(data, &choices)?;
     Ok(status(data))
 }
@@ -336,6 +350,8 @@ pub struct Ready {
     pub model: String,
     pub key: Option<String>,
     pub length: Length,
+    /// Whether the model may ask the tool kit's reports.
+    pub tools: bool,
 }
 
 pub fn ready(data: &Path) -> Result<Ready, Failure> {
@@ -348,7 +364,7 @@ pub fn ready(data: &Path) -> Result<Ready, Failure> {
     })?;
     let key = ai_keys::find(service, &environment, &ai_keys::SystemSecrets).0;
     allowed(data, service, key.as_deref())?;
-    Ok(Ready { service, model, key, length: choices.length })
+    Ok(Ready { service, model, key, length: choices.length, tools: !choices.tools_off })
 }
 
 /// The service's own list of models, through the same gate as a question.

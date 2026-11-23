@@ -49,6 +49,8 @@ export type AiStatus = {
   services: AiServiceStatus[];
   chosen: string | null;
   length: AiLength;
+  /** Whether the model may ask the tool kit's reports while it answers (0.73.0). */
+  tools: boolean;
   /** Whether AI services is on in Settings → Going online. */
   onlineOn: boolean;
   /** The key store's name, or null when this computer has none the program can use. */
@@ -70,12 +72,14 @@ export type AiPrepared = {
   service: string;
   model: string;
   local: boolean;
+  /** Whether the model may ask the tool kit's reports (0.73.0). */
+  tools: boolean;
   instruction: string;
   text: string;
   characters: number;
 };
 
-export type AiStop = "finished" | "cut" | "refused" | "failed";
+export type AiStop = "finished" | "calling" | "cut" | "refused" | "failed";
 
 export type AiAnswer = {
   text: string;
@@ -84,3 +88,27 @@ export type AiAnswer = {
   inputTokens: number | null;
   outputTokens: number | null;
 };
+
+/** A report the model asked for (0.73.0): what it asked in a few words, the tool kit's answer, and whether it was sent. */
+export type AiCallView = {
+  tool: string;
+  summary: string;
+  text: string;
+  characters: number;
+  failed: boolean;
+  sent: boolean;
+};
+
+/** What the window hears while an answer comes. */
+export type AiEvent =
+  { kind: "text"; text: string } | { kind: "call"; call: AiCallView };
+
+/** Where a question stands after Send or a yes: answered, or waiting on the person for an online model's report. */
+export type AiStep =
+  | {
+      step: "answered";
+      answer: AiAnswer;
+      calls: AiCallView[];
+      toolsUnavailable: boolean;
+    }
+  | { step: "waiting"; call: AiCallView; calls: AiCallView[] };

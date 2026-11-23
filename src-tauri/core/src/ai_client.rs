@@ -1,12 +1,17 @@
 //! Asking an AI service (0.71.0; `docs/ai.md`, A2): the request each kind of API takes, reading its answer as it streams, and its
 //! list of models. Two kinds: Claude's own Messages API (`anthropic`; Rust has no official Anthropic library, so this is plain
 //! HTTPS, as Anthropic documents it), and the chat completions API that OpenAI, Gemini, Ollama, LM Studio and most others offer
-//! (`openai`). The model is given **no tools**: text in a log aimed at a model can make an answer wrong, never make anything happen.
-//! An answer is text to show, never anything to act on.
+//! (`openai`). An answer is text to show, never anything to act on.
+//!
+//! **Tools** (0.73.0, slice 3b): a question may offer the model the tool kit's three read-only tools (phobos-modkit's `mcp tools`).
+//! When it asks for one, the answer stops with [`Stop::Calling`], carrying the calls and the model's own message as it gave it (its
+//! thinking included, which Claude requires back unchanged); the program runs each call through the kit and sends the results back
+//! with [`tool_results`]. Nothing here runs a tool: that is the caller's, behind the kit's own checks.
 
 use crate::ai::{Api, Service};
 use serde::Serialize;
 use serde_json::{Value, json};
+use std::collections::BTreeMap;
 use std::io::{BufRead, BufReader, Read};
 use std::time::Duration;
 
@@ -21,13 +26,30 @@ const MAX_MODELS_BODY: u64 = 4 * 1024 * 1024;
 const MAX_ANSWER: usize = 200_000;
 const MAX_MODELS: usize = 500;
 
-/// One question for one model.
+/// A tool the model may ask for: its name, what it does, and the JSON schema of what it takes.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Tool {
+    pub name: String,
+    pub description: String,
+    pub schema: Value,
+}
+
+/// One call the model asked for.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct ToolCall {
+    pub id: String,
+    pub name: String,
+    pub input: Value,
+}
+
+/// One question for one model: the conversation so far, in the API's own shape (see [`first_messages`]).
 pub struct Request<'a> {
     pub service: &'a Service,
     pub key: Option<&'a str>,
     pub model: &'a str,
     pub system: &'a str,
-    pub user: &'a str,
+    pub messages: &'a [Value],
+    pub tools: &'a [Tool],
     pub max_tokens: u32,
 }
 
@@ -37,6 +59,8 @@ pub struct Request<'a> {
 pub enum Stop {
     /// It said all it meant to.
     Finished,
+    /// It asked for one or more tools, and waits for their results.
+    Calling,
     /// It reached its length and was cut off.
     Cut,
     /// The service declined to answer.
@@ -54,41 +78,94 @@ pub struct Answer {
     pub problem: Option<String>,
     pub input_tokens: Option<u64>,
     pub output_tokens: Option<u64>,
+    /// The tools it asked for, when it stopped to call them.
+    #[serde(skip)]
+    pub calls: Vec<ToolCall>,
+    /// The model's own message, to send back with the tools' results.
+    #[serde(skip)]
+    pub assistant: Value,
+    /// The service refused the request because of its tools: this model cannot use them.
+    #[serde(skip)]
+    pub tools_refused: bool,
 }
 
 impl Answer {
-    fn failed(problem: impl Into<String>) -> Self {
+    fn new() -> Self {
         Self {
             text: String::new(),
-            stop: Stop::Failed,
-            problem: Some(problem.into()),
+            stop: Stop::Finished,
+            problem: None,
             input_tokens: None,
             output_tokens: None,
+            calls: Vec::new(),
+            assistant: Value::Null,
+            tools_refused: false,
         }
+    }
+
+    fn failed(problem: impl Into<String>) -> Self {
+        Self { stop: Stop::Failed, problem: Some(problem.into()), ..Self::new() }
+    }
+}
+
+/// The conversation's first message: the person's question.
+pub fn first_messages(user: &str) -> Vec<Value> {
+    vec![json!({"role": "user", "content": user})]
+}
+
+/// The messages that answer the calls the model made: (the call's id, its text, whether it failed or was refused).
+pub fn tool_results(api: Api, results: &[(String, String, bool)]) -> Vec<Value> {
+    match api {
+        Api::Anthropic => vec![json!({"role": "user", "content": results
+            .iter()
+            .map(|(id, text, failed)| json!({"type": "tool_result", "tool_use_id": id, "content": text, "is_error": failed}))
+            .collect::<Vec<_>>()})],
+        Api::Openai => results
+            .iter()
+            .map(|(id, text, failed)| {
+                let content = if *failed { format!("Error: {text}") } else { text.clone() };
+                json!({"role": "tool", "tool_call_id": id, "content": content})
+            })
+            .collect(),
     }
 }
 
 /// The request's JSON body.
 pub fn body(request: &Request) -> Value {
     match request.service.api {
-        Api::Anthropic => json!({
-            "model": request.model,
-            "max_tokens": request.max_tokens,
-            "stream": true,
-            "system": request.system,
-            "messages": [{"role": "user", "content": request.user}],
-        }),
-        Api::Openai => {
+        Api::Anthropic => {
             let mut body = json!({
                 "model": request.model,
+                "max_tokens": request.max_tokens,
                 "stream": true,
-                "messages": [
-                    {"role": "system", "content": request.system},
-                    {"role": "user", "content": request.user},
-                ],
+                "system": request.system,
+                "messages": request.messages,
             });
+            if !request.tools.is_empty() {
+                body["tools"] = request
+                    .tools
+                    .iter()
+                    .map(|t| json!({"name": t.name, "description": t.description, "input_schema": t.schema}))
+                    .collect();
+            }
+            body
+        }
+        Api::Openai => {
+            let mut messages = vec![json!({"role": "system", "content": request.system})];
+            messages.extend(request.messages.iter().cloned());
+            let mut body = json!({"model": request.model, "stream": true, "messages": messages});
             if request.service.stream_usage {
                 body["stream_options"] = json!({"include_usage": true});
+            }
+            if !request.tools.is_empty() {
+                body["tools"] = request
+                    .tools
+                    .iter()
+                    .map(|t| {
+                        json!({"type": "function",
+                               "function": {"name": t.name, "description": t.description, "parameters": t.schema}})
+                    })
+                    .collect();
             }
             body
         }
@@ -145,74 +222,197 @@ pub fn events(reader: impl BufRead) -> impl Iterator<Item = String> {
     })
 }
 
-/// Reads a streamed answer, handing each piece of text on as it comes.
-pub fn read_stream(api: Api, reader: impl BufRead, on_text: &mut dyn FnMut(&str)) -> Answer {
-    let mut answer =
-        Answer { text: String::new(), stop: Stop::Finished, problem: None, input_tokens: None, output_tokens: None };
+fn input_of(text: &str) -> Value {
+    if text.trim().is_empty() {
+        return json!({});
+    }
+    serde_json::from_str(text).unwrap_or_else(|_| json!({"unreadable": text}))
+}
+
+fn add_text(answer: &mut Answer, text: &str, on_text: &mut dyn FnMut(&str)) {
+    if !text.is_empty() && answer.text.len() < MAX_ANSWER {
+        answer.text.push_str(text);
+        on_text(text);
+    }
+}
+
+/// Claude's stream: each content block kept whole, by its index, as it came; tool inputs gathered from their pieces.
+fn read_anthropic(reader: impl BufRead, on_text: &mut dyn FnMut(&str)) -> Answer {
+    let mut answer = Answer::new();
     let mut stopped = false;
+    let mut blocks: Vec<Value> = Vec::new();
+    let mut inputs: BTreeMap<usize, String> = BTreeMap::new();
     for data in events(reader) {
-        if api == Api::Openai && data.trim() == "[DONE]" {
-            break;
-        }
         let Ok(event) = serde_json::from_str::<Value>(&data) else { continue };
-        let mut add = |text: &str, answer: &mut Answer| {
-            if !text.is_empty() && answer.text.len() < MAX_ANSWER {
-                answer.text.push_str(text);
-                on_text(text);
+        let index = event["index"].as_u64().unwrap_or(0) as usize;
+        match event["type"].as_str().unwrap_or_default() {
+            "message_start" => answer.input_tokens = event["message"]["usage"]["input_tokens"].as_u64(),
+            "content_block_start" => {
+                if blocks.len() <= index {
+                    blocks.resize(index + 1, Value::Null);
+                }
+                blocks[index] = event["content_block"].clone();
+                if blocks[index]["type"] == "tool_use" {
+                    inputs.insert(index, String::new());
+                }
             }
-        };
-        match api {
-            Api::Anthropic => match event["type"].as_str().unwrap_or_default() {
-                "message_start" => answer.input_tokens = event["message"]["usage"]["input_tokens"].as_u64(),
-                "content_block_delta" if event["delta"]["type"] == "text_delta" => {
-                    add(event["delta"]["text"].as_str().unwrap_or_default(), &mut answer)
-                }
-                "message_delta" => {
-                    if let Some(tokens) = event["usage"]["output_tokens"].as_u64() {
-                        answer.output_tokens = Some(tokens);
+            "content_block_delta" => {
+                let delta = &event["delta"];
+                // A text piece whose block was never opened opens one, so no text is lost.
+                if delta["type"] == "text_delta" && blocks.get(index).is_none_or(Value::is_null) {
+                    if blocks.len() <= index {
+                        blocks.resize(index + 1, Value::Null);
                     }
-                    match event["delta"]["stop_reason"].as_str() {
-                        Some("refusal") => answer.stop = Stop::Refused,
-                        Some("max_tokens") => answer.stop = Stop::Cut,
-                        Some(_) => answer.stop = Stop::Finished,
-                        None => {}
+                    blocks[index] = json!({"type": "text", "text": ""});
+                }
+                let Some(block) = blocks.get_mut(index).filter(|b| !b.is_null()) else { continue };
+                match delta["type"].as_str().unwrap_or_default() {
+                    "text_delta" => {
+                        let piece = delta["text"].as_str().unwrap_or_default();
+                        let kept = format!("{}{piece}", block["text"].as_str().unwrap_or_default());
+                        block["text"] = Value::String(kept);
+                        add_text(&mut answer, piece, on_text);
                     }
-                    stopped |= event["delta"]["stop_reason"].is_string();
+                    "thinking_delta" => {
+                        let kept = format!(
+                            "{}{}",
+                            block["thinking"].as_str().unwrap_or_default(),
+                            delta["thinking"].as_str().unwrap_or_default()
+                        );
+                        block["thinking"] = Value::String(kept);
+                    }
+                    "signature_delta" => block["signature"] = delta["signature"].clone(),
+                    "input_json_delta" => {
+                        if let Some(kept) = inputs.get_mut(&index) {
+                            kept.push_str(delta["partial_json"].as_str().unwrap_or_default());
+                        }
+                    }
+                    _ => {}
                 }
-                "error" => {
-                    answer.stop = Stop::Failed;
-                    answer.problem = Some(error_words(&event));
-                    return answer;
+            }
+            "content_block_stop" => {
+                if let (Some(text), Some(block)) = (inputs.get(&index), blocks.get_mut(index)) {
+                    block["input"] = input_of(text);
                 }
-                _ => {}
-            },
-            Api::Openai => {
-                if event.get("error").is_some() {
-                    answer.stop = Stop::Failed;
-                    answer.problem = Some(error_words(&event));
-                    return answer;
+            }
+            "message_delta" => {
+                if let Some(tokens) = event["usage"]["output_tokens"].as_u64() {
+                    answer.output_tokens = Some(tokens);
                 }
-                let choice = &event["choices"][0];
-                add(choice["delta"]["content"].as_str().unwrap_or_default(), &mut answer);
-                match choice["finish_reason"].as_str() {
-                    Some("length") => answer.stop = Stop::Cut,
-                    Some("content_filter") => answer.stop = Stop::Refused,
+                match event["delta"]["stop_reason"].as_str() {
+                    Some("refusal") => answer.stop = Stop::Refused,
+                    Some("max_tokens") => answer.stop = Stop::Cut,
+                    Some("tool_use") => answer.stop = Stop::Calling,
                     Some(_) => answer.stop = Stop::Finished,
                     None => {}
                 }
-                stopped |= choice["finish_reason"].is_string();
-                if let Some(usage) = event.get("usage").filter(|u| u.is_object()) {
-                    answer.input_tokens = usage["prompt_tokens"].as_u64();
-                    answer.output_tokens = usage["completion_tokens"].as_u64();
-                }
+                stopped |= event["delta"]["stop_reason"].is_string();
             }
+            "error" => {
+                answer.stop = Stop::Failed;
+                answer.problem = Some(error_words(&event));
+                return answer;
+            }
+            _ => {}
         }
     }
+    blocks.retain(|b| !b.is_null());
+    answer.calls = blocks
+        .iter()
+        .filter(|b| b["type"] == "tool_use")
+        .map(|b| ToolCall {
+            id: b["id"].as_str().unwrap_or_default().to_owned(),
+            name: b["name"].as_str().unwrap_or_default().to_owned(),
+            input: b["input"].clone(),
+        })
+        .collect();
+    answer.assistant = json!({"role": "assistant", "content": blocks});
+    finish(answer, stopped)
+}
+
+/// Chat completions' stream: text, and each tool call gathered by its index from its pieces.
+fn read_openai(reader: impl BufRead, on_text: &mut dyn FnMut(&str)) -> Answer {
+    let mut answer = Answer::new();
+    let mut stopped = false;
+    let mut calls: BTreeMap<u64, (String, String, String)> = BTreeMap::new();
+    for data in events(reader) {
+        if data.trim() == "[DONE]" {
+            break;
+        }
+        let Ok(event) = serde_json::from_str::<Value>(&data) else { continue };
+        if event.get("error").is_some() {
+            answer.stop = Stop::Failed;
+            answer.problem = Some(error_words(&event));
+            return answer;
+        }
+        let choice = &event["choices"][0];
+        add_text(&mut answer, choice["delta"]["content"].as_str().unwrap_or_default(), on_text);
+        for call in choice["delta"]["tool_calls"].as_array().map_or(&[][..], Vec::as_slice) {
+            let index = call["index"].as_u64().unwrap_or(calls.len() as u64);
+            let kept = calls.entry(index).or_insert_with(|| (format!("call_{index}"), String::new(), String::new()));
+            if let Some(id) = call["id"].as_str().filter(|id| !id.is_empty()) {
+                kept.0 = id.to_owned();
+            }
+            if let Some(name) = call["function"]["name"].as_str() {
+                kept.1.push_str(name);
+            }
+            match &call["function"]["arguments"] {
+                Value::String(piece) => kept.2.push_str(piece),
+                Value::Object(_) => kept.2 = call["function"]["arguments"].to_string(),
+                _ => {}
+            }
+        }
+        match choice["finish_reason"].as_str() {
+            Some("length") => answer.stop = Stop::Cut,
+            Some("content_filter") => answer.stop = Stop::Refused,
+            Some("tool_calls") => answer.stop = Stop::Calling,
+            Some(_) => answer.stop = Stop::Finished,
+            None => {}
+        }
+        stopped |= choice["finish_reason"].is_string();
+        if let Some(usage) = event.get("usage").filter(|u| u.is_object()) {
+            answer.input_tokens = usage["prompt_tokens"].as_u64();
+            answer.output_tokens = usage["completion_tokens"].as_u64();
+        }
+    }
+    answer.calls = calls
+        .values()
+        .map(|(id, name, args)| ToolCall { id: id.clone(), name: name.clone(), input: input_of(args) })
+        .collect();
+    if !answer.calls.is_empty() && answer.stop == Stop::Finished {
+        answer.stop = Stop::Calling;
+    }
+    let mut message =
+        json!({"role": "assistant", "content": if answer.text.is_empty() { Value::Null } else { json!(answer.text) }});
+    if !calls.is_empty() {
+        message["tool_calls"] = calls
+            .values()
+            .map(
+                |(id, name, args)| json!({"id": id, "type": "function", "function": {"name": name, "arguments": args}}),
+            )
+            .collect();
+    }
+    answer.assistant = message;
+    finish(answer, stopped)
+}
+
+fn finish(mut answer: Answer, stopped: bool) -> Answer {
     if !stopped && answer.stop == Stop::Finished {
         answer.stop = Stop::Failed;
         answer.problem = Some("The answer ended before the service said it was done.".to_owned());
     }
+    if answer.stop != Stop::Calling {
+        answer.calls.clear();
+    }
     answer
+}
+
+/// Reads a streamed answer, handing each piece of text on as it comes.
+pub fn read_stream(api: Api, reader: impl BufRead, on_text: &mut dyn FnMut(&str)) -> Answer {
+    match api {
+        Api::Anthropic => read_anthropic(reader, on_text),
+        Api::Openai => read_openai(reader, on_text),
+    }
 }
 
 /// The service's own words from an error body, where it gave them.
@@ -259,6 +459,11 @@ fn status_words(status: u16, reader: impl Read) -> String {
     }
 }
 
+/// Whether a refusal says the model cannot take the tools it was offered (a 400 naming tools).
+pub fn refuses_tools(status: u16, problem: &str) -> bool {
+    status == 400 && problem.to_ascii_lowercase().contains("tool")
+}
+
 /// Asks one question and streams the answer to `on_text`.
 pub fn ask(request: &Request, on_text: &mut dyn FnMut(&str)) -> Answer {
     let mut call = agent().post(endpoint(
@@ -278,7 +483,9 @@ pub fn ask(request: &Request, on_text: &mut dyn FnMut(&str)) -> Answer {
     let status = response.status().as_u16();
     let reader = response.into_body().into_reader();
     if status >= 400 {
-        return Answer::failed(status_words(status, reader));
+        let problem = status_words(status, reader);
+        let tools_refused = !request.tools.is_empty() && refuses_tools(status, &problem);
+        return Answer { tools_refused, ..Answer::failed(problem) };
     }
     read_stream(request.service.api, BufReader::new(reader), on_text)
 }

@@ -249,11 +249,25 @@ for (const [name, viewport] of [
         },
         ai_send: {
           result: {
-            text: "A boat's hull was missing. <b>Check Sample Boats.</b>",
-            stop: "finished",
-            problem: null,
-            inputTokens: 300,
-            outputTokens: 60,
+            step: "answered",
+            answer: {
+              text: "A boat's hull was missing. <b>Check Sample Boats.</b>",
+              stop: "finished",
+              problem: null,
+              inputTokens: 300,
+              outputTokens: 60,
+            },
+            calls: [
+              {
+                tool: "find_reports",
+                summary: 'Find reports about "boat"',
+                text: "2 reports found.",
+                characters: 16,
+                failed: false,
+                sent: true,
+              },
+            ],
+            toolsUnavailable: false,
           },
         },
       });
@@ -272,8 +286,70 @@ for (const [name, viewport] of [
       await expect(main).toContainText("<b>Check Sample Boats.</b>");
       await expect(main.locator("b")).toHaveCount(0);
       await expect(main).toContainText("300 tokens sent, 60 received.");
+      await expect(main).toContainText("It asked the tool kit once");
       await audit(page);
       expect(await smallControls(page)).toBe(0);
+    });
+
+    test("an online model's report waits, shown whole, until Send this report (0.73.0)", async ({
+      page,
+    }) => {
+      const report = {
+        tool: "ask_report",
+        summary: "Ask decisions list about first-mods",
+        text: "Decisions: 2 waiting",
+        characters: 20,
+        failed: false,
+        sent: false,
+      };
+      await open(page, sampleLog, [hull], {
+        ai_status: { result: sampleAiStatus },
+        ai_prepare_fault: {
+          result: {
+            id: 8,
+            what: "explain-fault",
+            service: "Claude (Anthropic)",
+            model: "sample-model",
+            local: false,
+            tools: true,
+            instruction: "You help a person who plays and mods PC games.",
+            text: "Game: First Sample",
+            characters: 18,
+          },
+        },
+        ai_send: { result: { step: "waiting", call: report, calls: [] } },
+        ai_answer_call: {
+          result: {
+            step: "answered",
+            answer: {
+              text: "Two decisions wait.",
+              stop: "finished",
+              problem: null,
+              inputTokens: 500,
+              outputTokens: 40,
+            },
+            calls: [{ ...report, sent: true }],
+            toolsUnavailable: false,
+          },
+        },
+      });
+      await page.locator("#log-bdd7badf > summary").click();
+      await page.getByRole("button", { name: "Explain this fault" }).click();
+      const main = page.locator("main");
+      await expect(main).toContainText(
+        "you see its answer and choose whether it is sent",
+      );
+      await page.getByRole("button", { name: "Send", exact: true }).click();
+      await expect(main).toContainText(
+        "Claude (Anthropic) asks the tool kit for a report",
+      );
+      await expect(main).toContainText("Ask decisions list about first-mods");
+      await expect(main).toContainText("Decisions: 2 waiting");
+      await audit(page);
+      expect(await smallControls(page)).toBe(0);
+      await page.getByRole("button", { name: "Send this report" }).click();
+      await expect(main).toContainText("Two decisions wait.");
+      await expect(main).toContainText("It asked the tool kit once");
     });
 
     test("no AI service ready means no Explain this fault", async ({

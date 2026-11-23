@@ -4,11 +4,16 @@
 //! page's last reading named, by its id; since 0.72.0 also a version of a changelog the Changes page last read, and a repository's
 //! last update check) and an instruction file kept with the program (`prompts/`), and shows it whole, with the service and model it
 //! would go to. **Send** sends that and nothing else, only for the question last prepared, and checks the
-//! service's gate again (`companion_core::ai::ready`). The model is given no tools, and its answer is text to show.
+//! service's gate again (`companion_core::ai::ready`). Its answer is text to show.
+//!
+//! **The tool kit's reports** (0.73.0, slice 3b): unless the person switched it off, the model may ask the kit's three read-only
+//! tools while it answers (`ai_tools`), at most six times a question. For a model on this computer each report runs and is sent at
+//! once, and the card lists it. **For an online model each report runs here first and waits, shown whole, for the person's yes**
+//! (`Step::Waiting`, then `answer_call`): only then is it sent; a no tells the model it was declined.
 
-use crate::{changes_page, logs_page, other_code_page};
+use crate::{ai_tools, changes_page, logs_page, other_code_page};
 use companion_core::ai::{self, Length};
-use companion_core::ai_client::{self, Answer, Request};
+use companion_core::ai_client::{self, Answer, Request, Stop, Tool, ToolCall};
 use companion_core::failure::Failure;
 use companion_core::games;
 use serde::Serialize;
@@ -23,6 +28,11 @@ const SUMMARISE_VERSION: &str = include_str!("../../prompts/summarise-version.md
 const SUMMARISE_VERSION_WHAT: &str = "summarise-version";
 const UPDATE_MEANING: &str = include_str!("../../prompts/update-meaning.md");
 const UPDATE_MEANING_WHAT: &str = "update-meaning";
+const TOOLS: &str = include_str!("../../prompts/tools.md");
+/// The most reports the model may ask for in one question (agent default).
+pub const MAX_CALLS: usize = 6;
+const TOO_MANY: &str = "No more reports can be asked for this question ({calls} at most): answer with what you have.";
+const DECLINED: &str = "The person chose not to send this report's answer. Answer without it.";
 const MAX_TEXT: usize = 12_000;
 const MAX_ENTRIES: usize = 60;
 const MAX_ROWS: usize = 30;
@@ -40,13 +50,15 @@ pub struct Prepared {
     pub model: String,
     /// Whether it stays on this computer.
     pub local: bool,
+    /// Whether the model may ask the tool kit's reports.
+    pub tools: bool,
     pub instruction: String,
     pub text: String,
     pub characters: usize,
 }
 
 static NEXT: AtomicU64 = AtomicU64::new(1);
-static PENDING: Mutex<Option<Prepared>> = Mutex::new(None);
+static PENDING: Mutex<Option<Conversation>> = Mutex::new(None);
 
 /// The instruction file with its length filled in.
 pub fn instruction(template: &str, length: Length) -> String {
@@ -191,26 +203,32 @@ pub fn report_text(report: &Value) -> String {
     cut(lines.join("\n"))
 }
 
-/// Keeps a question for Send and returns it to be shown: the chosen service and model, the instruction and the text.
+/// Keeps a question for Send and returns it to be shown: the chosen service and model, the instruction and the text. When the
+/// model may ask the tool kit's reports, the instruction says so, in the words the person reads first.
 fn keep(data: &Path, what: &str, template: &str, text: String) -> Result<Prepared, Failure> {
     let ready = ai::ready(data)?;
+    let mut said = instruction(template, ready.length);
+    if ready.tools {
+        said = format!("{said}\n\n{}", TOOLS.replace("{calls}", &MAX_CALLS.to_string()).trim());
+    }
     let prepared = Prepared {
         id: NEXT.fetch_add(1, Ordering::Relaxed),
         what: what.to_owned(),
         service: ready.service.name.clone(),
         model: ready.model.clone(),
         local: ready.service.local(),
-        instruction: instruction(template, ready.length),
+        tools: ready.tools,
+        instruction: said,
         characters: text.chars().count(),
         text,
     };
-    *PENDING.lock().map_err(|_| Failure::refused("the question could not be kept"))? = Some(prepared.clone());
+    let conversation = Conversation::new(prepared.clone());
+    *PENDING.lock().map_err(|_| Failure::refused("the question could not be kept"))? = Some(conversation);
     Ok(prepared)
 }
 
 /// Builds the question about one fault the Logs page's last reading named, and keeps it for Send.
 pub fn prepare_fault(data: &Path, game: &str, fault: &str) -> Result<Prepared, Failure> {
-    ai::ready(data)?;
     let found = logs_page::remembered(game, fault)?;
     let name = games::find(game)?.map_or_else(|| game.to_owned(), |g| g.name);
     keep(data, EXPLAIN_FAULT_WHAT, EXPLAIN_FAULT, fault_text(&name, &found))
@@ -224,49 +242,249 @@ pub fn prepare_version(
     changelog: &str,
     version: &str,
 ) -> Result<Prepared, Failure> {
-    ai::ready(data)?;
     let (product, found) = changes_page::remembered_version(game, repository, changelog, version)?;
     keep(data, SUMMARISE_VERSION_WHAT, SUMMARISE_VERSION, version_text(&product, changelog, &found))
 }
 
 /// Builds the question about a repository's last update check, from this run of the program (0.72.0).
 pub fn prepare_update_check(data: &Path, game: &str, repository: &str) -> Result<Prepared, Failure> {
-    ai::ready(data)?;
     let report = other_code_page::remembered_check(game, repository)?;
     keep(data, UPDATE_MEANING_WHAT, UPDATE_MEANING, report_text(&report))
 }
 
-/// Sends the question last prepared, if it is the one named, streaming the answer's text to `on_text`; counts its tokens.
-pub fn send(data: &Path, id: u64, on_text: &mut dyn FnMut(&str)) -> Result<Answer, Failure> {
-    let prepared = PENDING
+/// A report the model asked for, as the person sees it: what it asked in a few words, the kit's answer, and whether it was sent.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CallView {
+    pub tool: String,
+    pub summary: String,
+    pub text: String,
+    pub characters: usize,
+    /// The kit refused it or it failed: the model is told so in words.
+    pub failed: bool,
+    /// Sent to the model: always for a model on this computer; for an online one, only on the person's yes.
+    pub sent: bool,
+}
+
+/// What the window hears while an answer comes.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "kind", rename_all = "lowercase")]
+pub enum Event {
+    /// A piece of the answer's text.
+    Text { text: String },
+    /// A report the model asked for, run and sent.
+    Call { call: CallView },
+}
+
+/// Where a question stands after Send or a yes.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "step", rename_all = "lowercase", rename_all_fields = "camelCase")]
+pub enum Step {
+    /// The model has answered.
+    Answered { answer: Answer, calls: Vec<CallView>, tools_unavailable: bool },
+    /// An online model asked for a report: it has run on this computer, and waits for the person's yes before it is sent.
+    Waiting { call: CallView, calls: Vec<CallView> },
+}
+
+/// One question as it goes: the messages so far in the service's own shape, the tools offered, the reports asked for, and the
+/// counts kept across every turn.
+pub struct Conversation {
+    prepared: Prepared,
+    messages: Vec<Value>,
+    tools: Vec<Tool>,
+    started: bool,
+    calls: Vec<CallView>,
+    /// Reports run for an online model and not yet allowed, each with its id, its view and its kit answer.
+    waiting: Vec<(String, CallView)>,
+    /// The results of this turn's calls, to send back before the model is asked again.
+    results: Vec<(String, String, bool)>,
+    asked: usize,
+    text: String,
+    input_tokens: Option<u64>,
+    output_tokens: Option<u64>,
+    tools_unavailable: bool,
+}
+
+impl Conversation {
+    pub fn new(prepared: Prepared) -> Self {
+        Self {
+            messages: ai_client::first_messages(&prepared.text),
+            prepared,
+            tools: Vec::new(),
+            started: false,
+            calls: Vec::new(),
+            waiting: Vec::new(),
+            results: Vec::new(),
+            asked: 0,
+            text: String::new(),
+            input_tokens: None,
+            output_tokens: None,
+            tools_unavailable: false,
+        }
+    }
+
+    fn add(sum: &mut Option<u64>, more: Option<u64>) {
+        if let Some(more) = more {
+            *sum = Some(sum.unwrap_or(0) + more);
+        }
+    }
+}
+
+/// Asks the service one turn, handing each piece of text on as it comes.
+pub type Ask<'a> = dyn Fn(&Request, &mut dyn FnMut(&str)) -> Answer + 'a;
+/// Runs one report the model asked for: its text, and whether it was refused or failed.
+pub type Run<'a> = dyn Fn(&ToolCall) -> (String, bool) + 'a;
+
+/// The question's next steps until the model answers or an online model waits on a yes. `ask` asks the service and `run` runs one
+/// report through the kit; both are passed in, so tests need neither a service nor a kit.
+pub fn drive(
+    conversation: &mut Conversation,
+    ready: &ai::Ready,
+    ask: &Ask,
+    run: &Run,
+    on_event: &mut dyn FnMut(Event),
+) -> Step {
+    let api = ready.service.api;
+    loop {
+        if let Some((_, call)) = conversation.waiting.first() {
+            return Step::Waiting { call: call.clone(), calls: conversation.calls.clone() };
+        }
+        if !conversation.results.is_empty() {
+            let results = std::mem::take(&mut conversation.results);
+            conversation.messages.extend(ai_client::tool_results(api, &results));
+        }
+        let request = Request {
+            service: ready.service,
+            key: ready.key.as_deref(),
+            model: &ready.model,
+            system: &conversation.prepared.instruction,
+            messages: &conversation.messages,
+            tools: &conversation.tools,
+            max_tokens: ready.length.max_tokens(),
+        };
+        let mut answer = ask(&request, &mut |text| on_event(Event::Text { text: text.to_owned() }));
+        if answer.tools_refused && !conversation.tools.is_empty() && conversation.asked == 0 {
+            // This model cannot take tools: ask again without them, once, and say so.
+            conversation.tools.clear();
+            conversation.tools_unavailable = true;
+            continue;
+        }
+        Conversation::add(&mut conversation.input_tokens, answer.input_tokens);
+        Conversation::add(&mut conversation.output_tokens, answer.output_tokens);
+        if !answer.text.is_empty() {
+            if !conversation.text.is_empty() {
+                conversation.text.push_str("\n\n");
+            }
+            conversation.text.push_str(&answer.text);
+        }
+        if answer.stop != Stop::Calling || answer.calls.is_empty() {
+            answer.text = conversation.text.clone();
+            answer.input_tokens = conversation.input_tokens;
+            answer.output_tokens = conversation.output_tokens;
+            return Step::Answered {
+                answer,
+                calls: conversation.calls.clone(),
+                tools_unavailable: conversation.tools_unavailable,
+            };
+        }
+        conversation.messages.push(answer.assistant.clone());
+        for call in &answer.calls {
+            conversation.asked += 1;
+            let (text, failed) = if conversation.asked > MAX_CALLS {
+                (TOO_MANY.replace("{calls}", &MAX_CALLS.to_string()), true)
+            } else {
+                run(call)
+            };
+            let view = CallView {
+                tool: call.name.clone(),
+                summary: ai_tools::summary(call),
+                characters: text.chars().count(),
+                text,
+                failed,
+                sent: false,
+            };
+            if ready.service.local() {
+                let view = CallView { sent: true, ..view };
+                conversation.results.push((call.id.clone(), view.text.clone(), view.failed));
+                conversation.calls.push(view.clone());
+                on_event(Event::Call { call: view });
+            } else {
+                conversation.waiting.push((call.id.clone(), view));
+            }
+        }
+    }
+}
+
+/// Takes the waiting conversation if it is the one named, with the service and model it was shown for.
+fn take(data: &Path, id: u64) -> Result<(Conversation, ai::Ready), Failure> {
+    let conversation = PENDING
         .lock()
         .ok()
-        .and_then(|mut pending| pending.take_if(|p| p.id == id))
+        .and_then(|mut pending| pending.take_if(|c| c.prepared.id == id))
         .ok_or_else(|| Failure::refused("that question is no longer waiting: press the button again"))?;
     let ready = ai::ready(data)?;
-    if ready.service.name != prepared.service || ready.model != prepared.model {
+    if ready.service.name != conversation.prepared.service || ready.model != conversation.prepared.model {
         return Err(Failure::refused("the AI service or model changed since this was shown: press the button again"));
     }
-    let request = Request {
-        service: ready.service,
-        key: ready.key.as_deref(),
-        model: &ready.model,
-        system: &prepared.instruction,
-        user: &prepared.text,
-        max_tokens: ready.length.max_tokens(),
-    };
-    let answer = ai_client::ask(&request, on_text);
-    if answer.input_tokens.is_some() || answer.output_tokens.is_some() || !answer.text.is_empty() {
-        ai::record_usage(
-            data,
-            &ready.service.id,
-            &ready.model,
-            &prepared.what,
-            answer.input_tokens,
-            answer.output_tokens,
-        )?;
+    Ok((conversation, ready))
+}
+
+/// Drives a conversation with the real service and kit, keeps it while it waits on a yes, and counts an answer's tokens.
+fn go(
+    data: &Path,
+    mut conversation: Conversation,
+    ready: &ai::Ready,
+    on_event: &mut dyn FnMut(Event),
+) -> Result<Step, Failure> {
+    let step = drive(&mut conversation, ready, &ai_client::ask, &ai_tools::call, on_event);
+    match &step {
+        Step::Waiting { .. } => {
+            *PENDING.lock().map_err(|_| Failure::refused("the question could not be kept"))? = Some(conversation);
+        }
+        Step::Answered { answer, .. } => {
+            if answer.input_tokens.is_some() || answer.output_tokens.is_some() || !answer.text.is_empty() {
+                let what = &conversation.prepared.what;
+                ai::record_usage(
+                    data,
+                    &ready.service.id,
+                    &ready.model,
+                    what,
+                    answer.input_tokens,
+                    answer.output_tokens,
+                )?;
+            }
+        }
     }
-    Ok(answer)
+    Ok(step)
+}
+
+/// Sends the question last prepared, if it is the one named, streaming what happens to `on_event`.
+pub fn send(data: &Path, id: u64, on_event: &mut dyn FnMut(Event)) -> Result<Step, Failure> {
+    let (mut conversation, ready) = take(data, id)?;
+    if !conversation.started {
+        conversation.started = true;
+        if conversation.prepared.tools {
+            // The tools come from the kit; if it cannot say, the question goes without them.
+            conversation.tools = ai_tools::definitions().unwrap_or_default();
+            conversation.tools_unavailable = conversation.tools.is_empty();
+        }
+    }
+    go(data, conversation, &ready, on_event)
+}
+
+/// The person's answer to a report an online model asked for: sent on a yes; on a no, the model is told it was declined.
+pub fn answer_call(data: &Path, id: u64, allow: bool, on_event: &mut dyn FnMut(Event)) -> Result<Step, Failure> {
+    let (mut conversation, ready) = take(data, id)?;
+    if conversation.waiting.is_empty() {
+        return Err(Failure::refused("no report is waiting for your answer"));
+    }
+    let (call_id, view) = conversation.waiting.remove(0);
+    let view = CallView { sent: allow, ..view };
+    let text = if allow { view.text.clone() } else { DECLINED.to_owned() };
+    conversation.results.push((call_id, text, view.failed || !allow));
+    conversation.calls.push(view.clone());
+    on_event(Event::Call { call: view });
+    go(data, conversation, &ready, on_event)
 }
 
 #[cfg(test)]

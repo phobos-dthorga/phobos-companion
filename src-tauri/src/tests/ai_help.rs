@@ -133,3 +133,160 @@ fn only_a_fault_the_last_reading_named_can_be_asked_about() {
     logs_page::remember("sample-game", &json!({"groups": []}));
     assert!(logs_page::remembered("sample-game", "s1").is_err());
 }
+
+// The conversation with the tool kit's reports (0.73.0): a stand-in service and kit, so no question is sent and no report runs.
+
+fn prepared(local: bool) -> Prepared {
+    Prepared {
+        id: 1,
+        what: "explain-fault".into(),
+        service: if local { "Ollama" } else { "Claude (Anthropic)" }.into(),
+        model: "sample-model".into(),
+        local,
+        tools: true,
+        instruction: "Be brief.".into(),
+        text: "Why?".into(),
+        characters: 4,
+    }
+}
+
+fn ready(local: bool) -> ai::Ready {
+    ai::Ready {
+        service: ai::service(if local { "ollama" } else { "anthropic" }).unwrap(),
+        model: "sample-model".into(),
+        key: (!local).then(|| "sample-key".into()),
+        length: Length::Short,
+        tools: true,
+    }
+}
+
+fn conversation(local: bool) -> Conversation {
+    let mut found = Conversation::new(prepared(local));
+    found.tools =
+        vec![Tool { name: "find_reports".into(), description: "Finds.".into(), schema: json!({"type": "object"}) }];
+    found
+}
+
+fn calling(text: &str, ids: &[&str]) -> Answer {
+    Answer {
+        text: text.into(),
+        stop: Stop::Calling,
+        problem: None,
+        input_tokens: Some(100),
+        output_tokens: Some(10),
+        calls: ids
+            .iter()
+            .map(|id| ToolCall { id: (*id).into(), name: "find_reports".into(), input: json!({"words": "log"}) })
+            .collect(),
+        assistant: json!({"role": "assistant", "content": [{"type": "text", "text": text}]}),
+        tools_refused: false,
+    }
+}
+
+fn answered(text: &str) -> Answer {
+    Answer { stop: Stop::Finished, calls: Vec::new(), ..calling(text, &[]) }
+}
+
+/// A stand-in service that answers from a list, in order, and keeps every request's messages and how many tools it offered.
+struct StandIn {
+    answers: std::cell::RefCell<Vec<Answer>>,
+    seen: std::cell::RefCell<Vec<(Vec<Value>, usize)>>,
+}
+
+impl StandIn {
+    fn new(answers: Vec<Answer>) -> Self {
+        Self { answers: answers.into(), seen: Default::default() }
+    }
+
+    fn ask(&self, request: &Request, on_text: &mut dyn FnMut(&str)) -> Answer {
+        self.seen.borrow_mut().push((request.messages.to_vec(), request.tools.len()));
+        let answer = self.answers.borrow_mut().remove(0);
+        on_text(&answer.text);
+        answer
+    }
+}
+
+fn kit(_: &ToolCall) -> (String, bool) {
+    ("2 reports found.".into(), false)
+}
+
+#[test]
+fn a_local_model_asks_a_report_and_it_goes_at_once_then_it_answers() {
+    let service = StandIn::new(vec![calling("Let me look.", &["c1"]), answered("It is a null reference.")]);
+    let mut heard = Vec::new();
+    let mut talk = conversation(true);
+    let step = drive(&mut talk, &ready(true), &|r, t| service.ask(r, t), &kit, &mut |e| heard.push(e));
+    let Step::Answered { answer, calls, tools_unavailable } = step else { panic!("it should answer") };
+    assert_eq!(answer.text, "Let me look.\n\nIt is a null reference.");
+    assert_eq!((answer.input_tokens, answer.output_tokens, tools_unavailable), (Some(200), Some(20), false));
+    assert_eq!(calls.len(), 1);
+    assert!(calls[0].sent);
+    assert_eq!(calls[0].summary, "Find reports about \"log\"");
+    assert!(heard.iter().any(|e| matches!(e, Event::Call { .. })));
+    // The second request carries the model's own message, then the report's answer, in chat completions' shape (Ollama's).
+    let seen = service.seen.borrow();
+    assert_eq!(seen[1].0[1]["role"], "assistant");
+    assert_eq!(seen[1].0[2], json!({"role": "tool", "tool_call_id": "c1", "content": "2 reports found."}));
+}
+
+#[test]
+fn an_online_model_waits_for_a_yes_before_a_report_is_sent() {
+    let service = StandIn::new(vec![calling("", &["c1"]), answered("Done.")]);
+    let mut talk = conversation(false);
+    let step = drive(&mut talk, &ready(false), &|r, t| service.ask(r, t), &kit, &mut |_| ());
+    let Step::Waiting { call, calls } = step else { panic!("it should wait for the person") };
+    assert_eq!((call.text.as_str(), call.sent, calls.len()), ("2 reports found.", false, 0));
+    assert_eq!(service.seen.borrow().len(), 1, "nothing more is sent before the yes");
+    // The yes, as answer_call gives it.
+    let (id, view) = talk.waiting.remove(0);
+    talk.results.push((id, view.text.clone(), false));
+    let step = drive(&mut talk, &ready(false), &|r, t| service.ask(r, t), &kit, &mut |_| ());
+    assert!(matches!(step, Step::Answered { .. }));
+    assert_eq!(service.seen.borrow()[1].0[2]["content"][0]["content"], "2 reports found.");
+}
+
+#[test]
+fn a_no_tells_the_model_it_was_declined_and_sends_nothing_of_the_report() {
+    let service = StandIn::new(vec![calling("", &["c1"]), answered("Without it, then.")]);
+    let mut talk = conversation(false);
+    drive(&mut talk, &ready(false), &|r, t| service.ask(r, t), &kit, &mut |_| ());
+    let (id, _) = talk.waiting.remove(0);
+    talk.results.push((id, DECLINED.to_owned(), true));
+    drive(&mut talk, &ready(false), &|r, t| service.ask(r, t), &kit, &mut |_| ());
+    let sent = service.seen.borrow()[1].0[2].to_string();
+    assert!(sent.contains("chose not to send") && !sent.contains("2 reports found"));
+}
+
+#[test]
+fn a_model_that_cannot_take_tools_is_asked_again_without_them() {
+    let refused = Answer { tools_refused: true, stop: Stop::Failed, ..answered("") };
+    let service = StandIn::new(vec![refused, answered("Plain answer.")]);
+    let mut talk = conversation(true);
+    let step = drive(&mut talk, &ready(true), &|r, t| service.ask(r, t), &kit, &mut |_| ());
+    let Step::Answered { answer, tools_unavailable, .. } = step else { panic!("it should answer") };
+    assert_eq!((answer.text.as_str(), tools_unavailable), ("Plain answer.", true));
+    assert_eq!(service.seen.borrow().iter().map(|(_, tools)| *tools).collect::<Vec<_>>(), [1, 0]);
+}
+
+#[test]
+fn after_six_reports_the_model_is_told_to_answer_with_what_it_has() {
+    let mut answers: Vec<Answer> = (0..4).map(|_| calling("", &["a", "b"])).collect();
+    answers.push(answered("Enough."));
+    let service = StandIn::new(answers);
+    let ran = std::cell::Cell::new(0);
+    let counting = |c: &ToolCall| {
+        ran.set(ran.get() + 1);
+        kit(c)
+    };
+    let mut talk = conversation(true);
+    let step = drive(&mut talk, &ready(true), &|r, t| service.ask(r, t), &counting, &mut |_| ());
+    let Step::Answered { calls, .. } = step else { panic!("it should answer") };
+    assert_eq!((ran.get(), calls.len()), (MAX_CALLS, 8));
+    assert!(calls[7].failed && calls[7].text.contains("No more reports"));
+}
+
+#[test]
+fn the_tools_paragraph_is_part_of_what_is_shown() {
+    let said = TOOLS.replace("{calls}", &MAX_CALLS.to_string());
+    assert!(said.contains("at most 6 times") && said.contains("Every report only reads"));
+}

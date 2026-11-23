@@ -144,8 +144,12 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   words. **A new button adds its instruction file, a `prepare_` function in `ai_help.rs` that reads only what the host itself
   read, and its Guide words, in one change.** **Send** sends that question
   and nothing else, only the one last prepared, after `companion_core::ai::ready` checks the service, its key and, for an online
-  one, AI services in Going online. **The model is given no tools**, and its answer is shown as text, never acted on, never put
-  into `{@html}`. Each answer's token count is appended to `ai-usage.jsonl`. **Agents and tests never send a real question**:
+  one, AI services in Going online. **The model's only tools are the kit's three read-only ones** (0.73.0; the owner, 23 Nov 2026:
+  "go ahead with the kit's tools for the model"), unless the person switches them off: `ai_tools.rs` hands each call whole to the
+  kit's `mcp call`, which runs only reports the manifest calls `reads`, names repositories only from the games list, refuses
+  paths and redacts; at most six a question. **For an online model each report runs first and waits, shown whole, for the
+  person's Send this report** (`Step::Waiting`); a no tells the model it was declined. **Never give the model a tool that writes,
+  runs code or goes online.** Its answer is shown as text, never acted on, never put into `{@html}`. Each answer's token count is appended to `ai-usage.jsonl`. **Agents and tests never send a real question**:
   tests stand in the service, and a question to a model on the owner's computer loads their graphics card, so ask first.
 - **Settings adds to the games list on one press** (0.31.0, Add a game from Steam; `docs/later.md` item 5, the owner's yes of 19
   Nov 2026): one new entry in `.local/games.json`, after the window showed it whole, with every field checked again, the list's

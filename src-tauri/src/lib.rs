@@ -6,6 +6,7 @@
 mod about_page;
 mod ai_help;
 mod ai_programs;
+mod ai_tools;
 mod changed_files;
 mod changes_page;
 mod claims_board;
@@ -743,15 +744,31 @@ async fn ai_prepare_update_check(
     blocking(move || ai_help::prepare_update_check(&data, &game, &repository)).await
 }
 
-/// Sends the question last prepared, on the person's press, streaming the answer's text through the window's channel.
+/// Sends the question last prepared, on the person's press, streaming the answer's text and each report the model asks for
+/// through the window's channel; it answers, or waits on the person's yes for a report an online model asked for (0.73.0).
 #[tauri::command]
-async fn ai_send(
+async fn ai_send(app: tauri::AppHandle, id: u64, on_event: Channel<ai_help::Event>) -> Result<ai_help::Step, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || ai_help::send(&data, id, &mut |event| drop(on_event.send(event)))).await
+}
+
+/// The person's yes or no to the report an online model asked for, shown whole first (0.73.0); the question then goes on.
+#[tauri::command]
+async fn ai_answer_call(
     app: tauri::AppHandle,
     id: u64,
-    on_text: Channel<String>,
-) -> Result<companion_core::ai_client::Answer, Failure> {
+    allow: bool,
+    on_event: Channel<ai_help::Event>,
+) -> Result<ai_help::Step, Failure> {
     let data = data_folder(&app)?;
-    blocking(move || ai_help::send(&data, id, &mut |text| drop(on_text.send(text.to_owned())))).await
+    blocking(move || ai_help::answer_call(&data, id, allow, &mut |event| drop(on_event.send(event)))).await
+}
+
+/// Keeps whether the model may ask the tool kit's reports while it answers (0.73.0).
+#[tauri::command]
+async fn ai_choose_tools(app: tauri::AppHandle, on: bool) -> Result<companion_core::ai::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || companion_core::ai::choose_tools(&data, on)).await
 }
 
 /// Records the owner's answer to one decision, once they press Decide.
@@ -1535,6 +1552,8 @@ pub fn run() {
             ai_prepare_version,
             ai_prepare_update_check,
             ai_send,
+            ai_answer_call,
+            ai_choose_tools,
             picks_list,
             publish_read,
             publish_waiting,

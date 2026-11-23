@@ -158,6 +158,19 @@ fn choices_are_checked_and_kept() {
 }
 
 #[test]
+fn the_tool_kits_reports_start_on_and_the_choice_is_kept() {
+    let data = scratch();
+    assert!(status_with(&data, &no_environment, &Empty).tools);
+    choose_tools(&data, false).unwrap();
+    assert!(!status_with(&data, &no_environment, &Empty).tools);
+    choose_length(&data, Length::Medium).unwrap();
+    assert!(!status_with(&data, &no_environment, &Empty).tools, "another choice keeps it");
+    choose_tools(&data, true).unwrap();
+    assert!(status_with(&data, &no_environment, &Empty).tools);
+    fs::remove_dir_all(&data).unwrap();
+}
+
+#[test]
 fn the_months_count_adds_only_that_month() {
     let data = scratch();
     record_usage(&data, "ollama", "llama3.2", "explain-fault", Some(100), Some(20)).unwrap();

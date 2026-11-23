@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   blockedBy,
   changedMods,
+  docsOnly,
   encodeTargets,
   entryParts,
   formatSize,
@@ -250,12 +251,65 @@ describe("before you play", () => {
     ]);
   });
 
+  it("asks to install a docs-only change by default, as before, and only notes it when told to be quiet", () => {
+    const docs = mod({
+      name: "Words",
+      state: "behind",
+      files: { total: 2, counts: { docs: 2 }, paths: [] },
+    });
+    const code = mod({
+      name: "Code",
+      state: "behind",
+      files: { total: 2, counts: { docs: 1, code: 1 }, paths: [] },
+    });
+    const loud = preflight([repo([docs, code])], texturesReady([]), "G");
+    expect(loud.map((c) => [c.words, c.args.names])).toEqual([
+      ["mods-pre-install", "Words, Code"],
+    ]);
+    const quiet = preflight([repo([docs, code])], texturesReady([]), "G", true);
+    expect(quiet.map((c) => [c.kind, c.words, c.args.names])).toEqual([
+      ["todo", "mods-pre-install", "Code"],
+      ["info", "mods-pre-docs-only", "Words"],
+    ]);
+    const alone = preflight([repo([docs])], texturesReady([]), "G", true);
+    expect(alone.map((c) => [c.kind, c.words])).toEqual([
+      ["info", "mods-pre-docs-only"],
+      ["ready", "mods-pre-ready"],
+    ]);
+  });
+
   it("says it is still checking textures rather than calling them current", () => {
     const checks = preflight([repo([mod()])], { state: "reading" }, "G");
     expect(checks.map((c) => c.words)).toEqual([
       "mods-pre-textures-reading",
       "mods-pre-ready-mods",
     ]);
+  });
+});
+
+describe("a change only to docs", () => {
+  const docsFiles = { total: 2, counts: { docs: 2 }, paths: [] };
+  it("is every changed file a doc, nothing to build, and nothing the installed copy has alone", () => {
+    expect(docsOnly(mod({ state: "behind", files: docsFiles }))).toBe(true);
+    expect(docsOnly(mod({ state: "unlogged", files: docsFiles }))).toBe(true);
+  });
+  it("is not one when code changed too, a build waits, entries would be lost, or nothing changed", () => {
+    const mixed = { total: 3, counts: { docs: 2, defs: 1 }, paths: [] };
+    expect(docsOnly(mod({ state: "behind", files: mixed }))).toBe(false);
+    expect(
+      docsOnly(
+        mod({
+          state: "behind",
+          files: docsFiles,
+          build: { needsBuild: true, projects: [] },
+        }),
+      ),
+    ).toBe(false);
+    expect(docsOnly(mod({ state: "differs", files: docsFiles }))).toBe(false);
+    expect(docsOnly(mod())).toBe(false);
+    expect(
+      docsOnly(mod({ state: "behind", files: docsFiles, installed: null })),
+    ).toBe(false);
   });
 });
 

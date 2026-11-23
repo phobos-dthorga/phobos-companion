@@ -830,9 +830,39 @@ test.describe("Settings to look at, shown at once (0.27.0)", () => {
     await page.getByRole("button", { name: "Mods", exact: true }).click();
     const panel = page.locator("#settings-to-look");
     await expect(panel).toContainText("Kept from last time");
-    await expect(panel).toContainText("checking for changes");
+    // It says plainly the list may be short, with the read's bar, so a kept list never looks final (0.80.0).
+    await expect(panel).toContainText("may lack settings added since");
+    await expect(panel.getByRole("progressbar")).toBeVisible();
     await expect(panel).toContainText("Boats float", { timeout: 10_000 });
-    await expect(panel).not.toContainText("checking for changes");
+    await expect(panel).not.toContainText("may lack settings added since");
+    await expect(panel.getByRole("progressbar")).toHaveCount(0);
+  });
+});
+
+test.describe("When only a mod's docs differ (0.80.0)", () => {
+  test("is shown as an update until the owner chooses quietly, and the choice is kept", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      mod_installs: sampleInstalls([]),
+      texture_status: sampleTextures([]),
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Mods", exact: true }).click();
+    await page.getByRole("tab", { name: /Installed and backups/ }).click();
+    const update = page.getByRole("button", { name: "Show as an update" });
+    const quiet = page.getByRole("button", { name: "Show quietly" });
+    await expect(update).toHaveAttribute("aria-pressed", "true");
+    await quiet.click();
+    await expect(quiet).toHaveAttribute("aria-pressed", "true");
+    await expect(update).toHaveAttribute("aria-pressed", "false");
+    expect(
+      await page.evaluate(() =>
+        localStorage.getItem("companion.mods.docs-only"),
+      ),
+    ).toBe("quiet");
   });
 });
 

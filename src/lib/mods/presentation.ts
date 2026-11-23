@@ -135,6 +135,27 @@ export function hasChanges(mod: ModInstall): boolean {
   );
 }
 
+/**
+ * Whether installing would change only the mod's docs (0.80.0): every changed file is of the kit's "docs" kind (kit 1.114.0: a
+ * README, a changelog), no build waits, and the installed copy holds nothing the repository lacks. Nothing in play would change.
+ */
+export function docsOnly(mod: ModInstall): boolean {
+  const total = mod.files?.total ?? 0;
+  return (
+    mod.installed !== null &&
+    total > 0 &&
+    (mod.files?.counts.docs ?? 0) === total &&
+    !mod.build.needsBuild &&
+    (mod.state === "behind" || mod.state === "unlogged")
+  );
+}
+
+/** A docs-only mod's state on its card when the owner chose to show those quietly (0.80.0). */
+export const DOCS_ONLY_WORDS = {
+  label: "mods-state-docs-only",
+  mark: "✎",
+};
+
 /** Files differ, but the changelogs hold the same entries: a change nobody has written up yet, or one still to be built. */
 export function unlogged(mod: ModInstall): boolean {
   return mod.state === "unlogged";
@@ -206,11 +227,15 @@ export type Check = {
   action: "build" | "install-all" | "install-new" | "encode" | null;
 };
 
-/** "Before you play": what stands between now and a launch with everything current, or "Ready to play". */
+/**
+ * "Before you play": what stands between now and a launch with everything current, or "Ready to play". With `quietDocs` (the
+ * owner's choice, 0.80.0), a mod whose only changes are its docs is worth knowing, not something left to do.
+ */
 export function preflight(
   repositories: RepositoryInstalls[],
   textures: TexturesReading,
   game: string,
+  quietDocs = false,
 ): Check[] {
   const checks: Check[] = [];
   const mods = repositories.flatMap((r) => r.status.mods);
@@ -232,13 +257,22 @@ export function preflight(
       action: "build",
     });
   }
-  const changed = mods.filter(hasChanges);
+  const quiet = quietDocs ? mods.filter(docsOnly) : [];
+  const changed = mods.filter((m) => hasChanges(m) && !quiet.includes(m));
   if (changed.length > 0) {
     checks.push({
       kind: "todo",
       words: "mods-pre-install",
       args: { count: changed.length, ...names(changed.map((m) => m.name)) },
       action: "install-all",
+    });
+  }
+  if (quiet.length > 0) {
+    checks.push({
+      kind: "info",
+      words: "mods-pre-docs-only",
+      args: { count: quiet.length, ...names(quiet.map((m) => m.name)) },
+      action: null,
     });
   }
   // Worth knowing, not something left to do, so "Ready to play" still shows beside it.
@@ -325,6 +359,7 @@ export const FILE_WORDS: Record<string, string> = {
   text: "mods-files-text",
   sounds: "mods-files-sounds",
   about: "mods-files-about",
+  docs: "mods-files-docs",
   other: "mods-files-other",
 };
 

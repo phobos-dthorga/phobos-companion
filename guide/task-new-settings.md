@@ -9,4 +9,4 @@ see: page-mods
 2. **See the change** opens the code that made it.
 3. Press **Looked at** when you've seen it. **Show the … looked at** lists those again.
 
-Home says how many are new, and the [Timeline](page-timeline) shows each on the day it was made.
+The list opens with the one kept from last time and reads again behind it, which can take a minute: until then it says so, with a bar, and may lack the newest settings. Home says how many are new, and the [Timeline](page-timeline) shows each on the day it was made.

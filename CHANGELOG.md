@@ -13,6 +13,29 @@ Maintained from 9 November 2026.
   owner's choices, the agent's choices and the risk; its tables of how each part works moved to `docs/architecture.md`, "How each
   part works", and "Who chose what" points at the sections instead of stopping at 19 Nov.
 
+## [0.80.0] - 2026-11-24
+
+### Added
+
+- **A choice of how a mod whose only changes are its docs is shown** (the owner's screen notes of 24 Nov 2026, Issues #1 and #2:
+  every mod said "The repository has more" only because its README was slimmed; the owner's choice: a setting, as before by
+  default). On Mods, Installed and backups, at the top: **Show as an update** (the default; nothing changes) or **Show quietly**,
+  where such a mod's card says "Only its docs differ; nothing in play changes" and Before you play notes it instead of asking to
+  install it. A mod counts only when every file that would change is a doc (the kit's new `docs` kind: Markdown, a README,
+  changelog or licence), no build waits and the installed copy holds no entry the repository lacks. Kept in the window's own
+  storage, as the theme is. Guide: "Choose how a change only to a mod's docs is shown". **Not tested on screen.**
+
+### Fixed
+
+- **Settings to look at no longer looks finished while it reads again** (the owner's screen note of 24 Nov 2026, Issue #3: Home
+  counted three new settings, the Mods page showed two). The list kept from last time shows at once, as before, but now says in
+  plain words that it may lack settings added since, with the read's bar, until the read brings the rest. **Not tested on
+  screen.**
+
+### Dependencies
+
+- **Kit pin v1.112.0 to v1.114.0** (the `docs` kind of changed file; 1.113's docs releases change no command).
+
 ## [0.79.0] - 2026-11-24
 
 ### Added

@@ -32,6 +32,13 @@
     texturePairsOffered,
   } from "./desktopClient";
   import TexturePairs from "./TexturePairs.svelte";
+  import {
+    DOCS_CHOICES,
+    DOCS_CHOICE_WORDS,
+    keepDocsChoice,
+    keptDocsChoice,
+    type DocsChoice,
+  } from "./docsChoice";
   import Tabs from "../shell/Tabs.svelte";
   import { tabsOf } from "../shell/tabs";
   import {
@@ -55,6 +62,8 @@
     SETTING_WORDS,
     shortCommit,
     STATE_WORDS,
+    DOCS_ONLY_WORDS,
+    docsOnly,
     changedSources,
     rebuiltCount,
     unlogged,
@@ -149,9 +158,15 @@
     reading.state === "ready" ? reading.repositories : [],
   );
   const running = $derived(repositories.flatMap((r) => r.status.gameRunning));
+  /** How a mod whose only changes are its docs is shown (0.80.0): as an update, as before, or quietly. */
+  let docsChoice = $state<DocsChoice>(keptDocsChoice());
+  function chooseDocs(choice: DocsChoice) {
+    docsChoice = choice;
+    keepDocsChoice(choice);
+  }
   const checks = $derived(
     reading.state === "ready"
-      ? preflight(repositories, textures, game.name)
+      ? preflight(repositories, textures, game.name, docsChoice === "quiet")
       : [],
   );
 
@@ -1008,6 +1023,21 @@
 {/snippet}
 
 {#snippet installed()}
+  <section class="docs-choice" aria-labelledby="mods-docs-choice-title">
+    <h2 id="mods-docs-choice-title">{t("mods-docs-choice-title")}</h2>
+    <p class="small">{t("mods-docs-choice-body")}</p>
+    <div class="buttons">
+      {#each DOCS_CHOICES as choice (choice)}
+        <button
+          type="button"
+          class="action"
+          aria-pressed={docsChoice === choice}
+          onclick={() => chooseDocs(choice)}
+          >{t(DOCS_CHOICE_WORDS[choice])}</button
+        >
+      {/each}
+    </div>
+  </section>
   {#each repositories as repository (repository.repository)}
     {#if repositories.length > 1}
       <h2 class="repository">{repository.repository}</h2>
@@ -1016,7 +1046,8 @@
       {#each repository.status.mods as mod (mod.mod)}
         {@const key = `${repository.repository}/${mod.mod}`}
         {@const fromBefore = backupBefore(key, mod)}
-        {@const words = STATE_WORDS[mod.state]}
+        {@const quietDocs = docsChoice === "quiet" && docsOnly(mod)}
+        {@const words = quietDocs ? DOCS_ONLY_WORDS : STATE_WORDS[mod.state]}
         {@const pagedBackups = pageOf(
           mod.backups,
           backupPages[key] ?? 1,
@@ -1029,7 +1060,7 @@
           <article class="mod" aria-label={mod.name} id={`mod-${key}`}>
             <div class="mod-head">
               <h3>{mod.name}</h3>
-              <p class="state state-{mod.state}">
+              <p class="state state-{quietDocs ? 'docs-only' : mod.state}">
                 <span aria-hidden="true">{words.mark}</span>
                 {t(words.label)}
               </p>
@@ -1446,6 +1477,14 @@
 
   .state-up-to-date {
     color: var(--colour-success);
+  }
+
+  .state-docs-only {
+    color: var(--colour-text-muted);
+  }
+
+  .docs-choice {
+    margin-bottom: 1.25rem;
   }
 
   .state-ahead {

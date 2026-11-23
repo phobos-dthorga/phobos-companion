@@ -154,10 +154,14 @@
   </div>
   <p class="muted small">{t("ledger-how")}</p>
   <p class="ledger-status" role="status" aria-live="polite">
-    {said}{#if checking}<span class="muted small checking"
-        >{t("ledger-checking")}</span
+    {said}{#if checking}<strong class="small checking"
+        >{t("ledger-checking")}</strong
       >{/if}
   </p>
+  {#if checking}
+    <!-- The kept list may lack settings added since; the bar shows the read that will bring them (0.80.0). -->
+    <ProgressBar {progress} fallback={t("ledger-reading")} />
+  {/if}
 
   {#if reading.state === "reading"}
     <ProgressBar {progress} fallback={t("ledger-reading")} />

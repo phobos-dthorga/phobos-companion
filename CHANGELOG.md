@@ -4,6 +4,25 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.68.1] - 2026-11-23
+
+### Fixed
+
+- **A press on one sound no longer shows on every other** (the owner, 23 Nov 2026: picking one choice for a sound "picks all
+  other of those same choices for ALL OTHER sounds too"). The sound panel's **Choose this one** said only which side the **Y** key
+  plays, but the panel stays on screen from sound to sound and kept that side, so every later sound showed the same side
+  "Chosen". Each new sound, try, file or screenshot now starts with **Y** on the after side: on Picks, the try in focus. Nothing
+  was ever kept by that button: picks are kept only by **Pick Try …** and **None of these**, and the answers already kept were
+  each their own.
+- **The button no longer sounds like a pick**: **Have Y play this one**, and **Y plays this one** once pressed; the line above the
+  players and the Z and Y shortcuts in Settings say "which one Y plays" too.
+- **A band made with Play the band … alone is let go when the sound changes**, so it no longer plays under the next sound's name;
+  one still being made when the sound changes is thrown away.
+- **Guide**: Pick a picture or a sound and Compare a changed picture or sound say what Y and Z do, and that each sound starts
+  again.
+
+Not yet tested on screen.
+
 ## [0.68.0] - 2026-11-23
 
 Backups kept as zips, and Save a picture takes the whole window. Kit pin v1.95.0 to v1.96.0.

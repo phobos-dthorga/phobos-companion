@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import { t } from "../i18n/runtime";
   import { register } from "../shortcuts/registry";
   import type { SoundReading } from "./decode";
@@ -8,7 +8,7 @@
   type Ready = Extract<SoundReading, { ok: true }>;
 
   /**
-   * A changed sound, before and after side by side (0.50.0). Z chooses the other version, Y plays or stops the chosen one; each has
+   * A changed sound, before and after side by side (0.50.0). Z swaps which version Y plays, and Y plays or stops it; each has
    * its own player too. A sound added or removed has one side.
    */
   let {
@@ -21,8 +21,18 @@
     labels: { before: string; after: string };
   } = $props();
 
-  /** The version picked; one that does not exist is never the chosen one. */
+  /** The version Y plays; one that does not exist is never the chosen one. */
   let picked = $state<"before" | "after">("after");
+
+  /**
+   * A new pair (another pick, try, file or screenshot) starts with Y on the after side (0.68.1). The panel stays on screen from one
+   * sound to the next, and the side once carried over, so a press on one sound showed on every other (the owner, 23 Nov 2026).
+   */
+  $effect(() => {
+    void before?.address;
+    void after?.address;
+    untrack(() => (picked = "after"));
+  });
   const chosen = $derived<"before" | "after">(
     !after ? "before" : !before ? "after" : picked,
   );

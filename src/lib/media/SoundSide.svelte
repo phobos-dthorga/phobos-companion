@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy } from "svelte";
+  import { onDestroy, untrack } from "svelte";
   import { LOCALE, t } from "../i18n/runtime";
   import { themeColour, whineAlone } from "./decode";
   import { rgbOf } from "./pixels";
@@ -159,17 +159,36 @@
 
   async function makeWhine() {
     if (!measured.whine) return;
+    const from = address;
     making = true;
     whineFailed = false;
     try {
       if (whineAddress) URL.revokeObjectURL(whineAddress);
-      whineAddress = await whineAlone(channels, rate, measured.whine.hz);
+      whineAddress = null;
+      const made = await whineAlone(channels, rate, measured.whine.hz);
+      // Another sound took this place while it was made: it is not this one's band.
+      if (from !== address) URL.revokeObjectURL(made);
+      else whineAddress = made;
     } catch {
-      whineFailed = true;
+      if (from === address) whineFailed = true;
     } finally {
-      making = false;
+      if (from === address) making = false;
     }
   }
+
+  /**
+   * A new sound in this place lets go of the last one's band (0.68.1): the side stays on screen from one sound to the next, and a
+   * band made for one sound once stayed to play under the next one's name.
+   */
+  $effect(() => {
+    void address;
+    untrack(() => {
+      if (whineAddress) URL.revokeObjectURL(whineAddress);
+      whineAddress = null;
+      whineFailed = false;
+      making = false;
+    });
+  });
 
   onDestroy(() => {
     if (whineAddress) URL.revokeObjectURL(whineAddress);

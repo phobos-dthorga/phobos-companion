@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, SAMPLE_PNG, sampleHome } from "./host";
+import { healthyKit, mockHost, SAMPLE_PNG, sampleHome, toneWav } from "./host";
 
 /** Made-up picks (0.55.0): two pictures with their tries, as an art tool would offer them. */
 function pick(id: string, title: string, tries: string[]) {
@@ -112,6 +112,76 @@ for (const [name, viewport] of [
       await expect(
         page.getByRole("heading", { level: 2, name: "The billy kettle" }),
       ).toBeVisible();
+    });
+    test("which sound Y plays starts again on each sound, never carried from the last (0.68.1)", async ({
+      page,
+    }) => {
+      const sound = (id: string, title: string) => ({
+        ...pick(id, title, ["81", "82"]),
+        kind: "sound",
+        inUse: null,
+        inUseThere: false,
+        tries: ["81", "82"].map((n) => ({
+          id: n,
+          label: `Try ${n}`,
+          path: `K:/sounds/${id}/${id}-${n}.wav`,
+          note: "no flags",
+          there: true,
+        })),
+      });
+      await mockHost(page, {
+        home_status: { result: sampleHome() },
+        kit_status: healthyKit,
+        picks_list: {
+          result: {
+            waiting: 2,
+            repositories: [
+              {
+                repository: "first-mods",
+                root: "C:/repo",
+                grounds: [],
+                picks: [
+                  sound("window", "The window"),
+                  sound("purge", "The purge"),
+                ],
+              },
+            ],
+          },
+        },
+        viewable_file: { result: toneWav(440, 0.5) },
+      });
+      await page.goto("/");
+      await page.keyboard.press("Shift+P");
+      await expect(
+        page.getByRole("heading", { level: 2, name: "The window" }),
+      ).toBeVisible();
+      // Try 81 is in focus, set against Try 82: Y starts on the try in focus.
+      const focusSide = page.getByRole("region", { name: "Try 81" });
+      const otherSide = page.getByRole("region", { name: "Try 82" });
+      await expect(
+        focusSide.getByRole("button", { name: "Y plays this one" }),
+      ).toBeVisible();
+      await otherSide
+        .getByRole("button", { name: "Have Y play this one" })
+        .click();
+      await expect(
+        otherSide.getByRole("button", { name: "Y plays this one" }),
+      ).toBeVisible();
+      await page.keyboard.press("Shift+J");
+      await expect(
+        page.getByRole("heading", { level: 2, name: "The purge" }),
+      ).toBeVisible();
+      await expect(
+        page
+          .getByRole("region", { name: "Try 81" })
+          .getByRole("button", { name: "Y plays this one" }),
+      ).toBeVisible();
+      await expect(
+        page
+          .getByRole("region", { name: "Try 82" })
+          .getByRole("button", { name: "Have Y play this one" }),
+      ).toBeVisible();
+      await audit(page);
     });
     test("keeps the zoom, the ground and the marks from pick to pick, and compares one try with another (0.57.0)", async ({
       page,

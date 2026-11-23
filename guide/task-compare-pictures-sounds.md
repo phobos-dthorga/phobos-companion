@@ -28,7 +28,8 @@ see: task-code-behind, page-changes, page-mods, task-see-screenshots
 
 ### A sound
 
-- Each version has its own player. **Z** chooses the other version and **Y** plays or stops the chosen one.
+- Each version has its own player. **Y** plays or stops the one marked **Y plays this one**; **Z**, or **Have Y play this one**
+  on the other, swaps it. Each new sound starts with **Y** on the after side (on Picks, the try in focus).
 - Each shows its length, its loudness (LUFS), its peak, how strong its highs are above 4 kHz, and any steady whine, then its shape
   and its **spectrogram**: time left to right, pitch upwards, brighter for louder, with lines at 4 kHz and 15 kHz.
 - **Play the band near ... kHz alone, moved down** plays the strongest high band moved down to 1 kHz, where nearly every ear hears

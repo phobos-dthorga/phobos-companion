@@ -190,3 +190,28 @@ export async function chooseGame(page: Page, name: string) {
 export async function openTab(page: Page, name: string) {
   await page.getByRole("tab", { name: new RegExp(`^${name}`) }).click();
 }
+
+/** A made-up tone a quarter of a second long, as a 16-bit mono WAV at 8 kHz. */
+export function toneWav(hz: number, amplitude: number): number[] {
+  const rate = 8000;
+  const frames = 2000;
+  const bytes = Buffer.alloc(44 + frames * 2);
+  bytes.write("RIFF", 0);
+  bytes.writeUInt32LE(36 + frames * 2, 4);
+  bytes.write("WAVEfmt ", 8);
+  bytes.writeUInt32LE(16, 16);
+  bytes.writeUInt16LE(1, 20);
+  bytes.writeUInt16LE(1, 22);
+  bytes.writeUInt32LE(rate, 24);
+  bytes.writeUInt32LE(rate * 2, 28);
+  bytes.writeUInt16LE(2, 32);
+  bytes.writeUInt16LE(16, 34);
+  bytes.write("data", 36);
+  bytes.writeUInt32LE(frames * 2, 40);
+  for (let i = 0; i < frames; i++)
+    bytes.writeInt16LE(
+      Math.round(amplitude * 32767 * Math.sin((2 * Math.PI * hz * i) / rate)),
+      44 + i * 2,
+    );
+  return Array.from(bytes);
+}

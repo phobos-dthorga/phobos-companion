@@ -10,6 +10,8 @@ for: agents
 2. Choose a pick on the left; the waiting ones come first.
 3. Step through its tries with **J** and **K**. Each is set against the one in use now: press **Z** to flick between them, or
    **Show what changed**. Pick a ground that shows edges well (**Soil**, **Dark stone**, **Checks**).
+   For a sound, **Y** plays the try in focus; **Z** or **Have Y play this one** swaps it to the other side. That only says which
+   one **Y** plays: it keeps nothing, and each sound starts again on the try in focus.
 4. Press **Pick Try …** (**Ctrl + Enter**), or **None of these** (**Shift + N**) with your words for what to try next.
 
 The next waiting pick opens. **Your pick is kept, not applied**: an agent session exports it and records it, and then it leaves the

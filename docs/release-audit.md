@@ -111,7 +111,7 @@ Much of the foundation already suits others, and should be kept so:
 
 | Question | The owner's answer |
 | --- | --- |
-| Sign the installer? | **SignPath Foundation**, the free signing for open-source projects (B5). Its conditions, and what else going online would add, are in [later.md](later.md#going-online), O6 and O1 |
+| Sign the installer? | **SignPath Foundation**, the free signing for open-source projects (B5). Its conditions, and what else going online would add, are in [later.md](later.md#going-online), O6 and O1; researched for the owner on 25 Nov 2026 in [signing.md](signing.md) |
 
 **Still open:**
 

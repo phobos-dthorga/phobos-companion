@@ -38,6 +38,7 @@
   import { formatTime } from "./lib/home/presentation";
   import type { HomeReading } from "./lib/home/types";
   import { t } from "./lib/i18n/runtime";
+  import PageNeeds from "./lib/setup/PageNeeds.svelte";
   import AtlasPage from "./lib/atlas/AtlasPage.svelte";
   import ReportsPage from "./lib/reports/ReportsPage.svelte";
   import TestsPage from "./lib/tests/TestsPage.svelte";
@@ -323,6 +324,7 @@
           >
         </p>
       {/if}
+      <PageNeeds {page} game={selected?.id ?? null} />
       {#if selected && !pageServes(selected.kind, page)}
         <NotForTools game={selected} {page} />
       {:else if page === "settings" && home.state !== "reading"}

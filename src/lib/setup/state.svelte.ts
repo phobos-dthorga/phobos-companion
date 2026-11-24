@@ -1,3 +1,4 @@
+import { readSetup } from "./desktopClient";
 import type { SetupRow } from "./types";
 
 /**
@@ -8,4 +9,15 @@ export const setupSeen = $state<{ rows: SetupRow[] | null }>({ rows: null });
 
 export function rememberSetup(rows: SetupRow[]) {
   setupSeen.rows = rows;
+}
+
+let asked = false;
+
+/** Reads the setup once a run of the program, for Home's line and the pages' (0.88.0); the Setup tab reads it again itself. */
+export function readSetupOnce() {
+  if (asked || setupSeen.rows !== null) return;
+  asked = true;
+  void readSetup().then((answer) => {
+    if (answer.state === "ready") rememberSetup(answer.setup.rows);
+  });
 }

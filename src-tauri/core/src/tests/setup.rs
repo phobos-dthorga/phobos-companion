@@ -49,6 +49,21 @@ fn rows_say_how_each_program_stands_and_how_a_missing_one_is_fetched() {
 }
 
 #[test]
+fn each_row_carries_the_pages_that_use_it_from_the_companion_s_own_file() {
+    let pages = checked_pages(PAGES).expect("config/setup-pages.json");
+    assert!(pages.contains_key("dotnet-sdk") && !pages.contains_key("git"));
+    let rows = rows(&data(), &["rimworld".to_owned()], &[]);
+    let row = |key: &str| rows.iter().find(|r| r.key == key).expect("the row").clone();
+    assert_eq!(row("dotnet-sdk").pages, vec!["memory".to_owned()]);
+    assert_eq!(row("todds").pages, vec!["mods".to_owned()]);
+    // git says so on every page already.
+    assert!(row("git").pages.is_empty());
+    assert!(checked_pages(r#"{"pages": {"x": []}}"#).is_err());
+    assert!(checked_pages(r#"{"pages": {"x": [""]}}"#).is_err());
+    assert!(checked_pages("not json").is_err());
+}
+
+#[test]
 fn a_game_s_own_program_shows_only_for_a_game_on_the_list() {
     assert!(rows(&data(), &[], &[]).iter().all(|r| r.key != "todds"));
     assert!(rows(&data(), &["another".to_owned()], &[]).iter().all(|r| r.key != "todds"));

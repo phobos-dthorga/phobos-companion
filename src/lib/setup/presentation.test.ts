@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { arrived, homeNeeds, inGroup, offer, outcome } from "./presentation";
+import {
+  arrived,
+  homeNeeds,
+  inGroup,
+  offer,
+  outcome,
+  pageNeeds,
+} from "./presentation";
 import type { Fetching, SetupRow } from "./types";
 
 function row(key: string, more: Partial<SetupRow> = {}): SetupRow {
@@ -16,6 +23,7 @@ function row(key: string, more: Partial<SetupRow> = {}): SetupRow {
     fetcher: "winget",
     fetcherHere: true,
     waitsFor: [],
+    pages: [],
     ...more,
   };
 }
@@ -57,6 +65,26 @@ describe("setup", () => {
       row("here", { everyday: true, state: "here" }),
     ];
     expect(homeNeeds(rows).map((r) => r.key)).toEqual(["steam"]);
+  });
+
+  it("a page names what it uses that is not here, a game's own only on that game's pages", () => {
+    const rows = [
+      row("dotnet-sdk", { pages: ["memory"] }),
+      row("aside", { pages: ["memory"], state: "set-aside" }),
+      row("here", { pages: ["memory"], state: "here" }),
+      row("git", { pages: ["memory"] }),
+      row("todds", { pages: ["memory"], game: "first" }),
+    ];
+    expect(pageNeeds(rows, "memory", "first").map((r) => r.key)).toEqual([
+      "dotnet-sdk",
+      "aside",
+      "todds",
+    ]);
+    expect(pageNeeds(rows, "memory", "second").map((r) => r.key)).toEqual([
+      "dotnet-sdk",
+      "aside",
+    ]);
+    expect(pageNeeds(rows, "mods", "first")).toEqual([]);
   });
 
   it("offers a run only when the command can run now", () => {

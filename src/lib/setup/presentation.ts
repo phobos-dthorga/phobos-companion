@@ -20,6 +20,24 @@ export function homeNeeds(rows: SetupRow[]): SetupRow[] {
   );
 }
 
+/**
+ * What a page names (0.88.0): the programs it uses that are not here, set aside or not (the page can't work without them either
+ * way). A game's own program only on that game's pages; git never, since every page says so already.
+ */
+export function pageNeeds(
+  rows: SetupRow[],
+  page: string,
+  game: string | null,
+): SetupRow[] {
+  return rows.filter(
+    (row) =>
+      row.state !== "here" &&
+      row.key !== "git" &&
+      row.pages.includes(page) &&
+      (row.game === null || row.game === game),
+  );
+}
+
 /** What a missing row offers: run its command, wait for another program, get its page by hand, or nothing. */
 export type Offer =
   | { kind: "run" }

@@ -21,6 +21,15 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.88.0] - 2026-11-25
+
+### Added
+
+- **A page that uses a missing program says so at its top, with a button to Settings → Setup** (the owner's choice by card,
+  25 Nov 2026: "Say it on the page"). The Code map, Explorer, Memory, Game files, Mod list and Mods pages name what they use
+  that isn't here and what for (the .NET 10 runtime or SDK, ilspycmd, Steam, a game's own program), instead of failing in a
+  tool's words. Which page uses what is `config/setup-pages.json`. **Not tested on screen.**
+
 ## [0.87.0] - 2026-11-25
 
 ### Added

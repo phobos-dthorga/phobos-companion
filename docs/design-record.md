@@ -787,8 +787,8 @@ Companion, of course."
 | How does it change the way they work? | Setting up becomes a list to work down, once; Home says when an everyday page is missing something |
 | What outside it notices? | Windows: a fetch installs a program for the whole computer or the person, through winget or .NET, and Windows may ask for an administrator's yes |
 
-**Owner's choices (by card, 25 Nov 2026):** build all four kinds of help (this **setup check** first; "say it on the page",
-**starter files for a repository** and an **AI helper** follow); a missing program's command is **shown, and run on a press**;
+**Owner's choices (by card, 25 Nov 2026):** build all four kinds of help (this **setup check** first; **"say it on the page"**
+built in 0.88.0; **starter files for a repository** and an **AI helper** follow); a missing program's command is **shown, and run on a press**;
 the check is **a Settings tab with a line on Home**; a clean-PC trial in Windows Sandbox **later**.
 
 **Agent choices, owner to revise:** the commands live in the tool kit's program rows (kit 1.118.0), so every game and the
@@ -797,7 +797,9 @@ winget told to accept its catalogue's agreements, since the person saw the comma
 sees); the .NET SDK split from the runtime into a row of its own; **I don't need it** sets a row aside and Home stops naming it;
 Home names only everyday programs (git and Steam), and git keeps its own line on every page; after a fetch, the search path is
 read again from Windows so a new program is found without a restart; one fetch at a time; output kept to its last 6,000
-characters.
+characters. **Say it on the page** (0.88.0): which pages use which program is the Companion's own data
+(`config/setup-pages.json`), since pages are its own, not the kit's; the line shows for a program set aside too, since the page
+still can't work without it; it sits above the page's own content and never replaces a failure the page shows.
 
 **Risk, graded by the agent: low.** A fetch installs a program the person named, from the system's own catalogue, after they read
 the command and pressed Run it; Windows asks its own yes where it needs one. Nothing is removed or changed beyond that install, and

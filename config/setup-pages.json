@@ -1,0 +1,14 @@
+{
+  "about": "Which pages use which program the tool kit lists (programs status), so a page says when one it uses is missing (0.87.0, docs/design-record.md, Setup). Keys are the kit's program keys; values are page names (src/lib/navigation/place.ts). git has its own line on every page, so it is not here. A game's own program is listed by its key and shows only on that game's pages. A new program the kit lists joins here when a page uses it.",
+  "pages": {
+    "dotnet": ["codemap", "explorer"],
+    "assembly-reader": ["codemap"],
+    "names-reader": ["codemap"],
+    "ilspycmd": ["codemap"],
+    "heap-reader": ["explorer"],
+    "dotnet-sdk": ["memory"],
+    "dotnet-diagnostics": ["memory"],
+    "steam": ["gamefiles", "modlist"],
+    "todds": ["mods"]
+  }
+}

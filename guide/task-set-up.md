@@ -10,7 +10,8 @@ you.** The Companion brings its own Python and tools; each program here is neede
 stops working without it.
 
 1. Open **Settings** (the **9** key) and the **Setup** tab. Or press **Open Setup** on Home, which shows a line when a program an
-   everyday page uses is missing (Steam, say). git has its own line on every page while it is missing.
+   everyday page uses is missing (Steam, say). A page that uses a missing program says so at its top, with **Set it up in
+   Settings → Setup** (the Memory page, when the .NET 10 SDK isn't here). git has its own line on every page while it is missing.
 2. Missing programs come first, each with what uses it. Press **Fetch** and its name, for example **Fetch Steam…**.
 3. **The command is shown whole first: nothing runs yet.** Read it, then press **Run it**, or **Not now**.
 4. It runs on its own; the box shows what it printed. **Windows may ask you for an administrator's yes** for some installers.

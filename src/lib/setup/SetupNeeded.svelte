@@ -2,9 +2,8 @@
   import { onMount } from "svelte";
   import { t } from "../i18n/runtime";
   import { goPage } from "../navigation/navigation.svelte";
-  import { readSetup } from "./desktopClient";
   import { homeNeeds } from "./presentation";
-  import { rememberSetup, setupSeen } from "./state.svelte";
+  import { readSetupOnce, setupSeen } from "./state.svelte";
 
   /**
    * Home's line while a program an everyday page uses is missing and not set aside (0.87.0; the owner's choice: "Settings tab +
@@ -12,12 +11,7 @@
    */
   const needs = $derived(homeNeeds(setupSeen.rows ?? []));
 
-  onMount(() => {
-    if (setupSeen.rows !== null) return;
-    void readSetup().then((answer) => {
-      if (answer.state === "ready") rememberSetup(answer.setup.rows);
-    });
-  });
+  onMount(readSetupOnce);
 </script>
 
 {#if needs.length > 0}

@@ -17,6 +17,7 @@ function row(key: string, more: Record<string, unknown> = {}) {
     fetcher: null,
     fetcherHere: false,
     waitsFor: [],
+    pages: [],
     ...more,
   };
 }
@@ -28,6 +29,14 @@ const rows = [
     command: "winget install --id Valve.Steam --exact",
     fetcher: "winget",
     fetcherHere: true,
+  }),
+  row("dotnet-sdk", {
+    name: ".NET 10 SDK",
+    neededBy: "Watching a running game's memory",
+    command: "winget install --id Microsoft.DotNet.SDK.10 --exact",
+    fetcher: "winget",
+    fetcherHere: true,
+    pages: ["memory"],
   }),
   row("ilspycmd", {
     name: "ILSpy's command line (ilspycmd)",
@@ -62,6 +71,37 @@ async function openSetup(page: Page, answers: Record<string, unknown> = {}) {
 }
 
 test.describe("Setup", () => {
+  test("a page that uses a missing program says so, and opens Setup (0.88.0)", async ({
+    page,
+  }) => {
+    await openSetup(page);
+    // Home uses none of them: no page line there.
+    await expect(
+      page.getByRole("region", { name: /Part of this page uses/ }),
+    ).toHaveCount(0);
+    await page
+      .getByRole("navigation", { name: "Pages" })
+      .getByRole("button", { name: "Memory", exact: true })
+      .click();
+    const line = page.getByRole("region", {
+      name: "Part of this page uses a program that isn't on this computer",
+    });
+    await expect(line).toContainText(
+      ".NET 10 SDK: Watching a running game's memory",
+    );
+    await expect(
+      (
+        await new AxeBuilder({ page }).include(".page-needs").analyze()
+      ).violations.map((v) => v.id),
+    ).toEqual([]);
+    await line
+      .getByRole("button", { name: "Set it up in Settings → Setup" })
+      .click();
+    await expect(
+      page.getByRole("tab", { name: "Setup", selected: true }),
+    ).toBeVisible();
+  });
+
   test("Home names an everyday program that is missing, and opens Setup (0.87.0)", async ({
     page,
   }) => {
@@ -88,7 +128,7 @@ test.describe("Setup", () => {
     await page.keyboard.press("9");
     await page.getByRole("tab", { name: "Setup" }).click();
     const panel = page.getByRole("region", { name: "What the pages need" });
-    await expect(panel).toContainText("3 not here");
+    await expect(panel).toContainText("4 not here");
     await expect(panel).toContainText("Here (1)");
     // ilspycmd waits for the SDK; the game's own program has no command, only its page.
     await expect(panel).toContainText("Needs .NET 10 SDK first");

@@ -23,6 +23,8 @@ export type SetupRow = {
   fetcherHere: boolean;
   /** The programs that must be here first, and are not, by name. */
   waitsFor: string[];
+  /** The pages that use it (0.88.0), which say so while it is missing. */
+  pages: string[];
 };
 
 /** How a fetch command ended. */

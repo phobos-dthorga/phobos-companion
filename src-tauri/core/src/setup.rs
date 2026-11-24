@@ -8,6 +8,8 @@
 
 use serde::Serialize;
 use serde_json::Value;
+use std::collections::BTreeMap;
+use std::sync::OnceLock;
 
 /// The only programs a fetch command may start. The kit holds its commands to the same list (`programs.FETCHERS`).
 pub const FETCHERS: [&str; 2] = ["winget", "dotnet"];
@@ -16,6 +18,26 @@ const MAX_WORD: usize = 120;
 const MAX_ADDRESS: usize = 300;
 /// The end of a fetch command's output the page is shown.
 pub const SHOWN: usize = 6_000;
+/// Which pages use which program (0.88.0): the Companion's own knowledge, since pages are its own.
+const PAGES: &str = include_str!("../../../config/setup-pages.json");
+
+/// The pages each program is used by, read from `config/setup-pages.json`: {program key: [page]}.
+pub fn checked_pages(text: &str) -> Result<BTreeMap<String, Vec<String>>, String> {
+    let value: Value = serde_json::from_str(text).map_err(|e| e.to_string())?;
+    let pages: BTreeMap<String, Vec<String>> =
+        serde_json::from_value(value["pages"].clone()).map_err(|e| format!("pages: {e}"))?;
+    for (key, names) in &pages {
+        if key.is_empty() || names.is_empty() || names.iter().any(String::is_empty) {
+            return Err(format!("{key:?} names no page, or an empty one"));
+        }
+    }
+    Ok(pages)
+}
+
+fn pages_of(key: &str) -> Vec<String> {
+    static READ: OnceLock<BTreeMap<String, Vec<String>>> = OnceLock::new();
+    READ.get_or_init(|| checked_pages(PAGES).unwrap_or_default()).get(key).cloned().unwrap_or_default()
+}
 
 /// How one row stands. Set aside is the person's own word that they don't need it; it is still missing.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -49,6 +71,8 @@ pub struct Row {
     pub fetcher_here: bool,
     /// The names of the programs that must be here first, and are not.
     pub waits_for: Vec<String>,
+    /// The pages that use it (0.88.0), which say so while it is missing.
+    pub pages: Vec<String>,
 }
 
 fn programs(data: &Value) -> &[Value] {
@@ -110,6 +134,7 @@ pub fn rows(data: &Value, games: &[String], set_aside: &[String]) -> Vec<Row> {
                 fetcher: fetch.as_ref().map(|words| words[0].clone()),
                 fetcher_here: p["fetchHere"].as_bool() == Some(true),
                 waits_for: waits_for(data, p),
+                pages: pages_of(&key),
                 key,
             }
         })

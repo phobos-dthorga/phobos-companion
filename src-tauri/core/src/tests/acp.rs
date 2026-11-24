@@ -26,12 +26,22 @@ struct StandIn {
 
 impl StandIn {
     fn new(root: &Path) -> Self {
+        Self::with(root, Policy::refused())
+    }
+
+    /// A stand-in whose commands are handled as `policy` says (0.84.0).
+    fn with(root: &Path, policy: Policy) -> Self {
         let (from_agent, to_client) = std::io::pipe().unwrap();
         let (from_client, to_agent) = std::io::pipe().unwrap();
         let heard = Arc::new(Mutex::new(Vec::new()));
         let keep = Arc::clone(&heard);
-        let client =
-            Client::start(BufReader::new(from_agent), to_agent, root, Arc::new(move |e| keep.lock().unwrap().push(e)));
+        let client = Client::start_with(
+            BufReader::new(from_agent),
+            to_agent,
+            root,
+            Arc::new(move |e| keep.lock().unwrap().push(e)),
+            policy,
+        );
         Self { client, heard, from_client: BufReader::new(from_client), to_client: LineWriter::new(to_client) }
     }
 
@@ -347,10 +357,10 @@ fn a_permission_is_answered_only_with_an_offered_option() {
         "toolCall": {"toolCallId": "t2", "title": "Edit Boat.cs"},
         "options": [{"optionId": "allow-once", "name": "Allow once", "kind": "allow_once"},
                     {"optionId": "reject-once", "name": "Reject", "kind": "reject_once"}]}}));
-    let Some(Event::Permission { request, title, options }) = agent.heard_at_least(1).pop() else {
+    let Some(Event::Permission { request, title, options, command, .. }) = agent.heard_at_least(1).pop() else {
         panic!("it should ask the person")
     };
-    assert_eq!((title.as_str(), options.len()), ("Edit Boat.cs", 2));
+    assert_eq!((title.as_str(), options.len(), command), ("Edit Boat.cs", 2, None));
     assert!(agent.client.answer_permission(&request, Some("allow-always")).is_err(), "not offered");
     agent.client.answer_permission(&request, Some("reject-once")).unwrap();
     assert_eq!(
@@ -391,4 +401,255 @@ fn when_the_agent_ends_every_request_waiting_ends_too() {
     }
     assert!(matches!(heard.lock().unwrap().last(), Some(Event::Ended { .. })));
     std::fs::remove_dir_all(root).unwrap();
+}
+
+// ---------------------------------------------------------------- commands (0.84.0)
+
+fn in_mode(root: &Path, mode: Mode) -> StandIn {
+    let mut agent = StandIn::with(root, Policy { mode, kit: KitEffects::new() });
+    let root_seen = root.to_path_buf();
+    let session = asking(&agent.client, move |c| c.new_session(&root_seen, vec![], SECOND));
+    let asked = agent.read();
+    agent.write(json!({"jsonrpc": "2.0", "id": asked["id"], "result": {"sessionId": "sess_1"}}));
+    session.join().unwrap().unwrap();
+    agent
+}
+
+fn python() -> &'static str {
+    if cfg!(windows) { "python" } else { "python3" }
+}
+
+/// The last event of a kind the client heard, waiting for it up to a few seconds.
+fn last_heard(agent: &StandIn, wanted: impl Fn(&Event) -> bool) -> Event {
+    for _ in 0..500 {
+        if let Some(found) = agent.heard().into_iter().rev().find(|e| wanted(e)) {
+            return found;
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    panic!("not heard: {:?}", agent.heard());
+}
+
+fn create(agent: &mut StandIn, id: u64, command: &str, args: &[&str]) {
+    agent.write(json!({"jsonrpc": "2.0", "id": id, "method": "terminal/create",
+        "params": {"sessionId": "sess_1", "command": command, "args": args}}));
+}
+
+#[test]
+fn a_terminal_is_offered_unless_commands_are_refused() {
+    for (mode, offered) in [(Mode::Refused, false), (Mode::Ask, true), (Mode::Automatic, true)] {
+        let root = scratch();
+        let mut agent = StandIn::with(&root, Policy { mode, kit: KitEffects::new() });
+        let started = asking(&agent.client, |c| c.initialize("0.84.0", SECOND));
+        let asked = agent.read();
+        assert_eq!(asked["params"]["clientCapabilities"]["terminal"], offered, "{mode:?}");
+        agent.write(json!({"jsonrpc": "2.0", "id": asked["id"], "result": {"protocolVersion": 1}}));
+        started.join().unwrap().unwrap();
+        std::fs::remove_dir_all(root).unwrap();
+    }
+}
+
+#[test]
+fn in_automatic_a_reading_command_runs_by_itself_and_its_terminal_answers() {
+    let root = scratch();
+    let mut agent = in_mode(&root, Mode::Automatic);
+    create(&mut agent, 40, "git", &["--version"]);
+    let answer = agent.read();
+    let terminal = answer["result"]["terminalId"].as_str().expect("a terminal").to_owned();
+    let Event::CommandRun { command, how, cwd, why, .. } =
+        last_heard(&agent, |e| matches!(e, Event::CommandRun { .. }))
+    else {
+        unreachable!()
+    };
+    assert_eq!(
+        (command.as_str(), how.as_str(), cwd.as_str(), why),
+        ("git --version", "automatic", ".", vec!["reads".to_owned()])
+    );
+    agent.write(json!({"jsonrpc": "2.0", "id": 41, "method": "terminal/wait_for_exit",
+        "params": {"sessionId": "sess_1", "terminalId": terminal}}));
+    assert_eq!(agent.read(), json!({"jsonrpc": "2.0", "id": 41, "result": {"exitCode": 0, "signal": null}}));
+    agent.write(json!({"jsonrpc": "2.0", "id": 42, "method": "terminal/output",
+        "params": {"sessionId": "sess_1", "terminalId": terminal}}));
+    let output = agent.read();
+    assert!(output["result"]["output"].as_str().unwrap().contains("git version"), "{output}");
+    assert_eq!(output["result"]["exitStatus"]["exitCode"], 0);
+    let Event::CommandEnded { code, tail, .. } = last_heard(&agent, |e| matches!(e, Event::CommandEnded { .. })) else {
+        unreachable!()
+    };
+    assert_eq!(code, Some(0));
+    assert!(tail.contains("git version"));
+    agent.write(json!({"jsonrpc": "2.0", "id": 43, "method": "terminal/release",
+        "params": {"sessionId": "sess_1", "terminalId": terminal}}));
+    assert_eq!(agent.read()["result"], json!({}));
+    agent.write(json!({"jsonrpc": "2.0", "id": 44, "method": "terminal/output",
+        "params": {"sessionId": "sess_1", "terminalId": terminal}}));
+    assert!(agent.read()["error"]["message"].as_str().unwrap().contains("no such terminal"));
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn in_ask_a_command_waits_for_the_press_and_for_this_chat_runs_by_itself_after() {
+    let root = scratch();
+    let mut agent = in_mode(&root, Mode::Ask);
+    create(&mut agent, 50, "git", &["--version"]);
+    let Event::CommandAsk { request, command, why, warn, .. } =
+        last_heard(&agent, |e| matches!(e, Event::CommandAsk { .. }))
+    else {
+        unreachable!()
+    };
+    assert_eq!(
+        (command.as_str(), why, warn),
+        ("git --version", vec!["reads".to_owned()], false),
+        "it only reads, and still asks"
+    );
+    agent.client.answer_command(&request, CommandAnswer::ForChat).unwrap();
+    assert!(agent.read()["result"]["terminalId"].is_string());
+    assert!(agent.client.answer_command(&request, CommandAnswer::Run).is_err(), "answered once only");
+    // The same command again runs by itself, for the rest of this chat.
+    create(&mut agent, 51, "git", &["--version"]);
+    assert!(agent.read()["result"]["terminalId"].is_string());
+    let runs: Vec<String> = agent
+        .heard()
+        .into_iter()
+        .filter_map(|e| if let Event::CommandRun { how, .. } = e { Some(how) } else { None })
+        .collect();
+    assert_eq!(runs, ["for-chat", "for-chat"]);
+    // Both end before their folder is taken away (Windows keeps a folder a program runs in).
+    for _ in 0..500 {
+        if agent.heard().iter().filter(|e| matches!(e, Event::CommandEnded { .. })).count() == 2 {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn a_no_tells_the_agent_and_runs_nothing() {
+    let root = scratch();
+    let mut agent = in_mode(&root, Mode::Automatic);
+    create(&mut agent, 60, python(), &["-c", "open('made.txt', 'w').write('x')"]);
+    let Event::CommandAsk { request, why, .. } = last_heard(&agent, |e| matches!(e, Event::CommandAsk { .. })) else {
+        unreachable!()
+    };
+    assert_eq!(why, ["runs-script"], "a script asks, even in Automatic");
+    agent.client.answer_command(&request, CommandAnswer::No).unwrap();
+    assert!(agent.read()["error"]["message"].as_str().unwrap().contains("chose not to run"));
+    assert!(!root.join("made.txt").exists());
+    assert!(matches!(
+        last_heard(&agent, |e| matches!(e, Event::CommandNotRun { .. })),
+        Event::CommandNotRun { refused: false, reason: None, .. }
+    ));
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn what_is_forbidden_or_outside_the_repository_is_refused_at_once() {
+    let root = scratch();
+    let mut agent = in_mode(&root, Mode::Automatic);
+    create(&mut agent, 70, "git", &["push", "--force"]);
+    let answer = agent.read();
+    assert!(answer["error"]["message"].as_str().unwrap().contains("force-pushing"), "{answer}");
+    assert!(matches!(
+        last_heard(&agent, |e| matches!(e, Event::CommandNotRun { .. })),
+        Event::CommandNotRun { refused: true, ref why, .. } if why == &["force-push".to_owned()]
+    ));
+    let outside = std::env::temp_dir().canonicalize().unwrap();
+    agent.write(json!({"jsonrpc": "2.0", "id": 71, "method": "terminal/create",
+        "params": {"sessionId": "sess_1", "command": "git", "args": ["status"], "cwd": outside}}));
+    assert!(agent.read()["error"]["message"].as_str().unwrap().contains("outside the repository"));
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn stop_ends_a_running_command_and_declines_one_waiting() {
+    let root = scratch();
+    let mut agent = in_mode(&root, Mode::Ask);
+    create(&mut agent, 80, python(), &["-c", "import time; time.sleep(60)"]);
+    let Event::CommandAsk { request, .. } = last_heard(&agent, |e| matches!(e, Event::CommandAsk { .. })) else {
+        unreachable!()
+    };
+    agent.client.answer_command(&request, CommandAnswer::Run).unwrap();
+    assert!(agent.read()["result"]["terminalId"].is_string());
+    create(&mut agent, 81, "git", &["--version"]);
+    let _ = last_heard(&agent, |e| matches!(e, Event::CommandAsk { command, .. } if command == "git --version"));
+    agent.client.cancel();
+    assert_eq!(agent.read()["method"], "session/cancel");
+    assert!(agent.read()["error"]["message"].as_str().unwrap().contains("chose not to run"));
+    let ended = last_heard(&agent, |e| matches!(e, Event::CommandEnded { .. }));
+    assert!(matches!(ended, Event::CommandEnded { code, .. } if code != Some(0)), "{ended:?}");
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+fn ask_permission(agent: &mut StandIn, id: u64, command: &str) {
+    agent.write(json!({"jsonrpc": "2.0", "id": id, "method": "session/request_permission", "params": {
+        "sessionId": "sess_1",
+        "toolCall": {"toolCallId": format!("t{id}"), "title": format!("`{command}`"), "kind": "execute",
+                     "rawInput": {"command": command}},
+        "options": [{"optionId": "allow-once", "name": "Allow", "kind": "allow_once"},
+                    {"optionId": "allow-always", "name": "Always allow", "kind": "allow_always"},
+                    {"optionId": "reject-once", "name": "Reject", "kind": "reject_once"}]}}));
+}
+
+#[test]
+fn the_agents_own_permission_questions_are_sorted_the_same_way() {
+    let root = scratch();
+    let mut agent = in_mode(&root, Mode::Automatic);
+    ask_permission(&mut agent, 90, "git status");
+    assert_eq!(agent.read()["result"]["outcome"], json!({"outcome": "selected", "optionId": "allow-once"}));
+    ask_permission(&mut agent, 91, "git push --force");
+    assert_eq!(agent.read()["result"]["outcome"], json!({"outcome": "selected", "optionId": "reject-once"}));
+    let outcomes: Vec<String> = agent
+        .heard()
+        .into_iter()
+        .filter_map(|e| if let Event::Decided { outcome, .. } = e { Some(outcome) } else { None })
+        .collect();
+    assert_eq!(outcomes, ["allowed", "refused"]);
+    // One that changes something comes to the person, with what it is and why.
+    ask_permission(&mut agent, 92, "rm -rf build");
+    let Event::Permission { request, command, why, warn, remember, .. } =
+        last_heard(&agent, |e| matches!(e, Event::Permission { .. }))
+    else {
+        unreachable!()
+    };
+    assert_eq!(
+        (command.as_deref(), why, warn, remember),
+        (Some("rm -rf build"), vec!["deletes".to_owned()], true, true)
+    );
+    agent.client.allow_for_chat(&request).unwrap();
+    assert_eq!(agent.read()["result"]["outcome"]["optionId"], "allow-once", "the agent's own once, never its always");
+    ask_permission(&mut agent, 93, "rm   -rf build");
+    assert_eq!(agent.read()["result"]["outcome"]["optionId"], "allow-once");
+    assert!(matches!(
+        last_heard(&agent, |e| matches!(e, Event::Decided { .. })),
+        Event::Decided { ref outcome, .. } if outcome == "for-chat"
+    ));
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn with_commands_refused_the_agents_questions_still_come_to_the_person_and_a_forbidden_one_is_answered_no() {
+    let root = scratch();
+    let mut agent = in_mode(&root, Mode::Refused);
+    ask_permission(&mut agent, 95, "git status");
+    let Event::Permission { request, remember, .. } = last_heard(&agent, |e| matches!(e, Event::Permission { .. }))
+    else {
+        unreachable!()
+    };
+    assert!(!remember, "nothing is allowed for the chat while commands are refused");
+    assert!(agent.client.allow_for_chat(&request).is_err());
+    ask_permission(&mut agent, 96, "git rebase -i HEAD~2");
+    assert_eq!(agent.read()["result"]["outcome"]["optionId"], "reject-once");
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn a_command_is_found_in_the_agents_own_words_or_its_steps_title() {
+    assert_eq!(command_of(&json!({"rawInput": {"command": "git status"}})).as_deref(), Some("git status"));
+    assert_eq!(
+        command_of(&json!({"rawInput": {"command": ["bash", "-lc", "git log -3"]}})).as_deref(),
+        Some("bash -lc \"git log -3\"")
+    );
+    assert_eq!(command_of(&json!({"kind": "execute", "title": "`ls -la`"})).as_deref(), Some("ls -la"));
+    assert_eq!(command_of(&json!({"kind": "edit", "title": "Edit Boat.cs"})), None);
 }

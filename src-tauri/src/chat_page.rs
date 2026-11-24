@@ -6,14 +6,19 @@
 //! the chosen agent in `chat.json`. The program starts only the command the agents file names, found by name on the search path,
 //! **never installs one and never passes a login**. Through the Companion the agent may read text files inside the repository, ask
 //! the person's permission, and since 0.75.0 (slice 5) write a text file there **only after the person saw exactly what would
-//! change and said yes**; commands through it are refused. It is handed the tool kit's MCP server (the
-//! reports that read). One agent runs at a time; leaving the page, starting another or closing the program ends its whole process
-//! tree.
+//! change and said yes**. It is handed the tool kit's MCP server (the reports that read). One agent runs at a time; leaving the
+//! page, starting another or closing the program ends its whole process tree.
+//!
+//! **Commands** (0.84.0; the owner's choices by card, 25 Nov 2026): Settings → AI keeps how they are handled, **starting on Ask**:
+//! Refused (no terminal), Ask (each shown and run on a press), or Automatic (reading, tests and the kit's reports that read run by
+//! themselves). `companion_core::commands` sorts each, and the agent's own permission questions too; what the shared rules forbid
+//! agents is refused in every mode. The kit's manifest is read at each start, so its reports are judged by what it says they do.
 
 use crate::ai_programs;
-use companion_core::acp::{self, Client, OnEvent};
+use companion_core::acp::{self, Client, CommandAnswer, OnEvent, Policy};
+use companion_core::commands::{self, Mode};
 use companion_core::failure::Failure;
-use companion_core::{games, prefs, process};
+use companion_core::{games, kit, prefs, process};
 use serde::Serialize;
 use serde_json::{Value, json};
 use std::io::{BufRead, BufReader};
@@ -59,6 +64,8 @@ pub struct Status {
     pub agents: Vec<AgentStatus>,
     /// The agent running now, and where.
     pub running: Option<RunningStatus>,
+    /// How its commands are handled (0.84.0); it starts on Ask. A change reaches the next agent started.
+    pub commands: Mode,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -76,19 +83,32 @@ pub struct Started {
     pub kit_reports: bool,
 }
 
-fn kept(data: &Path) -> (bool, Option<String>) {
-    let file = prefs::read_json(&data.join(FILE)).ok().flatten().unwrap_or(Value::Null);
-    let chosen = file["agent"].as_str().filter(|id| acp::agent(id).is_ok()).map(str::to_owned);
-    (file["on"].as_bool() == Some(true), chosen)
+/// What `chat.json` keeps: the switch, the agent, and how commands are handled (Ask when it says nothing, as before 0.84.0).
+struct Kept {
+    on: bool,
+    chosen: Option<String>,
+    commands: Mode,
 }
 
-fn keep(data: &Path, on: bool, agent: Option<&str>) -> Result<(), Failure> {
-    prefs::write_json(&data.join(FILE), &json!({"version": VERSION, "on": on, "agent": agent}))
+fn kept(data: &Path) -> Kept {
+    let file = prefs::read_json(&data.join(FILE)).ok().flatten().unwrap_or(Value::Null);
+    Kept {
+        on: file["on"].as_bool() == Some(true),
+        chosen: file["agent"].as_str().filter(|id| acp::agent(id).is_ok()).map(str::to_owned),
+        commands: file["commands"].as_str().and_then(Mode::parse).unwrap_or_default(),
+    }
+}
+
+fn keep(data: &Path, kept: &Kept) -> Result<(), Failure> {
+    prefs::write_json(
+        &data.join(FILE),
+        &json!({"version": VERSION, "on": kept.on, "agent": kept.chosen, "commands": kept.commands}),
+    )
 }
 
 /// The switch, the agents with whether each is on this computer, and the one running.
 pub fn status(data: &Path) -> Status {
-    let (on, chosen) = kept(data);
+    let Kept { on, chosen, commands } = kept(data);
     let agents = acp::agents()
         .iter()
         .map(|a| AgentStatus {
@@ -102,13 +122,12 @@ pub fn status(data: &Path) -> Status {
         .lock()
         .ok()
         .and_then(|r| r.as_ref().map(|r| RunningStatus { agent: r.agent.clone(), repository: r.repository.clone() }));
-    Status { on, chosen, agents, running }
+    Status { on, chosen, agents, running, commands }
 }
 
 /// Switches the Chat page on or off; off also ends an agent that is running.
 pub fn switch(data: &Path, on: bool) -> Result<Status, Failure> {
-    let (_, chosen) = kept(data);
-    keep(data, on, chosen.as_deref())?;
+    keep(data, &Kept { on, ..kept(data) })?;
     if !on {
         end()?;
     }
@@ -118,8 +137,15 @@ pub fn switch(data: &Path, on: bool) -> Result<Status, Failure> {
 /// Keeps the chosen agent.
 pub fn choose(data: &Path, agent: &str) -> Result<Status, Failure> {
     acp::agent(agent)?;
-    let (on, _) = kept(data);
-    keep(data, on, Some(agent))?;
+    keep(data, &Kept { chosen: Some(agent.to_owned()), ..kept(data) })?;
+    Ok(status(data))
+}
+
+/// Keeps how the agent's commands are handled (0.84.0): `refused`, `ask` or `automatic`. It reaches the next agent started.
+pub fn choose_commands(data: &Path, mode: &str) -> Result<Status, Failure> {
+    let commands =
+        Mode::parse(mode).ok_or_else(|| Failure::refused(format!("{mode:?} is not a way commands are handled")))?;
+    keep(data, &Kept { commands, ..kept(data) })?;
     Ok(status(data))
 }
 
@@ -141,7 +167,7 @@ fn said_tail(said: &Arc<Mutex<String>>) -> String {
 
 /// Starts the chosen agent in a repository of the game, and opens a conversation; ends any agent running first.
 pub fn start(data: &Path, game: &str, repository: &str, on_event: OnEvent) -> Result<Started, Failure> {
-    let (on, chosen) = kept(data);
+    let Kept { on, chosen, commands: mode } = kept(data);
     if !on {
         return Err(Failure::refused("the Chat page is switched off in Settings → AI"));
     }
@@ -186,7 +212,14 @@ pub fn start(data: &Path, game: &str, repository: &str, on_event: OnEvent) -> Re
             }
         }
     });
-    let client = Client::start(BufReader::new(output), input, &found.path, on_event);
+    // What each of the kit's reports does, so a report that only reads is told from one that changes something; without the
+    // manifest every kit command asks.
+    let kit = if mode == Mode::Refused {
+        commands::KitEffects::new()
+    } else {
+        kit::read_manifest().map(|m| commands::kit_effects(&m)).unwrap_or_default()
+    };
+    let client = Client::start_with(BufReader::new(output), input, &found.path, on_event, Policy { mode, kit });
     let failed = |child: &mut Child, problem: String| {
         process::end_tree(child);
         Failure::refused(format!("{} did not start: {problem}.{}", agent.name, said_tail(&said)))
@@ -235,6 +268,22 @@ pub fn answer_permission(request: &str, option: Option<&str>) -> Result<(), Fail
 /// The person's answer to a change the agent asked to make through the Companion (0.75.0): written on a yes, declined on a no.
 pub fn answer_write(request: &str, allow: bool) -> Result<(), Failure> {
     client()?.answer_write(request, allow).map_err(Failure::refused)
+}
+
+/// The person's answer to a command the agent asked to run through the Companion (0.84.0): `run`, `no` or `for-chat`.
+pub fn answer_command(request: &str, answer: &str) -> Result<(), Failure> {
+    let answer = match answer {
+        "run" => CommandAnswer::Run,
+        "no" => CommandAnswer::No,
+        "for-chat" => CommandAnswer::ForChat,
+        other => return Err(Failure::refused(format!("{other:?} is not an answer to a command"))),
+    };
+    client()?.answer_command(request, answer).map_err(Failure::refused)
+}
+
+/// The person allows the command a permission question names for the rest of this chat (0.84.0).
+pub fn allow_for_chat(request: &str) -> Result<(), Failure> {
+    client()?.allow_for_chat(request).map_err(Failure::refused)
 }
 
 /// Ends the agent running, with every process it started. Ending none is not an error.

@@ -206,7 +206,7 @@ under the same manifest check as the press.
 | `features.json` | Core, `agents.rs` | Settings → Agents | One of the known choices; `prefs` |
 | `online.json` | Core, `online.rs` | Settings → Going online | A kind from `KINDS`; `prefs` |
 | `publishing.json` | Host, `publish_page.rs` | Settings → Publishing | `prefs` |
-| `chat.json` | Host, `chat_page.rs` | Settings → AI, Chat with an agent | On or off (starts off) and an agent from `config/chat-agents.json`; `prefs` |
+| `chat.json` | Host, `chat_page.rs` | Settings → AI, Chat with an agent | On or off (starts off), an agent from `config/chat-agents.json`, and since 0.84.0 how its commands are handled (`refused`, `ask`, `automatic`; Ask when absent), sorted by `companion_core::commands` from `config/chat-commands.json` and run by `companion_core::terminals`; `prefs` |
 | `ai.json` | Core, `ai.rs` | Settings → AI services: a service, a model, a length | A service from `config/ai-services.json`; a model of one line; `prefs` |
 | `ai-usage.jsonl` | Core, `ai.rs` | Each answer to **Send** | Appended: time, service, model, tokens; never the text |
 | The system's key store | Core, `ai_keys.rs` | **Keep this key**, **Forget this key** | Keys for AI services only, under "D'thorga Companion"; never in a file |

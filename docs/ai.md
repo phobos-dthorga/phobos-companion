@@ -270,14 +270,51 @@ Each slice is a working thing by itself, with its own version and commit.
 | 3b | **The kit's tools for the model** (built, 0.73.0 with phobos-modkit 1.110.0): the model may ask A1's read-only reports while it answers, with each call shown | phobos-modkit, then phobos-companion | None |
 | 4 | **A3, first slice** (built, 0.74.0): one agent, the chat page, permission cards, reads only through the Companion | phobos-companion | A new page; process tree ending on every system |
 | 5 | **A3 with the kit's tools**, and changes through the Companion with a yes on each (built, 0.75.0; the kit's tools came in 0.74.0) | phobos-companion | None |
+| 6 | **Commands**, sorted, in three modes (built, 0.84.0; the owner's decision `chat-commands`, answered by card 25 Nov 2026) | phobos-companion | The Chat page's rule in `AGENTS.md` |
 
 **Slice 5 as built (0.75.0)** (agent choices, to revise): the Companion now offers `fs.writeTextFile`. Each `fs/write_text_file`
 is checked first (an absolute path inside the repository, its nearest existing folder followed through links, never inside
 `.git` in any letter case, not a folder, at most 2 MB each way), then shown on a card as a line-by-line difference against what
 is there (a new file all added; kept lines more than two away from a change folded), with **+** and **−** marks so colour never
 carries it alone. **Make this change** writes it, making missing folders, after checking the target again; **Don't** answers the
-agent with "the person chose not to make this change"; **Stop** declines every change still waiting. Running commands through
-the Companion (`terminal/*`) stays refused: that is the owner's decision `chat-commands`, with the agent's lean to keep it so.
+agent with "the person chose not to make this change"; **Stop** declines every change still waiting.
+
+### Commands (slice 6, built 0.84.0)
+
+**The owner's question** (25 Nov 2026, on the decision `chat-commands`, whose lean was to keep commands refused): "There should be
+an automatic mode, perhaps? And for extra dangerous commands, we still refer to a query towards the user? Would that be
+possible?" **The owner's choices, by card:** three modes, **starting on Ask every time**; in Automatic, **reading commands, the
+tool kit's read-only reports, and tests and the gate** run by themselves; the card offers **Run it, Not this, Allow for this
+chat**; and **both paths** are sorted: commands the agent asks the Companion to run, and the agent's own permission questions
+that name one.
+
+| Tier | What it holds | What happens |
+| --- | --- | --- |
+| **Refused** (every mode) | What the shared rules forbid agents: force-pushing, rewriting history, skipping checks (`--no-verify`, `commit -n`, signing off), saves, Steam uploads and other owner-only kit reports, credentials, a repository's visibility, changing anything outside the repository | Answered no, even with a yes; the agent is told why in words |
+| **Runs by itself** (Automatic only) | Reading (git's reading commands, listing, searching, inside the repository); the kit's reports its manifest marks `reads`; the repository's gate and its tests | Runs; a line says so, then how it ended, with its output |
+| **Asks** | Everything else: builds, installs, scripts, deletes, git that changes, going online, a command it does not know, one that hides another (`$(…)`), writes its output into a file, sets its own environment, or reads outside the repository | Shown whole with what it does and **Look twice** where it can lose work; runs on Run it, or Allow for this chat |
+
+**How it works:** `companion_core::commands` reads a command as a shell would (quotes, `&&`, `||`, `;`, `|`, redirections, the
+text given to `bash -c` and its kin, three deep), and judges each part by the rules in `config/chat-commands.json`, tried in
+order, the first that names it deciding; a `cd` moves where later parts' paths are judged from. A command through the Companion
+(`terminal/create`) runs as its own program in a folder of the repository (`companion_core::terminals`), its output and errors
+kept together up to the agent's limit (at most 4 MB, the oldest dropped at a character's edge, as the protocol says), ended with
+everything it started by `terminal/kill`, its release, **Stop**, **End**, or after 30 minutes. A permission question names a
+command in its `rawInput.command` (text or words), or as the title of an `execute` step; the Companion answers with the agent's
+own **allow once** (never its "always"), or its **reject**. The protocol allows a client to "auto-allow or reject according to
+user settings" ([tool calls](https://agentclientprotocol.com/protocol/tool-calls)).
+
+**Agent choices, owner to revise:** the rule list itself (the data file); a script (`python x.py`, `node`, `bash x.sh`) always
+asks, and so does every `npx` but the test runners; a command whose environment names anything but a short list (encodings,
+colours) asks; the repository's own folder named from above (`cd .. && rm -rf repo`) asks, marked to look at twice, rather than
+being refused; reading outside the repository asks rather than being refused; Allow for this chat matches the command's words
+exactly (spacing evened out) and is forgotten when the agent ends; in Refused the agent's own questions still come to the person,
+a forbidden one answered no. **Risk grade (`rules/designs.md`): moderate**, so it starts on Ask, not off: in Automatic the person
+can lose nothing a reading or a test run could not, a misjudged command is the risk, and every command is listed on the page as
+it runs. **The honest limit: the sorting reads text; it is not a sandbox.** A script can do anything, so it never runs by itself;
+a program that reads can be given a path whose value the text does not hold, so such a path asks. **Next game:** nothing; the
+rules are game-free, and a repository's own read-only scripts (phobos-rimworld's `scripts/query-defs.py`) still ask until a
+repository may name them in its own data.
 
 ## Open, for the owner to revise
 

@@ -1,0 +1,687 @@
+{
+  "version": 1,
+  "about": "How the Chat page sorts a command an agent wants to run (0.84.0; docs/ai.md, Commands; the owner's choices by card, 25 Nov 2026). Rules are tried in order and the first that matches a simple command decides it: forbidden first (refused even with a yes), then tests and the gate, the tool kit's own list of what each report does, reading, and what changes something. A command no rule names asks. Read by companion_core::commands; game-free.",
+  "environment": [
+    "PYTHONIOENCODING",
+    "PYTHONUTF8",
+    "PYTHONDONTWRITEBYTECODE",
+    "NO_COLOR",
+    "FORCE_COLOR",
+    "CLICOLOR",
+    "TERM",
+    "LANG",
+    "LC_ALL",
+    "GIT_PAGER",
+    "PAGER",
+    "CI"
+  ],
+  "shells": {
+    "bash": ["-c", "-lc"],
+    "sh": ["-c"],
+    "zsh": ["-c", "-lc"],
+    "pwsh": ["-command", "-c"],
+    "powershell": ["-command", "-c"],
+    "cmd": ["/c"]
+  },
+  "valued": {
+    "git": ["-c", "-C", "--git-dir", "--work-tree", "--namespace"],
+    "cargo": ["--manifest-path", "-p", "--package", "--target-dir"],
+    "npm": ["--prefix"],
+    "dotnet": ["-c", "--configuration", "-f", "--framework"],
+    "python": ["-X", "-W"],
+    "python3": ["-X", "-W"],
+    "py": ["-X", "-W"]
+  },
+  "kit": { "programs": ["python", "python3", "py"], "module": "phobos_modkit" },
+  "rules": [
+    {
+      "programs": ["git"],
+      "sub": ["push"],
+      "any": [
+        "--force",
+        "-f",
+        "--force-with-lease*",
+        "--force-if-includes",
+        "--mirror",
+        "+*"
+      ],
+      "kind": "forbidden",
+      "why": "force-push"
+    },
+    {
+      "programs": ["git"],
+      "sub": ["rebase", "filter-branch", "filter-repo", "replace"],
+      "kind": "forbidden",
+      "why": "rewrites-history"
+    },
+    {
+      "programs": ["git"],
+      "sub": ["commit"],
+      "any": ["--amend", "--fixup*", "--squash*"],
+      "kind": "forbidden",
+      "why": "rewrites-history"
+    },
+    {
+      "programs": ["git"],
+      "sub": ["commit"],
+      "any": ["-n"],
+      "kind": "forbidden",
+      "why": "skips-checks"
+    },
+    {
+      "programs": ["*"],
+      "any": [
+        "--no-verify",
+        "*commit.gpgsign=false",
+        "--no-gpg-sign",
+        "*core.hookspath*"
+      ],
+      "kind": "forbidden",
+      "why": "skips-checks"
+    },
+    {
+      "programs": ["gh"],
+      "sub": ["repo"],
+      "all": ["edit"],
+      "any": ["--visibility*"],
+      "kind": "forbidden",
+      "why": "visibility"
+    },
+    {
+      "programs": ["gh"],
+      "sub": ["auth"],
+      "any": ["token", "login", "refresh"],
+      "kind": "forbidden",
+      "why": "credentials"
+    },
+    {
+      "programs": ["git"],
+      "sub": ["credential", "credential-manager", "credential-store"],
+      "kind": "forbidden",
+      "why": "credentials"
+    },
+    {
+      "programs": ["cmdkey", "vaultcmd", "security"],
+      "kind": "forbidden",
+      "why": "credentials"
+    },
+    {
+      "programs": ["steamcmd", "steamcmd.sh"],
+      "kind": "forbidden",
+      "why": "owner-only"
+    },
+    {
+      "programs": [
+        "rm",
+        "del",
+        "erase",
+        "rd",
+        "rmdir",
+        "mv",
+        "move",
+        "cp",
+        "copy",
+        "ren",
+        "rename",
+        "remove-item",
+        "ri",
+        "move-item",
+        "mi",
+        "copy-item",
+        "cpi",
+        "rename-item",
+        "rni",
+        "set-content",
+        "out-file",
+        "add-content",
+        "clear-content",
+        "tee"
+      ],
+      "any": ["*.rws", "*/saves/*", "*/saves"],
+      "kind": "forbidden",
+      "why": "saves"
+    },
+
+    {
+      "programs": ["python", "python3", "py"],
+      "sub": ["scripts/check-all.py", "scripts\\check-all.py"],
+      "kind": "tests",
+      "why": "tests"
+    },
+    {
+      "programs": ["python", "python3", "py"],
+      "all": ["-m", "phobos_modkit"],
+      "any": ["gate"],
+      "none": ["--write*", "--fix"],
+      "kind": "tests",
+      "why": "tests"
+    },
+    {
+      "programs": ["python", "python3", "py"],
+      "all": ["-m"],
+      "any": ["unittest", "pytest"],
+      "kind": "tests",
+      "why": "tests"
+    },
+    { "programs": ["pytest"], "kind": "tests", "why": "tests" },
+    {
+      "programs": ["npm", "pnpm", "yarn"],
+      "sub": ["test", "t"],
+      "kind": "tests",
+      "why": "tests"
+    },
+    {
+      "programs": ["npm", "pnpm", "yarn"],
+      "sub": ["run"],
+      "then": ["test", "test:*", "check", "lint"],
+      "kind": "tests",
+      "why": "tests"
+    },
+    {
+      "programs": ["npx"],
+      "sub": ["vitest", "svelte-check", "eslint"],
+      "none": ["--fix", "-u", "--update"],
+      "kind": "tests",
+      "why": "tests"
+    },
+    {
+      "programs": ["npx"],
+      "sub": ["playwright"],
+      "then": ["test"],
+      "kind": "tests",
+      "why": "tests"
+    },
+    {
+      "programs": ["npx"],
+      "sub": ["prettier"],
+      "any": ["--check", "-c"],
+      "none": ["--write", "-w"],
+      "kind": "tests",
+      "why": "tests"
+    },
+    {
+      "programs": ["cargo"],
+      "sub": ["test", "check", "clippy"],
+      "none": ["--fix"],
+      "kind": "tests",
+      "why": "tests"
+    },
+    {
+      "programs": ["cargo"],
+      "sub": ["fmt"],
+      "any": ["--check"],
+      "kind": "tests",
+      "why": "tests"
+    },
+    {
+      "programs": ["dotnet"],
+      "sub": ["test"],
+      "kind": "tests",
+      "why": "tests"
+    },
+
+    { "kit": true },
+
+    {
+      "programs": ["git"],
+      "sub": [
+        "status",
+        "log",
+        "diff",
+        "show",
+        "blame",
+        "ls-files",
+        "ls-tree",
+        "rev-parse",
+        "describe",
+        "shortlog",
+        "grep",
+        "cat-file",
+        "rev-list",
+        "merge-base",
+        "name-rev",
+        "whatchanged",
+        "show-ref",
+        "for-each-ref",
+        "count-objects",
+        "check-ignore",
+        "var",
+        "version",
+        "help"
+      ],
+      "none": ["--output*", "--ext-diff", "--textconv", "-o"],
+      "kind": "reads",
+      "why": "reads"
+    },
+    {
+      "programs": ["git"],
+      "sub": ["branch", "tag"],
+      "bare": true,
+      "none": [
+        "-d",
+        "-D",
+        "-m",
+        "-M",
+        "-c",
+        "-C",
+        "--delete",
+        "--move",
+        "--copy",
+        "-u",
+        "--set-upstream-to*",
+        "--unset-upstream",
+        "-f",
+        "--force",
+        "--edit-description",
+        "-a",
+        "-s",
+        "--annotate",
+        "--sign"
+      ],
+      "kind": "reads",
+      "why": "reads"
+    },
+    {
+      "programs": ["git"],
+      "sub": ["stash"],
+      "then": ["list", "show"],
+      "kind": "reads",
+      "why": "reads"
+    },
+    {
+      "programs": ["git"],
+      "sub": ["reflog"],
+      "then": ["", "show"],
+      "kind": "reads",
+      "why": "reads"
+    },
+    {
+      "programs": ["git"],
+      "sub": ["remote"],
+      "bare": true,
+      "kind": "reads",
+      "why": "reads"
+    },
+    {
+      "programs": ["git"],
+      "sub": ["config"],
+      "any": ["--get*", "--list", "-l"],
+      "kind": "reads",
+      "why": "reads"
+    },
+    { "programs": ["git"], "sub": [""], "kind": "reads", "why": "reads" },
+    {
+      "programs": ["find"],
+      "none": [
+        "-delete",
+        "-exec",
+        "-execdir",
+        "-ok",
+        "-okdir",
+        "-fprint*",
+        "-fls"
+      ],
+      "paths": true,
+      "kind": "reads",
+      "why": "reads"
+    },
+    {
+      "programs": ["rg"],
+      "none": ["--pre*", "--search-zip", "-z"],
+      "paths": true,
+      "kind": "reads",
+      "why": "reads"
+    },
+    {
+      "programs": [
+        "ls",
+        "dir",
+        "cat",
+        "type",
+        "head",
+        "tail",
+        "wc",
+        "tree",
+        "file",
+        "stat",
+        "du",
+        "grep",
+        "egrep",
+        "fgrep",
+        "findstr",
+        "select-string",
+        "sls",
+        "get-childitem",
+        "gci",
+        "get-content",
+        "gc",
+        "get-item",
+        "gi",
+        "test-path",
+        "resolve-path",
+        "measure-object",
+        "diff",
+        "cmp",
+        "comm",
+        "uniq",
+        "cut",
+        "jq",
+        "realpath",
+        "readlink",
+        "basename",
+        "dirname",
+        "cd",
+        "set-location",
+        "sl",
+        "pushd",
+        "popd",
+        "chdir"
+      ],
+      "paths": true,
+      "kind": "reads",
+      "why": "reads"
+    },
+    {
+      "programs": [
+        "pwd",
+        "get-location",
+        "which",
+        "where",
+        "where.exe",
+        "get-command",
+        "gcm",
+        "whoami",
+        "echo",
+        "printf",
+        "write-output",
+        "write-host",
+        "date",
+        "get-date",
+        "true",
+        "false",
+        "select-object",
+        "where-object",
+        "sort-object",
+        "format-table",
+        "format-list",
+        "foreach-object",
+        "out-string",
+        "hostname",
+        "uname",
+        "nproc"
+      ],
+      "kind": "reads",
+      "why": "reads"
+    },
+
+    {
+      "programs": ["git"],
+      "sub": ["push"],
+      "any": ["--delete", "-d", ":*"],
+      "kind": "changes",
+      "why": "deletes-online",
+      "warn": true
+    },
+    {
+      "programs": ["git"],
+      "sub": [
+        "reset",
+        "clean",
+        "checkout",
+        "restore",
+        "switch",
+        "stash",
+        "worktree"
+      ],
+      "kind": "changes",
+      "why": "throws-away-work",
+      "warn": true
+    },
+    {
+      "programs": ["git"],
+      "sub": ["push", "pull", "fetch", "clone", "ls-remote", "submodule"],
+      "kind": "changes",
+      "why": "goes-online"
+    },
+    { "programs": ["git"], "kind": "changes", "why": "changes-git" },
+    { "programs": ["gh"], "kind": "changes", "why": "goes-online" },
+    {
+      "programs": [
+        "rm",
+        "del",
+        "erase",
+        "rd",
+        "rmdir",
+        "remove-item",
+        "ri",
+        "unlink",
+        "shred"
+      ],
+      "paths": true,
+      "kind": "changes",
+      "why": "deletes",
+      "warn": true
+    },
+    {
+      "programs": [
+        "mv",
+        "move",
+        "cp",
+        "copy",
+        "ren",
+        "rename",
+        "move-item",
+        "mi",
+        "copy-item",
+        "cpi",
+        "rename-item",
+        "rni",
+        "mkdir",
+        "md",
+        "new-item",
+        "ni",
+        "touch",
+        "set-content",
+        "out-file",
+        "add-content",
+        "clear-content",
+        "tee",
+        "ln",
+        "chmod",
+        "chown",
+        "sed",
+        "awk",
+        "patch",
+        "tar",
+        "unzip",
+        "expand-archive",
+        "compress-archive"
+      ],
+      "paths": true,
+      "kind": "changes",
+      "why": "changes-files"
+    },
+    {
+      "programs": [
+        "npm",
+        "pnpm",
+        "yarn",
+        "pip",
+        "pip3",
+        "pipx",
+        "uv",
+        "winget",
+        "choco",
+        "scoop",
+        "brew",
+        "apt",
+        "apt-get",
+        "dnf",
+        "pacman",
+        "install-module",
+        "install-package"
+      ],
+      "sub": [
+        "install",
+        "i",
+        "ci",
+        "add",
+        "uninstall",
+        "remove",
+        "rm",
+        "update",
+        "upgrade",
+        "un",
+        "up",
+        ""
+      ],
+      "kind": "changes",
+      "why": "installs",
+      "warn": true
+    },
+    {
+      "programs": ["cargo", "dotnet"],
+      "sub": ["install", "tool", "add", "remove", "workload"],
+      "kind": "changes",
+      "why": "installs",
+      "warn": true
+    },
+    {
+      "programs": ["python", "python3", "py"],
+      "all": ["-m"],
+      "any": ["pip", "ensurepip", "venv"],
+      "kind": "changes",
+      "why": "installs",
+      "warn": true
+    },
+    {
+      "programs": ["npx", "bunx", "pnpx", "dlx"],
+      "kind": "changes",
+      "why": "installs",
+      "warn": true
+    },
+    {
+      "programs": ["cargo"],
+      "sub": ["build", "run", "fmt", "fix", "clean", "update", "doc"],
+      "kind": "changes",
+      "why": "builds"
+    },
+    {
+      "programs": ["dotnet"],
+      "sub": [
+        "build",
+        "publish",
+        "run",
+        "restore",
+        "clean",
+        "pack",
+        "format",
+        "msbuild"
+      ],
+      "kind": "changes",
+      "why": "builds"
+    },
+    {
+      "programs": ["npm", "pnpm", "yarn"],
+      "sub": ["run", "exec", "x"],
+      "kind": "changes",
+      "why": "runs-script"
+    },
+    {
+      "programs": ["msbuild", "make", "cmake", "ninja", "tsc", "vite"],
+      "kind": "changes",
+      "why": "builds"
+    },
+    {
+      "programs": [
+        "curl",
+        "wget",
+        "invoke-webrequest",
+        "iwr",
+        "invoke-restmethod",
+        "irm",
+        "ssh",
+        "scp",
+        "sftp",
+        "rsync",
+        "ftp",
+        "nc",
+        "ncat",
+        "telnet"
+      ],
+      "kind": "changes",
+      "why": "goes-online"
+    },
+    {
+      "programs": [
+        "taskkill",
+        "kill",
+        "killall",
+        "pkill",
+        "stop-process",
+        "spps",
+        "shutdown",
+        "restart-computer",
+        "stop-computer"
+      ],
+      "kind": "changes",
+      "why": "stops-program",
+      "warn": true
+    },
+    {
+      "programs": [
+        "reg",
+        "regedit",
+        "set-itemproperty",
+        "sp",
+        "setx",
+        "schtasks",
+        "sc",
+        "net",
+        "netsh",
+        "bcdedit",
+        "diskpart",
+        "format",
+        "format-volume",
+        "sudo",
+        "runas",
+        "start-process",
+        "saps",
+        "start",
+        "invoke-expression",
+        "iex",
+        "eval",
+        "exec",
+        "source",
+        "."
+      ],
+      "kind": "changes",
+      "why": "system",
+      "warn": true
+    },
+    {
+      "programs": [
+        "python",
+        "python3",
+        "py",
+        "node",
+        "deno",
+        "bun",
+        "ruby",
+        "perl",
+        "php",
+        "lua",
+        "java",
+        "dotnet-script",
+        "bash",
+        "sh",
+        "zsh",
+        "pwsh",
+        "powershell",
+        "cmd"
+      ],
+      "kind": "changes",
+      "why": "runs-script"
+    }
+  ]
+}

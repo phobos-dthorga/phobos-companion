@@ -1,4 +1,4 @@
-import type { ChatEvent, ChatOption } from "./types";
+import type { ChatEvent, ChatOption, CommandAnswer } from "./types";
 
 /** One thing in the conversation as the page shows it (0.74.0). */
 export type Entry =
@@ -18,8 +18,51 @@ export type Entry =
       request: string;
       title: string;
       options: ChatOption[];
+      command: string | null;
+      why: string[];
+      warn: boolean;
+      remember: boolean;
       /** The option's name the person chose, "" for none, or null while it waits. */
       answered: string | null;
+    }
+  | {
+      kind: "decided";
+      title: string;
+      command: string;
+      outcome: "allowed" | "for-chat" | "refused";
+      why: string[];
+    }
+  | {
+      kind: "command-ask";
+      request: string;
+      command: string;
+      cwd: string;
+      why: string[];
+      warn: boolean;
+      /** The person's answer, or null while it waits. */
+      answered: CommandAnswer | null;
+    }
+  | {
+      kind: "command-run";
+      terminal: string;
+      command: string;
+      cwd: string;
+      how: "automatic" | "you" | "for-chat";
+      why: string[];
+      /** How it ended, once it has. */
+      ended: {
+        code: number | null;
+        signal: string | null;
+        tail: string;
+        truncated: boolean;
+      } | null;
+    }
+  | {
+      kind: "command-not-run";
+      command: string;
+      refused: boolean;
+      why: string[];
+      reason: string | null;
     }
   | { kind: "read"; path: string; allowed: boolean; reason: string | null }
   | {
@@ -85,9 +128,35 @@ export function apply(entries: Entry[], event: ChatEvent): Entry[] {
           request: event.request,
           title: event.title,
           options: event.options,
+          command: event.command ?? null,
+          why: event.why ?? [],
+          warn: event.warn ?? false,
+          remember: event.remember ?? false,
           answered: null,
         },
       ];
+    case "decided":
+    case "command-not-run":
+      return [...entries, { ...event }];
+    case "command-ask":
+      return [...entries, { ...event, answered: null }];
+    case "command-run":
+      return [...entries, { ...event, ended: null }];
+    case "command-ended":
+      // The command that ended shows how, beside where it ran.
+      return entries.map((e) =>
+        e.kind === "command-run" && e.terminal === event.terminal
+          ? {
+              ...e,
+              ended: {
+                code: event.code,
+                signal: event.signal,
+                tail: event.tail,
+                truncated: event.truncated,
+              },
+            }
+          : e,
+      );
     case "read":
       return [
         ...entries,
@@ -151,12 +220,68 @@ export function answeredWrite(
   );
 }
 
-/** The permissions and changes still waiting for the person. */
+/** Marks a command the agent asked to run answered (0.84.0). */
+export function answeredCommand(
+  entries: Entry[],
+  request: string,
+  answer: CommandAnswer,
+): Entry[] {
+  return entries.map((e) =>
+    e.kind === "command-ask" && e.request === request
+      ? { ...e, answered: answer }
+      : e,
+  );
+}
+
+/** The permissions, changes and commands still waiting for the person. */
 export function waitingPermissions(entries: Entry[]): number {
   return entries.filter(
     (e) =>
-      (e.kind === "permission" || e.kind === "write") && e.answered === null,
+      (e.kind === "permission" ||
+        e.kind === "write" ||
+        e.kind === "command-ask") &&
+      e.answered === null,
   ).length;
+}
+
+/**
+ * Why a command asks, runs or is refused, as the words for each id the host gives (0.84.0), with every key written out so the
+ * catalogue check finds it. An id the window does not know reads as one it could not place.
+ */
+export const WHY_KEYS: Record<string, string> = {
+  reads: "chat-why-reads",
+  "kit-reads": "chat-why-kit-reads",
+  tests: "chat-why-tests",
+  "changes-git": "chat-why-changes-git",
+  "goes-online": "chat-why-goes-online",
+  "deletes-online": "chat-why-deletes-online",
+  "throws-away-work": "chat-why-throws-away-work",
+  deletes: "chat-why-deletes",
+  "changes-files": "chat-why-changes-files",
+  installs: "chat-why-installs",
+  builds: "chat-why-builds",
+  "runs-script": "chat-why-runs-script",
+  "stops-program": "chat-why-stops-program",
+  system: "chat-why-system",
+  unknown: "chat-why-unknown",
+  "hidden-command": "chat-why-hidden-command",
+  "writes-output": "chat-why-writes-output",
+  "reads-outside": "chat-why-reads-outside",
+  "sets-environment": "chat-why-sets-environment",
+  "kit-changes": "chat-why-kit-changes",
+  "force-push": "chat-why-force-push",
+  "rewrites-history": "chat-why-rewrites-history",
+  "skips-checks": "chat-why-skips-checks",
+  visibility: "chat-why-visibility",
+  credentials: "chat-why-credentials",
+  "owner-only": "chat-why-owner-only",
+  saves: "chat-why-saves",
+  "outside-repository": "chat-why-outside-repository",
+};
+
+/** The words keys for a command's reasons, in order, each once. */
+export function whyKeys(why: string[]): string[] {
+  return [...new Set(why.map((id) => WHY_KEYS[id] ?? "chat-why-unknown"))];
 }
 
 /** One line of a change as the card shows it: added, removed, kept, or a run of kept lines folded away. */

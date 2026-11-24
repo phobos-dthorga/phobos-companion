@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   answered,
+  answeredCommand,
   answeredWrite,
   apply,
   lineDiff,
   refusedWrite,
   waitingPermissions,
+  whyKeys,
+  WHY_KEYS,
   type Entry,
 } from "./presentation";
 import type { ChatEvent } from "./types";
@@ -131,5 +134,131 @@ describe("the conversation", () => {
   it("tells a refused change from a refused command", () => {
     expect(refusedWrite("fs/write_text_file")).toBe(true);
     expect(refusedWrite("terminal/create")).toBe(false);
+  });
+});
+
+describe("commands (0.84.0)", () => {
+  const play = (events: ChatEvent[]) =>
+    events.reduce<Entry[]>((entries, e) => apply(entries, e), []);
+
+  it("a command that ends shows how beside the line it ran on", () => {
+    const entries = play([
+      {
+        kind: "command-run",
+        terminal: "term_1",
+        command: "git status",
+        cwd: ".",
+        how: "automatic",
+        why: ["reads"],
+      },
+      {
+        kind: "command-ended",
+        terminal: "term_1",
+        code: 0,
+        signal: null,
+        tail: "nothing to commit",
+        truncated: false,
+      },
+      {
+        kind: "command-ended",
+        terminal: "term_9",
+        code: 1,
+        signal: null,
+        tail: "",
+        truncated: false,
+      },
+    ]);
+    expect(entries).toHaveLength(1);
+    const ran = entries[0] as Extract<Entry, { kind: "command-run" }>;
+    expect(ran.ended?.code).toBe(0);
+    expect(ran.ended?.tail).toBe("nothing to commit");
+  });
+
+  it("a command waiting counts as waiting until it is answered", () => {
+    let entries = play([
+      {
+        kind: "command-ask",
+        request: "c1",
+        command: "rm -rf build",
+        cwd: ".",
+        why: ["deletes"],
+        warn: true,
+      },
+    ]);
+    expect(waitingPermissions(entries)).toBe(1);
+    entries = answeredCommand(entries, "c1", "for-chat");
+    expect(waitingPermissions(entries)).toBe(0);
+    expect(
+      (entries[0] as Extract<Entry, { kind: "command-ask" }>).answered,
+    ).toBe("for-chat");
+  });
+
+  it("a permission names its command and why, and older hosts' permissions still read", () => {
+    const [named] = play([
+      {
+        kind: "permission",
+        request: "p1",
+        title: "`rm -rf build`",
+        options: [],
+        command: "rm -rf build",
+        why: ["deletes"],
+        warn: true,
+        remember: true,
+      },
+    ]);
+    expect(named).toMatchObject({
+      command: "rm -rf build",
+      warn: true,
+      remember: true,
+    });
+    const [plain] = play([
+      { kind: "permission", request: "p2", title: "Edit", options: [] },
+    ]);
+    expect(plain).toMatchObject({
+      command: null,
+      why: [],
+      warn: false,
+      remember: false,
+    });
+  });
+
+  it("every reason the host gives has its words, and one it does not know reads as unknown", () => {
+    expect(whyKeys(["deletes", "deletes", "force-push"])).toEqual([
+      "chat-why-deletes",
+      "chat-why-force-push",
+    ]);
+    expect(whyKeys(["something-new"])).toEqual(["chat-why-unknown"]);
+    // The host's ids (companion_core::commands and config/chat-commands.json) each have a key.
+    for (const id of [
+      "reads",
+      "kit-reads",
+      "tests",
+      "changes-git",
+      "goes-online",
+      "deletes-online",
+      "throws-away-work",
+      "deletes",
+      "changes-files",
+      "installs",
+      "builds",
+      "runs-script",
+      "stops-program",
+      "system",
+      "unknown",
+      "hidden-command",
+      "writes-output",
+      "reads-outside",
+      "sets-environment",
+      "kit-changes",
+      "force-push",
+      "rewrites-history",
+      "skips-checks",
+      "visibility",
+      "credentials",
+      "owner-only",
+      "saves",
+      "outside-repository",
+    ])
+      expect(WHY_KEYS[id], id).toBeTruthy();
   });
 });

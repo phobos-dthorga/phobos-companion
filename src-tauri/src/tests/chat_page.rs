@@ -18,6 +18,7 @@ fn the_chat_page_starts_off_with_no_agent_chosen() {
     let data = scratch();
     let found = status(&data);
     assert_eq!((found.on, found.chosen.as_deref(), found.running.is_none()), (false, None, true));
+    assert_eq!(found.commands, Mode::Ask, "commands start on Ask (the owner's choice, 25 Nov 2026)");
     assert!(found.agents.len() >= 3);
     std::fs::remove_dir_all(data).unwrap();
 }
@@ -32,6 +33,20 @@ fn the_switch_and_the_agent_are_kept_apart() {
     assert!(choose(&data, "some-other-program").is_err());
     switch(&data, false).unwrap();
     assert_eq!(status(&data).chosen.as_deref(), Some("claude"));
+    std::fs::remove_dir_all(data).unwrap();
+}
+
+#[test]
+fn how_commands_are_handled_is_kept_beside_the_switch_and_the_agent() {
+    let data = scratch();
+    choose(&data, "claude").unwrap();
+    assert_eq!(choose_commands(&data, "automatic").unwrap().commands, Mode::Automatic);
+    switch(&data, true).unwrap();
+    let found = status(&data);
+    assert_eq!((found.on, found.chosen.as_deref(), found.commands), (true, Some("claude"), Mode::Automatic));
+    assert_eq!(choose_commands(&data, "refused").unwrap().commands, Mode::Refused);
+    assert!(choose_commands(&data, "everything").is_err());
+    assert_eq!(status(&data).commands, Mode::Refused);
     std::fs::remove_dir_all(data).unwrap();
 }
 
@@ -53,4 +68,7 @@ fn without_an_agent_running_every_request_is_refused_in_words() {
     assert!(cancel().is_err());
     assert!(answer_permission("p1", None).is_err());
     assert!(answer_write("w1", true).is_err());
+    assert!(answer_command("c1", "run").is_err());
+    assert!(answer_command("c1", "always").is_err());
+    assert!(allow_for_chat("p1").is_err());
 }

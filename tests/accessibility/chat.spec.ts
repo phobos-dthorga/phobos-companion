@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, openTab, sampleHome } from "./host";
 
 const CONTROL_MIN_PX = 44;
 
@@ -19,6 +19,7 @@ const chatOn = {
     { id: "codex", name: "Codex", found: false, get: "Install it with npm." },
   ],
   running: null,
+  commands: "ask",
 };
 
 async function open(page: Page, more: Record<string, unknown> = {}) {
@@ -139,7 +140,7 @@ for (const [name, viewport] of [
         "Read through the Companion: src/Boat.cs",
       );
       await expect(main).toContainText(
-        "It asked to run a command through the Companion, and was refused.",
+        "It asked to run a command through the Companion, and was refused: commands are refused in Settings → AI.",
       );
       await expect(main).toContainText(
         "Claude (Claude Agent) asks: Edit Boat.cs",
@@ -166,6 +167,137 @@ for (const [name, viewport] of [
           document.documentElement.clientWidth,
       );
       expect(overflow).toBeLessThanOrEqual(0);
+    });
+
+    test("a command is shown whole with what it does, runs on a press, and one that only reads ran by itself (0.84.0)", async ({
+      page,
+    }) => {
+      await open(page, {
+        chat_prompt: {
+          result: "end_turn",
+          events: [
+            {
+              kind: "command-run",
+              terminal: "term_1",
+              command: "git status",
+              cwd: ".",
+              how: "automatic",
+              why: ["reads"],
+            },
+            {
+              kind: "command-ended",
+              terminal: "term_1",
+              code: 0,
+              signal: null,
+              tail: "nothing to commit, working tree clean",
+              truncated: false,
+            },
+            {
+              kind: "decided",
+              title: "`git push --force`",
+              command: "git push --force",
+              outcome: "refused",
+              why: ["force-push"],
+            },
+            {
+              kind: "command-ask",
+              request: "c1",
+              command: "rm -rf build",
+              cwd: "src",
+              why: ["deletes"],
+              warn: true,
+            },
+            {
+              kind: "permission",
+              request: "p1",
+              title: "`npm install`",
+              options: [
+                { id: "allow-once", name: "Allow", kind: "allow_once" },
+                { id: "reject-once", name: "Reject", kind: "reject_once" },
+              ],
+              command: "npm install",
+              why: ["installs"],
+              warn: true,
+              remember: true,
+            },
+          ],
+        },
+        chat_command: { result: null },
+        chat_allow_for_chat: { result: null },
+      });
+      await page.getByRole("button", { name: "Chat", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Start Claude (Claude Agent)" })
+        .click();
+      await page
+        .getByLabel("Your message to Claude (Claude Agent)")
+        .fill("Clean the build folder");
+      await page.getByRole("button", { name: "Send", exact: true }).click();
+      const main = page.locator("main");
+      // Reading ran by itself, with how it ended and its output folded away.
+      await expect(main).toContainText("Ran by itself: git status");
+      await expect(main).toContainText("Ended, exit code 0");
+      await page.getByText("Its output", { exact: true }).click();
+      await expect(main).toContainText("nothing to commit, working tree clean");
+      // What is never done here was answered no for the person, and says why.
+      await expect(main).toContainText(
+        "Answered no, never done here: git push --force (force-pushing)",
+      );
+      // A command that changes something waits, shown whole, with what it does and a warning.
+      const card = page.getByRole("region", {
+        name: "Claude (Claude Agent) asks to run a command",
+      });
+      await expect(card).toContainText("rm -rf build");
+      await expect(card).toContainText("In: src");
+      await expect(card).toContainText("What it does: deletes files");
+      await expect(card).toContainText("Look twice");
+      // The agent's own question names its command too, and may be allowed for this chat.
+      const question = page.getByRole("region", {
+        name: "Claude (Claude Agent) asks: `npm install`",
+      });
+      await expect(question).toContainText("installs or removes a program");
+      await audit(page);
+      expect(await smallControls(page)).toBe(0);
+      await card.getByRole("button", { name: "Run it" }).click();
+      await expect(card.getByRole("button")).toHaveCount(0);
+      await question
+        .getByRole("button", { name: "Allow for this chat" })
+        .click();
+      await expect(question).toContainText("You answered: Allow for this chat");
+      const overflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+    });
+
+    test("Settings → AI chooses how commands are handled, starting on Ask (0.84.0)", async ({
+      page,
+    }) => {
+      await open(page, {
+        chat_commands: { result: { ...chatOn, commands: "automatic" } },
+      });
+      await page.getByRole("button", { name: "Settings", exact: true }).click();
+      await openTab(page, "AI");
+      const panel = page.locator("#settings-chat");
+      const modes = panel.getByRole("group", { name: "Commands it runs" });
+      await expect(
+        modes.getByRole("button", { name: /^Ask every time/ }),
+      ).toHaveAttribute("aria-pressed", "true");
+      await expect(panel).toContainText("not a sandbox");
+      const results = await new AxeBuilder({ page })
+        .include("#settings-chat")
+        .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
+        .analyze();
+      expect(results.violations.map((v) => v.id)).toEqual([]);
+      await modes.getByRole("button", { name: /^Automatic/ }).click();
+      await expect(
+        modes.getByRole("button", { name: /^Automatic/ }),
+      ).toHaveAttribute("aria-pressed", "true");
+      await expect(panel).toContainText(
+        "Kept: commands are handled as Automatic.",
+      );
     });
 
     test("an agent not on this computer is not offered to start, and says where to get it", async ({

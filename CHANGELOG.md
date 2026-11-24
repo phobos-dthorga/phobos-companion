@@ -21,6 +21,24 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.84.0] - 2026-11-25
+
+### Added
+
+- **An agent on the Chat page may run commands, sorted by what they do** (the owner's question of 25 Nov 2026, "There should be
+  an automatic mode, perhaps? And for extra dangerous commands, we still refer to a query towards the user?", and their choices
+  by card; `docs/ai.md`, "Commands"). Settings → AI, **Commands it runs**: Refused, **Ask every time** (where it starts), or
+  Automatic, where a command that only reads, runs the tests or asks the tool kit's reports that read runs by itself. Anything
+  else is shown whole on a card with what it does, and **Look twice** where it can delete or throw work away, to **Run it**, say
+  **Not this**, or **Allow for this chat**. The agent's own permission questions that name a command are sorted the same way.
+  What agents never do here (force-pushing, rewriting history, skipping checks, touching saves, Steam uploads, credentials,
+  anything outside the repository) is refused in every mode, even with a yes. The sorting reads a command's words; it is not a
+  sandbox. **Not tested on screen, nor with a real agent.**
+
+### Changed
+
+- **The decision `chat-commands` is answered**, and leaves the Decisions page.
+
 ## [0.83.1] - 2026-11-25
 
 ### Fixed

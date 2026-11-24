@@ -16,6 +16,7 @@ pub mod ai_keys;
 pub mod args;
 pub mod checks;
 pub mod code_colours;
+pub mod commands;
 pub mod failure;
 pub mod games;
 pub mod git;
@@ -24,6 +25,7 @@ pub mod online;
 pub mod prefs;
 pub mod process;
 pub mod serve;
+pub mod terminals;
 pub mod themes;
 pub mod time;
 

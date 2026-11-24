@@ -6,6 +6,8 @@ import type {
   ChatStarted,
   ChatStatus,
   ChatStatusReading,
+  CommandAnswer,
+  CommandsMode,
 } from "./types";
 
 type Status = { state: "ready"; status: ChatStatus } | Failed;
@@ -25,6 +27,24 @@ export async function chatSwitch(on: boolean): Promise<Status> {
 
 export async function chatChoose(agent: string): Promise<Status> {
   return ask<ChatStatus, Status>("chat_choose", { agent }, ready);
+}
+
+/** Keeps how the agent's commands are handled (0.84.0). */
+export async function chatCommands(mode: CommandsMode): Promise<Status> {
+  return ask<ChatStatus, Status>("chat_commands", { mode }, ready);
+}
+
+/** The person's answer to a command the agent asked to run through the Companion, shown whole first (0.84.0). */
+export async function chatCommand(
+  request: string,
+  answer: CommandAnswer,
+): Promise<Done> {
+  return ask<null, Done>("chat_command", { request, answer }, done);
+}
+
+/** Allows the command a permission question names for the rest of this chat (0.84.0). */
+export async function chatAllowForChat(request: string): Promise<Done> {
+  return ask<null, Done>("chat_allow_for_chat", { request }, done);
 }
 
 /** Starts the chosen agent in a repository of the game, on the person's press; what it says comes to onEvent. */

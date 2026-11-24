@@ -3,9 +3,33 @@
   import { t } from "../i18n/runtime";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import type { Failure } from "../shell/types";
-  import { chatChoose, chatSwitch, readChatStatus } from "./desktopClient";
+  import {
+    chatChoose,
+    chatCommands,
+    chatSwitch,
+    readChatStatus,
+  } from "./desktopClient";
   import { chat, useChat } from "./state.svelte";
-  import type { ChatStatus } from "./types";
+  import type { ChatStatus, CommandsMode } from "./types";
+
+  /** How commands may be handled (0.84.0), each with its words, written out for the catalogue check. */
+  const MODES: { mode: CommandsMode; label: string; detail: string }[] = [
+    {
+      mode: "refused",
+      label: "chat-commands-refused",
+      detail: "chat-commands-refused-detail",
+    },
+    {
+      mode: "ask",
+      label: "chat-commands-ask",
+      detail: "chat-commands-ask-detail",
+    },
+    {
+      mode: "automatic",
+      label: "chat-commands-automatic",
+      detail: "chat-commands-automatic-detail",
+    },
+  ];
 
   /**
    * Settings → AI, Chat with an agent (0.74.0; `docs/ai.md`, A3): the Chat page's switch, which starts off, and the agent it starts.
@@ -109,6 +133,32 @@
     {#each status.agents.filter((a) => a.id === status.chosen && !a.found) as agent (agent.id)}
       <p class="small">{agent.get}</p>
     {/each}
+
+    <!-- How its commands are handled (0.84.0; the owner's choices by card, 25 Nov 2026): it starts on Ask. -->
+    <h3 id="chat-panel-commands-title">{t("chat-commands-title")}</h3>
+    <p class="small">{t("chat-commands-body")}</p>
+    <div
+      class="toggles agents"
+      role="group"
+      aria-labelledby="chat-panel-commands-title"
+    >
+      {#each MODES as each (each.mode)}
+        <button
+          type="button"
+          class="toggle"
+          aria-pressed={status.commands === each.mode}
+          disabled={busy}
+          onclick={() =>
+            void change(
+              () => chatCommands(each.mode),
+              t("chat-commands-kept", { mode: t(each.label) }),
+            )}
+          >{t(each.label)}
+          <span class="where">{t(each.detail)}</span></button
+        >
+      {/each}
+    </div>
+    <p class="small">{t("chat-commands-never")}</p>
     <p class="small now">
       {status.on && status.chosen
         ? t("chat-panel-shown")

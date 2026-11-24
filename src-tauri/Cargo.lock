@@ -2661,7 +2661,7 @@ dependencies = [
 
 [[package]]
 name = "phobos-companion"
-version = "0.83.1"
+version = "0.84.0"
 dependencies = [
  "companion-core",
  "serde",

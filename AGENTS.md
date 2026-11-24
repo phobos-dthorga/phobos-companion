@@ -158,8 +158,15 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   files inside that repository (each read shown), ask the person's permission (answered only by the person, only with an option
   it offered), and **write a text file there only after the person saw the change line by line and pressed Make this change**
   (0.75.0, slice 5; the owner's answer "reads only at first, then a yes on each"): never inside `.git`, at most 2 MB, its folder
-  checked again at the moment of writing, and a no tells the agent it was declined. **Running a command through it is not
-  offered**, and each request is refused and shown (`companion_core::acp`); that waits on the owner's decision `chat-commands`. It is handed the kit's MCP server (reports that read). **The agent is its own program with the
+  checked again at the moment of writing, and a no tells the agent it was declined. **Commands** (0.84.0; the owner's choices by
+  card, 25 Nov 2026): Settings → AI keeps a mode, **starting on Ask** (Refused, Ask every time, Automatic). Every command the
+  agent asks the Companion to run, and every one its own permission questions name, is sorted by `companion_core::commands`
+  from the data in `config/chat-commands.json`: **what the shared rules forbid agents is refused in every mode, even with a yes**;
+  in Automatic only reading, tests and the kit's reports its manifest marks `reads` run by themselves; everything else is shown
+  whole, with why, and runs only on Run it or Allow for this chat. A command runs as its own program in a folder of the
+  repository, never through a shell the Companion adds, its output capped and its process tree ended by Stop, End or after 30
+  minutes. **A rule about what commands may do goes in that data file, tested in `core/src/tests/commands.rs`; the sorting reads
+  text and is never called a sandbox.** It is handed the kit's MCP server (reports that read). **The agent is its own program with the
   person's own access to the disk**, and may change files by itself: the page says so before a first start. One runs at a time;
   leaving the page, starting another, switching off or closing the program ends its whole process tree. **Agents and tests
   never start a real agent on the owner's computer**: tests stand in the agent on pipes; ask the owner first.

@@ -6,7 +6,9 @@
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { started as fresh } from "../shell/progress";
   import {
+    chatAllowForChat,
     chatCancel,
+    chatCommand,
     chatEnd,
     chatPermission,
     chatPrompt,
@@ -15,20 +17,24 @@
   } from "./desktopClient";
   import {
     answered,
+    answeredCommand,
     answeredWrite,
     apply,
     lineDiff,
     refusedWrite,
     waitingPermissions,
+    whyKeys,
     type Entry,
   } from "./presentation";
   import { chat, loadChat } from "./state.svelte";
-  import type { ChatOption, ChatStarted } from "./types";
+  import type { ChatOption, ChatStarted, CommandAnswer } from "./types";
 
   /**
    * The Chat page (0.74.0; `docs/ai.md`, A3; the owner, 23 Nov 2026: "go ahead with A3"): a whole agent, chosen in Settings → AI,
    * working in one of the game's repositories. Before a first start the page says plainly what an agent can do by itself; through
-   * the Companion it may only read files in the repository and ask the person's permission. Leaving the page ends it.
+   * the Companion it may read files in the repository, ask the person's permission, change a file on their yes, and since 0.84.0
+   * run a command as Settings → AI says: each sorted, shown with why, run by itself, on a press, or refused. Leaving the page ends
+   * it.
    */
   let { game }: { game: GameHome } = $props();
 
@@ -91,6 +97,40 @@
     else said = t("chat-failed", { reason: answer.failure.detail });
   }
 
+  /** The person allows the command a permission question names for the rest of this chat (0.84.0). */
+  async function allowForChat(request: string) {
+    const answer = await chatAllowForChat(request);
+    if (answer.state === "ready")
+      entries = answered(entries, request, t("chat-allow-for-chat"));
+    else said = t("chat-failed", { reason: answer.failure.detail });
+  }
+
+  /** The person's answer to a command the agent asked to run through the Companion (0.84.0). */
+  async function decideCommand(request: string, answer: CommandAnswer) {
+    const done = await chatCommand(request, answer);
+    if (done.state === "ready")
+      entries = answeredCommand(entries, request, answer);
+    else said = t("chat-failed", { reason: done.failure.detail });
+  }
+
+  /** A command's reasons in words. */
+  function whyWords(why: string[]): string {
+    return whyKeys(why)
+      .map((key) => t(key))
+      .join("; ");
+  }
+
+  const HOW_KEYS = {
+    automatic: "chat-command-run-automatic",
+    you: "chat-command-run-you",
+    "for-chat": "chat-command-run-for-chat",
+  } as const;
+  const DECIDED_KEYS = {
+    allowed: "chat-decided-allowed",
+    "for-chat": "chat-decided-for-chat",
+    refused: "chat-decided-refused",
+  } as const;
+
   /** The person's answer to a change the agent asked to make through the Companion (0.75.0). */
   async function decideWrite(request: string, allow: boolean) {
     const answer = await chatWrite(request, allow);
@@ -106,7 +146,9 @@
         ? { ...e, answered: "" }
         : e.kind === "write" && e.answered === null
           ? { ...e, answered: false }
-          : e,
+          : e.kind === "command-ask" && e.answered === null
+            ? { ...e, answered: "no" as const }
+            : e,
     );
   }
 
@@ -248,8 +290,27 @@
                 title: entry.title,
               })}
             </h3>
+            {#if entry.command}
+              <pre class="command"><code>{entry.command}</code></pre>
+              {#if entry.why.length > 0}
+                <p class="small">
+                  {t("chat-command-why", { why: whyWords(entry.why) })}
+                </p>
+              {/if}
+              {#if entry.warn}
+                <p class="small refused-line">{t("chat-command-warn")}</p>
+              {/if}
+            {/if}
             {#if entry.answered === null}
               <div class="buttons">
+                {#if entry.remember}
+                  <button
+                    type="button"
+                    class="action"
+                    onclick={() => void allowForChat(entry.request)}
+                    >{t("chat-allow-for-chat")}</button
+                  >
+                {/if}
                 {#each entry.options as option (option.id)}
                   <button
                     type="button"
@@ -331,6 +392,94 @@
               </div>
             {/if}
           </section>
+        {:else if entry.kind === "decided"}
+          <p
+            class={entry.outcome === "refused"
+              ? "small refused-line"
+              : "small muted"}
+          >
+            {t(DECIDED_KEYS[entry.outcome])}
+            <code class="inline">{entry.command}</code>
+            {#if entry.why.length > 0}
+              <span>({whyWords(entry.why)})</span>
+            {/if}
+          </p>
+        {:else if entry.kind === "command-ask"}
+          <section
+            class="ask"
+            aria-labelledby={`chat-command-${entry.request}`}
+          >
+            <h3 id={`chat-command-${entry.request}`}>
+              {t("chat-command-asks", { agent: running.started.agent })}
+            </h3>
+            <pre class="command"><code>{entry.command}</code></pre>
+            <p class="small">{t("chat-command-where", { cwd: entry.cwd })}</p>
+            <p class="small">
+              {t("chat-command-why", { why: whyWords(entry.why) })}
+            </p>
+            {#if entry.warn}
+              <p class="small refused-line">{t("chat-command-warn")}</p>
+            {/if}
+            {#if entry.answered === null}
+              <div class="buttons">
+                <button
+                  type="button"
+                  class="action"
+                  onclick={() => void decideCommand(entry.request, "run")}
+                  >{t("chat-command-run")}</button
+                >
+                <button
+                  type="button"
+                  class="action"
+                  onclick={() => void decideCommand(entry.request, "no")}
+                  >{t("chat-command-no")}</button
+                >
+                <button
+                  type="button"
+                  class="action"
+                  onclick={() => void decideCommand(entry.request, "for-chat")}
+                  >{t("chat-allow-for-chat")}</button
+                >
+              </div>
+            {/if}
+          </section>
+        {:else if entry.kind === "command-run"}
+          <div class="ran">
+            <p class="small">
+              {t(HOW_KEYS[entry.how])}
+              <code class="inline">{entry.command}</code>
+            </p>
+            {#if entry.ended}
+              <p class="small muted">
+                {entry.ended.code !== null
+                  ? t("chat-command-ended", { code: entry.ended.code })
+                  : t("chat-command-ended-signal", {
+                      signal: entry.ended.signal ?? "",
+                    })}
+              </p>
+              {#if entry.ended.tail.trim() !== ""}
+                <details>
+                  <summary>
+                    {entry.ended.truncated
+                      ? t("chat-command-output-end")
+                      : t("chat-command-output")}
+                  </summary>
+                  <pre class="output">{entry.ended.tail}</pre>
+                </details>
+              {/if}
+            {:else}
+              <p class="small muted">{t("chat-command-running")}</p>
+            {/if}
+          </div>
+        {:else if entry.kind === "command-not-run"}
+          <p class="small refused-line">
+            {entry.refused
+              ? t("chat-command-refused", { why: whyWords(entry.why) })
+              : entry.reason
+                ? t("chat-command-failed", { reason: entry.reason })
+                : t("chat-command-declined")}
+            <code class="inline">{entry.command}</code>
+          </p>
         {:else if entry.kind === "written"}
           <p class={entry.written ? "small" : "small refused-line"}>
             {entry.written
@@ -504,6 +653,33 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+
+  /* A command shown whole, as it would run: it wraps rather than scrolls, so nothing of it is hidden. */
+  .command,
+  .output {
+    margin: 6px 0;
+    padding: 6px 8px;
+    font-size: var(--type-small);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: var(--colour-canvas);
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
+  }
+
+  .output {
+    max-height: 18rem;
+    overflow-y: auto;
+  }
+
+  .inline {
+    overflow-wrap: anywhere;
+  }
+
+  .ran {
+    padding-inline-start: 8px;
+    border-inline-start: 3px solid var(--colour-observed);
   }
 
   .refused-line {

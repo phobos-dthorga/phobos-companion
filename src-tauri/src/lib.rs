@@ -796,6 +796,25 @@ async fn chat_choose(app: tauri::AppHandle, agent: String) -> Result<chat_page::
     blocking(move || chat_page::choose(&data, &agent)).await
 }
 
+/// Keeps how the agent's commands are handled (0.84.0): refused, ask or automatic.
+#[tauri::command]
+async fn chat_commands(app: tauri::AppHandle, mode: String) -> Result<chat_page::Status, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || chat_page::choose_commands(&data, &mode)).await
+}
+
+/// The person's answer to a command the agent asked to run through the Companion (0.84.0): run, no or for-chat.
+#[tauri::command]
+async fn chat_command(request: String, answer: String) -> Result<(), Failure> {
+    blocking(move || chat_page::answer_command(&request, &answer)).await
+}
+
+/// The person allows the command a permission question names for the rest of this chat (0.84.0).
+#[tauri::command]
+async fn chat_allow_for_chat(request: String) -> Result<(), Failure> {
+    blocking(move || chat_page::allow_for_chat(&request)).await
+}
+
 /// Starts the chosen agent in a repository of the game, on the person's press; what it says comes through the channel.
 #[tauri::command]
 async fn chat_start(
@@ -1677,6 +1696,9 @@ pub fn run() {
             chat_cancel,
             chat_permission,
             chat_write,
+            chat_commands,
+            chat_command,
+            chat_allow_for_chat,
             chat_end,
             picks_list,
             publish_read,

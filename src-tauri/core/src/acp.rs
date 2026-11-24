@@ -8,20 +8,28 @@
 //! **What an agent may do through the Companion**: read a text file inside the repository it was started in (`fs/read_text_file`,
 //! each read shown to the person), ask the person's permission for its own steps (`session/request_permission`, answered only
 //! by the person), and since 0.75.0 (slice 5) **write a text file inside the repository, only after the person saw exactly what
-//! would change and said yes** (`fs/write_text_file`, never inside `.git`). **Never** run a command through the Companion: it is
-//! not offered, and each such request is refused and shown. The agent's own tools are its own: it may change files by itself, as it would in a terminal, and the page
-//! says so before a first start.
+//! would change and said yes** (`fs/write_text_file`, never inside `.git`). The agent's own tools are its own: it may change files
+//! by itself, as it would in a terminal, and the page says so before a first start.
+//!
+//! **Commands** (0.84.0; the owner's choices by card, 25 Nov 2026): in the Ask and Automatic modes the agent is offered a terminal,
+//! and each command it asks the Companion to run is sorted by `commands` first: refused (what the shared rules forbid agents),
+//! run by itself (only in Automatic, and only reading, testing or the kit's reports that read), or shown whole on a card and run
+//! on the person's press. **The agent's own permission questions are sorted the same way** where they name a command: a forbidden
+//! one is answered no, one that only reads or tests is answered yes in Automatic, and the rest come to the person. A command the
+//! person allows "for this chat" runs by itself until the agent ends. In the Refused mode no terminal is offered.
 
+use crate::commands::{self, KitEffects, Mode, Tier};
 use crate::failure::Failure;
+use crate::terminals::{self, Terminal};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::ffi::OsStr;
 use std::io::{BufRead, Read, Write};
 use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::mpsc::{self, RecvTimeoutError, Sender};
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock, Weak};
 use std::time::Duration;
 
 /// The protocol's major version this client speaks.
@@ -35,6 +43,8 @@ const METHOD_NOT_FOUND: i64 = -32601;
 const INVALID_PARAMS: i64 = -32602;
 /// What the agent is told when the person declines a change.
 const DECLINED: &str = "The person chose not to make this change. Go on without it, or ask them.";
+/// What the agent is told when the person declines a command.
+const DECLINED_COMMAND: &str = "The person chose not to run this command. Go on without it, or ask them.";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Agent {
@@ -147,8 +157,33 @@ pub enum Event {
     Tool { id: String, title: Option<String>, tool: Option<String>, status: Option<String> },
     /// The agent's plan, whole each time.
     Plan { entries: Vec<PlanEntry> },
-    /// The agent asks the person's permission; only the person answers.
-    Permission { request: String, title: String, options: Vec<PermissionOption> },
+    /// The agent asks the person's permission; only the person answers. Where it names a command (0.84.0): the command, why it
+    /// asks (the ids `commands` gives), whether it is one to look at twice, and whether it may be allowed for the rest of the chat.
+    Permission {
+        request: String,
+        title: String,
+        options: Vec<PermissionOption>,
+        command: Option<String>,
+        why: Vec<String>,
+        warn: bool,
+        remember: bool,
+    },
+    /// A permission question the Companion answered for the person, by the mode they chose (0.84.0): `allowed` (it only reads or
+    /// tests, in Automatic), `for-chat` (allowed for this chat), or `refused` (forbidden).
+    #[serde(rename = "decided")]
+    Decided { title: String, command: String, outcome: String, why: Vec<String> },
+    /// The agent asks to run a command through the Companion, and it waits for the person (0.84.0).
+    #[serde(rename = "command-ask")]
+    CommandAsk { request: String, command: String, cwd: String, why: Vec<String>, warn: bool },
+    /// A command running through the Companion: `how` it came to run (`automatic`, `you`, `for-chat`).
+    #[serde(rename = "command-run")]
+    CommandRun { terminal: String, command: String, cwd: String, how: String, why: Vec<String> },
+    /// A command not run: refused by a rule (`refused`), declined by the person, or one that could not start (`reason`).
+    #[serde(rename = "command-not-run")]
+    CommandNotRun { command: String, refused: bool, why: Vec<String>, reason: Option<String> },
+    /// A command that ran has ended: its exit code or signal, and the end of its output.
+    #[serde(rename = "command-ended")]
+    CommandEnded { terminal: String, code: Option<i32>, signal: Option<String>, tail: String, truncated: bool },
     /// The agent read a file through the Companion, or was refused.
     Read { path: String, allowed: bool, reason: Option<String> },
     /// The agent asks to write a file through the Companion (0.75.0): what is there now, if anything, and what it would write. It
@@ -237,6 +272,73 @@ pub fn write_target(root: &Path, asked: &str) -> Result<(String, PathBuf), (Stri
     Ok((shown, target))
 }
 
+/// How the agent's commands are handled (0.84.0): the person's mode, and what each of the kit's reports does, for sorting.
+#[derive(Debug, Clone, Default)]
+pub struct Policy {
+    pub mode: Mode,
+    pub kit: KitEffects,
+}
+
+impl Policy {
+    /// No terminal, as before 0.84.0.
+    pub fn refused() -> Self {
+        Self { mode: Mode::Refused, kit: KitEffects::new() }
+    }
+}
+
+/// A permission question waiting on the person: the agent's request id, the options it offered, the one that allows once, and
+/// the command it names.
+struct Asked {
+    id: Value,
+    offered: Vec<String>,
+    allow_once: Option<String>,
+    command: Option<String>,
+}
+
+/// A command waiting on the person's press.
+struct WaitingCommand {
+    id: Value,
+    program: String,
+    args: Vec<String>,
+    cwd: PathBuf,
+    shown_cwd: String,
+    env: Vec<(String, String)>,
+    limit: usize,
+    text: String,
+    why: Vec<String>,
+}
+
+/// The person's answer to a command the agent asked to run (0.84.0).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum CommandAnswer {
+    Run,
+    No,
+    /// Run it, and this command again for the rest of the chat.
+    ForChat,
+}
+
+/// The command a permission question names, where it names one: the agent's own input (`command` as text, or as words), or the
+/// title of a step that runs one.
+pub fn command_of(call: &Value) -> Option<String> {
+    let raw = &call["rawInput"];
+    for key in ["command", "cmd"] {
+        if let Some(text) = raw[key].as_str().filter(|t| !t.trim().is_empty()) {
+            return Some(text.to_owned());
+        }
+        if let Some(words) = raw[key].as_array() {
+            let words: Vec<String> = words.iter().filter_map(|w| w.as_str().map(str::to_owned)).collect();
+            if let Some((first, rest)) = words.split_first() {
+                return Some(commands::joined(first, rest));
+            }
+        }
+    }
+    (call["kind"] == "execute")
+        .then(|| call["title"].as_str().map(|t| t.trim().trim_matches('`').to_owned()))
+        .flatten()
+        .filter(|t| !t.is_empty())
+}
+
 /// A write waiting on the person: the agent's request id, where it goes, and what it would write.
 struct Waiting {
     id: Value,
@@ -250,8 +352,8 @@ struct Waiting {
 pub struct Client {
     writer: Mutex<Box<dyn Write + Send>>,
     waiting: Mutex<HashMap<u64, Sender<Result<Value, String>>>>,
-    /// Each permission waiting on the person: the agent's request id, and the ids of the options it offered.
-    permissions: Mutex<HashMap<String, (Value, Vec<String>)>>,
+    /// Each permission waiting on the person.
+    permissions: Mutex<HashMap<String, Asked>>,
     /// Each write waiting on the person's yes (0.75.0).
     writes: Mutex<HashMap<String, Waiting>>,
     next: AtomicU64,
@@ -260,17 +362,37 @@ pub struct Client {
     on_event: OnEvent,
     /// The agent's output has ended: every request from then on fails at once.
     ended: AtomicBool,
+    /// How its commands are handled (0.84.0).
+    policy: Policy,
+    /// Commands the person allowed for the rest of this chat, as `commands::remembered` gives them.
+    for_chat: Mutex<HashSet<String>>,
+    /// Commands waiting on the person's press, and the terminals of commands run.
+    commands: Mutex<HashMap<String, WaitingCommand>>,
+    terminals: Mutex<HashMap<String, Arc<Terminal>>>,
+    /// Itself, for the threads that answer the agent later (waiting for a command to end).
+    me: Weak<Client>,
 }
 
 impl Client {
-    /// Starts reading what the agent writes, on a thread of its own, until it ends.
+    /// Starts reading what the agent writes, on a thread of its own, until it ends. No terminal is offered.
     pub fn start(
         reader: impl BufRead + Send + 'static,
         writer: impl Write + Send + 'static,
         root: &Path,
         on_event: OnEvent,
     ) -> Arc<Self> {
-        let client = Arc::new(Self {
+        Self::start_with(reader, writer, root, on_event, Policy::refused())
+    }
+
+    /// Starts reading what the agent writes, with its commands handled as `policy` says (0.84.0).
+    pub fn start_with(
+        reader: impl BufRead + Send + 'static,
+        writer: impl Write + Send + 'static,
+        root: &Path,
+        on_event: OnEvent,
+        policy: Policy,
+    ) -> Arc<Self> {
+        let client = Arc::new_cyclic(|me| Self {
             writer: Mutex::new(Box::new(writer)),
             waiting: Mutex::new(HashMap::new()),
             permissions: Mutex::new(HashMap::new()),
@@ -280,6 +402,11 @@ impl Client {
             session: Mutex::new(None),
             on_event,
             ended: AtomicBool::new(false),
+            policy,
+            for_chat: Mutex::new(HashSet::new()),
+            commands: Mutex::new(HashMap::new()),
+            terminals: Mutex::new(HashMap::new()),
+            me: me.clone(),
         });
         let reading = Arc::clone(&client);
         std::thread::spawn(move || {
@@ -354,6 +481,14 @@ impl Client {
         if let Ok(mut writes) = self.writes.lock() {
             writes.clear();
         }
+        if let Ok(mut commands) = self.commands.lock() {
+            commands.clear();
+        }
+        let running: Vec<Arc<Terminal>> =
+            self.terminals.lock().map(|mut t| t.drain().map(|(_, t)| t).collect()).unwrap_or_default();
+        for terminal in running {
+            terminal.kill();
+        }
         (self.on_event)(Event::Ended { reason: "The agent's program has ended.".to_owned() });
     }
 
@@ -420,31 +555,7 @@ impl Client {
 
     fn answer(&self, method: &str, id: &Value, params: &Value) {
         match method {
-            "session/request_permission" => {
-                let key = format!("p{}", self.next.fetch_add(1, Ordering::Relaxed));
-                let call = &params["toolCall"];
-                let title = call["title"]
-                    .as_str()
-                    .or_else(|| call["toolCallId"].as_str())
-                    .unwrap_or("a step of its own")
-                    .to_owned();
-                let options = params["options"]
-                    .as_array()
-                    .map_or(&[][..], Vec::as_slice)
-                    .iter()
-                    .filter_map(|o| {
-                        Some(PermissionOption {
-                            id: o["optionId"].as_str()?.to_owned(),
-                            name: o["name"].as_str().unwrap_or_default().to_owned(),
-                            kind: o["kind"].as_str().unwrap_or_default().to_owned(),
-                        })
-                    })
-                    .collect::<Vec<PermissionOption>>();
-                if let Ok(mut permissions) = self.permissions.lock() {
-                    permissions.insert(key.clone(), (id.clone(), options.iter().map(|o| o.id.clone()).collect()));
-                }
-                (self.on_event)(Event::Permission { request: key, title, options });
-            }
+            "session/request_permission" => self.ask_permission(id, params),
             "fs/read_text_file" => match read_file(&self.root, params) {
                 Ok((path, content)) => {
                     (self.on_event)(Event::Read { path, allowed: true, reason: None });
@@ -456,6 +567,12 @@ impl Client {
                 }
             },
             "fs/write_text_file" => self.ask_to_write(id, params),
+            "terminal/create" if self.policy.mode.offers_terminal() => self.ask_to_run(id, params),
+            "terminal/output" | "terminal/wait_for_exit" | "terminal/kill" | "terminal/release"
+                if self.policy.mode.offers_terminal() =>
+            {
+                self.terminal(method, id, params);
+            }
             other if other.starts_with("fs/") || other.starts_with("terminal/") => {
                 (self.on_event)(Event::Refused { what: other.to_owned() });
                 self.respond_error(
@@ -465,6 +582,274 @@ impl Client {
                 );
             }
             _ => self.respond_error(id, METHOD_NOT_FOUND, "The Companion does not offer that."),
+        }
+    }
+
+    /// A permission question: where it names a command, sorted first (0.84.0), and answered for the person where the mode says so;
+    /// otherwise shown to them with what it names and why.
+    fn ask_permission(&self, id: &Value, params: &Value) {
+        let call = &params["toolCall"];
+        let title =
+            call["title"].as_str().or_else(|| call["toolCallId"].as_str()).unwrap_or("a step of its own").to_owned();
+        let options = params["options"]
+            .as_array()
+            .map_or(&[][..], Vec::as_slice)
+            .iter()
+            .filter_map(|o| {
+                Some(PermissionOption {
+                    id: o["optionId"].as_str()?.to_owned(),
+                    name: o["name"].as_str().unwrap_or_default().to_owned(),
+                    kind: o["kind"].as_str().unwrap_or_default().to_owned(),
+                })
+            })
+            .collect::<Vec<PermissionOption>>();
+        let first_of = |kinds: &[&str]| {
+            kinds.iter().find_map(|kind| options.iter().find(|o| o.kind == *kind)).map(|o| o.id.clone())
+        };
+        let allow_once = first_of(&["allow_once"]);
+        let command = command_of(call);
+        let mut why = Vec::new();
+        let mut warn = false;
+        if let Some(text) = &command {
+            let sorted = commands::sort(commands::rules(), &self.policy.kit, text, &self.root, &self.root);
+            let tier = commands::decide(self.policy.mode, &sorted);
+            let remembered = self.policy.mode.offers_terminal()
+                && tier != Tier::Refused
+                && self.for_chat.lock().is_ok_and(|f| f.contains(&commands::remembered(text)));
+            let decided = |outcome: &str, option: Option<String>| {
+                let answer = match option {
+                    Some(option) => json!({"outcome": "selected", "optionId": option}),
+                    None => json!({"outcome": "cancelled"}),
+                };
+                self.respond(id, json!({"outcome": answer}));
+                (self.on_event)(Event::Decided {
+                    title: title.clone(),
+                    command: text.clone(),
+                    outcome: outcome.to_owned(),
+                    why: sorted.why.clone(),
+                });
+            };
+            if tier == Tier::Refused {
+                return decided("refused", first_of(&["reject_once", "reject_always"]));
+            }
+            if allow_once.is_some() && (tier == Tier::Runs || remembered) {
+                return decided(if remembered { "for-chat" } else { "allowed" }, allow_once);
+            }
+            why = sorted.why;
+            warn = sorted.warn;
+        }
+        let key = format!("p{}", self.next.fetch_add(1, Ordering::Relaxed));
+        let remember = command.is_some() && allow_once.is_some() && self.policy.mode.offers_terminal();
+        if let Ok(mut permissions) = self.permissions.lock() {
+            permissions.insert(
+                key.clone(),
+                Asked {
+                    id: id.clone(),
+                    offered: options.iter().map(|o| o.id.clone()).collect(),
+                    allow_once,
+                    command: command.clone(),
+                },
+            );
+        }
+        (self.on_event)(Event::Permission { request: key, title, options, command, why, warn, remember });
+    }
+
+    /// Where a command may run: a folder inside the repository, as an absolute path; the repository when none is named.
+    fn command_folder(&self, asked: Option<&str>) -> Result<(PathBuf, String), String> {
+        let Some(asked) = asked else { return Ok((self.root.clone(), ".".to_owned())) };
+        let path = Path::new(asked);
+        if !path.is_absolute() {
+            return Err("its folder is not an absolute path".to_owned());
+        }
+        let real = path.canonicalize().map_err(|_| "its folder does not exist".to_owned())?;
+        let inside = real.strip_prefix(&self.root).map_err(|_| "its folder is outside the repository".to_owned())?;
+        let shown = inside.to_string_lossy().replace('\\', "/");
+        Ok((real.clone(), if shown.is_empty() { ".".to_owned() } else { shown }))
+    }
+
+    /// A command the agent asks the Companion to run (0.84.0): sorted, then refused, run, or kept for the person's press.
+    fn ask_to_run(&self, id: &Value, params: &Value) {
+        let refuse = |text: String, why: Vec<String>, reason: Option<String>| {
+            let words = reason.clone().unwrap_or_else(|| commands::told(&why));
+            (self.on_event)(Event::CommandNotRun { command: text, refused: true, why, reason });
+            self.respond_error(id, INVALID_PARAMS, &format!("The Companion did not run it: {words}."));
+        };
+        let Some(program) = params["command"].as_str().filter(|c| !c.trim().is_empty()) else {
+            return refuse(String::new(), vec![], Some("it named no command".to_owned()));
+        };
+        let args: Option<Vec<String>> = params["args"]
+            .as_array()
+            .map_or(Some(Vec::new()), |a| a.iter().map(|w| w.as_str().map(str::to_owned)).collect());
+        let Some(args) = args else {
+            return refuse(program.to_owned(), vec![], Some("its words are not all text".to_owned()));
+        };
+        let text = commands::joined(program, &args);
+        let (cwd, shown_cwd) = match self.command_folder(params["cwd"].as_str()) {
+            Ok(found) => found,
+            Err(reason) => return refuse(text, vec!["outside-repository".to_owned()], Some(reason)),
+        };
+        let env: Vec<(String, String)> = params["env"]
+            .as_array()
+            .map_or(&[][..], Vec::as_slice)
+            .iter()
+            .filter_map(|e| Some((e["name"].as_str()?.to_owned(), e["value"].as_str().unwrap_or_default().to_owned())))
+            .collect();
+        let limit = params["outputByteLimit"]
+            .as_u64()
+            .map_or(terminals::DEFAULT_OUTPUT, |n| (n as usize).clamp(1024, terminals::MAX_OUTPUT));
+        let mut sorted = commands::sort(commands::rules(), &self.policy.kit, &text, &self.root, &cwd);
+        if !env.is_empty() && sorted.tier != Tier::Refused {
+            // Its own environment can change what any program does, so it is shown and asked.
+            sorted.tier = Tier::Asks;
+            sorted.why.push("sets-environment".to_owned());
+            sorted.warn = true;
+        }
+        let tier = commands::decide(self.policy.mode, &sorted);
+        if tier == Tier::Refused {
+            return refuse(text, sorted.why, None);
+        }
+        let waiting = WaitingCommand {
+            id: id.clone(),
+            program: program.to_owned(),
+            args,
+            cwd,
+            shown_cwd: shown_cwd.clone(),
+            env,
+            limit,
+            text: text.clone(),
+            why: sorted.why.clone(),
+        };
+        if self.for_chat.lock().is_ok_and(|f| f.contains(&commands::remembered(&text))) {
+            return self.run(waiting, "for-chat");
+        }
+        if tier == Tier::Runs {
+            return self.run(waiting, "automatic");
+        }
+        let key = format!("c{}", self.next.fetch_add(1, Ordering::Relaxed));
+        if let Ok(mut commands) = self.commands.lock() {
+            commands.insert(key.clone(), waiting);
+        }
+        (self.on_event)(Event::CommandAsk {
+            request: key,
+            command: text,
+            cwd: shown_cwd,
+            why: sorted.why,
+            warn: sorted.warn,
+        });
+    }
+
+    /// Runs a command and gives the agent its terminal; says how it came to run, and, when it ends, how.
+    fn run(&self, waiting: WaitingCommand, how: &str) {
+        let terminal = format!("term_{}", self.next.fetch_add(1, Ordering::Relaxed));
+        let on_event = Arc::clone(&self.on_event);
+        let named = terminal.clone();
+        let started = terminals::start(
+            &waiting.program,
+            &waiting.args,
+            &waiting.cwd,
+            &waiting.env,
+            waiting.limit,
+            move |exit, tail, truncated| {
+                on_event(Event::CommandEnded {
+                    terminal: named,
+                    code: exit.exit_code,
+                    signal: exit.signal,
+                    tail,
+                    truncated,
+                });
+            },
+        );
+        match started {
+            Ok(running) => {
+                if let Ok(mut terminals) = self.terminals.lock() {
+                    terminals.insert(terminal.clone(), running);
+                }
+                self.respond(&waiting.id, json!({"terminalId": terminal}));
+                (self.on_event)(Event::CommandRun {
+                    terminal,
+                    command: waiting.text,
+                    cwd: waiting.shown_cwd,
+                    how: how.to_owned(),
+                    why: waiting.why,
+                });
+            }
+            Err(reason) => {
+                self.respond_error(&waiting.id, INVALID_PARAMS, &format!("The Companion could not run it: {reason}."));
+                (self.on_event)(Event::CommandNotRun {
+                    command: waiting.text,
+                    refused: false,
+                    why: waiting.why,
+                    reason: Some(reason),
+                });
+            }
+        }
+    }
+
+    /// The person's answer to a command the agent asked to run (0.84.0).
+    pub fn answer_command(&self, request: &str, answer: CommandAnswer) -> Result<(), String> {
+        let waiting = self
+            .commands
+            .lock()
+            .ok()
+            .and_then(|mut commands| commands.remove(request))
+            .ok_or_else(|| "that command is no longer waiting".to_owned())?;
+        match answer {
+            CommandAnswer::No => {
+                self.respond_error(&waiting.id, INVALID_PARAMS, DECLINED_COMMAND);
+                (self.on_event)(Event::CommandNotRun {
+                    command: waiting.text,
+                    refused: false,
+                    why: waiting.why,
+                    reason: None,
+                });
+            }
+            CommandAnswer::Run => self.run(waiting, "you"),
+            CommandAnswer::ForChat => {
+                if let Ok(mut allowed) = self.for_chat.lock() {
+                    allowed.insert(commands::remembered(&waiting.text));
+                }
+                self.run(waiting, "for-chat");
+            }
+        }
+        Ok(())
+    }
+
+    /// What the agent asks of a terminal it was given: its output so far, waiting for it to end, ending it, or letting it go.
+    fn terminal(&self, method: &str, id: &Value, params: &Value) {
+        let name = params["terminalId"].as_str().unwrap_or_default();
+        let found = self.terminals.lock().ok().and_then(|t| t.get(name).cloned());
+        let Some(terminal) = found else {
+            return self.respond_error(id, INVALID_PARAMS, "There is no such terminal.");
+        };
+        match method {
+            "terminal/output" => {
+                let output = terminal.output();
+                let mut result = json!({"output": output.text, "truncated": output.truncated});
+                if let Some(exit) = output.exit {
+                    result["exitStatus"] = json!({"exitCode": exit.exit_code, "signal": exit.signal});
+                }
+                self.respond(id, result);
+            }
+            "terminal/wait_for_exit" => {
+                // Waiting must not hold up the agent's other messages: a thread of its own answers when it ends.
+                let Some(me) = self.me.upgrade() else { return };
+                let id = id.clone();
+                std::thread::spawn(move || {
+                    let exit = terminal.wait();
+                    me.respond(&id, json!({"exitCode": exit.exit_code, "signal": exit.signal}));
+                });
+            }
+            "terminal/kill" => {
+                terminal.kill();
+                self.respond(id, json!({}));
+            }
+            _ => {
+                terminal.kill();
+                if let Ok(mut terminals) = self.terminals.lock() {
+                    terminals.remove(name);
+                }
+                self.respond(id, json!({}));
+            }
         }
     }
 
@@ -543,13 +928,16 @@ impl Client {
     }
 
     /// The handshake: the protocol's version, and what the Companion offers (reading text files, and since 0.75.0 writing them on
-    /// the person's yes; never a terminal).
+    /// the person's yes; since 0.84.0 a terminal, unless the person chose to refuse commands).
     pub fn initialize(&self, version: &str, timeout: Duration) -> Result<Value, String> {
         let answer = self.request(
             "initialize",
             json!({
                 "protocolVersion": PROTOCOL_VERSION,
-                "clientCapabilities": {"fs": {"readTextFile": true, "writeTextFile": true}, "terminal": false},
+                "clientCapabilities": {
+                    "fs": {"readTextFile": true, "writeTextFile": true},
+                    "terminal": self.policy.mode.offers_terminal(),
+                },
                 "clientInfo": {"name": "dthorga-companion", "title": "D'thorga Companion", "version": version},
             }),
             timeout,
@@ -588,13 +976,14 @@ impl Client {
         Ok(answer["stopReason"].as_str().unwrap_or("end_turn").to_owned())
     }
 
-    /// Asks the agent to stop its turn; every permission still waiting is answered as cancelled, as the protocol requires.
+    /// Asks the agent to stop its turn; every permission still waiting is answered as cancelled, as the protocol requires, every
+    /// command waiting declined, and every command running ended (0.84.0).
     pub fn cancel(&self) {
         if let Ok(session) = self.session() {
             self.notify("session/cancel", json!({"sessionId": session}));
         }
         let waiting: Vec<Value> =
-            self.permissions.lock().map(|mut p| p.drain().map(|(_, (id, _))| id).collect()).unwrap_or_default();
+            self.permissions.lock().map(|mut p| p.drain().map(|(_, asked)| asked.id).collect()).unwrap_or_default();
         for id in waiting {
             self.respond(&id, json!({"outcome": {"outcome": "cancelled"}}));
         }
@@ -602,22 +991,52 @@ impl Client {
         for key in writes {
             let _ = self.answer_write(&key, false);
         }
+        let commands: Vec<String> = self.commands.lock().map(|c| c.keys().cloned().collect()).unwrap_or_default();
+        for key in commands {
+            let _ = self.answer_command(&key, CommandAnswer::No);
+        }
+        let running: Vec<Arc<Terminal>> =
+            self.terminals.lock().map(|t| t.values().cloned().collect()).unwrap_or_default();
+        for terminal in running {
+            terminal.kill();
+        }
     }
 
     /// The person's answer to a permission the agent asked: one of its options, or none (cancelled).
     pub fn answer_permission(&self, request: &str, option: Option<&str>) -> Result<(), String> {
         let mut permissions = self.permissions.lock().map_err(|_| "that question is no longer waiting".to_owned())?;
-        let (_, offered) = permissions.get(request).ok_or_else(|| "that question is no longer waiting".to_owned())?;
-        if option.is_some_and(|o| !offered.iter().any(|known| known == o)) {
+        let asked = permissions.get(request).ok_or_else(|| "that question is no longer waiting".to_owned())?;
+        if option.is_some_and(|o| !asked.offered.iter().any(|known| known == o)) {
             return Err("that is not one of the answers the agent offered".to_owned());
         }
-        let (id, _) = permissions.remove(request).ok_or_else(|| "that question is no longer waiting".to_owned())?;
+        let id = permissions.remove(request).ok_or_else(|| "that question is no longer waiting".to_owned())?.id;
         drop(permissions);
         let outcome = match option {
             Some(option) => json!({"outcome": "selected", "optionId": option}),
             None => json!({"outcome": "cancelled"}),
         };
         self.respond(&id, json!({"outcome": outcome}));
+        Ok(())
+    }
+
+    /// The person allows the command a permission question names for the rest of this chat (0.84.0): answered with the agent's
+    /// own "allow once", and the same command allowed by itself from then on.
+    pub fn allow_for_chat(&self, request: &str) -> Result<(), String> {
+        let gone = || "that question is no longer waiting".to_owned();
+        let mut permissions = self.permissions.lock().map_err(|_| gone())?;
+        let asked = permissions.get(request).ok_or_else(gone)?;
+        let (Some(option), Some(command)) = (asked.allow_once.clone(), asked.command.clone()) else {
+            return Err("this question cannot be allowed for the rest of the chat".to_owned());
+        };
+        if !self.policy.mode.offers_terminal() {
+            return Err("commands are refused in Settings → AI".to_owned());
+        }
+        let id = permissions.remove(request).ok_or_else(gone)?.id;
+        drop(permissions);
+        if let Ok(mut allowed) = self.for_chat.lock() {
+            allowed.insert(commands::remembered(&command));
+        }
+        self.respond(&id, json!({"outcome": {"outcome": "selected", "optionId": option}}));
         Ok(())
     }
 }

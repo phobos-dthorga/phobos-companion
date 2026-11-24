@@ -9,13 +9,20 @@ export type ChatAgent = {
   get: string;
 };
 
+/** How the agent's commands are handled (0.84.0; the owner's choices by card, 25 Nov 2026); it starts on Ask. */
+export type CommandsMode = "refused" | "ask" | "automatic";
+
 export type ChatStatus = {
   /** Whether the Chat page is switched on (it starts off). */
   on: boolean;
   chosen: string | null;
   agents: ChatAgent[];
   running: { agent: string; repository: string } | null;
+  commands: CommandsMode;
 };
+
+/** The person's answer to a command the agent asked to run (0.84.0). */
+export type CommandAnswer = "run" | "no" | "for-chat";
 
 export type ChatStatusReading =
   { state: "browser" } | { state: "ready"; status: ChatStatus } | Failed;
@@ -45,6 +52,50 @@ export type ChatEvent =
       request: string;
       title: string;
       options: ChatOption[];
+      /** Where it names a command (0.84.0): the command, why it asks (ids), whether to look twice, and whether it may be allowed
+       *  for the rest of the chat. */
+      command?: string | null;
+      why?: string[];
+      warn?: boolean;
+      remember?: boolean;
+    }
+  | {
+      kind: "decided";
+      title: string;
+      command: string;
+      outcome: "allowed" | "for-chat" | "refused";
+      why: string[];
+    }
+  | {
+      kind: "command-ask";
+      request: string;
+      command: string;
+      cwd: string;
+      why: string[];
+      warn: boolean;
+    }
+  | {
+      kind: "command-run";
+      terminal: string;
+      command: string;
+      cwd: string;
+      how: "automatic" | "you" | "for-chat";
+      why: string[];
+    }
+  | {
+      kind: "command-not-run";
+      command: string;
+      refused: boolean;
+      why: string[];
+      reason: string | null;
+    }
+  | {
+      kind: "command-ended";
+      terminal: string;
+      code: number | null;
+      signal: string | null;
+      tail: string;
+      truncated: boolean;
     }
   | { kind: "read"; path: string; allowed: boolean; reason: string | null }
   | {

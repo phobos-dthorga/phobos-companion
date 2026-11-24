@@ -84,7 +84,7 @@ flowchart LR
 | Code colours in a theme | A theme gains a part for code: twelve roles (keyword, flow word, type, function, variable, constant, string, number, comment, tag, punctuation, plain), each `#RRGGBB`, checked at 4.5:1 on the surface code is drawn on. One table in the colouring module says which grammar scopes take which role. House D'thorga ships with VS Code's default dark colours; the other two built-in themes get their own | Owner: VS Code's colours. Agent: the twelve roles and the table |
 | Bring in a VS Code theme | Settings → Appearance: **Bring in a VS Code theme's code colours**. The host opens the file, takes only its token colour rules (a scope, a colour, bold or italic), and keeps them as a set of code colours in the program's own folder. "Code colours" is then a choice: the theme's own, or a set brought in | Owner: bring in a theme. Agent: the rest |
 | What a brought-in file may be | Data only: at most 256 KB; comments allowed, as VS Code allows them; a file that includes another file is refused in words; every colour checked for shape. Workbench colours and everything else in the file are ignored | Agent, after the rule for what others bring |
-| A colour that cannot be read | Decision `code-colours-contrast` (the agent leans to replacing it with the theme's own and saying how many were replaced) | For the owner |
+| A colour that cannot be read | It takes the theme's own colour for that kind of code, and the page says how many were replaced | Owner (by card, 24 Nov 2026: "Replace it, and say so") |
 
 **Why this now answers the old objection.** highlight.js was chosen on 19 Nov 2026 over a larger highlighter because it needed no
 WebAssembly and no theme files of its own. Shiki's JavaScript engine needs no WebAssembly (observed), and the colours still come
@@ -114,7 +114,7 @@ flowchart LR
 | A name that is not ours | The game's or another mod's opens in **Read their code** at that member. A name from .NET itself shows its card and offers no jump | Agent |
 | From a name to its picture | The card offers **How it connects**, which opens the Code map on the same thing | Agent |
 | Other languages | Lua, Python and XML Defs go by name through the kit's existing `connections find`: one match goes straight there; several show a short list, each marked "by name" | Owner: by name elsewhere |
-| Parameters, locals, fields and properties | VS Code gives all four one blue. Decision `code-kinds-apart` (the agent leans to keeping VS Code's way) | For the owner |
+| Parameters, locals, fields and properties | One colour for all four, as VS Code gives them; the card of a pressed name says which it is | Owner (by card, 24 Nov 2026: "One colour, as VS Code") |
 
 **At a commit.** The code viewer shows code as a commit left it. The reader takes those files' text from git and the references as
 they are today, and says so in its answer. A commit that changed which files a project has is the unmeasured case.
@@ -161,7 +161,7 @@ flowchart TB
 | Moved | When a set of calls leaves one changed method and arrives whole at another, the picture says "moved", not "gone" and "new" | Agent's rule |
 | A ring finder | A ring is a loop of calls. The picture says in words when a change **makes** a ring or **cuts** one, and marks its arrows. Rings that were there before and after are not raised | Owner: the finder. Agent: only rings a change makes or cuts |
 | Rings through the game | A ring can pass through the game's code, as the one of 23 Nov 2026 did: our override asked its base, and the base asked our override back. To see such a ring the finder reads, with the kit's assembly reader, only the outside methods a changed method overrides or hands on to, never the game's whole assembly | Agent's proposal; its cost is unmeasured |
-| Where the picture sits | Decision `code-change-layout` (the agent leans to the picture above the lines: side by side, the picture needed about 700 px and was cut off in the mock-up) | For the owner |
+| Where the picture sits | Above the lines: side by side, the picture needed about 700 px and was cut off in the mock-up | Owner (by card, 24 Nov 2026: "Picture above lines") |
 | Motion | Boxes and arrows arrive with a short fade; none with reduced motion | Agent |
 | Other languages | The lighting works wherever the kit places a changed thing. Calls gone and added, and rings, are exact for C# and by name elsewhere, drawn dashed as by-name connections are today | Agent |
 
@@ -194,10 +194,10 @@ language the list has; the C# reader on phobos-rimworld and phobos-ostranauts.
 - The Guide: the code viewer's entry, the appearance entry, a new "How do I follow a name?" answer, and the words "ring" and
   "code colours".
 - `docs/cross-links.md`: the focus keys for a chosen name and a chosen thing in a change, and a name's address.
-- Shortcuts: C, N and H stay; the joined view takes B, A and C only if the owner settles `code-change-layout` that way, since C
-  is taken (What changed).
+- Shortcuts: C, N and H stay, the picture sitting above the lines (the owner's choice, 24 Nov 2026).
 
 ## Agent choices, for the owner to revise
 
-Every row marked "Agent" above. The three that most change what is seen are on the Decisions page: `code-colours-contrast`,
-`code-kinds-apart` and `code-change-layout`.
+Every row marked "Agent" above. **The five that most changed what is seen were put to the owner by card on 24 Nov 2026, and
+each was answered as it was built**: a faint colour replaced, one colour for the four kinds of name, the picture above the lines,
+plain strings that are names kept, and a name of nothing here still pressed. They are off the Decisions page.

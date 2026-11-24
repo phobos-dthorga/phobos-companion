@@ -6,6 +6,11 @@ Maintained from 9 November 2026.
 
 ### Changed
 
+- **Five choices about the code viewer are the owner's now** (by card, 24 Nov 2026), each as it was built, so nothing in the
+  program changes: a brought-in colour too faint to read is replaced, the four kinds of name keep one colour, the picture sits
+  above the lines, a plain string that is a key's or a Def's name can be pressed, and so can a name of nothing here. They leave
+  the Decisions page; `docs/code-reading.md` and the design record say whose they are.
+
 - **The README is a front door, and the Guide is the manual** (the owner's docs rewrite, step 7, 24 Nov 2026). The README says
   what the program is, what it needs before the window opens, how to install it and its first steps, then "press F1"; its "Read
   this first" bullets moved into the Guide's entries for their pages, or were dropped where the Guide already said them.

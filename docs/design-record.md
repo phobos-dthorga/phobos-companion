@@ -691,7 +691,7 @@ italic (VS Code's Dark+ does not italicise them; the old colours did).
 **Agent choices, owner to revise:** files a theme builds on are **followed, from the same folder only**, against the design's
 "refused": VS Code's own Dark Modern builds on Dark+, which builds on Visual Studio Dark, so refusing `include` would have refused
 the theme the owner most likely uses. A colour that cannot be read on the theme in use takes the theme's own code colour for its
-kind: the lean of the open decision `code-colours-contrast`.
+kind. **Owner's choice since** (by card, 24 Nov 2026: "Replace it, and say so").
 
 **Measured by hand on this PC's VS Code** (an ignored test, `vs_codes_own_themes_on_this_computer_are_read`): Dark Modern 65
 rules, 26 swapped on House D'thorga; Dark 2026 118 and 32; Dark+ 65 and 26; Dark High Contrast 54 and 19; Light Modern 64 and 61.
@@ -709,7 +709,8 @@ D'thorga's `#5CA2DC`.
 | How does it change the way they work? | "What did this change do to this method?" is two presses: light it, then How it connects |
 | What outside it notices? | The kit (`connections changed` gives `at`, 1.112.0) and the connections picture, which now hands its centre to the viewer |
 
-**Agent choices, owner to revise:** the lines beneath the picture (the lean of the open decision `code-change-layout`); lit by an
+**Owner's choice** (by card, 24 Nov 2026): the picture above the lines ("Picture above lines"). **Agent choices, owner to
+revise:** lit by an
 accent bar and bold accent numbers, not by colour alone; **Shift + N** for The code as it was, since every single letter is taken.
 **Not built here:** calls gone and added and the ring finder (step 6), which wait for the owner's word.
 
@@ -763,8 +764,8 @@ from the picture card: step 6 of [Reading code closer](code-reading.md), on phob
 | How does it change the way they work? | "Did this fix break the loop?" is answered by a drawing and a sentence under the picture |
 | What outside it notices? | The kit (its names reader, run on the commit's files before and after it; its assembly reader, for the game's methods a change hands on to, from the game's install) and the connections picture, which shares its middle with the calls shown |
 
-**Agent choices, owner to revise:** the calls sit under the picture (with `code-change-layout` still open, the lean of the
-lines-beneath choice in step 3); only rings a commit made or cut are drawn, those it left standing are counted in one line; a ring
+**Agent choices, owner to revise:** the calls sit under the picture (as the lines do, the owner's choice by card of
+24 Nov 2026); only rings a commit made or cut are drawn, those it left standing are counted in one line; a ring
 cut is dashed, one made solid and heavy, with the words "cut" and "made" in its middle; a call gone dashed and struck through, a
 new one heavy, a kept one thin, each with its word; Before, After and The change belong to the calls, not yet to the lines; the
 game named for every commit, so a game with no reader of its assemblies gets the kit's limit line rather than silence. **Risks:**
@@ -793,11 +794,11 @@ Ostranauts (short keys such as `status`). The figures and what was left out are 
 "What the count found". **A rule that could not be counted is not kept.**
 
 **Owner choices:** jumps between a game's data files and its code (the picture card); the count before building (this design's
-own rule, agreed with the record). **Agent choices, owner to revise:** which rules each game has (the kit's two tables); a name a
+own rule, agreed with the record); and, by card after it was built (24 Nov 2026): any plain string that is a key's or a Def's
+name can be pressed in RimWorld C# ("Keep them"), and a name of nothing here can still be pressed and says so ("Yes, say so on
+card"). **Agent choices, owner to revise:** which rules each game has (the kit's two tables); a name a
 rule found says so on its card, with the rule's own words, and that a rule can be wrong; a C# name read exactly keeps that
-reading and gains what it also stands for beneath it, never in its place; any plain string that is a key's or a Def's name can be
-pressed in RimWorld C# (decision `code-jump-plain-strings`); a name of nothing here can still be pressed and says so (decision
-`code-jump-nothing-here`); every `connections` question names the game, so the Code map shows the same things the viewer does; a
+reading and gains what it also stands for beneath it, never in its place; every `connections` question names the game, so the Code map shows the same things the viewer does; a
 translation file's prose is never read word by word; the name card keeps to half its pane and scrolls within itself. **Risks:** a
 rule reads text, so a name passed about in a variable is read where its string is written and a key built from pieces is not read
 at all; with the game named the kit keeps a second store for the repository, read once (about 17 s for phobos-rimworld); the

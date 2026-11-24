@@ -1,3 +1,4 @@
+import type { Report } from "../reports/types";
 import type { Failed, Waiting } from "../shell/types";
 
 /** Whether this game's tools can look inside the running game, and why not when the manifest has changed. */
@@ -199,4 +200,24 @@ export type Request =
   | { op: "object"; address: string; skip: number; take: number }
   | { op: "holders"; address: string; max: number }
   | { op: "path"; address: string }
-  | { op: "why"; type: string; sample: number };
+  | { op: "why"; type: string; sample: number }
+  | { op: "checks" };
+
+/** One live check's outcome, as the tools give it (phobos-modkit 1.123.0, `look-serve`'s checks). */
+export type CheckOutcome = {
+  id: string;
+  title: string;
+  level: "fault" | "look";
+  row: string;
+  read: number;
+  problem: string;
+  findings: { id: string; label: string; text: string }[];
+};
+
+/** The answer to `{ op: "checks" }`: every live check in the game's check files, asked of the snapshot held. */
+export type ChecksAnswer = {
+  checks: CheckOutcome[];
+  faults: number;
+  looks: number;
+  report: Report;
+};

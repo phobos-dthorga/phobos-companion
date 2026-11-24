@@ -21,6 +21,17 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.91.0] - 2026-11-25
+
+### Added
+
+- **Explorer: Run the checks on the snapshot held** (the owner's choice of 25 Nov 2026, of ways to automate an in-game test
+  list). Every rule your repositories keep for the running game is asked of the snapshot you already hold, so the game is not paused
+  again; the view shows how many ran, the faults and what is worth a look, then the tools' report. Key **C**. The request carries
+  nothing from the window. RimWorld today (the only game whose tools look inside one); not yet run on the owner's game.
+- **The Reports page offers the save checks** ("Is anything in my save in a state it should never be?"), through the tool kit's
+  pin moving from 1.118.0 to 1.123.0, which also brings saved histories to the Tests page's evidence.
+
 ## [0.90.0] - 2026-11-25
 
 ### Added

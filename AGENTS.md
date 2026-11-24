@@ -111,7 +111,8 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   that look at "variables in memory"; `docs/debugging.md`). The game's `look-inside` tool, only while the manifest calls it
   `runs`; it pauses the game for about half a second and writes nothing to the game. **Never take one by itself.** One is held at
   a time, and let go on Let it go, on leaving the page, when the program closes, or after ten minutes (the owner's choice). Every
-  request is checked for kind, shape and size first.
+  request is checked for kind, shape and size first. **Run the checks** (0.91.0) asks the snapshot held the live checks the
+  game's repositories keep; its request carries nothing from the window, so the rules come only from the tools.
 - **Changes page and the code viewer only read.** The code viewer's **pictures and sounds** (0.50.0; the owner, 22 Nov 2026:
   "display multimedia in parts like this", with Save a copy and Open with its own program) are only files the kit's last answer
   named, at most 64 MB. **Save a copy** writes only where the owner chose in the Save dialog; **Open with its own program** writes

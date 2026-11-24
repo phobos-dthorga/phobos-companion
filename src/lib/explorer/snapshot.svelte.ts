@@ -157,6 +157,12 @@ export function openObject(object: Opened) {
   });
 }
 
+/** The live checks, asked of the held snapshot (0.91.0): a step on the trail; the answer is remembered while it is held. */
+export function openChecks() {
+  if (!explorer.held) return;
+  go({ ...here(), focus: { view: "checks" }, dialog: null });
+}
+
 /** Back to the overview of the held snapshot (or the start, with none held), as a step on the trail. */
 export function openOverview() {
   go({ ...here(), focus: {}, dialog: null });

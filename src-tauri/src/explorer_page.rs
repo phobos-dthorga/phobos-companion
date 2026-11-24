@@ -174,7 +174,8 @@ pub fn checked_request(request: &Value) -> Result<Value, String> {
     let mut checked = Map::new();
     checked.insert("op".to_owned(), Value::from(op));
     match op {
-        "overview" | "info" | "release" => {}
+        // "checks" (0.91.0) asks every live check the game's tools keep of the snapshot held; it takes nothing from the window.
+        "overview" | "info" | "release" | "checks" => {}
         "kind" => {
             checked.insert("type".to_owned(), kind_name(request)?.into());
             checked.insert("skip".to_owned(), whole(request, "skip", 0..=MAX_SKIP, 0)?.into());

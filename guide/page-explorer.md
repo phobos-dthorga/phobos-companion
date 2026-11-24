@@ -12,9 +12,10 @@ see: task-find-memory-use, task-find-why-in-memory, term-snapshot, term-garbage
 - **What is in memory**: how many objects, the memory they take, and the free space between them (not counted). **Who it belongs to** lists each mod, the game and the runtime, biggest first. **The largest kinds** each open with a press.
 - **One kind**: its objects a page at a time, **Largest first** or as found, and a filter by a word in their descriptions (a name, for one). Each opens the thing in full.
 - **One thing in full**: every value it holds; another thing it names is a button that opens it. **What holds it** and **Why is it still in memory?** answer a memory leak.
+- **Run the checks** asks the snapshot you already hold every rule your repositories keep for the running game (their `config/checks.json`), so the game is not paused again. **The checks** shows how many ran, the faults and what is worth a look, each with where it was found and why the rule holds. A finding is something to look at, not a test: a snapshot holds one moment, and a rule can be wrong. A game whose repositories keep no rules is told so.
 - **Let it go** frees the snapshot. It also goes after ten minutes, and when you leave the page. Take another to look again.
 
 Reading saves here comes later, with the save explorer. Only a game whose tools can look inside it has this page; any other is told so.
 
 ### Keys
-- **V** opens Explorer. On the page: **E** looks inside (it asks first), **Q** lets the snapshot go, **O** goes back to the overview.
+- **V** opens Explorer. On the page: **E** looks inside (it asks first), **Q** lets the snapshot go, **O** goes back to the overview, **C** runs the checks on the snapshot held.

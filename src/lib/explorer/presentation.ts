@@ -111,7 +111,8 @@ export function kindPager(kind: KindPage, page: number) {
   return pagerOf(page, kind.items.length, kind.match ? null : kind.count);
 }
 
-/** What the page shows, from the place: the start, the overview, one kind, one object, or word that an object is gone. */
+/** What the page shows, from the place: the start, the overview, one kind, one object, the live checks (0.91.0), or word that an
+ * object is gone. */
 export type View =
   | { name: "start" }
   | { name: "overview" }
@@ -123,6 +124,7 @@ export type View =
       page: number;
     }
   | { name: "object"; token: string }
+  | { name: "checks" }
   | { name: "gone"; was: "kind" | "object" };
 
 /**
@@ -139,6 +141,7 @@ export function viewOf(
     return view === "kind" || view === "object"
       ? { name: "gone", was: view }
       : { name: "start" };
+  if (view === "checks") return { name: "checks" };
   if (view === "object")
     return focus.snapshot === String(held) && known(focus.object ?? "")
       ? { name: "object", token: focus.object! }

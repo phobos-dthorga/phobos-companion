@@ -506,6 +506,13 @@ export const ACTIONS: Action[] = [
     defaultKey: "o",
     words: "shortcut-explorer-overview",
   },
+  // 0.91.0: C for the checks, as the code viewer's C (its changes) is never on screen with the Explorer.
+  {
+    id: "explorer.checks",
+    scope: "explorer",
+    defaultKey: "c",
+    words: "shortcut-explorer-checks",
+  },
 ];
 
 export const SCOPES: { scope: Scope; words: string }[] = [

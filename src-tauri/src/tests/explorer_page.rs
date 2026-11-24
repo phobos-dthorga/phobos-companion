@@ -36,6 +36,15 @@ fn a_snapshot_is_held_for_ten_minutes_at_most_with_the_label_as_one_argument() {
 }
 
 #[test]
+fn the_checks_are_asked_with_nothing_from_the_window() {
+    // 0.91.0: the live checks take no part from the window; anything sent with them is dropped before the reader sees it.
+    assert_eq!(
+        checked_request(&json!({"op": "checks", "file": "C:/elsewhere/checks.json", "paths": ["x"]})).unwrap(),
+        json!({"op": "checks"})
+    );
+}
+
+#[test]
 fn a_request_is_rebuilt_from_its_checked_parts_alone() {
     assert_eq!(checked_request(&json!({"op": "overview", "extra": "dropped"})).unwrap(), json!({"op": "overview"}));
     assert_eq!(

@@ -12,6 +12,7 @@
   import { register } from "../shortcuts/registry";
   import { formatClock } from "../memory/presentation";
   import { readOffer } from "./desktopClient";
+  import ChecksView from "./ChecksView.svelte";
   import KindView from "./KindView.svelte";
   import ObjectView from "./ObjectView.svelte";
   import OverviewView from "./OverviewView.svelte";
@@ -25,6 +26,7 @@
   import {
     explorer,
     letGo,
+    openChecks,
     openedAs,
     openOverview,
     take,
@@ -85,6 +87,9 @@
         "explorer.release": () => void letGo("asked"),
         "explorer.overview": () => {
           if (held) openOverview();
+        },
+        "explorer.checks": () => {
+          if (held) openChecks();
         },
       },
     });
@@ -186,6 +191,11 @@
             >{t("explorer-overview-button")}</button
           >
         {/if}
+        {#if view.name !== "checks"}
+          <button type="button" class="action" onclick={openChecks}
+            >{t("explorer-checks-button")}</button
+          >
+        {/if}
         <span class="small muted">{t("explorer-let-go-how")}</span>
       </div>
     </section>
@@ -205,6 +215,8 @@
       {#key view.token}
         <ObjectView object={opened} />
       {/key}
+    {:else if view.name === "checks"}
+      <ChecksView />
     {:else if view.name === "gone"}
       <p class="said" role="status">{t("explorer-gone-object")}</p>
     {/if}

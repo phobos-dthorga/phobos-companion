@@ -993,6 +993,26 @@ the Guide, lets the snapshot go; and it is shown to everyone, not hidden as an a
 with the kit's command line): 453 MB of every mod's patch XML kept alive, read back by Vanilla Expanded Framework's settings code
 after the game had let it go.
 
+### The checks on the snapshot held (built 25 Nov 2026, 0.91.0)
+
+**The owner's choice** (25 Nov 2026, of ways to automate an in-game test list: "I especially want to do #4"; phobos-rimworld's
+`docs/development/test-automation.md`). A repository keeps rules for its game's running state in `config/checks.json` (phobos-modkit
+`docs/checks.md`); **Run the checks** asks the snapshot already held every one of them through the kit's `look-serve`
+(`{"op": "checks"}`, kit 1.123.0), so the person's one snapshot answers them with no second pause and no second card. The view shows
+how many ran, the faults and what is worth a look, then the tools' own report through `ReportView`.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Learn of a state their game should never be in, from the snapshot they took anyway |
+| What does it stop them doing? | Nothing; it only reads. A request carries nothing from the window: the host drops any part sent with it |
+| How does it change the way they work? | A fault an agent would hunt for in code is named on a press, with where it was found |
+| What outside it notices? | Nothing: the snapshot is already held |
+
+**Games:** any game whose tools have a look inside and whose repositories on the games list keep live checks; RimWorld today. A
+game whose repositories keep none is told so by the tools' own words. **Agent choices, owner to revise:** the button beside Back to
+the overview, its key **C**, and the view's words. The save checks need no page of their own: `rimworld-save checks` only reads, asks
+a plain question and needs nothing typed, so the Reports page offers it once the kit's pin is at 1.122.0 or later.
+
 ## Safe copies on Home (built 21 Nov 2026, 0.42.0)
 
 **The owner's request** (21 Nov 2026: "backup functionality for our training sets, models, etc. ... within Companion"), after the

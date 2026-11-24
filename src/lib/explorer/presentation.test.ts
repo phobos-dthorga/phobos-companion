@@ -107,6 +107,11 @@ describe("what the page shows from its place", () => {
     });
   });
 
+  it("shows the checks only while a snapshot is held (0.91.0)", () => {
+    expect(viewOf({ view: "checks" }, 3, known)).toEqual({ name: "checks" });
+    expect(viewOf({ view: "checks" }, null, known)).toEqual({ name: "start" });
+  });
+
   it("opens an object only in the snapshot it was found in", () => {
     expect(
       viewOf({ view: "object", snapshot: "3", object: "o1" }, 3, known),

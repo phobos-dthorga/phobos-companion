@@ -775,6 +775,28 @@ ours and through the game's methods a change hands on to. Checked on phobos-rimw
 cut, `AvailableOnNow → AvailableReport → the game's RecipeWorker.AvailableReport`, and 6 calls moved into `Check`. **Not tested on
 screen.**
 
+## System activity in the status bar (built 25 Nov 2026, 0.86.0)
+
+**The owner asked** (25 Nov 2026): "in Companion somewhere on all windows, I want there to be shown a little display of your
+system activity, perhaps things like CPU, Disk, and Network, since GPU doesn't really come into it for this app".
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See at a glance how busy the computer is, and how much of that is the Companion and what it started |
+| What does it stop them doing? | Opening Task Manager to learn whether a slow moment is the Companion's doing |
+| How does it change the way they work? | A long report, an agent's command or a game starting shows as it happens, in the bar they already look at |
+| What outside it notices? | Nothing outside the window: it only reads the computer (stated as a choice) |
+
+**Owner's choices (by card, 25 Nov 2026):** the whole PC **with the Companion's share** beside it; **CPU, disk, network and
+memory**; **in the status bar**; **a number and a tiny graph** of the last minute. GPU: "fit it if you truly feel it's necessary";
+**the agent left it out** (the Companion barely uses one; a local AI model's use of it would be the case for it, and `sysinfo`
+can read it should that come). **Agent choices, owner to revise:** once a second; the last minute kept; the Companion's share
+taken as its process and every descendant, re-listed every fifth second (a measured halving of the cost); disk as reading plus
+writing a second, not how busy, which `sysinfo` does not give; a rate graph's top the minute's busiest moment, never under
+1 MB/s so a quiet minute draws flat; the loopback left out of network; graphs and shares folded away under 900 px; no setting to
+hide it yet. **Limits:** network has no share; a program the Companion starts joins its share within five seconds. **Not tested
+on screen.**
+
 ## Jumps between data files and code (built 24 Nov 2026, 0.83.0)
 
 **The owner said "go ahead with Step #7"** (24 Nov 2026), having chosen "jumps between XML and C#" from the picture card: step 7

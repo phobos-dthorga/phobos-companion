@@ -4,7 +4,7 @@ kind: page
 page: about
 go: about
 words: version, update, installer, newer, which version, updater, install now
-see: task-update-companion, term-tool-kit, task-other-programs, task-going-online
+see: task-update-companion, term-tool-kit, task-other-programs, task-going-online, term-system-activity
 ---
 **Which version of the Companion you are running**, and whether a newer one is waiting.
 

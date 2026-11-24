@@ -118,6 +118,12 @@ fn before_exit() {
     let _ = chat_page::end();
 }
 
+/// The computer's activity over the last minute, with the Companion's share (0.86.0), for the status bar. Only reads.
+#[tauri::command]
+fn activity() -> Vec<companion_core::activity::Sample> {
+    companion_core::activity::recent()
+}
+
 /// How the updater stands (0.85.0, `docs/releases.md`). Only reads.
 #[tauri::command]
 fn updates_status() -> updates::Status {
@@ -1627,6 +1633,7 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             about,
+            activity,
             updates_status,
             updates_check,
             updates_install,
@@ -1804,6 +1811,8 @@ pub fn run() {
             records_backup::start();
             // A newer published version is looked for once, a few seconds after the start (0.85.0).
             updates::start(app.handle());
+            // The computer's activity, read once a second for the status bar (0.86.0).
+            companion_core::activity::start();
             Ok(())
         })
         .build(tauri::generate_context!())

@@ -16,6 +16,7 @@ serde_json = { version = "1.0.145", features = ["preserve_order"] }
 # any system; and the operating system's own key store for the keys a person adds.
 ureq = { version = "3.5.2", default-features = false, features = ["rustls"] }
 keyring-core = "1.1.0"
+sysinfo = { version = "=0.40.1", default-features = false, features = ["system", "disk", "network"] }
 
 [target.'cfg(windows)'.dependencies]
 windows-native-keyring-store = { version = "1.1.0", default-features = false }

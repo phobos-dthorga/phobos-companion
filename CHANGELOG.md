@@ -21,6 +21,16 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.86.0] - 2026-11-25
+
+### Added
+
+- **The status bar shows what the computer is doing, and the Companion's part of it** (the owner, 25 Nov 2026, and their choices
+  by card). CPU, memory, disk and network, read once a second, each with its value and a tiny graph of the last minute. Within
+  each, the part taken by the Companion and every program it started (its reports, an agent and its commands) is drawn and named;
+  network has none, since Windows can't say which program carried what. Hovering gives the details. Reading it costs about
+  16 thousandths of a second a second on the owner's PC. A new Guide word, **System activity**. **Not tested on screen.**
+
 ## [0.85.1] - 2026-11-25
 
 ### Changed

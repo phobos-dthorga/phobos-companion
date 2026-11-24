@@ -9,6 +9,7 @@
 //! program; a second front end could use this crate whole (owner, 19 Nov 2026: `docs/history/shared-code-audit.md`).
 
 pub mod acp;
+pub mod activity;
 pub mod agents;
 pub mod ai;
 pub mod ai_client;

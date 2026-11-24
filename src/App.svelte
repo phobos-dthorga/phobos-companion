@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ActivityMeters from "./lib/activity/ActivityMeters.svelte";
   import { onMount, untrack } from "svelte";
   import CodeViewer from "./lib/code/CodeViewer.svelte";
   import AsItStood from "./lib/timeline/AsItStood.svelte";
@@ -518,6 +519,8 @@
 
   <footer class="status-bar">
     <span>{t("status-reading-only")}</span>
+    <!-- The computer's activity, with the Companion's share (0.86.0). -->
+    <ActivityMeters />
     <span class="footer-end">
       <button
         type="button"

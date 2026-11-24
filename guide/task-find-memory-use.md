@@ -3,7 +3,7 @@ title: Find out what is using my game's memory
 kind: task
 go: explorer?start=yes
 words: memory, RAM, heap, big, slow, which mod, using memory
-see: page-explorer, term-snapshot, task-memory-watch
+see: page-explorer, term-snapshot, task-memory-watch, term-system-activity
 ---
 1. **Save your game first.** Taking a snapshot pauses it for about half a second.
 2. Open **Explorer** (the **V** key) and press **Look inside the running game…** (or the **E** key).

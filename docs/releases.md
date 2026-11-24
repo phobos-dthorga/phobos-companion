@@ -1,7 +1,8 @@
 # Releases on GitHub, and the updater (O1, 25 Nov 2026)
 
-**Status (25 Nov 2026):** designed and built in Companion 0.85.0; **waiting on the owner's one-time setup** (the update key,
-below) before the first release can be built, and not tested on screen. The owner chose O1 from [later.md](later.md#going-online)
+**Status (25 Nov 2026):** designed and built in Companion 0.85.0. **The owner's one-time setup is done** (the same day: the key's
+two secrets on GitHub, and its public half, minisign `F729C046867F3956`, in 0.85.1), so **0.85.1 is the first version built as a
+draft release and the first that updates itself**; 0.85.0 is installed by hand once. Not tested on screen. The owner chose O1 from [later.md](later.md#going-online)
 ("Releases and updater"), the first step toward the Companion for others (the [release audit](release-audit.md)'s B6), and
 answered five questions by card the same day. Agent choices are labelled so the owner can revise them.
 
@@ -75,8 +76,10 @@ signed by an older Tauri command line; worth turning on once a release built wit
 
 Agents never do these: the key is a credential.
 
-1. **Make the key**, in a terminal in the phobos-companion folder: `npx tauri signer generate -w "%USERPROFILE%\.tauri\dthorga-companion.key"`.
-   It asks for a password (it may be empty) and writes two files: the private key and `dthorga-companion.key.pub`.
+1. **Make the key**, in PowerShell in the phobos-companion folder: `New-Item -ItemType Directory -Force "$env:USERPROFILE\.tauri"`,
+   then `npx tauri signer generate -w "$env:USERPROFILE\.tauri\dthorga-companion.key"` (in the older command prompt,
+   `%USERPROFILE%` in place of `$env:USERPROFILE`). It asks for a password (it may be empty) and writes two files: the private key
+   and `dthorga-companion.key.pub`. `Get-Content <file> -Raw | Set-Clipboard` copies either without selecting text.
 2. **Put the private key on GitHub**: the repository's Settings → Secrets and variables → Actions → New repository secret,
    `TAURI_SIGNING_PRIVATE_KEY`, with the whole content of `dthorga-companion.key`; and, if you gave one, the password as
    `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.

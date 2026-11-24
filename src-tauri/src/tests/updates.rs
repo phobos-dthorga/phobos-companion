@@ -20,6 +20,8 @@ fn the_shipped_settings_read_the_latest_published_release() {
     );
     assert_eq!(updater["windows"]["installMode"], "passive");
     assert!(updater["pubkey"].is_string(), "the plugin refuses to start without the key's field");
+    // The owner's public update key (minisign F729C046867F3956), from their one-time setup of 25 Nov 2026.
+    assert!(key_set(&config["plugins"]), "the program carries the owner's public update key");
     assert_eq!(
         config["bundle"]["createUpdaterArtifacts"],
         json!(null),

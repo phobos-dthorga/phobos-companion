@@ -21,6 +21,14 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.85.1] - 2026-11-25
+
+### Changed
+
+- **The Companion carries the owner's public update key**, from their one-time setup the same day, so this is the first version
+  built as a draft release on GitHub and the first that updates itself. 0.85.0 is installed by hand once, then every version
+  the owner publishes arrives by itself. **Not tested on screen.**
+
 ## [0.85.0] - 2026-11-25
 
 ### Added

@@ -21,6 +21,17 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.90.0] - 2026-11-25
+
+### Added
+
+- **Settings → Setup ends with "AI, if you want it": find a model or an agent already on this computer, and try it** (the
+  owner's choice by card, 25 Nov 2026: an AI helper with "a 'try it' button that you press"). **Look for Ollama** or LM Studio
+  says whether it is running and lists its models, and **Use** and a model's name chooses it for help on pages. Each chat agent
+  says whether it is here; **Try** starts a found one for a moment, checks it answers (with its version and how it may ask you to
+  sign in), and ends it, with no repository, commands or conversation. **Use it for chat** chooses it. **Not tested on screen;
+  no agent has been tried on the owner's computer.**
+
 ## [0.89.0] - 2026-11-25
 
 ### Added

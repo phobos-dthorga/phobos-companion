@@ -788,7 +788,7 @@ Companion, of course."
 | What outside it notices? | Windows: a fetch installs a program for the whole computer or the person, through winget or .NET, and Windows may ask for an administrator's yes |
 
 **Owner's choices (by card, 25 Nov 2026):** build all four kinds of help (this **setup check** first; **"say it on the page"**
-built in 0.88.0; **starter files for a repository** built in 0.89.0; an **AI helper** follows); a missing program's command is **shown, and run on a press**;
+built in 0.88.0; **starter files for a repository** built in 0.89.0; an **AI helper** built in 0.90.0); a missing program's command is **shown, and run on a press**;
 the check is **a Settings tab with a line on Home**; a clean-PC trial in Windows Sandbox **later**.
 
 **Agent choices, owner to revise:** the commands live in the tool kit's program rows (kit 1.118.0), so every game and the
@@ -804,7 +804,14 @@ files** (0.89.0): three starters, as data in `config/repository-starters.json`: 
 repository has none up to three folders down), the open-work list and, for agent sessions, an empty decisions file. The files that
 need the person's own facts (`installs.json`'s install command, `test-evidence.json`'s test list, `settings.json`'s folders) are
 not offered: a starter would only be wrong. Nothing is committed; `git init` is not run for a repository without git, only said.
-**Risk: low**, since a starter is only ever a new file, shown first, and git shows it as new.
+**Risk: low**, since a starter is only ever a new file, shown first, and git shows it as new. **AI helper** (0.90.0): a section
+last on the tab, "AI, if you want it". Local model runners (Ollama, LM Studio) are looked for only on a press, by asking for their
+models, the same call Settings → AI makes; a found model is used with one press. Online services are left to Settings → AI, since
+they need a key and the Going online switch. Each chat agent is found or not as Settings → AI already says; **Try** starts a found
+one in the Companion's own folder for the protocol's handshake only (its name, version and ways to sign in), then ends it; **Use it
+for chat** chooses it. The Chat page's switch is not turned on from here: it is said, with a button to it, since its risk was graded
+high. **Risk of Try: low**: the agent is given no repository, terminal, reports or conversation, so it can read or change nothing
+through the Companion, though as its own program it runs with the person's own access for the moment it is up.
 
 **Risk, graded by the agent: low.** A fetch installs a program the person named, from the system's own catalogue, after they read
 the command and pressed Run it; Windows asks its own yes where it needs one. Nothing is removed or changed beyond that install, and

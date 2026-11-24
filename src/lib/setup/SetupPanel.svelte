@@ -4,6 +4,7 @@
   import { goPage } from "../navigation/navigation.svelte";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import RepositoriesPanel from "./RepositoriesPanel.svelte";
+  import SetupAi from "./SetupAi.svelte";
   import {
     fetchProgram,
     lookAgain,
@@ -319,6 +320,8 @@
     onchanged={(setup) => settle({ state: "ready", setup })}
   />
 {/if}
+
+<SetupAi />
 
 <style>
   .setup {

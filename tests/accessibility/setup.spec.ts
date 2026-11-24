@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { healthyKit, mockHost, sampleHome } from "./host";
+import { healthyKit, mockHost, sampleAiStatus, sampleHome } from "./host";
 
 /** Invented rows (0.87.0): Steam missing, ilspycmd waiting for the SDK, a game's own program with no command, git here. */
 function row(key: string, more: Record<string, unknown> = {}) {
@@ -263,6 +263,68 @@ test.describe("Setup", () => {
     await write.click();
     await expect(panel).toContainText("Written into first-mods");
     await expect(panel).toContainText("It has every file the pages read.");
+  });
+
+  test("AI, if you want it: a local model is looked for and used, and an agent is tried, on a press (0.90.0)", async ({
+    page,
+  }) => {
+    const chat = {
+      on: false,
+      chosen: null,
+      agents: [
+        { id: "claude", name: "Claude (Claude Agent)", found: true, get: "" },
+        {
+          id: "codex",
+          name: "Codex",
+          found: false,
+          get: "Install it with npm.",
+        },
+      ],
+      running: null,
+      commands: "ask",
+    };
+    await openSetup(page, {
+      ai_status: { result: { ...sampleAiStatus, chosen: null } },
+      chat_status: { result: chat },
+      ai_models: { result: ["small-model:3b", "sample-model:8b"] },
+      ai_choose_service: { result: sampleAiStatus },
+      ai_choose_model: { result: sampleAiStatus },
+      chat_try: {
+        result: {
+          agent: "Claude (Claude Agent)",
+          saidName: "Claude Agent",
+          version: "0.9.1",
+          signIn: ["Log in with Claude"],
+        },
+      },
+      chat_choose: { result: { ...chat, chosen: "claude" } },
+    });
+    await page.keyboard.press("9");
+    await page.getByRole("tab", { name: "Setup" }).click();
+    const panel = page.getByRole("region", { name: "AI, if you want it" });
+    await panel.getByRole("button", { name: "Look for Ollama" }).click();
+    await expect(panel).toContainText("It's running, with 2 models.");
+    await panel.getByRole("button", { name: "Use sample-model:8b" }).click();
+    await expect(panel).toContainText(
+      "Kept: help on pages uses sample-model:8b.",
+    );
+
+    // Codex isn't here: how to get it. Claude is: Try it, then use it.
+    await expect(panel).toContainText("Install it with npm.");
+    await panel
+      .getByRole("button", { name: "Try Claude (Claude Agent)" })
+      .click();
+    await expect(panel).toContainText(
+      "Claude Agent 0.9.1 answered: it starts and speaks to the Companion. It may ask you to sign in, with: Log in with Claude.",
+    );
+    await panel.getByRole("button", { name: "Use it for chat" }).click();
+    await expect(panel).toContainText("chosen for chat");
+    await expect(panel).toContainText("The Chat page is switched off.");
+    await expect(
+      (
+        await new AxeBuilder({ page }).include(".setup-ai").analyze()
+      ).violations.map((v) => v.id),
+    ).toEqual([]);
   });
 
   test("a program set aside moves to its own group, and Home no longer names it (0.87.0)", async ({

@@ -31,7 +31,7 @@ export const PAGE_TABS: Partial<Record<PageName, Tab[]>> = {
     {
       id: "setup",
       words: "settings-tab-setup",
-      panels: ["setup", "repositories"],
+      panels: ["setup", "repositories", "setup-ai"],
     },
     { id: "folders", words: "settings-tab-folders", keys: ["key"] },
     { id: "online", words: "settings-tab-online", panels: ["online"] },

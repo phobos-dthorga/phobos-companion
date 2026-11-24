@@ -3,7 +3,7 @@ title: Set up what the pages need
 kind: task
 go: settings?panel=setup
 words: setup, set up, install, missing, programs, git, .NET, dotnet, SDK, ilspycmd, Steam, winget, fetch, download, requirements, needs
-see: task-other-programs, task-repository-ready, page-settings, task-first-steps, term-tool-kit
+see: task-other-programs, task-repository-ready, task-ai-services, task-chat-agent, page-settings, task-first-steps, term-tool-kit
 ---
 **Settings → Setup lists every program the pages use beyond the Companion, says which are here, and can fetch a missing one for
 you.** The Companion brings its own Python and tools; each program here is needed only by the pages it names, and nothing else
@@ -30,6 +30,12 @@ Press **I don't need it**. It moves to **Set aside**, and Home stops naming it. 
 ### Your repositories
 Beneath the programs, **Your repositories** says which files the pages read each repository on your list has, and can add a
 starter where one is missing: see [make a repository ready](task-repository-ready).
+
+### AI, if you want it
+Last on the tab, and never needed. **Look for Ollama** (or LM Studio) checks whether that model runner is answering on this
+computer, and **Use** and a model's name makes it the one that [explains things on pages](task-ai-services). Each agent for the
+[Chat page](task-chat-agent) says whether it is on this computer: **Try** and its name starts it for a moment, checks it answers,
+and ends it, without a repository, commands or a conversation. **Use it for chat** chooses it.
 
 ### How it fetches
 - **winget**, Windows' own package manager, fetches git, .NET 10 and Steam from its catalogue and runs their installers.

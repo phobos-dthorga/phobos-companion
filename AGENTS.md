@@ -185,7 +185,10 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   repository on the games list **only the starters `config/repository-starters.json` carries**, at their own paths, after the
   window showed each whole and the person ticked it and pressed Write the ticked files: opened as new files, so **nothing there
   is ever replaced**, inside the repository's folder (checked after its folders are made), and **never committed**
-  (`companion_core::starters`). A new starter is a row in that file.
+  (`companion_core::starters`). A new starter is a row in that file. **AI, if you want it** (0.90.0): a look for a model running
+  on this computer is the AI services' own **Read the models** (loopback only, no key); **Try** starts an agent from
+  `config/chat-agents.json` in this program's own folder, only for the handshake, with no terminal, reports, repository or
+  conversation, and ends its tree (`chat_page::try_agent`), on the person's press only: **agents and tests never press it**.
 - **Their code and What did an update change? read, except one press** (owner's choice of 19 Nov 2026, "Read and compare, on your
   press"). **Decompile runs only on the owner's press, only for an assembly the kit named in this run of the program, and only
   while the manifest calls it `runs`**; it writes only into the kit's cache. Other authors' code is shown, never copied into a

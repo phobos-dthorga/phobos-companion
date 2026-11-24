@@ -184,6 +184,13 @@ async fn setup_set_aside(app: tauri::AppHandle, key: String, aside: bool) -> Res
     blocking(move || setup_page::set_aside(&data, &key, aside)).await
 }
 
+/// Tries an agent for a moment on the person's press (0.90.0): starts it, shakes hands, ends it.
+#[tauri::command]
+async fn chat_try(app: tauri::AppHandle, agent: String) -> Result<chat_page::Tried, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || chat_page::try_agent(&data, &agent)).await
+}
+
 /// Writes the chosen starter files into one listed repository, on the person's press after they saw each (0.89.0).
 #[tauri::command]
 async fn setup_write_starters(
@@ -1708,6 +1715,7 @@ pub fn run() {
             setup_set_aside,
             setup_open_page,
             setup_write_starters,
+            chat_try,
             cleanup_list,
             cleanup_apply,
             mod_list_check,

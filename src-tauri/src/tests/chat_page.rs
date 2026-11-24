@@ -72,3 +72,20 @@ fn without_an_agent_running_every_request_is_refused_in_words() {
     assert!(answer_command("c1", "always").is_err());
     assert!(allow_for_chat("p1").is_err());
 }
+
+#[test]
+fn try_it_reads_the_agent_s_name_version_and_ways_to_sign_in_from_its_handshake() {
+    let answer = json!({
+        "protocolVersion": 1,
+        "agentInfo": {"name": "claude-agent-acp", "title": "Claude Agent", "version": "0.9.1"},
+        "authMethods": [{"id": "claude-login", "name": "Log in with Claude"}, {"id": "api-key"}],
+    });
+    let tried = tried_from("Claude (Claude Agent)", &answer);
+    assert_eq!(tried.said_name.as_deref(), Some("Claude Agent"));
+    assert_eq!(tried.version.as_deref(), Some("0.9.1"));
+    assert_eq!(tried.sign_in, vec!["Log in with Claude".to_owned(), "api-key".to_owned()]);
+    // An agent that says nothing of itself is named as the list names it.
+    let quiet = tried_from("Goose", &json!({"protocolVersion": 1}));
+    assert_eq!(quiet, Tried { agent: "Goose".to_owned(), said_name: None, version: None, sign_in: vec![] });
+    assert_eq!(serde_json::to_value(&quiet).unwrap()["signIn"], json!([]));
+}

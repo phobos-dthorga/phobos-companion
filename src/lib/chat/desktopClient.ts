@@ -6,6 +6,7 @@ import type {
   ChatStarted,
   ChatStatus,
   ChatStatusReading,
+  ChatTried,
   CommandAnswer,
   CommandsMode,
 } from "./types";
@@ -27,6 +28,17 @@ export async function chatSwitch(on: boolean): Promise<Status> {
 
 export async function chatChoose(agent: string): Promise<Status> {
   return ask<ChatStatus, Status>("chat_choose", { agent }, ready);
+}
+
+/** Tries an agent for a moment, on the person's press (0.90.0): the host starts it, shakes hands and ends it. */
+export async function chatTry(
+  agent: string,
+): Promise<{ state: "ready"; tried: ChatTried } | Failed> {
+  return ask<ChatTried, { state: "ready"; tried: ChatTried } | Failed>(
+    "chat_try",
+    { agent },
+    (tried) => ({ state: "ready", tried }),
+  );
 }
 
 /** Keeps how the agent's commands are handled (0.84.0). */

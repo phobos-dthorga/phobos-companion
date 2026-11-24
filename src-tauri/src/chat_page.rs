@@ -31,6 +31,8 @@ const FILE: &str = "chat.json";
 const VERSION: u64 = 1;
 /// How long an agent may take to start and open a conversation.
 const START: Duration = Duration::from_secs(120);
+/// How long Try it (0.90.0) waits for an agent to answer the handshake.
+const TRY: Duration = Duration::from_secs(60);
 /// How long one turn may run.
 const TURN: Duration = Duration::from_secs(60 * 60);
 const MAX_MESSAGE: usize = 20_000;
@@ -165,29 +167,18 @@ fn said_tail(said: &Arc<Mutex<String>>) -> String {
     if said.is_empty() { String::new() } else { format!(" It said: {said}") }
 }
 
-/// Starts the chosen agent in a repository of the game, and opens a conversation; ends any agent running first.
-pub fn start(data: &Path, game: &str, repository: &str, on_event: OnEvent) -> Result<Started, Failure> {
-    let Kept { on, chosen, commands: mode } = kept(data);
-    if !on {
-        return Err(Failure::refused("the Chat page is switched off in Settings → AI"));
-    }
-    let agent =
-        acp::agent(&chosen.ok_or_else(|| Failure::refused("no agent is chosen yet: choose one in Settings → AI"))?)?;
-    let program = acp::find_on_path(&agent.command).ok_or_else(|| {
-        Failure::refused(format!(
-            "{} is not on this computer (no {} on the search path). {}",
-            agent.name, agent.command, agent.get
-        ))
-    })?;
-    let found = games::named_repository(game, repository)?;
-    end()?;
-    let mut command = Command::new(&program);
-    command
-        .args(&agent.args)
-        .current_dir(&found.path)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+/// An agent's program, started: the process, its input and output, and the end of what it said on its errors.
+struct Spawned {
+    child: Child,
+    input: std::process::ChildStdin,
+    output: std::process::ChildStdout,
+    said: Arc<Mutex<String>>,
+}
+
+/// An agent's program started in a folder, its errors kept as it says them: the one way the Chat page and Try it start one.
+fn spawn(agent: &acp::Agent, program: &Path, cwd: &Path) -> Result<Spawned, Failure> {
+    let mut command = Command::new(program);
+    command.args(&agent.args).current_dir(cwd).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
     process::hide_console(&mut command);
     process::own_group(&mut command);
     let mut child =
@@ -212,6 +203,75 @@ pub fn start(data: &Path, game: &str, repository: &str, on_event: OnEvent) -> Re
             }
         }
     });
+    Ok(Spawned { child, input, output, said })
+}
+
+/// The program an agent's command names, found on the search path, or why it can't be started.
+fn program_of(agent: &acp::Agent) -> Result<std::path::PathBuf, Failure> {
+    acp::find_on_path(&agent.command).ok_or_else(|| {
+        Failure::refused(format!(
+            "{} is not on this computer (no {} on the search path). {}",
+            agent.name, agent.command, agent.get
+        ))
+    })
+}
+
+/// What Try it heard (0.90.0): the agent's own name and version, where it says them, and the ways it may ask you to sign in.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Tried {
+    pub agent: String,
+    pub said_name: Option<String>,
+    pub version: Option<String>,
+    pub sign_in: Vec<String>,
+}
+
+/// What an agent's answer to the handshake says about it.
+pub fn tried_from(agent: &str, answer: &Value) -> Tried {
+    let text =
+        |value: &Value| value.as_str().map(str::trim).filter(|s| !s.is_empty()).map(|s| s.chars().take(120).collect());
+    let info = &answer["agentInfo"];
+    Tried {
+        agent: agent.to_owned(),
+        said_name: text(&info["title"]).or_else(|| text(&info["name"])),
+        version: text(&info["version"]),
+        sign_in: answer["authMethods"]
+            .as_array()
+            .map(|methods| methods.iter().filter_map(|m| text(&m["name"]).or_else(|| text(&m["id"]))).take(6).collect())
+            .unwrap_or_default(),
+    }
+}
+
+/// Tries an agent on the person's press (0.90.0; the owner's choice by card, 25 Nov 2026: an AI helper with "a 'try it'
+/// button that you press"): starts it in this program's own folder, shakes hands, and ends it with everything it started. It
+/// opens no conversation and is given no repository, no terminal and no reports.
+pub fn try_agent(data: &Path, id: &str) -> Result<Tried, Failure> {
+    let agent = acp::agent(id)?;
+    let program = program_of(agent)?;
+    std::fs::create_dir_all(data).map_err(|e| Failure::refused(format!("{}: {e}", data.display())))?;
+    let Spawned { mut child, input, output, said } = spawn(agent, &program, data)?;
+    let quiet: OnEvent = Arc::new(|_| {});
+    let policy = Policy { mode: Mode::Refused, kit: commands::KitEffects::new() };
+    let client = Client::start_with(BufReader::new(output), input, data, quiet, policy);
+    let answer = client.initialize(env!("CARGO_PKG_VERSION"), TRY);
+    process::end_tree(&mut child);
+    answer
+        .map(|answer| tried_from(&agent.name, &answer))
+        .map_err(|problem| Failure::refused(format!("{} did not answer: {problem}.{}", agent.name, said_tail(&said))))
+}
+
+/// Starts the chosen agent in a repository of the game, and opens a conversation; ends any agent running first.
+pub fn start(data: &Path, game: &str, repository: &str, on_event: OnEvent) -> Result<Started, Failure> {
+    let Kept { on, chosen, commands: mode } = kept(data);
+    if !on {
+        return Err(Failure::refused("the Chat page is switched off in Settings → AI"));
+    }
+    let agent =
+        acp::agent(&chosen.ok_or_else(|| Failure::refused("no agent is chosen yet: choose one in Settings → AI"))?)?;
+    let program = program_of(agent)?;
+    let found = games::named_repository(game, repository)?;
+    end()?;
+    let Spawned { mut child, input, output, said } = spawn(agent, &program, &found.path)?;
     // What each of the kit's reports does, so a report that only reads is told from one that changes something; without the
     // manifest every kit command asks.
     let kit = if mode == Mode::Refused {

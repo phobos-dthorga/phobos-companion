@@ -24,6 +24,14 @@ export type ChatStatus = {
 /** The person's answer to a command the agent asked to run (0.84.0). */
 export type CommandAnswer = "run" | "no" | "for-chat";
 
+/** What Try it heard from an agent (0.90.0): its own name and version where it says them, and the ways it may ask to sign in. */
+export type ChatTried = {
+  agent: string;
+  saidName: string | null;
+  version: string | null;
+  signIn: string[];
+};
+
 export type ChatStatusReading =
   { state: "browser" } | { state: "ready"; status: ChatStatus } | Failed;
 

@@ -923,6 +923,23 @@ for (const [name, viewport] of [
       await expect(calls).toContainText(
         "The game's own code was read from Assembly-CSharp, as files.",
       );
+      // Drawn at the page's own size, never stretched to fill the viewer, and every word inside its picture (0.83.1): a wide
+      // viewer once drew the calls nearly twice as large, a long name spilling out of its box and off the picture's edge.
+      for (const svg of await calls.locator("figure svg").all()) {
+        const fits = await svg.evaluate((element) => {
+          const drawn = element.getBoundingClientRect();
+          const scale = drawn.width / Number(element.getAttribute("width"));
+          const outside = [...element.querySelectorAll("text")].filter(
+            (text) => {
+              const box = text.getBoundingClientRect();
+              return box.left < drawn.left - 1 || box.right > drawn.right + 1;
+            },
+          );
+          return { scale, outside: outside.map((text) => text.textContent) };
+        });
+        expect(fits.scale).toBeLessThanOrEqual(1.01);
+        expect(fits.outside).toEqual([]);
+      }
       await audit(page);
       // Before the commit: no new calls; after it: none gone.
       await calls.getByRole("button", { name: "Before", exact: true }).click();

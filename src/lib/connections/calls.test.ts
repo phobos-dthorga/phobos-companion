@@ -3,6 +3,8 @@ import {
   arrow,
   callRows,
   callsPicture,
+  estimate,
+  fitted,
   methodsFor,
   ringPicture,
   ringWords,
@@ -120,6 +122,42 @@ describe("one method's calls", () => {
     expect(callRows(added, "change")[0].movedFrom).toBeNull();
   });
 
+  it("is as wide as its method's name and its longest call, never a fixed width (0.83.1)", () => {
+    const rows = callRows(REPORT, "change");
+    const long =
+      "Seen.Note(string, Thing?, string?, string?, IReadOnlyList<KeyValuePair<string, string>>)";
+    const wide = callsPicture(
+      [{ ...rows[0], display: long }, ...rows.slice(1)],
+      {
+        label: "Changed(VehiclePawn, RemoteState, RemoteState)",
+        notes: ["in Assembly-CSharp", "", "", ""],
+      },
+    );
+    // The box holds its whole name, and every call fits inside the picture.
+    expect(wide.label).toBe("Changed(VehiclePawn, RemoteState, RemoteState)");
+    expect(wide.full).toBeNull();
+    expect(estimate(wide.label, 13, true)).toBeLessThanOrEqual(wide.box.width);
+    expect(wide.nameX + estimate(long, 13)).toBeLessThanOrEqual(wide.width);
+    expect(wide.rows[0].line.x2).toBeLessThan(wide.wordX);
+    expect(wide.wordX + estimate("kept", 12, true)).toBeLessThan(wide.nameX);
+    const narrow = callsPicture(rows, { label: "Check()" });
+    expect(narrow.width).toBeLessThan(wide.width);
+    expect(narrow.box.width).toBeLessThan(wide.box.width);
+  });
+
+  it("shortens a name too long for its box: parameters first, then with an ellipsis, the whole name kept", () => {
+    const name =
+      "AvailableReport(Thing, Pawn, RecipeDef, BillStack, IntVec3, Map, Faction, bool)";
+    const picture = callsPicture([], { label: name });
+    expect(picture.label).toBe("AvailableReport(…)");
+    expect(picture.full).toBe(name);
+    expect(fitted("A".repeat(80), 100, 13, true, estimate)).toMatch(/…$/);
+    expect(
+      estimate(fitted("A".repeat(80), 100, 13, true, estimate), 13, true),
+    ).toBeLessThanOrEqual(100);
+    expect(fitted("Short", 100, 13, true, estimate)).toBe("Short");
+  });
+
   it("draws a line from the method's box to every row, and grows with its rows", () => {
     const picture = callsPicture(callRows(REPORT, "change"));
     expect(picture.rows).toHaveLength(4);
@@ -148,6 +186,33 @@ describe("a ring of calls", () => {
     const back = picture.arrows[2];
     const first = picture.steps[0];
     expect(Math.hypot(back.x2 - first.x, back.y2 - first.y)).toBeCloseTo(13, 0);
+  });
+
+  it("is widened until every step's name fits, and keeps its loop in the middle (0.83.1)", () => {
+    const picture = ringPicture(ring, new Set(), { gameWord: "the game's" });
+    expect(picture.cx).toBe(picture.width / 2);
+    for (const step of picture.steps) {
+      const wide = estimate(step.label, 13);
+      const left =
+        step.anchor === "start"
+          ? step.labelX
+          : step.anchor === "end"
+            ? step.labelX - wide
+            : step.labelX - wide / 2;
+      expect(left).toBeGreaterThanOrEqual(0);
+      expect(left + wide).toBeLessThanOrEqual(picture.width);
+    }
+    expect(picture.steps[2].label).toBe(
+      "RecipeWorker.AvailableReport (the game's)",
+    );
+    const longer = ringPicture(
+      [
+        ...ring.slice(0, 2),
+        { ...ring[2], display: `${ring[2].display}WithAVeryLongName` },
+      ],
+      new Set(),
+    );
+    expect(longer.width).toBeGreaterThan(ringPicture(ring, new Set()).width);
   });
 
   it("loops a ring of one step back into itself", () => {

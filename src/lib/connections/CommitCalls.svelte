@@ -8,11 +8,13 @@
   import {
     callRows,
     callsPicture,
+    estimate,
     methodsFor,
     ringPicture,
     ringWords,
     type CallRow,
     type CallsView,
+    type Measure,
   } from "./calls";
   import { askCalls } from "./desktopClient";
   import type { Calls, RingStep } from "./types";
@@ -90,6 +92,38 @@
           : { state: "refused", reason: asked.answer.refusal ?? "" };
   }
 
+  /**
+   * Text widths measured with the page's own font (0.83.1), so each picture is sized to what it holds; a rough estimate where the
+   * window cannot measure. A few pixels over, so a name never touches an edge.
+   */
+  const measure: Measure = (() => {
+    const context =
+      typeof document === "undefined"
+        ? null
+        : document.createElement("canvas").getContext("2d");
+    if (!context) return estimate;
+    const family = getComputedStyle(document.body).fontFamily || "sans-serif";
+    return (text, size, bold = false) => {
+      context.font = `${bold ? 600 : 400} ${size}px ${family}`;
+      return context.measureText(text).width + 4;
+    };
+  })();
+  const STATE_TEXT = $derived(
+    (["gone", "new", "kept"] as const).map((state) => t(STATE_WORDS[state])),
+  );
+
+  /** A row's second line: where the call goes, and how. */
+  function rowNote(row: CallRow): string {
+    return [
+      row.outside ? t("calls-outside", { assembly: row.assembly ?? "" }) : "",
+      row.viaBase ? t("calls-via-base") : "",
+      row.movedTo ? t("calls-moved-to", { name: row.movedTo }) : "",
+      row.movedFrom ? t("calls-moved-from", { name: row.movedFrom }) : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
   function rowWords(row: CallRow): string {
     const parts = [t(STATE_WORDS[row.state]), row.display];
     if (row.outside)
@@ -126,13 +160,18 @@
     {/if}
     {#each [["cut", calls.rings.cut], ["made", calls.rings.made]] as [kind, rings] (kind)}
       {#each rings as ring, index (`${kind}-${index}`)}
-        {@const picture = ringPicture(ring as RingStep[], changedKeys)}
+        {@const picture = ringPicture(ring as RingStep[], changedKeys, {
+          gameWord: t("calls-game"),
+          measure,
+        })}
         {@const caption = ringCaption(
           kind as "made" | "cut",
           ring as RingStep[],
         )}
         <figure class="ring {kind}">
           <svg
+            width={picture.width}
+            height={picture.height}
             viewBox={`0 0 ${picture.width} ${picture.height}`}
             role="img"
             aria-label={caption}
@@ -159,22 +198,12 @@
               />
               <text
                 class="step-label"
-                x={step.anchor === "start"
-                  ? step.x + 16
-                  : step.anchor === "end"
-                    ? step.x - 16
-                    : step.x}
+                x={step.labelX}
                 y={step.labelY}
-                text-anchor={step.anchor}
-                >{step.display}{step.outside
-                  ? ` (${t("calls-game")})`
-                  : ""}</text
+                text-anchor={step.anchor}>{step.label}</text
               >
             {/each}
-            <text
-              class="ring-word"
-              x={picture.width / 2}
-              y={picture.height / 2 + 5}
+            <text class="ring-word" x={picture.cx} y={picture.cy + 5}
               >{t(RING_WORDS[kind as "cut" | "made"].word)}</text
             >
           </svg>
@@ -209,7 +238,12 @@
       {/if}
       {#each shown as method (method.key)}
         {@const rows = callRows(method, view)}
-        {@const picture = callsPicture(rows)}
+        {@const picture = callsPicture(rows, {
+          label: method.display.split(".").pop() ?? method.display,
+          notes: rows.map(rowNote),
+          words: STATE_TEXT,
+          measure,
+        })}
         <figure class="method">
           <figcaption>
             <strong>{method.display}</strong>
@@ -228,8 +262,9 @@
               aria-label={t("calls-method-label", { name: method.display })}
             >
               <svg
+                width={picture.width}
+                height={picture.height}
                 viewBox={`0 0 ${picture.width} ${picture.height}`}
-                style={`min-width: ${picture.width * 0.75}px`}
               >
                 <rect
                   class="box"
@@ -243,7 +278,8 @@
                   class="box-label"
                   x={picture.box.x + picture.box.width / 2}
                   y={picture.box.y + picture.box.height / 2 + 5}
-                  >{method.display.split(".").pop()}</text
+                  >{#if picture.full}<title>{picture.full}</title
+                    >{/if}{picture.label}</text
                 >
                 {#each picture.rows as row (row.key + row.state)}
                   <g class="call {row.state}">
@@ -255,7 +291,7 @@
                       y2={row.line.y2}
                     />
                     <polygon class="call-head" points={row.line.head} />
-                    <text class="call-word" x="336" y={row.y + 5}
+                    <text class="call-word" x={picture.wordX} y={row.y + 5}
                       >{t(STATE_WORDS[row.state])}</text
                     >
                     {#if row.node && !row.outside && row.state !== "gone"}
@@ -272,30 +308,19 @@
                           }
                         }}
                       >
-                        <text class="call-name link" x="392" y={row.y + 5}
-                          >{row.display}</text
+                        <text
+                          class="call-name link"
+                          x={picture.nameX}
+                          y={row.y + 5}>{row.display}</text
                         >
                       </g>
                     {:else}
-                      <text class="call-name" x="392" y={row.y + 5}
+                      <text class="call-name" x={picture.nameX} y={row.y + 5}
                         >{row.display}</text
                       >
                     {/if}
-                    <text class="call-note" x="392" y={row.y + 18}
-                      >{[
-                        row.outside
-                          ? t("calls-outside", { assembly: row.assembly ?? "" })
-                          : "",
-                        row.viaBase ? t("calls-via-base") : "",
-                        row.movedTo
-                          ? t("calls-moved-to", { name: row.movedTo })
-                          : "",
-                        row.movedFrom
-                          ? t("calls-moved-from", { name: row.movedFrom })
-                          : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}</text
+                    <text class="call-note" x={picture.nameX} y={row.y + 18}
+                      >{row.note}</text
                     >
                   </g>
                 {/each}
@@ -353,17 +378,18 @@
     min-width: 0;
   }
 
+  /* Drawn at the page's own size, never stretched to fill the window (0.83.1): a method's calls scroll sideways when wide; a
+     ring, which has nothing to press, shrinks to fit a narrow window instead. */
   figure svg {
     display: block;
-    width: 100%;
-    height: auto;
     background: var(--colour-surface-raised);
     border: 1px solid var(--colour-line);
     border-radius: 4px;
   }
 
   .ring svg {
-    max-width: 640px;
+    max-width: 100%;
+    height: auto;
   }
 
   .scroll {

@@ -21,6 +21,18 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.83.1] - 2026-11-25
+
+### Fixed
+
+- **A commit's calls and rings are drawn at the page's own size, each name inside its picture** (the owner's report of
+  25 Nov 2026, with a screenshot). On a wide window the calls under How it connects were stretched to fill it, nearly twice as
+  large, a long method name spilled out of both sides of its box and long calls ran off the picture's edge. Each picture is now
+  sized from its text, measured in the page's own font: the box as wide as the method's name (a very long one drops its
+  parameters, the whole name shown on hover and above), the picture as wide as its longest call, scrolling sideways when wider
+  than the viewer. A ring is widened until every step's name fits, and only ever shrinks, on a narrow window. Fit and the zoom
+  buttons belong to the picture above, not these. **Not tested on screen.**
+
 ## [0.83.0] - 2026-11-24
 
 ### Added

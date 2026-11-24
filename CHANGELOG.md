@@ -21,6 +21,18 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.87.0] - 2026-11-25
+
+### Added
+
+- **Settings has a Setup tab: every program the pages use, whether it is here, and a way to fetch a missing one** (the owner,
+  25 Nov 2026, and their choices by card). git, the .NET 10 runtime and SDK, ilspycmd, Steam and each listed game's own programs,
+  missing ones first, each with what uses it. **Fetch** shows the command whole (winget for git, .NET and Steam; .NET for
+  ilspycmd) and runs it only on **Run it**, showing what it printed; a program is believed only once it is found, and Windows'
+  search path is read again so it is found without a restart. **I don't need it** sets one aside. Home shows a line while an
+  everyday page's program is missing, and the "git isn't installed" line has a button to fetch it. About's "Which other
+  programs…" now opens this tab. Tool kit 1.118.0 says how each is fetched. **Not tested on screen; no fetch has been run.**
+
 ## [0.86.1] - 2026-11-25
 
 ### Fixed

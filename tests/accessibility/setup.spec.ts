@@ -1,0 +1,180 @@
+import AxeBuilder from "@axe-core/playwright";
+import { expect, test, type Page } from "@playwright/test";
+import { healthyKit, mockHost, sampleHome } from "./host";
+
+/** Invented rows (0.87.0): Steam missing, ilspycmd waiting for the SDK, a game's own program with no command, git here. */
+function row(key: string, more: Record<string, unknown> = {}) {
+  return {
+    key,
+    name: key,
+    game: null,
+    neededBy: "Some pages",
+    how: "not on the PATH",
+    state: "missing",
+    everyday: false,
+    page: true,
+    command: null,
+    fetcher: null,
+    fetcherHere: false,
+    waitsFor: [],
+    ...more,
+  };
+}
+
+const rows = [
+  row("steam", {
+    name: "Steam",
+    everyday: true,
+    command: "winget install --id Valve.Steam --exact",
+    fetcher: "winget",
+    fetcherHere: true,
+  }),
+  row("ilspycmd", {
+    name: "ILSpy's command line (ilspycmd)",
+    command: "dotnet tool install --global ilspycmd",
+    fetcher: "dotnet",
+    waitsFor: [".NET 10 SDK"],
+  }),
+  row("todds", { name: "RimSort's texture encoder", game: "first" }),
+  row("git", { name: "git", state: "here", how: "on the PATH" }),
+];
+
+const setup = (fetching: unknown = null) => ({
+  result: { system: "windows", rows, games: 2, fetching },
+});
+
+const running = {
+  key: "steam",
+  name: "Steam",
+  command: "winget install --id Valve.Steam --exact",
+  output: "Found Steam [Valve.Steam]",
+  ended: null,
+};
+
+async function openSetup(page: Page, answers: Record<string, unknown> = {}) {
+  await mockHost(page, {
+    home_status: { result: sampleHome() },
+    kit_status: healthyKit,
+    setup_status: setup(),
+    ...answers,
+  });
+  await page.goto("/");
+}
+
+test.describe("Setup", () => {
+  test("Home names an everyday program that is missing, and opens Setup (0.87.0)", async ({
+    page,
+  }) => {
+    await openSetup(page);
+    const line = page.getByRole("region", {
+      name: "A program the pages use isn't here",
+    });
+    await expect(line).toContainText("Missing: Steam");
+    await line.getByRole("button", { name: "Open Setup" }).click();
+    await expect(
+      page.getByRole("tab", { name: "Setup", selected: true }),
+    ).toBeVisible();
+  });
+
+  test("the tab lists what is missing first, says what each needs, and shows a command before it runs (0.87.0)", async ({
+    page,
+  }) => {
+    await openSetup(page, {
+      setup_fetch: { result: running },
+      setup_fetching: {
+        result: { ...running, ended: { exitCode: 0, signal: null } },
+      },
+    });
+    await page.keyboard.press("9");
+    await page.getByRole("tab", { name: "Setup" }).click();
+    const panel = page.getByRole("region", { name: "What the pages need" });
+    await expect(panel).toContainText("3 not here");
+    await expect(panel).toContainText("Here (1)");
+    // ilspycmd waits for the SDK; the game's own program has no command, only its page.
+    await expect(panel).toContainText("Needs .NET 10 SDK first");
+    await expect(panel).toContainText("use its download page");
+    await expect(
+      panel.getByRole("button", { name: /Fetch ILSpy/ }),
+    ).toHaveCount(0);
+
+    // A press shows the command whole; nothing runs until Run it.
+    await panel.getByRole("button", { name: "Fetch Steam…" }).click();
+    const confirm = panel.getByRole("group", {
+      name: "This runs on your computer",
+    });
+    await expect(confirm).toContainText(
+      "winget install --id Valve.Steam --exact",
+    );
+    await expect(confirm).toContainText("administrator's yes");
+    await expect(
+      (
+        await new AxeBuilder({ page }).include(".setup").analyze()
+      ).violations.map((v) => v.id),
+    ).toEqual([]);
+    await confirm.getByRole("button", { name: "Run it" }).click();
+
+    // It runs, ends, and is believed only once the tools find it: still missing here, so the page says to look again.
+    const fetching = panel.getByRole("group", { name: "Fetching Steam" });
+    await expect(fetching).toContainText("isn't found yet");
+    await expect(fetching.getByRole("button", { name: "Stop" })).toHaveCount(0);
+  });
+
+  test("a refused fetch says why, and a failed one shows what it printed (0.87.0)", async ({
+    page,
+  }) => {
+    await openSetup(page, {
+      setup_status: setup({
+        ...running,
+        output: "Installer failed with exit code: 1603",
+        ended: { exitCode: 1603, signal: null },
+      }),
+      setup_fetch: {
+        failure: {
+          code: "refused",
+          detail: "Steam is already on this computer",
+        },
+      },
+    });
+    await page.keyboard.press("9");
+    await page.getByRole("tab", { name: "Setup" }).click();
+    const panel = page.getByRole("region", { name: "What the pages need" });
+    const fetching = panel.getByRole("group", { name: "Fetching Steam" });
+    await expect(fetching).toContainText("ended with code 1603");
+    await expect(fetching.locator(".output")).toBeVisible();
+    await expect(fetching.locator(".output")).toContainText("1603");
+
+    await panel.getByRole("button", { name: "Fetch Steam…" }).click();
+    await panel.getByRole("button", { name: "Run it" }).click();
+    await expect(panel).toContainText(
+      "Not run: Steam is already on this computer",
+    );
+  });
+
+  test("a program set aside moves to its own group, and Home no longer names it (0.87.0)", async ({
+    page,
+  }) => {
+    const aside = rows.map((r) =>
+      r.key === "steam" ? { ...r, state: "set-aside" } : r,
+    );
+    await openSetup(page, {
+      setup_set_aside: {
+        result: { system: "windows", rows: aside, games: 2, fetching: null },
+      },
+    });
+    await page.keyboard.press("9");
+    await page.getByRole("tab", { name: "Setup" }).click();
+    const panel = page.getByRole("region", { name: "What the pages need" });
+    const steam = panel.locator("li", { hasText: "Steam" });
+    await steam.getByRole("button", { name: "I don't need it" }).click();
+    await expect(panel).toContainText(
+      "Set aside: you said you don't need these (1)",
+    );
+    await expect(
+      panel.getByRole("button", { name: "I need it after all" }),
+    ).toBeVisible();
+    await page.keyboard.press("1");
+    await expect(
+      page.getByRole("region", { name: "A program the pages use isn't here" }),
+    ).toHaveCount(0);
+  });
+});

@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
-  import { go, here } from "../navigation/navigation.svelte";
+  import { go, goPage, here } from "../navigation/navigation.svelte";
   import { place } from "../navigation/place";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import Placeholder from "../shell/Placeholder.svelte";
@@ -187,13 +187,8 @@
           <br /><button
             type="button"
             class="action programs"
-            onclick={() =>
-              go(
-                place("reports", here().game, {
-                  command: "programs",
-                  report: "status",
-                }),
-              )}>{t("about-programs")}</button
+            onclick={() => goPage("settings", { panel: "setup" })}
+            >{t("about-programs")}</button
           >
         {:else if kit.state === "failed"}
           {t("about-kit-unreadable")}

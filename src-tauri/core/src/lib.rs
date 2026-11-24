@@ -26,6 +26,7 @@ pub mod online;
 pub mod prefs;
 pub mod process;
 pub mod serve;
+pub mod setup;
 pub mod terminals;
 pub mod themes;
 pub mod time;

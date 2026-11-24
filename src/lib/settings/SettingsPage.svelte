@@ -9,6 +9,7 @@
   import Placeholder from "../shell/Placeholder.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import Tabs from "../shell/Tabs.svelte";
+  import SetupPanel from "../setup/SetupPanel.svelte";
   import { tabsOf } from "../shell/tabs";
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
@@ -268,6 +269,8 @@
           void load();
         }}
       />
+    {:else if tab === "setup"}
+      <SetupPanel />
     {:else if tab === "online"}
       <OnlinePanel />
     {:else if tab === "backups"}

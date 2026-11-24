@@ -135,7 +135,7 @@ test.describe("Keyboard shortcuts", () => {
     await expect(selected).toHaveAccessibleName(/^Look and keys/);
     await page.keyboard.press("'");
     await expect(selected).toHaveAccessibleName(/^Games/);
-    await page.keyboard.press("Alt+5");
+    await page.keyboard.press("Alt+6");
     await expect(selected).toHaveAccessibleName(/^Backups and space/);
     await page.keyboard.press(";");
     await expect(selected).toHaveAccessibleName(/^Going online/);

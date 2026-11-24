@@ -61,7 +61,7 @@ async function audit(page: Page) {
 }
 
 test.describe("About", () => {
-  test("leads to which other programs the tools use (0.38.0)", async ({
+  test("leads to which other programs the tools use, on Settings' Setup tab (0.87.0)", async ({
     page,
   }) => {
     await open(page, false);
@@ -75,8 +75,11 @@ test.describe("About", () => {
     await expect(
       page
         .getByRole("navigation", { name: "Pages" })
-        .getByRole("button", { name: "Reports", exact: true }),
+        .getByRole("button", { name: "Settings", exact: true }),
     ).toHaveAttribute("aria-current", "page");
+    await expect(
+      page.getByRole("tab", { name: "Setup", selected: true }),
+    ).toBeVisible();
   });
 
   test("the version is in the status bar on every page, and opens About", async ({

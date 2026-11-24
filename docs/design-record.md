@@ -775,6 +775,36 @@ ours and through the game's methods a change hands on to. Checked on phobos-rimw
 cut, `AvailableOnNow → AvailableReport → the game's RecipeWorker.AvailableReport`, and 6 calls moved into `Check`. **Not tested on
 screen.**
 
+## Setup: what the pages need (built 25 Nov 2026, 0.87.0)
+
+**The owner asked** (25 Nov 2026): "what can we do to help the user in setting anything up that might be necessary for them? Via
+Companion, of course."
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See in one place every program the pages use beyond the Companion, whether each is here, and fetch a missing one with a press |
+| What does it stop them doing? | Finding out a program was missing from a page that failed in a tool's words, then hunting for where to get it |
+| How does it change the way they work? | Setting up becomes a list to work down, once; Home says when an everyday page is missing something |
+| What outside it notices? | Windows: a fetch installs a program for the whole computer or the person, through winget or .NET, and Windows may ask for an administrator's yes |
+
+**Owner's choices (by card, 25 Nov 2026):** build all four kinds of help (this **setup check** first; "say it on the page",
+**starter files for a repository** and an **AI helper** follow); a missing program's command is **shown, and run on a press**;
+the check is **a Settings tab with a line on Home**; a clean-PC trial in Windows Sandbox **later**.
+
+**Agent choices, owner to revise:** the commands live in the tool kit's program rows (kit 1.118.0), so every game and the
+command line share them; **winget** for git, .NET 10 and Steam, **`dotnet tool install`** for ilspycmd, page only for the rest;
+winget told to accept its catalogue's agreements, since the person saw the command and pressed (it cannot ask on a console nobody
+sees); the .NET SDK split from the runtime into a row of its own; **I don't need it** sets a row aside and Home stops naming it;
+Home names only everyday programs (git and Steam), and git keeps its own line on every page; after a fetch, the search path is
+read again from Windows so a new program is found without a restart; one fetch at a time; output kept to its last 6,000
+characters.
+
+**Risk, graded by the agent: low.** A fetch installs a program the person named, from the system's own catalogue, after they read
+the command and pressed Run it; Windows asks its own yes where it needs one. Nothing is removed or changed beyond that install, and
+it never runs by itself, so it has no setting to switch it off. **Limits:** commands are known for Windows only (and ilspycmd on
+every system); a Linux or macOS row gives the page alone until a `fetch` entry for that system is added to the kit's row; whether
+an installed program works is not checked, only that it is found. **Not tested on screen, and no fetch has been run.**
+
 ## System activity in the status bar (built 25 Nov 2026, 0.86.0)
 
 **The owner asked** (25 Nov 2026): "in Companion somewhere on all windows, I want there to be shown a little display of your

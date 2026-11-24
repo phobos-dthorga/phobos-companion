@@ -29,6 +29,7 @@
   import { agents } from "../agents/state.svelte";
   import GateLights from "../online/GateLights.svelte";
   import UpdateReady from "../updates/UpdateReady.svelte";
+  import SetupNeeded from "../setup/SetupNeeded.svelte";
   import TheirCodeChanged from "../online/TheirCodeChanged.svelte";
   import GamesPanel from "./GamesPanel.svelte";
 
@@ -313,6 +314,7 @@
 {/if}
 
 <UpdateReady />
+<SetupNeeded />
 <GateLights game={game.id} />
 <TheirCodeChanged game={game.id} />
 

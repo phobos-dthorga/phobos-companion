@@ -45,6 +45,7 @@ mod safe_copies;
 mod screen_notes;
 mod settings_ledger;
 mod settings_page;
+mod setup_page;
 mod shortcuts;
 mod tests_page;
 mod themes_page;
@@ -141,6 +142,52 @@ fn updates_check(app: tauri::AppHandle) -> updates::Status {
 #[tauri::command]
 async fn updates_install() -> Result<(), Failure> {
     blocking(|| updates::install_now(before_exit).map_err(Failure::refused)).await
+}
+
+/// How the setup stands (0.87.0): what the pages use beyond the Companion, and whether each is here. Only reads.
+#[tauri::command]
+async fn setup_status(app: tauri::AppHandle) -> Result<setup_page::Setup, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || setup_page::read(&data)).await
+}
+
+/// Looks again on the person's press: Windows' search path is read afresh and an ended fetch is forgotten.
+#[tauri::command]
+async fn setup_look_again(app: tauri::AppHandle) -> Result<setup_page::Setup, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || setup_page::look_again(&data)).await
+}
+
+/// The fetch that is running or has just ended, if any; cheap, for the page to ask each second while one runs.
+#[tauri::command]
+fn setup_fetching() -> Option<setup_page::Fetching> {
+    setup_page::fetching()
+}
+
+/// Runs the command that fetches a missing program, on the person's press: the window names the program, never a command.
+#[tauri::command]
+async fn setup_fetch(app: tauri::AppHandle, key: String) -> Result<setup_page::Fetching, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || setup_page::fetch(&data, &key)).await
+}
+
+/// Stops the fetch that is running.
+#[tauri::command]
+fn setup_stop() {
+    setup_page::stop();
+}
+
+/// Keeps the person's word that they do or don't need a program the Setup tab lists.
+#[tauri::command]
+async fn setup_set_aside(app: tauri::AppHandle, key: String, aside: bool) -> Result<setup_page::Setup, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || setup_page::set_aside(&data, &key, aside)).await
+}
+
+/// Opens the page a program is got from by hand, in the browser: the address the tools name for it.
+#[tauri::command]
+async fn setup_open_page(key: String) -> Result<(), Failure> {
+    blocking(move || setup_page::open_page(&key)).await
 }
 
 /// This program's own data folder, where the owner's test verdicts are kept.
@@ -1637,6 +1684,13 @@ pub fn run() {
             updates_status,
             updates_check,
             updates_install,
+            setup_status,
+            setup_look_again,
+            setup_fetching,
+            setup_fetch,
+            setup_stop,
+            setup_set_aside,
+            setup_open_page,
             cleanup_list,
             cleanup_apply,
             mod_list_check,

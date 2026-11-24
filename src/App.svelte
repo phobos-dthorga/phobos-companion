@@ -313,7 +313,15 @@
 
     <main class="canvas">
       {#if home.state === "ready" && home.home.git_found === false}
-        <p class="no-git" role="status">{t("home-no-git")}</p>
+        <p class="no-git" role="status">
+          {t("home-no-git")}
+          <button
+            type="button"
+            class="action"
+            onclick={() => goPage("settings", { panel: "setup" })}
+            >{t("home-no-git-setup")}</button
+          >
+        </p>
       {/if}
       {#if selected && !pageServes(selected.kind, page)}
         <NotForTools game={selected} {page} />

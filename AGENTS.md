@@ -174,6 +174,13 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   Nov 2026): one new entry in `.local/games.json`, after the window showed it whole, with every field checked again, the list's
   order kept and the list as it was kept beside it; nothing is written when a check fails. **It never changes or removes an entry
   already there.**
+- **Settings → Setup fetches a missing program only on the person's press, after showing its command whole** (0.87.0; the
+  owner's choices by card, 25 Nov 2026: "Show command, run on press", in a Settings tab with a line on Home). The rows and their
+  commands are the tool kit's (`programs status`, which only looks); **the window names a program, never a command**, and the host
+  takes the command from a fresh reading and holds it to `companion_core::setup::command_of`: the kit's own words for that
+  program, still missing, starting only `winget` or `dotnet` (`FETCHERS`), with what it needs first already here. One runs at a
+  time, as its own program with no shell, ended by Stop. It installs programs for the person, so **agents and tests never press
+  it on the owner's computer**: tests stand in the host. **A new program to fetch is a row in the kit, never a command here.**
 - **Their code and What did an update change? read, except one press** (owner's choice of 19 Nov 2026, "Read and compare, on your
   press"). **Decompile runs only on the owner's press, only for an assembly the kit named in this run of the program, and only
   while the manifest calls it `runs`**; it writes only into the kit's cache. Other authors' code is shown, never copied into a
@@ -239,7 +246,9 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   - **First steps** (0.35.0): a new, empty games list where there is none, naming the projects folder the owner chose; it
     refuses when a list is already there. Adding a game to it is the Settings page's, above;
   - **The daily run of safe copies** (Settings; the owner's word of 22 Nov 2026): the kit's `safe-copies schedule`, which sets or
-    removes the owner's one Windows scheduled task, "D'thorga Safe Copies", and no other.
+    removes the owner's one Windows scheduled task, "D'thorga Safe Copies", and no other;
+  - **Set aside** on Settings → Setup (0.87.0): the keys of the programs the person said they don't need, in `setup.json` in this
+    program's folder.
 
   **The Game files page only reads**; Show in folder opens the file manager on a file inside a folder the last report named, and
   nothing else.

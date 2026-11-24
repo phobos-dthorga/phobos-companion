@@ -4,10 +4,11 @@ import {
   homeNeeds,
   inGroup,
   offer,
+  offered,
   outcome,
   pageNeeds,
 } from "./presentation";
-import type { Fetching, SetupRow } from "./types";
+import type { Fetching, Readiness, SetupRow } from "./types";
 
 function row(key: string, more: Partial<SetupRow> = {}): SetupRow {
   return {
@@ -85,6 +86,34 @@ describe("setup", () => {
       "aside",
     ]);
     expect(pageNeeds(rows, "mods", "first")).toEqual([]);
+  });
+
+  it("offers a repository the starter files it lacks, one for agents only while those show (0.89.0)", () => {
+    const starter = (id: string, present: boolean, forAgents = false) => ({
+      id,
+      path: id,
+      present,
+      chosen: true,
+      forAgents,
+      content: "x",
+    });
+    const repository: Readiness = {
+      game: "first",
+      gameName: "First",
+      name: "mods",
+      found: true,
+      git: true,
+      starters: [
+        starter("changelog", true),
+        starter("open-work", false),
+        starter("decisions", false, true),
+      ],
+    };
+    expect(offered(repository, false).map((s) => s.id)).toEqual(["open-work"]);
+    expect(offered(repository, true).map((s) => s.id)).toEqual([
+      "open-work",
+      "decisions",
+    ]);
   });
 
   it("offers a run only when the command can run now", () => {

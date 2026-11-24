@@ -27,6 +27,7 @@ pub mod prefs;
 pub mod process;
 pub mod serve;
 pub mod setup;
+pub mod starters;
 pub mod terminals;
 pub mod themes;
 pub mod time;

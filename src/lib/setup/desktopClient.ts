@@ -49,6 +49,22 @@ export async function setAside(key: string, aside: boolean): Promise<Answer> {
   return ask<Setup, Answer>("setup_set_aside", { key, aside }, ready);
 }
 
+/** Writes the ticked starter files into one listed repository, after the person saw each whole (0.89.0). */
+export async function writeStarters(
+  game: string,
+  repository: string,
+  starters: string[],
+): Promise<{ state: "ready"; setup: Setup; refused: string[] } | Failed> {
+  return ask<
+    { setup: Setup; refused: string[] },
+    { state: "ready"; setup: Setup; refused: string[] } | Failed
+  >("setup_write_starters", { game, repository, starters }, (answer) => ({
+    state: "ready",
+    setup: answer.setup,
+    refused: answer.refused,
+  }));
+}
+
 /** Opens the page a program is got from by hand, in the browser. */
 export async function openPage(
   key: string,

@@ -3,6 +3,7 @@
   import { t } from "../i18n/runtime";
   import { goPage } from "../navigation/navigation.svelte";
   import FailurePanel from "../shell/FailurePanel.svelte";
+  import RepositoriesPanel from "./RepositoriesPanel.svelte";
   import {
     fetchProgram,
     lookAgain,
@@ -311,6 +312,13 @@
     {/if}
   </div>
 </section>
+
+{#if reading.state === "ready"}
+  <RepositoriesPanel
+    repositories={reading.setup.repositories}
+    onchanged={(setup) => settle({ state: "ready", setup })}
+  />
+{/if}
 
 <style>
   .setup {

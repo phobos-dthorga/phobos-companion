@@ -2,8 +2,8 @@
 title: Make a repository ready for the Companion
 kind: task
 words: ready, set up, repository, changelog, config, opt in, empty, nothing to show, test list, installs
-go: settings?panel=games
-see: term-repository, term-changelog-entry, task-add-game
+go: settings?panel=repositories
+see: task-set-up, term-repository, term-changelog-entry, task-add-game
 ---
 **Most pages need only what a mod repository has anyway: git and a changelog.** A few read a small file the repository keeps to opt in. A page with nothing to read says so, with a button to this entry.
 
@@ -28,5 +28,14 @@ see: term-repository, term-changelog-entry, task-add-game
 - `config/decisions.json`, the questions sessions leave you, for the [Decisions page](page-decisions).
 
 Then add the repository to its game: **Settings** (the **9** key), on the **Games** tab.
+
+### Let the Companion start them
+**Settings → Setup**, under **Your repositories**, lists each repository on your games list, whether it is kept with git, and which
+of these files it has: a changelog, the open-work list and, while the features for AI agent sessions show, the decisions file.
+
+1. Press **Add starter files…** beside a repository.
+2. **Each file is shown whole.** Tick the ones you want: a changelog is ticked when it has none.
+3. Press **Write the ticked files**. Each is written only where nothing is there, never over a file.
+4. **The Companion commits nothing**: commit them with git when you're ready.
 
 Nothing else is asked of a repository, and **the Companion never writes into one**, except where a page says so and you press a button.

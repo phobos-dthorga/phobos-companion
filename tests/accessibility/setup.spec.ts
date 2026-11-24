@@ -48,8 +48,33 @@ const rows = [
   row("git", { name: "git", state: "here", how: "on the PATH" }),
 ];
 
+/** Invented (0.89.0): one repository with a changelog and nothing else, kept with git. */
+const starter = (id: string, path: string, present: boolean, more = {}) => ({
+  id,
+  path,
+  present,
+  chosen: false,
+  forAgents: false,
+  content: `# ${id}\n`,
+  ...more,
+});
+const repositories = [
+  {
+    game: "first",
+    gameName: "First Sample",
+    name: "first-mods",
+    found: true,
+    git: true,
+    starters: [
+      starter("changelog", "CHANGELOG.md", true, { chosen: true }),
+      starter("open-work", "docs/development/outstanding-work.md", false),
+      starter("decisions", "config/decisions.json", false, { forAgents: true }),
+    ],
+  },
+];
+
 const setup = (fetching: unknown = null) => ({
-  result: { system: "windows", rows, games: 2, fetching },
+  result: { system: "windows", rows, repositories, games: 2, fetching },
 });
 
 const running = {
@@ -190,6 +215,56 @@ test.describe("Setup", () => {
     );
   });
 
+  test("a repository is offered the starter files it lacks, each shown whole, written only on a press (0.89.0)", async ({
+    page,
+  }) => {
+    const written = repositories.map((r) => ({
+      ...r,
+      starters: r.starters.map((s) => ({ ...s, present: true })),
+    }));
+    await openSetup(page, {
+      setup_write_starters: {
+        result: {
+          setup: {
+            system: "windows",
+            rows,
+            repositories: written,
+            games: 2,
+            fetching: null,
+          },
+          refused: [],
+        },
+      },
+    });
+    await page.keyboard.press("9");
+    await page.getByRole("tab", { name: "Setup" }).click();
+    const panel = page.getByRole("region", { name: "Your repositories" });
+    await expect(panel).toContainText("first-mods");
+    await expect(panel).toContainText("Kept with git.");
+    await panel.getByRole("button", { name: "Add starter files…" }).click();
+    const confirm = panel.getByRole("group", {
+      name: "These would be written into first-mods",
+    });
+    await expect(confirm).toContainText("docs/development/outstanding-work.md");
+    await expect(confirm).toContainText("# open-work");
+    // Nothing is ticked by default here, so nothing can be written yet.
+    const write = confirm.getByRole("button", {
+      name: "Write the ticked files",
+    });
+    await expect(write).toBeDisabled();
+    await confirm
+      .getByRole("checkbox", { name: "docs/development/outstanding-work.md" })
+      .check();
+    await expect(
+      (
+        await new AxeBuilder({ page }).include(".repositories").analyze()
+      ).violations.map((v) => v.id),
+    ).toEqual([]);
+    await write.click();
+    await expect(panel).toContainText("Written into first-mods");
+    await expect(panel).toContainText("It has every file the pages read.");
+  });
+
   test("a program set aside moves to its own group, and Home no longer names it (0.87.0)", async ({
     page,
   }) => {
@@ -198,7 +273,13 @@ test.describe("Setup", () => {
     );
     await openSetup(page, {
       setup_set_aside: {
-        result: { system: "windows", rows: aside, games: 2, fetching: null },
+        result: {
+          system: "windows",
+          rows: aside,
+          repositories,
+          games: 2,
+          fetching: null,
+        },
       },
     });
     await page.keyboard.press("9");

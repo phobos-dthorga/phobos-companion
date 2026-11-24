@@ -1,4 +1,10 @@
-import type { Fetching, SetupRow, SetupState } from "./types";
+import type {
+  Fetching,
+  Readiness,
+  SetupRow,
+  SetupState,
+  StarterState,
+} from "./types";
 
 /** The order the Setup tab shows its groups in: what is missing first, then what is here, then what was set aside. */
 export const GROUPS: SetupState[] = ["missing", "here", "set-aside"];
@@ -35,6 +41,16 @@ export function pageNeeds(
       row.key !== "git" &&
       row.pages.includes(page) &&
       (row.game === null || row.game === game),
+  );
+}
+
+/** The starter files a repository is offered (0.89.0): those it lacks, and one for agent sessions only while those show. */
+export function offered(
+  repository: Readiness,
+  agentsShown: boolean,
+): StarterState[] {
+  return repository.starters.filter(
+    (starter) => !starter.present && (agentsShown || !starter.forAgents),
   );
 }
 

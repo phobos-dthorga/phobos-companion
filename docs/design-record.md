@@ -788,7 +788,7 @@ Companion, of course."
 | What outside it notices? | Windows: a fetch installs a program for the whole computer or the person, through winget or .NET, and Windows may ask for an administrator's yes |
 
 **Owner's choices (by card, 25 Nov 2026):** build all four kinds of help (this **setup check** first; **"say it on the page"**
-built in 0.88.0; **starter files for a repository** and an **AI helper** follow); a missing program's command is **shown, and run on a press**;
+built in 0.88.0; **starter files for a repository** built in 0.89.0; an **AI helper** follows); a missing program's command is **shown, and run on a press**;
 the check is **a Settings tab with a line on Home**; a clean-PC trial in Windows Sandbox **later**.
 
 **Agent choices, owner to revise:** the commands live in the tool kit's program rows (kit 1.118.0), so every game and the
@@ -799,7 +799,12 @@ Home names only everyday programs (git and Steam), and git keeps its own line on
 read again from Windows so a new program is found without a restart; one fetch at a time; output kept to its last 6,000
 characters. **Say it on the page** (0.88.0): which pages use which program is the Companion's own data
 (`config/setup-pages.json`), since pages are its own, not the kit's; the line shows for a program set aside too, since the page
-still can't work without it; it sits above the page's own content and never replaces a failure the page shows.
+still can't work without it; it sits above the page's own content and never replaces a failure the page shows. **Starter
+files** (0.89.0): three starters, as data in `config/repository-starters.json`: a changelog (ticked by default, offered where the
+repository has none up to three folders down), the open-work list and, for agent sessions, an empty decisions file. The files that
+need the person's own facts (`installs.json`'s install command, `test-evidence.json`'s test list, `settings.json`'s folders) are
+not offered: a starter would only be wrong. Nothing is committed; `git init` is not run for a repository without git, only said.
+**Risk: low**, since a starter is only ever a new file, shown first, and git shows it as new.
 
 **Risk, graded by the agent: low.** A fetch installs a program the person named, from the system's own catalogue, after they read
 the command and pressed Run it; Windows asks its own yes where it needs one. Nothing is removed or changed beyond that install, and

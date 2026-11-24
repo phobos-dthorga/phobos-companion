@@ -14,6 +14,7 @@ use companion_core::kit;
 use companion_core::prefs;
 use companion_core::process;
 use companion_core::setup::{self, Row};
+use companion_core::starters::{self, Starter};
 use companion_core::terminals::{self, Exit, Terminal};
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -49,6 +50,30 @@ pub struct Fetching {
     pub ended: Option<Exit>,
 }
 
+/// One starter file as a repository stands with it (0.89.0).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StarterState {
+    #[serde(flatten)]
+    pub starter: Starter,
+    /// The repository has its kind of file already.
+    pub present: bool,
+}
+
+/// A repository on the games list, and which starter files it has (0.89.0). Its folder stays with the host.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Readiness {
+    pub game: String,
+    pub game_name: String,
+    pub name: String,
+    /// The folder is there.
+    pub found: bool,
+    /// The folder is kept with git.
+    pub git: bool,
+    pub starters: Vec<StarterState>,
+}
+
 /// What the Setup tab shows.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -56,6 +81,8 @@ pub struct Setup {
     /// This system as the kit names it: windows, linux or macos.
     pub system: String,
     pub rows: Vec<Row>,
+    /// Every repository on the games list, and which starter files it has (0.89.0).
+    pub repositories: Vec<Readiness>,
     /// How many games are on the list; none when there is no list yet (First steps makes it).
     pub games: Option<usize>,
     pub fetching: Option<Fetching>,
@@ -101,12 +128,68 @@ pub fn fetching() -> Option<Fetching> {
     RUN.lock().ok()?.as_ref().map(shown)
 }
 
+/// How one repository stands with the starter files.
+pub fn readiness(game: &games::Game, repository: &games::Repository) -> Readiness {
+    let root = &repository.path;
+    Readiness {
+        game: game.id.clone(),
+        game_name: game.name.clone(),
+        name: repository.name.clone(),
+        found: root.is_dir(),
+        git: root.join(".git").exists(),
+        starters: starters::starters()
+            .iter()
+            .map(|starter| StarterState { starter: starter.clone(), present: starters::present(root, starter) })
+            .collect(),
+    }
+}
+
+/// Every repository of every listed game, in the list's order.
+fn every_readiness(listed: Option<&Vec<games::Game>>) -> Vec<Readiness> {
+    listed
+        .into_iter()
+        .flatten()
+        .flat_map(|game| game.repositories.iter().map(move |repository| readiness(game, repository)))
+        .collect()
+}
+
+/// Writes the chosen starter files into one repository of a listed game, on the person's press after they saw each whole:
+/// only starters the Companion carries, only where the path is free. Says what was written and what was not, and why.
+pub fn write_starters(
+    data: &Path,
+    game: &str,
+    repository: &str,
+    ids: &[String],
+) -> Result<(Setup, Vec<String>), Failure> {
+    if ids.is_empty() || ids.len() > starters::starters().len() {
+        return Err(Failure::refused("choose one or more starter files"));
+    }
+    let chosen: Vec<&Starter> = ids
+        .iter()
+        .map(|id| {
+            starters::starters()
+                .iter()
+                .find(|starter| &starter.id == id)
+                .ok_or_else(|| Failure::refused(format!("{id:?} is not a starter file the Companion carries")))
+        })
+        .collect::<Result<_, _>>()?;
+    let repository = games::named_repository(game, repository)?;
+    let mut refused = Vec::new();
+    for starter in chosen {
+        if let Err(why) = starters::write(&repository.path, starter) {
+            refused.push(format!("{}: {why}", starter.path));
+        }
+    }
+    Ok((read(data)?, refused))
+}
+
 fn setup_of(data: &Path, programs: &Value) -> Setup {
     let listed = games::load().ok().flatten();
     let ids: Vec<String> = listed.iter().flatten().map(|game| game.id.clone()).collect();
     Setup {
         system: programs["system"].as_str().unwrap_or_default().to_owned(),
         rows: setup::rows(programs, &ids, &kept(data)),
+        repositories: every_readiness(listed.as_ref()),
         games: listed.map(|games| games.len()),
         fetching: fetching(),
     }

@@ -21,6 +21,16 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.89.0] - 2026-11-25
+
+### Added
+
+- **Settings → Setup lists your repositories, and can add the starter files the pages read** (the owner's choice by card,
+  25 Nov 2026: "Starter files for a repository"). Each repository on the games list says whether it is kept with git and which it
+  has: a changelog, the open-work list and, for agent sessions, the decisions file. **Add starter files…** shows each missing one
+  whole; the ticked ones are written only where nothing is there, never over a file, and nothing is committed. **Not tested on
+  screen; nothing has been written into a real repository.**
+
 ## [0.88.0] - 2026-11-25
 
 ### Added

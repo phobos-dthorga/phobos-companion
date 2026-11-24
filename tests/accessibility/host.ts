@@ -128,7 +128,13 @@ export async function mockHost(
     activity: { result: [] },
     // Home's setup line (0.87.0) reads once; a test that is not about it sees everything here.
     setup_status: {
-      result: { system: "windows", rows: [], games: 1, fetching: null },
+      result: {
+        system: "windows",
+        rows: [],
+        repositories: [],
+        games: 1,
+        fetching: null,
+      },
     },
     // The updater is read on About and Home (0.85.0); a test that is not about it sees this version as the newest.
     updates_status: { result: { state: "current", checked: 1_795_000_000 } },

@@ -181,6 +181,11 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   program, still missing, starting only `winget` or `dotnet` (`FETCHERS`), with what it needs first already here. One runs at a
   time, as its own program with no shell, ended by Stop. It installs programs for the person, so **agents and tests never press
   it on the owner's computer**: tests stand in the host. **A new program to fetch is a row in the kit, never a command here.**
+  **Starter files** (0.89.0; the owner's choice by card, 25 Nov 2026): Your repositories, on the same tab, may write into a
+  repository on the games list **only the starters `config/repository-starters.json` carries**, at their own paths, after the
+  window showed each whole and the person ticked it and pressed Write the ticked files: opened as new files, so **nothing there
+  is ever replaced**, inside the repository's folder (checked after its folders are made), and **never committed**
+  (`companion_core::starters`). A new starter is a row in that file.
 - **Their code and What did an update change? read, except one press** (owner's choice of 19 Nov 2026, "Read and compare, on your
   press"). **Decompile runs only on the owner's press, only for an assembly the kit named in this run of the program, and only
   while the manifest calls it `runs`**; it writes only into the kit's cache. Other authors' code is shown, never copied into a

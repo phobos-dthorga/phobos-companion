@@ -22,6 +22,30 @@ fn what_the_person_set_aside_is_kept_whole_in_order_and_each_once() {
 }
 
 #[test]
+fn a_repository_says_which_starter_files_it_has() {
+    let root = folder("readiness");
+    std::fs::create_dir_all(root.join(".git")).unwrap();
+    std::fs::write(root.join("CHANGELOG.md"), "# Changelog\n").unwrap();
+    let game = games::Game {
+        id: "first".to_owned(),
+        name: "First".to_owned(),
+        repositories: vec![games::Repository { name: "mods".to_owned(), path: root.clone() }],
+        kind: games::GameKind::Game,
+    };
+    let ready = readiness(&game, &game.repositories[0]);
+    assert!(ready.found && ready.git);
+    let present: Vec<(&str, bool)> = ready.starters.iter().map(|s| (s.starter.id.as_str(), s.present)).collect();
+    assert_eq!(present, [("changelog", true), ("open-work", false), ("decisions", false)]);
+    let value = serde_json::to_value(&ready).unwrap();
+    // The folder stays with the host; each starter is sent whole, for the window to show before writing.
+    assert!(value.get("path").is_none());
+    assert_eq!(value["gameName"], "First");
+    assert_eq!(value["starters"][1]["path"], "docs/development/outstanding-work.md");
+    assert!(value["starters"][1]["content"].as_str().unwrap().contains("| Item | Status |"));
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
 fn a_key_is_set_aside_once_and_taken_back() {
     let keys = with_key(vec!["git".to_owned()], "steam", true);
     assert_eq!(keys, vec!["git".to_owned(), "steam".to_owned()]);

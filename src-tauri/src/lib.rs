@@ -184,6 +184,22 @@ async fn setup_set_aside(app: tauri::AppHandle, key: String, aside: bool) -> Res
     blocking(move || setup_page::set_aside(&data, &key, aside)).await
 }
 
+/// Writes the chosen starter files into one listed repository, on the person's press after they saw each (0.89.0).
+#[tauri::command]
+async fn setup_write_starters(
+    app: tauri::AppHandle,
+    game: String,
+    repository: String,
+    starters: Vec<String>,
+) -> Result<serde_json::Value, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || {
+        let (setup, refused) = setup_page::write_starters(&data, &game, &repository, &starters)?;
+        Ok(serde_json::json!({ "setup": setup, "refused": refused }))
+    })
+    .await
+}
+
 /// Opens the page a program is got from by hand, in the browser: the address the tools name for it.
 #[tauri::command]
 async fn setup_open_page(key: String) -> Result<(), Failure> {
@@ -1691,6 +1707,7 @@ pub fn run() {
             setup_stop,
             setup_set_aside,
             setup_open_page,
+            setup_write_starters,
             cleanup_list,
             cleanup_apply,
             mod_list_check,

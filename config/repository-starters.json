@@ -1,0 +1,29 @@
+{
+  "about": "Starter files Settings → Setup offers a repository on the games list (0.89.0, docs/design-record.md, Setup). Each is written only when the person saw it whole and pressed Write, only where its path is free, and never over a file. `present` says how the Companion knows the repository already has one: `changelog` is any CHANGELOG.md up to three folders down (as the tool kit's changes finds them); `file` is the path itself. A starter `forAgents` is offered only while the features for AI agent sessions are shown.",
+  "starters": [
+    {
+      "id": "changelog",
+      "path": "CHANGELOG.md",
+      "present": "changelog",
+      "chosen": true,
+      "forAgents": false,
+      "content": "# Changelog\n\nWhat changed in each version, newest first. Each version is a heading such as `## [1.0.0] - 2026-11-25`, with sections such as `### Added`, `### Changed` and `### Fixed`, and one entry per line starting with `- `. Work not released yet goes under Unreleased. Commit a change with its entry, in one commit.\n\n## [Unreleased]\n"
+    },
+    {
+      "id": "open-work",
+      "path": "docs/development/outstanding-work.md",
+      "present": "file",
+      "chosen": false,
+      "forAgents": false,
+      "content": "# Outstanding work\n\nWhat is still to do. Home lists the rows whose status is open, in progress, waiting or blocked.\n\n| Item | Status |\n| --- | --- |\n"
+    },
+    {
+      "id": "decisions",
+      "path": "config/decisions.json",
+      "present": "file",
+      "chosen": false,
+      "forAgents": true,
+      "content": "{\n  \"schemaVersion\": 1,\n  \"decisions\": []\n}\n"
+    }
+  ]
+}

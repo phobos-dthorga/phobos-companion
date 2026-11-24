@@ -3,7 +3,7 @@ title: Set up what the pages need
 kind: task
 go: settings?panel=setup
 words: setup, set up, install, missing, programs, git, .NET, dotnet, SDK, ilspycmd, Steam, winget, fetch, download, requirements, needs
-see: task-other-programs, page-settings, task-first-steps, term-tool-kit
+see: task-other-programs, task-repository-ready, page-settings, task-first-steps, term-tool-kit
 ---
 **Settings → Setup lists every program the pages use beyond the Companion, says which are here, and can fetch a missing one for
 you.** The Companion brings its own Python and tools; each program here is needed only by the pages it names, and nothing else
@@ -26,6 +26,10 @@ stops working without it.
 
 ### Don't need one?
 Press **I don't need it**. It moves to **Set aside**, and Home stops naming it. **I need it after all** brings it back.
+
+### Your repositories
+Beneath the programs, **Your repositories** says which files the pages read each repository on your list has, and can add a
+starter where one is missing: see [make a repository ready](task-repository-ready).
 
 ### How it fetches
 - **winget**, Windows' own package manager, fetches git, .NET 10 and Steam from its catalogue and runs their installers.

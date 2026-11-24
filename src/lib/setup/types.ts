@@ -39,9 +39,32 @@ export type Fetching = {
   ended: SetupExit | null;
 };
 
+/** One starter file as a repository stands with it (0.89.0). */
+export type StarterState = {
+  id: string;
+  path: string;
+  present: boolean;
+  /** Ticked when offered. */
+  chosen: boolean;
+  /** Offered only while the features for AI agent sessions are shown. */
+  forAgents: boolean;
+  content: string;
+};
+
+/** A repository on the games list, and which starter files it has (0.89.0). */
+export type Readiness = {
+  game: string;
+  gameName: string;
+  name: string;
+  found: boolean;
+  git: boolean;
+  starters: StarterState[];
+};
+
 export type Setup = {
   system: string;
   rows: SetupRow[];
+  repositories: Readiness[];
   /** How many games are on the list; null before First steps made one. */
   games: number | null;
   fetching: Fetching | null;

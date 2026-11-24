@@ -93,6 +93,11 @@ const KIND_WORDS: Record<string, KindWords> = {
     body: "online-gate-lights-body",
     loss: "online-gate-lights-loss",
   },
+  updates: {
+    name: "online-updates-name",
+    body: "online-updates-body",
+    loss: "online-updates-loss",
+  },
 };
 
 /** The locale key for one of a kind's words; null for a kind this window has no words for yet (shown by its id). */

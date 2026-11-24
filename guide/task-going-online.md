@@ -2,7 +2,7 @@
 title: Choose what the Companion asks the internet
 kind: task
 go: settings?panel=online
-words: online, internet, GitHub, network, privacy, gate lights, checks, switch off, offline, AI services
+words: online, internet, GitHub, network, privacy, gate lights, checks, switch off, offline, AI services, updates, updater
 see: page-settings, page-home, page-about, page-logs, page-modlist, page-publish, task-ai-services
 ---
 **The Companion asks the internet only for what Settings lists under Going online.** Every kind but one only reads public pages: nothing about you is sent. Those kinds are **on** for the repositories on your list, and you can switch any of them off. **AI services is the one exception: it starts off**, because it sends text you chose.
@@ -20,6 +20,8 @@ see: page-settings, page-home, page-about, page-logs, page-modlist, page-publish
 **Known problems**: the Mod list's What's wrong warns when mods on your list are known to go wrong together, with what goes wrong and what to do. The problems come from the feeds your repositories publish (a `feeds` folder), each checked against the authors' own work before it was published. The Companion reads them at most every six hours, without using any of GitHub's hourly calls, and uses the last copy it has when GitHub can't be reached.
 
 **Nightly watch**: each night GitHub's own machine looks through the public source of the mods yours patch, for commits that touch a method your code names. Home's **Their code changed** lists what it found, before those authors' updates reach you. The Companion reads each repository's results at most every six hours, without using any of GitHub's hourly calls. A repository needs its own nightly run to have results; one without simply shows nothing.
+
+**Updates**: once each time the Companion starts, it asks GitHub whether a newer version is published, fetches it in the background and installs it when you close the Companion ([how](task-update-companion)). Only a version signed with the owner's update key is installed.
 
 **Gate lights**: Home shows whether each repository's last push passed its checks on GitHub, and whether its nightly runs still run. It asks GitHub once for each repository, then again only after you push, or while a check is still running. **Look now** on Home asks at once.
 

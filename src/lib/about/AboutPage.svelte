@@ -12,6 +12,7 @@
   import { listedWith, standing } from "./presentation";
   import type { About, AboutReading } from "./types";
   import AboutOnline from "../online/AboutOnline.svelte";
+  import UpdatesPanel from "../updates/UpdatesPanel.svelte";
   import Tabs from "../shell/Tabs.svelte";
   import { tabsOf } from "../shell/tabs";
 
@@ -96,6 +97,8 @@
 {/if}
 
 {#snippet version(about: About)}
+  <!-- Updates from GitHub's published releases (0.85.0, docs/releases.md); the repository's own standing follows. -->
+  <UpdatesPanel />
   {#if stands?.kind === "newer"}
     <section class="standing newer" aria-labelledby="about-newer">
       <h2 id="about-newer">

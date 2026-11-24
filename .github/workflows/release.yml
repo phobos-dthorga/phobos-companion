@@ -1,0 +1,67 @@
+# A draft release for each version tag (0.85.0; docs/releases.md, O1; the owner's choice of 25 Nov 2026: "a draft; I press
+# Publish"). GitHub's own Windows machine builds the same installer as `npm run installer` on the owner's PC, signed for the
+# updater with the owner's update key from this repository's secrets, and makes a draft release holding it, its signature and
+# latest.json. Nothing is public, and no updater sees it, until the owner presses Publish.
+name: Release
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: The update key is set
+        shell: bash
+        env:
+          KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::There is no TAURI_SIGNING_PRIVATE_KEY secret yet: see docs/releases.md, the owner's one-time setup."
+            exit 1
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: 10.0.x
+      - name: Install the pinned Rust toolchain
+        shell: bash
+        run: rustup show
+      - name: Install packages
+        shell: bash
+        run: npm ci --no-fund --no-audit
+      - name: Build the signed installer
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npm run installer
+      - name: The release's files
+        shell: bash
+        run: node scripts/release-files.mjs "$LOCALAPPDATA/phobos-modkit/target/release/bundle/nsis" release "$GITHUB_REF_NAME"
+      - name: A draft release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" \
+            "release/DthorgaCompanion_${version}_x64-setup.exe" \
+            "release/DthorgaCompanion_${version}_x64-setup.exe.sig" \
+            release/latest.json \
+            --draft --verify-tag \
+            --title "D'thorga Companion ${version}" \
+            --notes-file release/notes.md

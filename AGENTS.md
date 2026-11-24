@@ -344,6 +344,11 @@ Build output stays out of the repository: `scripts/with-target.mjs` and the gate
 
 - **Public, MIT** (agent default, matching its siblings). Never change the repository's visibility.
 - The version lives in `package.json` and `src-tauri/Cargo.toml`, and a test keeps them equal.
+- **Tag each version, and never publish a release** (0.85.0; `docs/releases.md`; the owner's choice of 25 Nov 2026: "a draft; I
+  press Publish"). Once a version's commit is pushed, tag it `vX.Y.Z` and push the tag: GitHub's Windows machine builds the signed
+  installer and a **draft** release. **Agents never publish a release, never make, see or hold the update key, and never change the
+  repository's secrets**; the owner publishes, and only a published release reaches anyone's updater. Until the owner's one-time
+  setup is done (the key's secret, its public half in `tauri.conf.json`), the release build stops at its first step and says why.
 - **Build the installer for the owner after every new version** (owner, 18 Nov 2026: "build it ahead of time for me"): once the
   version is committed, run `npm run installer` and tell the owner the setup file's full path
   (`%LOCALAPPDATA%\phobos-modkit\target\release\bundle\nsis\D’thorga Companion_<version>_x64-setup.exe`), so all they do is run

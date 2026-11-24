@@ -21,6 +21,18 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.85.0] - 2026-11-25
+
+### Added
+
+- **The Companion updates itself from GitHub** (the owner's choice of O1, 25 Nov 2026, and "I think we should integrate an
+  auto-updater"; `docs/releases.md`). Once each time it starts it asks for the latest published release, fetches a newer version
+  in the background, checks it against the owner's update key, and installs it when you close the Companion; **Install now** on
+  About does it at once. Home says when one is ready. **Updates** has its own switch in Settings → Going online, on by default.
+  **Waits on the owner's one-time setup** of the update key, and says so on About until then. **Not tested on screen.**
+- **Each version tag builds a draft release on GitHub**: GitHub's Windows machine builds the same installer, signed for the
+  updater, with the version's changelog section as its notes. Nothing reaches anyone until the owner presses Publish.
+
 ## [0.84.0] - 2026-11-25
 
 ### Added

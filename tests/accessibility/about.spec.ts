@@ -98,6 +98,64 @@ test.describe("About", () => {
     await audit(page);
   });
 
+  test("a newer published version is fetched, ready to install on close or at once, and Home says so (0.85.0)", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      about: { result: about(false) },
+      updates_status: {
+        result: {
+          state: "ready",
+          version: "9.2.0",
+          notes:
+            "### Added\n\n- **<b>The updater.</b>** It fetches a newer version.",
+          date: "2026-11-25 3:14:00.0 +00:00:00",
+        },
+      },
+      updates_install: { result: null },
+    });
+    await page.goto("/");
+    // Home says one is ready, and leads to About.
+    await expect(
+      page.getByRole("heading", { name: "Version 9.2.0 is ready" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "See what's new" }).click();
+    const panel = page.getByRole("region", { name: "Updates from GitHub" });
+    await expect(panel).toContainText("Version 9.2.0 is ready");
+    await expect(panel).toContainText("2026-11-25");
+    await expect(panel).toContainText(
+      "It installs when you close the Companion",
+    );
+    await page.getByText("What's new in 9.2.0").click();
+    // The notes are text: markup in them is shown, never drawn.
+    await expect(panel).toContainText("<b>The updater.</b>");
+    await expect(panel.locator("b")).toHaveCount(0);
+    await audit(page);
+    await panel.getByRole("button", { name: "Install now" }).click();
+    await expect(panel).toContainText("the Companion closes and opens again");
+  });
+
+  test("updates say when they are off or not set up yet, and never claim more (0.85.0)", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      about: { result: about(false) },
+      updates_status: { result: { state: "not-set-up" } },
+    });
+    await page.goto("/");
+    await page.keyboard.press("i");
+    const panel = page.getByRole("region", { name: "Updates from GitHub" });
+    await expect(panel).toContainText("Updates are not set up yet");
+    await expect(panel.getByRole("button")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: /is ready$/ })).toHaveCount(
+      0,
+    );
+  });
+
   test("says a newer version is waiting and where its installer is", async ({
     page,
   }) => {

@@ -28,6 +28,7 @@
   import PublishNote from "../publish/PublishNote.svelte";
   import { agents } from "../agents/state.svelte";
   import GateLights from "../online/GateLights.svelte";
+  import UpdateReady from "../updates/UpdateReady.svelte";
   import TheirCodeChanged from "../online/TheirCodeChanged.svelte";
   import GamesPanel from "./GamesPanel.svelte";
 
@@ -311,6 +312,7 @@
   </section>
 {/if}
 
+<UpdateReady />
 <GateLights game={game.id} />
 <TheirCodeChanged game={game.id} />
 

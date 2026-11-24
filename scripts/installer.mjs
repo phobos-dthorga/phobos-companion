@@ -2,6 +2,8 @@
 // checked against python.org's own checksum, and the tool kit from this repository's pinned submodule. On a PC without the
 // repository the program uses these; beside the repository (a developer's, the owner's) it keeps using the repository's own.
 // Everything it makes stays outside the repository, beside Rust's build output, since a clone may sit in a synced folder.
+// With the owner's update key in its environment (TAURI_SIGNING_PRIVATE_KEY, as GitHub's release build has it; 0.85.0,
+// docs/releases.md) it also signs the installer for the updater; without it, as on the owner's PC, nothing is signed.
 import { createHash } from "node:crypto";
 import {
   cpSync,
@@ -153,14 +155,25 @@ writeFileSync(
   ].join("\r\n"),
 );
 const config = join(target, "companion-runtime.tauri.json");
+const signs = Boolean(process.env.TAURI_SIGNING_PRIVATE_KEY);
 writeFileSync(
   config,
   JSON.stringify(
-    { bundle: { windows: { nsis: { installerHooks: hooks } } } },
+    {
+      bundle: {
+        windows: { nsis: { installerHooks: hooks } },
+        // The updater's signature beside the installer, only where the key is.
+        ...(signs ? { createUpdaterArtifacts: true } : {}),
+      },
+    },
     null,
     2,
   ),
 );
+if (signs)
+  console.log(
+    "The update key is here: the installer is signed for the updater.",
+  );
 console.log(`Runtime ready in ${runtime}; building the installer…`);
 run("npx", ["tauri", "build", "--bundles", "nsis", "--config", config], {
   ...process.env,

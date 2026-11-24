@@ -36,7 +36,7 @@ pub struct Kind {
 }
 
 /// Every kind, in the order the panel lists them. A new kind joins here, in the locale file and in the Guide in one change.
-pub const KINDS: [Kind; 6] = [
+pub const KINDS: [Kind; 7] = [
     Kind { id: "gate-lights", contacts: "api.github.com", loss: Loss::Severe, starts_on: true },
     // The nightly watch's findings, read from each repository's results branch (0.63.0, `docs/online.md` O3).
     Kind { id: "nightly-watch", contacts: "raw.githubusercontent.com", loss: Loss::Severe, starts_on: true },
@@ -48,6 +48,9 @@ pub const KINDS: [Kind; 6] = [
     // Each Workshop item read back from Steam's public API (keyless) on the Publish page's Read Steam back (0.69.0,
     // `docs/publishing.md`): its visibility and the day it went public. Uploading is the owner's press, not a call of this kind.
     Kind { id: "workshop-pages", contacts: "api.steampowered.com", loss: Loss::Small, starts_on: true },
+    // The updater (0.85.0, `docs/releases.md`, O1; the owner's "auto-updater", 25 Nov 2026): once a start, the latest published
+    // release's latest.json, and a newer version's installer, fetched in the background and installed when the program closes.
+    Kind { id: "updates", contacts: "github.com", loss: Loss::Small, starts_on: true },
     // An online AI service the person chose, asked on their press after they were shown what goes (0.71.0, `docs/ai.md`, A2;
     // the owner's choice of 23 Nov 2026: shown first, then a press, the switch off until turned on). Unlike every kind above it
     // sends the person's own text and their key, so it **starts off**. A model on this computer is not going online.

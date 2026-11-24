@@ -48,6 +48,7 @@ mod settings_page;
 mod shortcuts;
 mod tests_page;
 mod themes_page;
+mod updates;
 mod viewable;
 
 use companion_core::failure::{Failure, FailureCode};
@@ -108,6 +109,32 @@ async fn run_report(
     on_progress: Channel<kit::Progress>,
 ) -> Result<reports::ReportResult, Failure> {
     blocking(move || reports::run(&game, &command, report.as_deref(), top, Some(&hearing(on_progress)))).await
+}
+
+/// What closing the program does first: a snapshot of the running game is never left held (owner's choice, 20 Nov 2026), and an
+/// agent ends with everything it started. Install now (0.85.0) does it too, before the installer takes over.
+fn before_exit() {
+    explorer_page::release_at_exit();
+    let _ = chat_page::end();
+}
+
+/// How the updater stands (0.85.0, `docs/releases.md`). Only reads.
+#[tauri::command]
+fn updates_status() -> updates::Status {
+    updates::status()
+}
+
+/// Looks for a newer published version again, on the person's press.
+#[tauri::command]
+fn updates_check(app: tauri::AppHandle) -> updates::Status {
+    updates::check_now(&app);
+    updates::status()
+}
+
+/// Installs the update that is ready at once, and opens the new version: on the person's press.
+#[tauri::command]
+async fn updates_install() -> Result<(), Failure> {
+    blocking(|| updates::install_now(before_exit).map_err(Failure::refused)).await
 }
 
 /// This program's own data folder, where the owner's test verdicts are kept.
@@ -1600,6 +1627,9 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             about,
+            updates_status,
+            updates_check,
+            updates_install,
             cleanup_list,
             cleanup_apply,
             mod_list_check,
@@ -1762,6 +1792,8 @@ pub fn run() {
             report_theirs
         ])
         .plugin(tauri_plugin_dialog::init())
+        // The updater (0.85.0, `docs/releases.md`): the host alone uses it; the window has no permission to call it.
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             // Where the installer put its own Python and tool kit, and this person's data folder (0.35.0): used where the program
             // does not run beside the repository it was built from.
@@ -1770,6 +1802,8 @@ pub fn run() {
             }
             // The records copy themselves every few hours while the program is open (0.29.0).
             records_backup::start();
+            // A newer published version is looked for once, a few seconds after the start (0.85.0).
+            updates::start(app.handle());
             Ok(())
         })
         .build(tauri::generate_context!())
@@ -1777,8 +1811,9 @@ pub fn run() {
         .run(|_, event| {
             // A snapshot of the running game is never left held when the program closes (owner's choice, 20 Nov 2026).
             if let tauri::RunEvent::Exit = event {
-                explorer_page::release_at_exit();
-                let _ = chat_page::end();
+                before_exit();
+                // An update fetched while the program ran installs now, and the program does not open again (0.85.0).
+                updates::install_on_exit();
             }
         });
 }

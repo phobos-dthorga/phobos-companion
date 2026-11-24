@@ -124,6 +124,8 @@ export async function mockHost(
     publish_waiting: { result: { waiting: 0, mods: [] } },
     // Home's Safe copies card (0.42.0) reads on every visit; a test that is not about it sees a game that lists none.
     safe_copies_status: { result: [] },
+    // The updater is read on About and Home (0.85.0); a test that is not about it sees this version as the newest.
+    updates_status: { result: { state: "current", checked: 1_795_000_000 } },
     // The code colours in use are read at every start (0.77.0); a test that is not about them sees the theme's own.
     code_colours_status: {
       result: {

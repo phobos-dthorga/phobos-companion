@@ -11,8 +11,11 @@ use serde_json::Value;
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
 
-/// The only programs a fetch command may start. The kit holds its commands to the same list (`programs.FETCHERS`).
-pub const FETCHERS: [&str; 2] = ["winget", "dotnet"];
+/// The only programs a fetch command may start. The kit holds its commands to the same list (`programs.FETCHERS`); `pkexec`
+/// (0.92.0, kit 1.124.0) is Linux's own window asking for an administrator's yes, before the system's package manager runs.
+pub const FETCHERS: [&str; 3] = ["winget", "dotnet", "pkexec"];
+/// The package managers a Linux fetch may run after `pkexec` (0.92.0).
+pub const LINUX_MANAGERS: [&str; 3] = ["apt-get", "dnf", "pacman"];
 const MAX_WORDS: usize = 16;
 const MAX_WORD: usize = 120;
 const MAX_ADDRESS: usize = 300;
@@ -152,6 +155,12 @@ pub fn command_of(data: &Value, key: &str) -> Result<Vec<String>, String> {
     let words = words(program).ok_or_else(|| format!("no command is known that fetches {name} on this system"))?;
     if !FETCHERS.contains(&words[0].as_str()) {
         return Err(format!("{:?} is not a program a fetch may start", words[0]));
+    }
+    // pkexec runs whatever follows it as an administrator: only a package manager, installing.
+    if words[0] == "pkexec" && !(words.len() > 2 && LINUX_MANAGERS.contains(&words[1].as_str())) {
+        return Err(format!(
+            "the command for {name} asks for an administrator's yes for something that isn't a package manager"
+        ));
     }
     let sane = |word: &String| !word.is_empty() && word.len() <= MAX_WORD && !word.chars().any(char::is_control);
     if words.len() > MAX_WORDS || !words.iter().all(sane) {

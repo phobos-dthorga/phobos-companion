@@ -2742,6 +2742,7 @@
     "setup-confirm-title": "This runs on your computer",
     "setup-confirm-winget": "Windows' own package manager, winget, fetches it from its catalogue and runs its installer. Windows may ask you for an administrator's yes. It can take a few minutes, and the Companion can be used meanwhile.",
     "setup-confirm-dotnet": ".NET fetches it from NuGet, Microsoft's catalogue of .NET tools, for you alone. It can take a minute.",
+    "setup-confirm-pkexec": "Your system asks for an administrator's yes in a window of its own, then its package manager fetches it from your distribution's own catalogue.",
     "setup-run": "Run it",
     "setup-not-now": "Not now",
     "setup-fetching-title": "Fetching { $name }",

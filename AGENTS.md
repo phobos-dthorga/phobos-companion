@@ -179,7 +179,8 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   owner's choices by card, 25 Nov 2026: "Show command, run on press", in a Settings tab with a line on Home). The rows and their
   commands are the tool kit's (`programs status`, which only looks); **the window names a program, never a command**, and the host
   takes the command from a fresh reading and holds it to `companion_core::setup::command_of`: the kit's own words for that
-  program, still missing, starting only `winget` or `dotnet` (`FETCHERS`), with what it needs first already here. One runs at a
+  program, still missing, starting only `winget`, `dotnet` or, on Linux, `pkexec` followed by `apt-get`, `dnf` or `pacman`
+  (`FETCHERS`, `LINUX_MANAGERS`; 0.92.0), with what it needs first already here. One runs at a
   time, as its own program with no shell, ended by Stop. It installs programs for the person, so **agents and tests never press
   it on the owner's computer**: tests stand in the host. **A new program to fetch is a row in the kit, never a command here.**
   **Starter files** (0.89.0; the owner's choice by card, 25 Nov 2026): Your repositories, on the same tab, may write into a

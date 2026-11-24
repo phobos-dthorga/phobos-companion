@@ -813,6 +813,12 @@ for chat** chooses it. The Chat page's switch is not turned on from here: it is 
 high. **Risk of Try: low**: the agent is given no repository, terminal, reports or conversation, so it can read or change nothing
 through the Companion, though as its own program it runs with the person's own access for the moment it is up.
 
+**The owner's word on the agent's choices (by card, 25 Nov 2026):** winget accepting its catalogue's agreements: **keep it**;
+Home names **Steam and .NET 10** (the .NET 10 runtime is everyday since kit 1.124.0; built 0.92.0); **guided forms** for
+`installs.json`, `test-evidence.json` and `settings.json`: **yes, build them**; Setup switching the Chat page on: **link only**.
+**Linux fetch commands** (0.92.0, kit 1.124.0): git and .NET 10 from the distribution's own feed through `pkexec`, which may start
+only `apt-get`, `dnf` or `pacman` (`setup::command_of`); no Linux build exists yet, so none has run.
+
 **Risk, graded by the agent: low.** A fetch installs a program the person named, from the system's own catalogue, after they read
 the command and pressed Run it; Windows asks its own yes where it needs one. Nothing is removed or changed beyond that install, and
 it never runs by itself, so it has no setting to switch it off. **Limits:** commands are known for Windows only (and ilspycmd on

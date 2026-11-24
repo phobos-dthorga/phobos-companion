@@ -10,7 +10,7 @@ you.** The Companion brings its own Python and tools; each program here is neede
 stops working without it.
 
 1. Open **Settings** (the **9** key) and the **Setup** tab. Or press **Open Setup** on Home, which shows a line when a program an
-   everyday page uses is missing (Steam, say). A page that uses a missing program says so at its top, with **Set it up in
+   everyday page uses is missing (Steam or the .NET 10 runtime). A page that uses a missing program says so at its top, with **Set it up in
    Settings → Setup** (the Memory page, when the .NET 10 SDK isn't here). git has its own line on every page while it is missing.
 2. Missing programs come first, each with what uses it. Press **Fetch** and its name, for example **Fetch Steam…**.
 3. **The command is shown whole first: nothing runs yet.** Read it, then press **Run it**, or **Not now**.
@@ -40,4 +40,7 @@ and ends it, without a repository, commands or a conversation. **Use it for chat
 ### How it fetches
 - **winget**, Windows' own package manager, fetches git, .NET 10 and Steam from its catalogue and runs their installers.
 - **.NET** fetches ilspycmd from NuGet, Microsoft's catalogue of .NET tools, for you alone.
-- The command comes from the tool kit, never from what is typed, and only `winget` or `dotnet` may be started.
+- **On Linux** (once there is a Linux build), git and .NET 10 come from your distribution's own package manager (apt, dnf, or
+  pacman for git), after your system asks for an administrator's yes in its own window. Steam on Linux gives its page only.
+- The command comes from the tool kit, never from what is typed, and only `winget`, `dotnet` or, on Linux, `pkexec` with a
+  package manager may be started.

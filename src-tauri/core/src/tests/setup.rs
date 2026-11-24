@@ -90,6 +90,15 @@ fn only_the_kit_s_own_command_for_a_missing_program_may_run() {
 }
 
 #[test]
+fn pkexec_may_only_start_a_package_manager() {
+    let apt = with(data(), "git", "fetch", json!(["pkexec", "apt-get", "install", "-y", "git"]));
+    assert_eq!(command_of(&apt, "git").unwrap()[1], "apt-get");
+    for bad in [json!(["pkexec", "sh", "-c", "anything"]), json!(["pkexec", "apt-get"]), json!(["pkexec"])] {
+        assert!(command_of(&with(data(), "git", "fetch", bad.clone()), "git").is_err(), "{bad}");
+    }
+}
+
+#[test]
 fn a_program_that_needs_another_first_waits_for_it() {
     assert!(command_of(&data(), "ilspycmd").unwrap_err().contains("needs .NET 10 SDK first"));
     let ready = with(data(), "dotnet-sdk", "here", json!(true));

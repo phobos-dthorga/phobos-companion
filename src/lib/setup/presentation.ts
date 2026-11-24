@@ -19,7 +19,8 @@ export function inGroup(rows: SetupRow[], state: SetupState): SetupRow[] {
     );
 }
 
-/** What Home names (0.87.0): the everyday programs missing and not set aside. git is said on every page already, so not here too. */
+/** What Home names (0.87.0): the everyday programs missing and not set aside (Steam, and since 0.92.0 the .NET 10 runtime, as the
+ * tool kit marks them). git is said on every page already, so not here too. */
 export function homeNeeds(rows: SetupRow[]): SetupRow[] {
   return rows.filter(
     (row) => row.state === "missing" && row.everyday && row.key !== "git",

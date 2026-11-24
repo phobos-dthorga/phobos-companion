@@ -122,6 +122,13 @@
       said = { ok: false, words: answer.failure.detail };
   }
 
+  /** What running a command does, by the program it starts (pkexec since 0.92.0). */
+  function confirmKey(fetcher: string | null): string {
+    if (fetcher === "winget") return "setup-confirm-winget";
+    if (fetcher === "pkexec") return "setup-confirm-pkexec";
+    return "setup-confirm-dotnet";
+  }
+
   function groupWords(state: SetupState, count: number): string {
     if (state === "missing") return t("setup-group-missing", { count });
     if (state === "here") return t("setup-group-here", { count });
@@ -252,9 +259,7 @@
                     <p><strong>{t("setup-confirm-title")}</strong></p>
                     <pre class="command"><code>{row.command}</code></pre>
                     <p class="small">
-                      {row.fetcher === "winget"
-                        ? t("setup-confirm-winget")
-                        : t("setup-confirm-dotnet")}
+                      {t(confirmKey(row.fetcher))}
                     </p>
                     <div class="buttons">
                       <button

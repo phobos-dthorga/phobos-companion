@@ -21,6 +21,21 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.92.0] - 2026-11-25
+
+### Changed
+
+- **Home names a missing .NET 10 runtime too, beside Steam** (the owner's choice by card, 25 Nov 2026: "Steam and .NET 10").
+  Tool kit 1.124.0 marks it everyday. The owner also kept winget accepting its catalogue's agreements, and Setup only linking
+  to the Chat page's switch. **Not tested on screen.**
+
+### Added
+
+- **On Linux, Setup can fetch git and .NET 10 from the distribution's own package manager** (the owner's choice by card,
+  25 Nov 2026), once there is a Linux build: tool kit 1.124.0's commands run through `pkexec`, which asks for an
+  administrator's yes in the system's own window, and the Companion lets `pkexec` start only `apt-get`, `dnf` or `pacman`.
+  **No Linux command has been run.**
+
 ## [0.91.0] - 2026-11-25
 
 ### Added

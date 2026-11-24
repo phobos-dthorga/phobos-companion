@@ -2362,6 +2362,7 @@
     "app-update-elsewhere": "Updates are built for Windows only so far; on this system, download each new version from GitHub.",
     "app-update-checking": "Looking for a newer version on GitHub…",
     "app-update-current": "This is the newest published version (checked { $when }).",
+    "app-update-nothing-published": "No version is published on GitHub yet, so there is nothing to update to (checked { $when }). Each version waits there as a draft until the owner publishes it.",
     "app-update-check": "Check now",
     "app-update-check-again": "Check again",
     "app-update-fetching": "Fetching version { $version }: { $got } MB so far…",

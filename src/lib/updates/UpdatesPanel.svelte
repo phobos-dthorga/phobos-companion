@@ -65,6 +65,15 @@
       <p>{t("app-update-elsewhere")}</p>
     {:else if status.state === "waiting" || status.state === "checking"}
       <p role="status">{t("app-update-checking")}</p>
+    {:else if status.state === "nothing-published"}
+      <p>
+        {t("app-update-nothing-published", {
+          when: formatUnixWhen(status.checked),
+        })}
+      </p>
+      <button type="button" class="action" onclick={() => void check()}
+        >{t("app-update-check")}</button
+      >
     {:else if status.state === "current"}
       <p>
         {t("app-update-current", { when: formatUnixWhen(status.checked) })}

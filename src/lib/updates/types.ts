@@ -7,6 +7,7 @@ export type UpdatesStatus =
   | { state: "elsewhere" }
   | { state: "waiting" }
   | { state: "checking" }
+  | { state: "nothing-published"; checked: number }
   | { state: "current"; checked: number }
   | { state: "fetching"; version: string; got: number; total: number | null }
   | {

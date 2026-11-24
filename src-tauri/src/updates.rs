@@ -35,6 +35,11 @@ pub enum Status {
     /// The program has just started; it looks in a moment.
     Waiting,
     Checking,
+    /// GitHub has no published version to offer, as of `checked` (Unix seconds): every release is still a draft, or none was
+    /// made. The updater hears this as "not found" (0.86.1: shown as a failure before, which it is not).
+    NothingPublished {
+        checked: u64,
+    },
     /// The newest published version is this one, as of `checked` (Unix seconds).
     Current {
         checked: u64,
@@ -110,6 +115,10 @@ async fn look(app: AppHandle, data: PathBuf) {
     let update = match checked {
         Ok(Some(update)) => update,
         Ok(None) => return set(Status::Current { checked: unix_now() }),
+        // The address answered, but not with a release: nothing is published there yet. A network fault is another error.
+        Err(tauri_plugin_updater::Error::ReleaseNotFound) => {
+            return set(Status::NothingPublished { checked: unix_now() });
+        }
         Err(problem) => return set(Status::Failed { reason: problem.to_string() }),
     };
     let version = update.version.clone();

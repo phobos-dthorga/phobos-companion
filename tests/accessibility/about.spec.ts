@@ -137,6 +137,27 @@ test.describe("About", () => {
     await expect(panel).toContainText("the Companion closes and opens again");
   });
 
+  test("with nothing published on GitHub yet, updates say so calmly, not as a failure (0.86.1)", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      about: { result: about(false) },
+      updates_status: {
+        result: { state: "nothing-published", checked: 1_795_000_000 },
+      },
+    });
+    await page.goto("/");
+    await page.keyboard.press("i");
+    const panel = page.getByRole("region", { name: "Updates from GitHub" });
+    await expect(panel).toContainText("No version is published on GitHub yet");
+    await expect(panel).not.toContainText("could not");
+    await expect(
+      panel.getByRole("button", { name: "Check now" }),
+    ).toBeVisible();
+  });
+
   test("updates say when they are off or not set up yet, and never claim more (0.85.0)", async ({
     page,
   }) => {

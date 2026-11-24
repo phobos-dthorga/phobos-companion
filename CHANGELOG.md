@@ -21,6 +21,15 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.86.1] - 2026-11-25
+
+### Fixed
+
+- **Updates say "no version is published on GitHub yet" instead of a failure** (the owner's report of 25 Nov 2026, with a
+  screenshot). While every release is still a draft, GitHub answers the updater "not found", which About showed as "could not
+  fetch a valid release JSON". That is not a fault: nothing has been published to update to. A real fault, such as no network,
+  still says why. **Not tested on screen.**
+
 ## [0.86.0] - 2026-11-25
 
 ### Added

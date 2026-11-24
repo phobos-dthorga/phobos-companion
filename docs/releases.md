@@ -64,7 +64,7 @@ flowchart LR
 | Checking | Once, a few seconds after the Companion starts, when the `updates` kind is on and the key is set: `latest.json` from the latest published release (`github.com/phobos-dthorga/phobos-companion/releases/latest/download/latest.json`), compared with the running version (only newer) | Owner: auto-updater. Agent: once a start, a minute's timeout |
 | Fetching | At once, in the background; the file is checked against the key before it is kept, and kept in memory | Owner |
 | Installing | When the Companion closes (after a snapshot is released and an agent ended), the installer runs with its progress window and the program does not reopen; **Install now** runs it at once and opens the new version | Owner |
-| Where it shows | About's Version tab: checking, up to date, fetching, ready (with its notes and Install now), failed (with why and Check again), off, or not set up; Home: one line while an update is ready | Owner: About and Home. Agent: the words |
+| Where it shows | About's Version tab: checking, up to date, nothing published yet (0.86.1), fetching, ready (with its notes and Install now), failed (with why and Check again), off, or not set up; Home: one line while an update is ready | Owner: About and Home. Agent: the words |
 | Its switch | Settings → Going online, `updates` ("github.com"), on by default | Owner (O4's rule) |
 
 **Agent choices, owner to revise:** the plain asset name (GitHub would otherwise turn the curly apostrophe and spaces into

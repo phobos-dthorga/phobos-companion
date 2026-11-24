@@ -48,6 +48,10 @@ fn nothing_installs_when_nothing_is_ready() {
 fn the_window_reads_each_state_by_its_name() {
     assert_eq!(serde_json::to_value(Status::NotSetUp).unwrap(), json!({"state": "not-set-up"}));
     assert_eq!(
+        serde_json::to_value(Status::NothingPublished { checked: 5 }).unwrap(),
+        json!({"state": "nothing-published", "checked": 5})
+    );
+    assert_eq!(
         serde_json::to_value(Status::Fetching { version: "0.86.0".into(), got: 10, total: Some(20) }).unwrap(),
         json!({"state": "fetching", "version": "0.86.0", "got": 10, "total": 20})
     );

@@ -217,6 +217,11 @@ pub fn start() {
     });
 }
 
+/// This system's name and version, in words ("Windows 11 Pro 25H2"), for a report a person sends themselves (0.100.0).
+pub fn system_name() -> String {
+    sysinfo::System::long_os_version().unwrap_or_else(|_| std::env::consts::OS.to_owned())
+}
+
 #[cfg(test)]
 #[path = "tests/activity.rs"]
 mod tests;

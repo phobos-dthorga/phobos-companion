@@ -51,6 +51,7 @@
   import ActivityStrip from "./lib/shell/ActivityStrip.svelte";
   import PictureButton from "./lib/pictures/PictureButton.svelte";
   import ScreenNoteButton from "./lib/notes/ScreenNoteButton.svelte";
+  import ReportButton from "./lib/notes/ReportButton.svelte";
   import MakeupPage from "./lib/makeup/MakeupPage.svelte";
   import DecisionsPage from "./lib/decisions/DecisionsPage.svelte";
   import PicksPage from "./lib/picks/PicksPage.svelte";
@@ -279,6 +280,8 @@
       <PictureButton game={selected.name} page={t(`page-${page}`)} />
       {#if agents.shown}
         <ScreenNoteButton game={selected.name} page={t(`page-${page}`)} />
+      {:else}
+        <ReportButton page={t(`page-${page}`)} />
       {/if}
     {/if}
     <span class="look-again">

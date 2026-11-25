@@ -21,6 +21,16 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.100.0] - 2026-11-26
+
+### Added
+
+- **Something's off makes a GitHub report for anyone without agent sessions** (the release audit's C5; the owner's choices by
+  card, 25 Nov 2026). Press **!**: the page is drawn with your home folder's name hidden, you add a few words, **Show the report**
+  shows it whole (your words, the page, and the Companion's, the tool kit's and Windows' versions), and **Open on GitHub** saves
+  the picture in your Pictures folder and opens the Companion's new-issue page in your browser, filled in, to read and submit
+  yourself. The Companion sends nothing. Where agent sessions are at work, ! still makes a screen note. **Not tested on screen.**
+
 ## [0.99.0] - 2026-11-25
 
 ### Added

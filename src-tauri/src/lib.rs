@@ -41,6 +41,7 @@ mod publish_page;
 mod records_backup;
 mod repo_status;
 mod report_links;
+mod report_page;
 mod reports;
 mod safe_copies;
 mod screen_notes;
@@ -573,6 +574,52 @@ async fn save_picture(app: tauri::AppHandle, request: tauri::ipc::Request<'_>) -
     let bytes = bytes.clone();
     let folder = pictures_folder(&app)?;
     blocking(move || pictures::save(&folder, &name, &bytes).map(|path| path.display().to_string())).await
+}
+
+/// The person's home folder, for the window to hide in a report's picture (0.100.0).
+#[tauri::command]
+fn report_home() -> Option<String> {
+    report_page::home()
+}
+
+fn report_versions() -> report_page::Versions {
+    report_page::Versions {
+        companion: env!("CARGO_PKG_VERSION").to_owned(),
+        kit: kit::read_status().map(|s| s.kit_version).unwrap_or_else(|_| "unknown".to_owned()),
+        system: companion_core::activity::system_name(),
+    }
+}
+
+/// The GitHub issue a report would open, shown whole before anything leaves (0.100.0). Only reads.
+#[tauri::command]
+async fn report_preview(words: String, page: String) -> Result<report_page::Report, Failure> {
+    blocking(move || {
+        report_page::report(&words, &page, &report_versions(), Some("(the picture's name)")).map_err(Failure::refused)
+    })
+    .await
+}
+
+/// Saves the report's picture in the Pictures folder and opens GitHub's new-issue page, filled in, in the browser (0.100.0):
+/// on the person's press. The Companion sends nothing; they submit it on GitHub, or don't.
+#[tauri::command]
+async fn report_open(app: tauri::AppHandle, request: tauri::ipc::Request<'_>) -> Result<String, Failure> {
+    let tauri::ipc::InvokeBody::Raw(bytes) = request.body() else {
+        return Err(Failure::refused("a report's picture is sent as its bytes"));
+    };
+    let header = |name: &str| {
+        request.headers().get(name).and_then(|v| v.to_str().ok()).map(pictures::decode_name).unwrap_or_default()
+    };
+    let (words, page) = (header("x-report-words"), header("x-report-page"));
+    let bytes = bytes.clone();
+    let folder = pictures_folder(&app)?;
+    blocking(move || {
+        let name = format!("Something's off, {page}");
+        let draft = report_page::report(&words, &page, &report_versions(), Some(&format!("{name}.png")))
+            .map_err(Failure::refused)?;
+        let saved = report_page::open(&folder, &draft, &bytes, &name)?;
+        Ok(saved)
+    })
+    .await
 }
 
 /// Shows a saved picture in the file manager.
@@ -1872,6 +1919,9 @@ pub fn run() {
             memory_stop,
             memory_mark,
             memory_take_game_key,
+            report_home,
+            report_preview,
+            report_open,
             memory_release_game_key,
             explorer_offer,
             explorer_start,

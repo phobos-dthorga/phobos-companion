@@ -229,6 +229,10 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   only kind that does. Settings → Going online and About show the same list of kinds: today six (Gate lights, Nightly watch,
   Known problems, Their reports, Workshop pages and AI services; `docs/architecture.md` says what each contacts). **A new kind
   joins `companion_core::online::KINDS`, the window's words and the Guide's Going online entry in one change.**
+- **Something's off, without agent sessions, opens a GitHub issue to send yourself, and never posts** (0.100.0; the release
+  audit's C5; the owner's choices by card, 25 Nov 2026): the host builds the issue only from the person's words, the page's name
+  and the versions (`report_page::report`), shows it whole, and on Open on GitHub saves the picture (their home folder hidden in
+  its text first) in their Pictures folder and opens only `report_page::ISSUES`, filled in. They submit it on GitHub, or don't.
 - **Report links open GitHub in the browser, and never post** (0.65.0; the owner's choice of 23 Nov 2026: the Logs page only).
   Only an address for a repository the kit named: our repository's new-issue form filled in, another author's blank form, or one
   of their issues. **Another author's form is never filled in**: drafts to them go through the owner's tracker (phobos-modkit

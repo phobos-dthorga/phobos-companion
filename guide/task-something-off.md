@@ -2,7 +2,7 @@
 title: Tell an agent that something looks wrong
 kind: task
 words: bug, wrong, broken, report, screen note, problem, !
-see: term-screen-note, task-save-picture
+see: term-screen-note, task-save-picture, task-report-problem
 for: agents
 ---
 1. On the page that looks wrong, press **!** (or the **Something's off** button).

@@ -38,6 +38,40 @@ export function settledLooks(previous: number, loading: boolean): number {
   return loading ? 0 : previous + 1;
 }
 
+/**
+ * Hides the person's home folder in the page's text before a picture another person may see (0.100.0, a report): each time it
+ * shows, written with either slash, becomes "~". Returns a function that puts the text back.
+ */
+export function hideHome(
+  element: HTMLElement,
+  home: string | null,
+): () => void {
+  if (!home) return () => {};
+  const forms = [home, home.replaceAll("\\", "/")].map((form) =>
+    form.toLowerCase(),
+  );
+  const changed: { node: Text; text: string }[] = [];
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const text = node.textContent ?? "";
+    let hidden = text;
+    for (const form of forms) {
+      let at = hidden.toLowerCase().indexOf(form);
+      while (at >= 0) {
+        hidden = `${hidden.slice(0, at)}~${hidden.slice(at + form.length)}`;
+        at = hidden.toLowerCase().indexOf(form);
+      }
+    }
+    if (hidden !== text) {
+      changed.push({ node: node as Text, text });
+      node.textContent = hidden;
+    }
+  }
+  return () => {
+    for (const { node, text } of changed) node.textContent = text;
+  };
+}
+
 /** Leaves out of the picture anything marked as not belonging in it (a picture's own notice, say). */
 export function belongsInPicture(node: Node): boolean {
   return !(node instanceof HTMLElement && node.dataset.noPicture !== undefined);

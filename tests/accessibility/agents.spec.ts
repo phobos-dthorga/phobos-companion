@@ -40,13 +40,16 @@ async function audit(page: Page) {
 }
 
 test.describe("Features for agent sessions", () => {
-  test("nothing found: no Something's off, no Decisions, no D key", async ({
+  test("nothing found: Something's off makes a report, not a note; no Decisions, no D key (0.100.0)", async ({
     page,
   }) => {
     await open(page);
-    await expect(
-      page.getByRole("button", { name: "Something's off" }),
-    ).toHaveCount(0);
+    // Without agent sessions, Something's off makes a GitHub report to send yourself (0.100.0), never a screen note.
+    await page.getByRole("button", { name: "Something's off" }).click();
+    await expect(page.getByRole("dialog")).toContainText(
+      "the Companion sends nothing",
+    );
+    await page.keyboard.press("Escape");
     const bar = page.getByRole("navigation", { name: /pages/i });
     await expect(bar.getByRole("button", { name: "Decisions" })).toHaveCount(0);
     await page.locator("main").click({ position: { x: 5, y: 5 } });

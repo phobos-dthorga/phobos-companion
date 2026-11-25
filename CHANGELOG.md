@@ -21,6 +21,16 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.98.0] - 2026-11-25
+
+### Added
+
+- **While a memory watch runs, Ctrl+Alt+M marks the moment from the game** (the owner's answer on the Decisions page, "Add a
+  key that works in the game"), without leaving it: "Marked from the game", at that moment, with words to add on the Memory page
+  afterwards. The key is the system's only while a watch runs, and can be changed in Settings (Look and keys: "Mark the moment
+  from the game, while a watch runs"); one the game uses alone is refused. Tauri's global shortcut plugin 2.4.1 (MIT or
+  Apache-2.0). **Not tested in game or on screen.**
+
 ## [0.97.0] - 2026-11-25
 
 ### Added

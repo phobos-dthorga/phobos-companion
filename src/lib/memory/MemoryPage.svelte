@@ -12,8 +12,11 @@
   import RichText from "../shell/RichText.svelte";
   import { heard, started } from "../shell/progress";
   import { register } from "../shortcuts/registry";
+  import { keyFor } from "../shortcuts/state.svelte";
   import {
     markWatch,
+    releaseGameKey,
+    takeGameKey,
     readReport,
     readStatus,
     stopWatch,
@@ -75,6 +78,45 @@
   const liveData = $derived(
     data !== null && data.state !== "none" && alive(data.state) ? data : null,
   );
+  /**
+   * The key that marks from the game (0.98.0; the owner's answer "Add a key that works in the game"): taken from the system while
+   * a watch runs, let go when it ends or the page goes. Each press marks at once, "Marked from the game".
+   */
+  const gameKey = $derived(keyFor("memory.mark-in-game"));
+  let gameKeyTaken = $state<string | null>(null);
+  let gameKeySaid = $state<string | null>(null);
+
+  $effect(() => {
+    const want = liveData && gameKey ? `${game.id} ${gameKey}` : null;
+    if (want === gameKeyTaken) return;
+    untrack(() => {
+      if (want && gameKey) {
+        void takeGameKey(
+          game.id,
+          gameKey,
+          t("memory-mark-from-game"),
+          (mark) => {
+            markSaid = mark.ok
+              ? {
+                  ok: true,
+                  words: t("memory-mark-from-game-done", {
+                    when: formatClock(mark.at),
+                  }),
+                }
+              : { ok: false, words: mark.refusal ?? "" };
+            if (mark.ok) void read(true);
+          },
+        ).then((answer) => {
+          gameKeySaid =
+            answer.state === "failed" ? answer.failure.detail : null;
+        });
+      } else void releaseGameKey();
+      gameKeyTaken = want;
+    });
+  });
+
+  onMount(() => () => void releaseGameKey());
+
   const chosen = $derived(here().focus.watch);
   /** The kept watch whose whole report shows: the one chosen, else the newest, unless it is the one running. */
   const reportFor = $derived.by(() => {
@@ -323,6 +365,13 @@
           >
         </div>
         <p class="small muted">{t("memory-mark-how")}</p>
+        {#if liveData && gameKey}
+          <p class="small">
+            {gameKeySaid
+              ? t("memory-mark-from-game-refused", { why: gameKeySaid })
+              : t("memory-mark-from-game-how", { key: gameKey })}
+          </p>
+        {/if}
         <div class="toggles" role="group" aria-label={t("memory-quick-label")}>
           {#each QUICK_MARKS as key (key)}
             <button

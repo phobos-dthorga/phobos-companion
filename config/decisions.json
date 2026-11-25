@@ -2,27 +2,6 @@
   "schemaVersion": 1,
   "decisions": [
     {
-      "id": "memory-mark-in-game",
-      "question": "Mark a moment in a memory watch without leaving the game?",
-      "context": "Today a mark needs the Companion in front: Alt+Tab, B, a few words, Enter, then back to the game. The page's own keys are one key each, but a key that works while the game is in front has to be two held together, or the game would lose that key. It needs a new library (Tauri's global shortcut plugin).",
-      "options": [
-        {
-          "id": "global-key",
-          "label": "Add a key that works in the game",
-          "detail": "Ctrl+Alt+M (changeable) marks the moment at once as 'marked from the game', without leaving the game; add words on the Memory page afterwards"
-        },
-        {
-          "id": "window-only",
-          "label": "Keep marks in the Companion's window",
-          "detail": "Alt+Tab, B, words, Enter, as now"
-        }
-      ],
-      "lean": "global-key",
-      "why": "Switching windows mid-reload is the moment marks matter most and the moment you are least free to type; one press keeps the time exact and spares the mouse",
-      "from": "docs/design-record.md, Memory",
-      "asked": "2026-11-19"
-    },
-    {
       "id": "code-map-languages",
       "question": "Teach the Code map to read TypeScript, Svelte and Rust, so the tools entry's own code can be followed?",
       "context": "0.24.0 lists your tools (the Companion, the kit and the logger) beside your games. The Code map reads C#, XML Defs, Lua and Python, so it follows the kit's Python but not the Companion's Svelte, TypeScript or Rust: for phobos-companion it says nothing was read. Ostranauts and RimWorld are C#; none of your games' mods use these three.",

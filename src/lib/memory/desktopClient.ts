@@ -1,9 +1,11 @@
+import { Channel } from "@tauri-apps/api/core";
 import {
   ask,
   BROWSER,
   inBrowser,
   progressChannel,
 } from "../shell/desktopClient";
+import type { Failed } from "../shell/types";
 import type { OnProgress } from "../shell/progress";
 import type {
   MemoryReading,
@@ -87,5 +89,36 @@ export async function markWatch(
     "memory_mark",
     { game, watch, text, at },
     (result) => ({ state: "ready", result }),
+  );
+}
+
+/** A mark made from the game (0.98.0): when, and whether the tools kept it. */
+export type GameMark = { at: number; ok: boolean; refusal: string | null };
+
+/**
+ * Takes the key that marks this game's running watch while the game is in front (0.98.0): the host holds it for the system and
+ * marks the moment on each press, with these words; each press is told to `onMarked`.
+ */
+export async function takeGameKey(
+  game: string,
+  key: string,
+  words: string,
+  onMarked: (mark: GameMark) => void,
+): Promise<{ state: "ready" } | Failed> {
+  const channel = new Channel<GameMark>();
+  channel.onmessage = onMarked;
+  return ask<null, { state: "ready" } | Failed>(
+    "memory_take_game_key",
+    { game, key, words, onMarked: channel },
+    () => ({ state: "ready" }),
+  );
+}
+
+/** Lets go of that key (0.98.0). */
+export async function releaseGameKey(): Promise<void> {
+  await ask<null, { state: "ready" } | Failed>(
+    "memory_release_game_key",
+    {},
+    () => ({ state: "ready" }),
   );
 }

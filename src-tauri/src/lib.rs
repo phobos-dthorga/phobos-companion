@@ -17,6 +17,7 @@ mod connections_page;
 mod decisions_page;
 mod explorer_page;
 mod game_files_page;
+mod game_key;
 mod games_page;
 mod history_page;
 mod home;
@@ -1405,6 +1406,24 @@ async fn memory_stop(game: String, watch: Option<String>) -> Result<memory_page:
     blocking(move || memory_page::stop(&game, watch.as_deref())).await
 }
 
+/// Takes the key that marks a game's running watch from the game itself (0.98.0); a press is told through the channel.
+#[tauri::command]
+fn memory_take_game_key(
+    app: tauri::AppHandle,
+    game: String,
+    key: String,
+    words: String,
+    on_marked: Channel<game_key::Marked>,
+) -> Result<(), Failure> {
+    game_key::take(&app, &game, &key, &words, on_marked)
+}
+
+/// Lets go of that key (0.98.0).
+#[tauri::command]
+fn memory_release_game_key(app: tauri::AppHandle) {
+    game_key::release(&app);
+}
+
 /// Puts the owner's words beside a memory watch's figures.
 #[tauri::command]
 async fn memory_mark(
@@ -1852,6 +1871,8 @@ pub fn run() {
             memory_start,
             memory_stop,
             memory_mark,
+            memory_take_game_key,
+            memory_release_game_key,
             explorer_offer,
             explorer_start,
             explorer_ask,
@@ -1891,6 +1912,7 @@ pub fn run() {
             report_theirs
         ])
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         // The updater (0.85.0, `docs/releases.md`): the host alone uses it; the window has no permission to call it.
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {

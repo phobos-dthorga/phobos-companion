@@ -126,6 +126,9 @@ export async function mockHost(
     safe_copies_status: { result: [] },
     // The status bar's activity (0.86.0) is read every second on every page; a test that is not about it sees none yet.
     activity: { result: [] },
+    // The Memory page takes the key that marks from the game while a watch runs (0.98.0).
+    memory_take_game_key: { result: null },
+    memory_release_game_key: { result: null },
     // Home's setup line (0.87.0) reads once; a test that is not about it sees everything here.
     setup_status: {
       result: {

@@ -105,6 +105,9 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   once unless the owner chose Windows' figures only, only while the manifest calls it `runs`. **Never start one by itself** unless
   the owner chooses that on the Decisions page. Reading a watch only reads; stopping and marking write only into the watch's own
   folder in the kit's cache, while the manifest calls them `writes`. Every length, text and name is checked first.
+- **Memory page: a key that marks from the game** (0.98.0; the owner's answer on the Decisions page): while a watch runs, the
+  host takes one system key, held with Ctrl or Alt (`game_key::plugin_key` refuses one the game uses alone), and a press runs the
+  page's own mark through the manifest. It is let go when the watch ends, the page goes or the program closes.
 - **Explorer: a snapshot of the running game, only on the owner's press and confirmation** (owner, 20 Nov 2026: debugging tools
   that look at "variables in memory"; `docs/debugging.md`). The game's `look-inside` tool, only while the manifest calls it
   `runs`; it pauses the game for about half a second and writes nothing to the game. **Never take one by itself.** One is held at

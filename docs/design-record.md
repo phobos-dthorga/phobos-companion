@@ -490,6 +490,13 @@ ten saves a page; space as plain bars rather than a chart.
 
 ## Memory (built 19 Nov 2026, 0.23.0)
 
+**A mark from the game** (built 0.98.0; the owner's answer on the Decisions page, "Add a key that works in the game"): while a
+watch runs, **Ctrl+Alt+M** marks the moment at once, "Marked from the game", without leaving the game. Agent choices, owner to
+revise: the key is the system's only while a watch runs (taken when the page sees one, let go when it ends, the page goes or the
+program closes); it must be held with Ctrl or Alt, and a default may hold two of them (the only one that does), so no game loses a
+key; words are added on the Memory page afterwards. It needs Tauri's global shortcut plugin, used from the host only. **Risk:
+low**: it marks, nothing else, and takes the key from other programs only while a watch runs. **Not tested in game.**
+
 **The owner decided (19 Nov 2026) that memory profiling is done from the Companion**, not by asking agent sessions to run watches.
 The tool kit already had the watch (phobos-modkit 1.42.0, fixed in 1.45.1); 1.47.0 added what a program needs to follow and steer it.
 

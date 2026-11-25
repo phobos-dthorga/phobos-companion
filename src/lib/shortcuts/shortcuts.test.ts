@@ -72,7 +72,8 @@ describe("the defaults", () => {
     for (const a of ACTIONS) {
       if (!a.defaultKey || a.defaultKey === "+") continue;
       const held = a.defaultKey.split("+").slice(0, -1);
-      expect(held.length, a.id).toBeLessThanOrEqual(1);
+      // A key the system holds while the game is in front (0.98.0) holds two, so the game never loses a key of its own.
+      expect(held.length, a.id).toBeLessThanOrEqual(a.system ? 2 : 1);
       expect(["Shift", "Ctrl", "Alt"]).toEqual(expect.arrayContaining(held));
     }
   });

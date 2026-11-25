@@ -24,6 +24,11 @@ export type Action = {
   words: string;
   /** A feature for AI agent sessions (0.37.0): listed and offered only while those are shown. */
   forAgents?: true;
+  /**
+   * A key the system holds for the host while the game is in front (0.98.0), never dispatched in the window: held with two of Ctrl,
+   * Alt and Shift, so it never takes a key a game uses alone or with one.
+   */
+  system?: true;
 };
 
 export const ACTIONS: Action[] = [
@@ -487,6 +492,15 @@ export const ACTIONS: Action[] = [
     scope: "memory",
     defaultKey: "b",
     words: "shortcut-memory-mark",
+  },
+  // 0.98.0: marks the running watch while the game is in front, so held with Ctrl and Alt (the owner's answer on the Decisions
+  // page). The system holds it while a watch runs; the Memory page never runs it itself.
+  {
+    id: "memory.mark-in-game",
+    scope: "memory",
+    defaultKey: "Ctrl+Alt+m",
+    words: "shortcut-memory-mark-in-game",
+    system: true,
   },
   {
     id: "memory.stop",

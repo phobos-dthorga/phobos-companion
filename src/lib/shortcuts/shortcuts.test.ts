@@ -80,7 +80,7 @@ describe("the defaults", () => {
 
 describe("the owner's keys", () => {
   it("does an action only in a scope that is working", () => {
-    expect(actionFor("7", NOTHING_SAVED, new Set(["everywhere"]))).toBe(
+    expect(actionFor("8", NOTHING_SAVED, new Set(["everywhere"]))).toBe(
       "page.timeline",
     );
     expect(actionFor("j", NOTHING_SAVED, new Set(["everywhere"]))).toBeNull();
@@ -116,7 +116,7 @@ describe("the owner's keys", () => {
     expect(actionFor("`", saved, new Set(["everywhere"]))).toBe(
       "page.timeline",
     );
-    expect(actionFor("7", saved, new Set(["everywhere"]))).toBeNull();
+    expect(actionFor("8", saved, new Set(["everywhere"]))).toBeNull();
     saved = withKey(saved, "page.home", null);
     expect(keysNow(saved).get("page.home")).toBeNull();
     saved = withKey(withDefault(saved, "page.timeline"), "page.home", "1");

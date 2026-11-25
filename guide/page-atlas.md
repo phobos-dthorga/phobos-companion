@@ -14,4 +14,4 @@ see: page-reports
 - **On a PC that cannot draw the globe**, the page says so and lists the same facts in tables.
 
 ### Keys
-- **3** opens the Atlas.
+- **6** opens the Atlas.

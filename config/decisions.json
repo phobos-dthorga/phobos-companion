@@ -2,27 +2,6 @@
   "schemaVersion": 1,
   "decisions": [
     {
-      "id": "page-keys",
-      "question": "Renumber the page keys to follow the grouped page bar?",
-      "context": "The page bar is now grouped into Play (Home, Mods, Tests, Logs, Memory, Game files, Atlas), Code (Changes, Timeline, Code map, Make-up) and Tools (Reports, Settings, Decisions). The keys still follow the old order: 1 Home, 2 Reports, 3 Atlas, 4 Tests, 5 Mods, 6 Changes, 7 Timeline, 8 Code map, 9 Settings, G Logs, M Make-up, D Decisions. Memory (U) and Game files (W) keep their letters either way.",
-      "options": [
-        {
-          "id": "renumber",
-          "label": "Renumber them",
-          "detail": "1 Home, 2 Mods, 3 Tests, 4 Logs, 5 Atlas, 6 Changes, 7 Timeline, 8 Code map, 9 Make-up; E Reports, S Settings, D Decisions. G and M are freed. Keys you changed yourself stay as you set them"
-        },
-        {
-          "id": "keep",
-          "label": "Keep them as they are",
-          "detail": "No key changes; the numbers no longer match the bar's order"
-        }
-      ],
-      "lean": "renumber",
-      "why": "The number keys would count along the bar you see; they are a day old, so little is lost in learning them again",
-      "from": "docs/design-record.md, Decisions page",
-      "asked": "2026-11-19"
-    },
-    {
       "id": "decisions-everywhere",
       "question": "Should agents in every repository put the choices they make for you on this page?",
       "context": "Today only the Companion's own agent choices are here. As a shared rule, every repository (phobos-rimworld and the rest) would list its agent choices and open questions in its own config/decisions.json, and this page would gather them all.",

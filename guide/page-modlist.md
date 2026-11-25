@@ -58,6 +58,6 @@ game's mod menu shows it, with its authors and the versions it was made for.
 Home shows a note when a game's list has problems or warnings.
 
 ### Keys
-- **S** opens Mod list.
+- **3** opens Mod list.
 - **R** reads again.
 - In a list: **Up**, **Down**, **Page Up**, **Page Down**, **Home**, **End**, **Space** and **Enter**, as above.

@@ -59,7 +59,7 @@ test.describe("Keyboard shortcuts", () => {
     page,
   }) => {
     await open(page);
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     await expect(settingsHeading(page)).toBeVisible();
     await page.keyboard.press("?");
     const list = page.getByRole("dialog", { name: "Keyboard shortcuts" });
@@ -74,7 +74,7 @@ test.describe("Keyboard shortcuts", () => {
 
   test("never acts while typing in a box", async ({ page }) => {
     await open(page);
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     await openTab(page, "Folders and files");
     await page.locator("#setting-historyPath .line").click();
     await page
@@ -90,7 +90,7 @@ test.describe("Keyboard shortcuts", () => {
     page,
   }) => {
     await open(page);
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     await openTab(page, "Look and keys");
     await page
       .getByRole("button", { name: "Change keyboard shortcuts" })
@@ -130,7 +130,7 @@ test.describe("Keyboard shortcuts", () => {
     page,
   }) => {
     await open(page);
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     const selected = page.getByRole("tab", { selected: true });
     await expect(selected).toHaveAccessibleName(/^Look and keys/);
     await page.keyboard.press("'");
@@ -147,7 +147,7 @@ test.describe("Keyboard shortcuts", () => {
 
   test("does nothing when the owner turned them off", async ({ page }) => {
     await open(page, { format: 1, enabled: false, keys: {} });
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     await expect(settingsHeading(page)).toHaveCount(0);
   });
 });

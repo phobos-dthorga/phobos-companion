@@ -8,7 +8,7 @@ see: page-modlist, task-fix-mod-list, task-saved-lists, task-edit-mod-list
 **Steam must be running and signed in.** The Companion asks it directly, as RimSort does, by borrowing the game's own Steam library for a few seconds: Steam shows you as playing the game meanwhile. Nothing asks for your Steam password.
 
 **To subscribe:**
-1. Open **Mod list** (the **S** key).
+1. Open **Mod list** (the **3** key).
 2. Press **Subscribe** beside a missing mod on **What's wrong**, or beside a mod a saved list names that is not on this PC (**Saved lists**, after **Compare**; **Subscribe to all** for several). Or, in **Edit the list**, paste a Workshop link or number into **Subscribe by Workshop link or number** and press **Subscribe**.
 3. A bar shows Steam downloading. When it is done, the page offers what comes next: What's wrong checks again, Saved lists compares again, and Edit the list offers **Switch on**.
 

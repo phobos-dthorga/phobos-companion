@@ -14,4 +14,4 @@ Reports that need something typed or chosen first, read online or change anythin
 - **A RimWorld save holds only half of a colonist's mood.** The mood report counts the remembered events exactly and gives the rest (rooms, pain, beliefs) as one figure, unless D'thorga Framework wrote its colony mood file at that save.
 
 ### Keys
-- **2** opens Reports.
+- **G** opens Reports.

@@ -468,7 +468,10 @@ page bar grouped in the same change.
 | How does it change the way they work? | Agents leave questions on a page instead of in prose; sessions start by acting on the answers |
 
 **Agent choices, owner to revise:** the lean chosen to begin with (one press to agree, at the cost of agreeing too easily); the D
-key; the groups' names and order (Play, Code and Tools); keys left as they were until the owner answers `page-keys` on the page.
+key; the groups' names and order (Play, Code and Tools); keys left as they were until the owner answers `page-keys` on the page. **The owner answered "Renumber them"**, and on
+25 Nov 2026, by card, since the Mod list had taken S and every letter was in use somewhere, chose **numbers along the bar**
+(built 0.94.0): 1 Home, 2 Mods, 3 Mod list, 4 Tests, 5 Logs, 6 Atlas, 7 Changes, 8 Timeline, 9 Code map; **S** Settings,
+**G** Reports; Search, when built, **Shift+S**. Keys the person changed themselves stay as they set them.
 
 ## Game files (built 19 Nov 2026, 0.22.0)
 

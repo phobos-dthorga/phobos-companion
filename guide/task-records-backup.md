@@ -7,7 +7,7 @@ see: term-records, page-settings
 ---
 Your test verdicts, the history log, screen notes, themes, shortcuts and settings live in this PC's local app data, which most backups leave out.
 
-1. Open **Settings** (the **9** key), on the **Backups and space** tab, at **Back up your records**.
+1. Open **Settings** (the **S** key), on the **Backups and space** tab, at **Back up your records**.
 2. Press **Choose the folder** and pick a folder your backup keeps: a synced folder (OneDrive, Dropbox or the like), a network drive or an external disk.
 3. That's all: **the Companion copies them every 6 hours while it is open**, and makes up a missed copy soon after it next opens. **Back up now** makes one at once.
 

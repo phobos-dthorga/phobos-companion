@@ -9,7 +9,7 @@ see: task-other-programs, task-repository-ready, task-ai-services, task-chat-age
 you.** The Companion brings its own Python and tools; each program here is needed only by the pages it names, and nothing else
 stops working without it.
 
-1. Open **Settings** (the **9** key) and the **Setup** tab. Or press **Open Setup** on Home, which shows a line when a program an
+1. Open **Settings** (the **S** key) and the **Setup** tab. Or press **Open Setup** on Home, which shows a line when a program an
    everyday page uses is missing (Steam or the .NET 10 runtime). A page that uses a missing program says so at its top, with **Set it up in
    Settings → Setup** (the Memory page, when the .NET 10 SDK isn't here). git has its own line on every page while it is missing.
 2. Missing programs come first, each with what uses it. Press **Fetch** and its name, for example **Fetch Steam…**.

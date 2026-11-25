@@ -27,7 +27,7 @@ see: task-set-up, term-repository, term-changelog-entry, task-add-game
 ### For AI agent sessions (optional)
 - `config/decisions.json`, the questions sessions leave you, for the [Decisions page](page-decisions).
 
-Then add the repository to its game: **Settings** (the **9** key), on the **Games** tab.
+Then add the repository to its game: **Settings** (the **S** key), on the **Games** tab.
 
 ### Let the Companion start them
 **Settings → Setup**, under **Your repositories**, lists each repository on your games list, whether it is kept with git, and which

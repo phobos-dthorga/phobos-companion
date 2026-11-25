@@ -20,5 +20,5 @@ see: task-set-up, task-change-folder, task-change-key, task-change-theme, task-a
 - **AI:** [the AI that explains things on pages](task-ai-services): a model on this computer or an online service with your key, its model and answer length; [the lines that let an AI program you use ask the tool kit's reports](task-ai-programs), with **Copy the list** and **Copy the command**; and [the Chat page and its agent](task-chat-agent), **Off** until you turn it on.
 
 ### Keys
-- **9** opens Settings.
+- **S** opens Settings.
 - **;** and **'** step to the tab before or after; **Alt + 1** to **Alt + 9** jump to a tab by its place. **Left** and **Right** move along the tabs when one has the keyboard. Each tab is a step of the trail, so **Back** returns to the tab you left.

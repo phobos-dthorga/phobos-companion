@@ -81,7 +81,8 @@ flowchart LR
 
 ## Agent choices, owner to revise
 
-**The owner's choices** (on the Decisions page): the page key is **S**, "for search"; a new search **starts in the part you came
+**The owner's choices** (on the Decisions page): the page key is **S**, "for search", which became **Shift+S** once the page keys
+were renumbered on 25 Nov 2026 and Settings took S (the owner's choice by card); a new search **starts in the part you came
 from** (Play from the Mods or Logs page, Code from Changes), with everywhere one press away.
 
 The name **Search**; Go to anything staying beside it; the context names and what each holds; starting in the context you came from;

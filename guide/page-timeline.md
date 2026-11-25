@@ -15,4 +15,4 @@ see: task-see-screenshots, term-install-record
 Installs, go-backs, backups, builds and encodings are recorded from 19 Nov 2026 on, in the history log in the Companion's own folder.
 
 ### Keys
-- **7** opens the Timeline.
+- **8** opens the Timeline.

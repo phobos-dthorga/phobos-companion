@@ -177,7 +177,7 @@ test.describe("Setup", () => {
         result: { ...running, ended: { exitCode: 0, signal: null } },
       },
     });
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     await page.getByRole("tab", { name: "Setup" }).click();
     const panel = page.getByRole("region", { name: "What the pages need" });
     await expect(panel).toContainText("4 not here");
@@ -227,7 +227,7 @@ test.describe("Setup", () => {
         },
       },
     });
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     await page.getByRole("tab", { name: "Setup" }).click();
     const panel = page.getByRole("region", { name: "What the pages need" });
     const fetching = panel.getByRole("group", { name: "Fetching Steam" });
@@ -263,7 +263,7 @@ test.describe("Setup", () => {
         },
       },
     });
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     await page.getByRole("tab", { name: "Setup" }).click();
     const panel = page.getByRole("region", { name: "Your repositories" });
     await expect(panel).toContainText("first-mods");
@@ -326,7 +326,7 @@ test.describe("Setup", () => {
       },
       chat_choose: { result: { ...chat, chosen: "claude" } },
     });
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     await page.getByRole("tab", { name: "Setup" }).click();
     const panel = page.getByRole("region", { name: "AI, if you want it" });
     await panel.getByRole("button", { name: "Look for Ollama" }).click();
@@ -363,7 +363,7 @@ test.describe("Setup", () => {
           '{\n  "schemaVersion": 1,\n  "settings": [{ "key": "artWorkPath" }]\n}\n',
       },
     });
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     await page.getByRole("tab", { name: "Setup" }).click();
     const panel = page.getByRole("region", { name: "Your repositories" });
     // The game's tools can't install mods: no installs form is offered.
@@ -404,7 +404,7 @@ test.describe("Setup", () => {
         },
       },
     });
-    await page.keyboard.press("9");
+    await page.keyboard.press("s");
     await page.getByRole("tab", { name: "Setup" }).click();
     const panel = page.getByRole("region", { name: "What the pages need" });
     const steam = panel.locator("li", { hasText: "Steam" });

@@ -36,13 +36,13 @@ export const ACTIONS: Action[] = [
   {
     id: "page.reports",
     scope: "everywhere",
-    defaultKey: "2",
+    defaultKey: "g",
     words: "shortcut-page-reports",
   },
   {
     id: "page.atlas",
     scope: "everywhere",
-    defaultKey: "3",
+    defaultKey: "6",
     words: "shortcut-page-atlas",
   },
   {
@@ -54,43 +54,43 @@ export const ACTIONS: Action[] = [
   {
     id: "page.mods",
     scope: "everywhere",
-    defaultKey: "5",
+    defaultKey: "2",
     words: "shortcut-page-mods",
   },
   {
     id: "page.modlist",
     scope: "everywhere",
-    defaultKey: "s",
+    defaultKey: "3",
     words: "shortcut-page-modlist",
   },
   {
     id: "page.changes",
     scope: "everywhere",
-    defaultKey: "6",
+    defaultKey: "7",
     words: "shortcut-page-changes",
   },
   {
     id: "page.timeline",
     scope: "everywhere",
-    defaultKey: "7",
+    defaultKey: "8",
     words: "shortcut-page-timeline",
   },
   {
     id: "page.codemap",
     scope: "everywhere",
-    defaultKey: "8",
+    defaultKey: "9",
     words: "shortcut-page-codemap",
   },
   {
     id: "page.settings",
     scope: "everywhere",
-    defaultKey: "9",
+    defaultKey: "s",
     words: "shortcut-page-settings",
   },
   {
     id: "page.logs",
     scope: "everywhere",
-    defaultKey: "g",
+    defaultKey: "5",
     words: "shortcut-page-logs",
   },
   {

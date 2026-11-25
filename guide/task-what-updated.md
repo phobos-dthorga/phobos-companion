@@ -5,7 +5,7 @@ go: mods
 words: updated, steam update, workshop, since last played, new version, changed, update check, temporary patch, broke, xml patch, AI
 see: page-gamefiles, page-mods, task-ai-services
 ---
-1. Open **Mods** (the **5** key). **Since you last played**, in Before you play, says what updated since the session before, and whether any update changed something our mods patch.
+1. Open **Mods** (the **2** key). **Since you last played**, in Before you play, says what updated since the session before, and whether any update changed something our mods patch.
 2. **See what changed** opens the change itself. **Keep the new builds** keeps them to compare with later.
 3. **Check what they mean for ours** asks the tools what the updates mean for our mods. It takes a couple of minutes the first time, while the tools read the new builds, and changes nothing. The button is always there, even when nothing is new.
 

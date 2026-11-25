@@ -26,8 +26,8 @@ describe("dispatching a key", () => {
       inDialog: false,
       run: { "page.timeline": () => done.push("page") },
     });
-    expect(dispatch(press("7"), NOTHING_SAVED, false)).toBe(true);
-    expect(dispatch(press("7"), NOTHING_SAVED, true)).toBe(false);
+    expect(dispatch(press("8"), NOTHING_SAVED, false)).toBe(true);
+    expect(dispatch(press("8"), NOTHING_SAVED, true)).toBe(false);
     const viewer = register({
       scope: "code",
       inDialog: true,
@@ -37,7 +37,7 @@ describe("dispatching a key", () => {
     expect(dispatch(press("j"), NOTHING_SAVED, false)).toBe(false);
     viewer();
     page();
-    expect(dispatch(press("7"), NOTHING_SAVED, false)).toBe(false);
+    expect(dispatch(press("8"), NOTHING_SAVED, false)).toBe(false);
     expect(done).toEqual(["page", "next"]);
   });
 
@@ -59,7 +59,7 @@ describe("dispatching a key", () => {
       ),
     ).toBe(false);
     expect(
-      dispatch(press("7"), { ...NOTHING_SAVED, enabled: false }, false),
+      dispatch(press("8"), { ...NOTHING_SAVED, enabled: false }, false),
     ).toBe(false);
     page();
     expect(done).toEqual([]);

@@ -31,5 +31,5 @@ The active mods whose [textures](term-textures) want encoding, each with how man
 A repository opts in with `config/installs.json`: see [make a repository ready](task-repository-ready).
 
 ### Keys
-- **5** opens Mods.
+- **2** opens Mods.
 - **;** and **'** step to the tab before or after; **Alt + 1** to **Alt + 9** jump to a tab by its place. **Left** and **Right** move along the tabs when one has the keyboard. Each tab is a step of the trail, so **Back** returns to the tab you left.

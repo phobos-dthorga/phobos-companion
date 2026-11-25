@@ -9,7 +9,7 @@ see: task-explain-fault, task-going-online, task-ai-programs, page-settings
 
 **A model on this computer is free, and nothing leaves the computer.** Install **Ollama** or **LM Studio** yourself, download a model in it, and leave it running. **An online service** (Claude, OpenAI, Gemini) needs your own key from that service's website, and the service charges you for each question.
 
-1. Open **Settings** (the **9** key), on the **AI** tab.
+1. Open **Settings** (the **S** key), on the **AI** tab.
 2. Under **AI services**, press the service you want.
 3. For an online service:
    - paste your key in **A key for …** and press **Keep this key**. It goes into your computer's own key store (Windows Credential Manager on Windows) and is **never shown again**;

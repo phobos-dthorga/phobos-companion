@@ -20,4 +20,4 @@ The Companion never posts anything: you read each form and press Submit there yo
 **Explaining a fault.** Once [an AI is chosen](task-ai-services), **Explain this fault** shows what it would send and sends it only on **Send**: see [Have a fault in the log explained](task-explain-fault).
 
 ### Keys
-- **G** opens Logs.
+- **5** opens Logs.

@@ -7,7 +7,7 @@ see: term-tool-kit, page-settings, page-reports
 ---
 **An AI program you already use can ask the [tool kit's](term-tool-kit) reports in plain words**: why the game logged errors, what is in a save, what changed. You paste a few lines into the program once; **it starts the kit's server by itself** whenever it needs it.
 
-1. Open **Settings** (the **9** key), on the **AI** tab.
+1. Open **Settings** (the **S** key), on the **AI** tab.
 2. For Claude Desktop, LM Studio, Gemini CLI and most others: press **Copy the list**, then paste it into the program's own list of servers, beside any already there.
 3. For Claude Code: press **Copy the command**, then run it once in a terminal.
 4. Restart the AI program, then ask it something like "why did my game log errors?".

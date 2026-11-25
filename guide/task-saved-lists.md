@@ -6,7 +6,7 @@ words: saved list, mod list preset, load mod list, save mod list, modlist, rml, 
 see: page-modlist, task-edit-mod-list, task-fix-mod-list
 ---
 1. **Close the game and RimSort** first: loading waits until both are closed.
-2. Open **Mod list** (the **S** key) and press **Saved lists**.
+2. Open **Mod list** (the **3** key) and press **Saved lists**.
 3. **To keep your list:** type a **Name**, then press **Save the list**. If the name is in use, press **Replace the one with that name**, or choose another.
 4. **To load one:** find it under **Saved by name**, **Kept at each game start**, **From your saves** or **RimSort's history**, and press **Compare**. Or press **Open a file…** for a list file.
 5. Read what loading would do: how many mods switch on, switch off and move, and which are **not on this PC**, each with why.

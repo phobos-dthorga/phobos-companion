@@ -16,4 +16,4 @@ see: page-logs, task-code-behind
 - Patches on another author's method say who else patches it and whether their last update changed it; **Read their code** opens it. In the picture, **a red dotted ring** marks a method many other mods patch, or one the last update changed.
 
 ### Keys
-- **8** opens the Code map. On the page: **A** around it, **F** flow of calls, **L** as a list, **+** and **-** zoom, **0** fits it all, **Backspace** goes back in the picture.
+- **9** opens the Code map. On the page: **A** around it, **F** flow of calls, **L** as a list, **+** and **-** zoom, **0** fits it all, **Backspace** goes back in the picture.

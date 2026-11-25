@@ -6,7 +6,7 @@ words: sort mods, sorter, load order, rimsort sort, auto sort, rules, load after
 see: page-modlist, term-load-order-rule, task-edit-mod-list
 ---
 1. **Close the game and RimSort** first: the order waits until both are closed.
-2. Open **Mod list** (the **S** key) and press **Sort**.
+2. Open **Mod list** (the **3** key) and press **Sort**.
 3. Press **Sort: fewest moves**, which keeps your order and moves only what a rule says is out of place. Or press **Full re-sort** to rebuild the whole order, as RimSort does.
 4. Read the moves. **Moves a rule asks for** come first, each with whose rule. Below them, folded: mods moved **into their group** (the game's own and frameworks first, "bottom" mods last) and, in a full re-sort, mods moved **only to put names in order**.
 5. Press **Use this order** to write it, or **Not now**. A backup of the list is kept first, and **Undo the last change** takes it back.

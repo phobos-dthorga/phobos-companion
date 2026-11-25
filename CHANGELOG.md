@@ -21,6 +21,16 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.94.0] - 2026-11-25
+
+### Changed
+
+- **The page keys count along the page bar** (the owner's answer on the Decisions page, "Renumber them", and their layout by card,
+  25 Nov 2026). **1** Home, **2** Mods, **3** Mod list, **4** Tests, **5** Logs, **6** Atlas, **7** Changes, **8** Timeline,
+  **9** Code map; **S** Settings and **G** Reports. Memory (U), Game files (W), Explorer (V), Make-up (M), Decisions (D), About
+  (I) and the Shift keys are as before. Keys you changed yourself in Settings stay as you set them. The Guide says the new keys.
+  **Not tested on screen.**
+
 ## [0.93.0] - 2026-11-25
 
 ### Added

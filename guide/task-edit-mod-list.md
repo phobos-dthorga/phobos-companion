@@ -6,7 +6,7 @@ words: enable mod, disable mod, load order, move mod, reorder, activate, deactiv
 see: page-modlist, task-fix-mod-list, task-sort-mod-list
 ---
 1. **Close the game and RimSort** first: changes wait until both are closed.
-2. Open **Mod list** (the **S** key) and press **Edit the list**.
+2. Open **Mod list** (the **3** key) and press **Edit the list**.
 3. **Choose the mods**: click a row, or walk the list with **Up** and **Down** and press **Space**. Choose as many as you like; **Find a mod** narrows the list.
 4. Move them, any of these ways:
    - **Carry (Enter)**, then **Up**, **Down**, **Page Up**, **Page Down**, **Home** or **End**, and **Enter** to put them down (**Escape** cancels).

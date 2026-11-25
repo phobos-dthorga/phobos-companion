@@ -5,7 +5,7 @@ go: settings?panel=themes
 words: theme, colours, colors, dark, contrast, appearance, look
 see: term-theme
 ---
-1. Open **Settings** (the **9** key), on the **Look and keys** tab, at **Appearance**. Each theme is drawn in its own colours.
+1. Open **Settings** (the **S** key), on the **Look and keys** tab, at **Appearance**. Each theme is drawn in its own colours.
 2. Press **Use this** on one. The window changes at once, and it is kept for next time.
 
 ### Make your own

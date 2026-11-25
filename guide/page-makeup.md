@@ -9,6 +9,8 @@ see: page-tests
 **What the game's mods are made of.** Every committed file, by mod and kind, measured in lines, size on disk or files:
 
 - **What it's made of**, as boxes within boxes, coloured by kind or by recent changes.
+- **Size as installed** (since 0.97.0): what each mod takes in the game's Mods folder, encoded textures and all, beside its
+  folder in the repository. Shown for a repository whose `config/installs.json` says where its mods install.
 - **Each part's mix** of code, data, words, pictures and sounds.
 - **How it grew**, day by day.
 - **Tested in game:** how much of each mod has passed, is waiting or failed.

@@ -43,11 +43,9 @@ reads them.
   owner flagged, with its picture (`picture.png` in the note's folder: read it), its address and their words. Raise them with the
   owner before other work, and when one is dealt with, `screen-notes resolve ID --how "what was done, and in which version"`.
   **Never delete a note.**
-- **Put every choice you make for the owner to revise, and every question you need their word on, in `config/decisions.json`**
-  (owner's go-ahead for the Decisions page, 19 Nov 2026; phobos-modkit's `docs/decisions.md`): a question, two or more options,
-  your lean and why. Read the answers at the start of a session with `python -m phobos_modkit decisions list --root ../../..`
-  (from `external/phobos-modkit/python`), **act on each answer and remove its decision from the file in the same commit.** Design
-  records still label agent choices as now.
+- **Choices for the owner to revise go in `config/decisions.json`**: a shared rule since 25 Nov 2026 (the owner's answer "Yes,
+  every repository"; `every-session.md`). Here, read the answers with `python -m phobos_modkit decisions list --root ../../..`
+  from `external/phobos-modkit/python`.
 - Every new behaviour's design record answers the shared `rules/designs.md` questions; how to work with the owner (slices, testing
   on screen, mouse and saves, labels, plain writing) is in the shared `every-session.md`.
 

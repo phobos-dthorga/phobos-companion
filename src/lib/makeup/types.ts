@@ -24,12 +24,29 @@ export type MadeFile = {
   lines: number;
 };
 
+/** One mod's size as installed (kit 1.127.0): its folder in the game, encoded textures and all, beside the repository's. */
+export type InstalledMod = {
+  mod: string;
+  found: boolean;
+  bytes: number;
+  files: number;
+  repositoryBytes: number;
+};
+
+/** Size as installed (0.97.0): null for a repository with no installs.json. */
+export type Installed = {
+  problem: string | null;
+  folder: string | null;
+  mods: InstalledMod[];
+};
+
 export type MadeNow = {
   repository: string;
   commit: string;
   kinds: Kind[];
   products: string[];
   files: MadeFile[];
+  installed?: Installed | null;
 };
 
 /** A total: [lines, bytes]. */

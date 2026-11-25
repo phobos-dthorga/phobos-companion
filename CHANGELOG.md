@@ -21,6 +21,20 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.97.0] - 2026-11-25
+
+### Added
+
+- **Make-up shows each mod's size as installed** (the owner's answer on the Decisions page, "Add it"; tool kit 1.127.0): what it
+  takes in the game's Mods folder, encoded textures and all, beside its folder in the repository, for a repository whose
+  installs.json says where its mods install. **Not tested on screen.**
+
+### Changed
+
+- **Choices for the owner to revise go in every repository's `config/decisions.json`**, a shared rule now (the owner's answer on
+  the Decisions page, "Yes, every repository"; tool kit 1.126.0), so the Decisions page gathers every repository's. It was this
+  program's own rule. Nothing changes on the page, which already read every repository on the games list.
+
 ## [0.96.0] - 2026-11-25
 
 ### Added

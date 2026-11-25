@@ -301,3 +301,51 @@ for (const [name, viewport] of [
     });
   });
 }
+
+test("Size as installed shows each mod's installed folder beside the repository's (0.97.0)", async ({
+  page,
+}) => {
+  await mockHost(page, {
+    home_status: { result: sampleHome() },
+    kit_status: healthyKit,
+    "makeup:now": {
+      result: {
+        ...sampleNow,
+        installed: {
+          problem: null,
+          folder: "C:/Game/Mods",
+          mods: [
+            {
+              mod: "Alpha",
+              found: true,
+              bytes: 52_428_800,
+              files: 120,
+              repositoryBytes: 10_485_760,
+            },
+            {
+              mod: "Beta",
+              found: false,
+              bytes: 0,
+              files: 0,
+              repositoryBytes: 1_048_576,
+            },
+          ],
+        },
+      },
+    },
+    "makeup:growth": { result: sampleGrowth },
+    "makeup:churn": { result: sampleChurn },
+    "makeup:census": { result: sampleCensus },
+    test_lists: { result: [] },
+  });
+  await page.goto("/");
+  await page.keyboard.press("m");
+  const panel = page.getByRole("region", { name: "Size as installed" });
+  await expect(panel).toContainText("Alpha");
+  await expect(panel).toContainText("50 MB");
+  await expect(panel).toContainText("not installed");
+  const results = await new AxeBuilder({ page })
+    .include("section[aria-labelledby=makeup-installed-title]")
+    .analyze();
+  expect(results.violations.map((v) => v.id)).toEqual([]);
+});

@@ -13,6 +13,7 @@
   import { readTestLists } from "../tests/desktopClient";
   import type { TestList } from "../tests/types";
   import { askMakeup } from "./desktopClient";
+  import InstalledSizes from "./InstalledSizes.svelte";
   import {
     growthOptions,
     HEAT_RAMP,
@@ -395,6 +396,10 @@
         </table>
       {/if}
     </section>
+
+    {#if now.state === "ready" && now.data.installed}
+      <InstalledSizes installed={now.data.installed} />
+    {/if}
 
     <section class="panel" aria-labelledby="makeup-mix-title">
       <h2 id="makeup-mix-title">{t("makeup-mix-title")}</h2>

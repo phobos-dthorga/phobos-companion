@@ -2,46 +2,6 @@
   "schemaVersion": 1,
   "decisions": [
     {
-      "id": "decisions-everywhere",
-      "question": "Should agents in every repository put the choices they make for you on this page?",
-      "context": "Today only the Companion's own agent choices are here. As a shared rule, every repository (phobos-rimworld and the rest) would list its agent choices and open questions in its own config/decisions.json, and this page would gather them all.",
-      "options": [
-        {
-          "id": "everywhere",
-          "label": "Yes, every repository",
-          "detail": "A shared rule in phobos-modkit's rules; design records still label choices as now"
-        },
-        {
-          "id": "companion-only",
-          "label": "Only the Companion's",
-          "detail": "Other repositories keep their choices in their design records"
-        }
-      ],
-      "lean": "everywhere",
-      "why": "Choices scattered across design records are easy to miss; one page with buttons is the point of this page",
-      "from": "docs/design-record.md, Decisions page",
-      "asked": "2026-11-19"
-    },
-    {
-      "id": "size-as-installed",
-      "question": "Add 'Size as installed' to Make-up?",
-      "context": "Make-up measures lines, size in the repository and files. Size as installed would measure what each mod takes in the game's Mods folder, encoded textures included.",
-      "options": [
-        {
-          "id": "build",
-          "label": "Add it"
-        },
-        {
-          "id": "leave",
-          "label": "Leave it out"
-        }
-      ],
-      "lean": "build",
-      "why": "Textures make installed size very different from repository size, and the install records already know where each mod is",
-      "from": "docs/design-record.md, Make-up",
-      "asked": "2026-11-19"
-    },
-    {
       "id": "memory-mark-in-game",
       "question": "Mark a moment in a memory watch without leaving the game?",
       "context": "Today a mark needs the Companion in front: Alt+Tab, B, a few words, Enter, then back to the game. The page's own keys are one key each, but a key that works while the game is in front has to be two held together, or the game would lose that key. It needs a new library (Tauri's global shortcut plugin).",

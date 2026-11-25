@@ -66,10 +66,20 @@
   /** The most changed lines the tools keep for one file (phobos-modkit `changes`). */
   const FILE_LINE_LIMIT = 600;
   /**
-   * The languages whose names the kit reads: C# exactly (0.79.0), Lua, Python and XML by name (0.81.0), and a data file by the
+   * The languages whose names the kit reads: C# exactly (0.79.0), Lua, Python and XML by name (0.81.0; TypeScript, Svelte and
+   * Rust since 0.99.0), and a data file by the
    * rules of the game's table, where it has one (0.83.0); a data file no rule reads comes back with no names.
    */
-  const NAMED_LANGUAGES = ["csharp", "lua", "python", "xml", "json"];
+  const NAMED_LANGUAGES = [
+    "csharp",
+    "lua",
+    "python",
+    "xml",
+    "json",
+    "typescript",
+    "svelte",
+    "rust",
+  ];
 
   let reading = $state<EntryCodeReading>({ state: "reading" });
   let progress = $state(started());

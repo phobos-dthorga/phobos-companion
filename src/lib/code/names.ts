@@ -145,9 +145,18 @@ export function asCandidate(name: CodeName, index: number): CodeName {
 export function languageOf(file: string): string {
   const suffix = file.slice(file.lastIndexOf(".") + 1).toLowerCase();
   return (
-    { cs: "csharp", lua: "lua", py: "python", xml: "xml", json: "json" }[
-      suffix
-    ] ?? "plain"
+    (
+      {
+        cs: "csharp",
+        lua: "lua",
+        py: "python",
+        xml: "xml",
+        json: "json",
+        ts: "typescript",
+        svelte: "svelte",
+        rs: "rust",
+      } as Record<string, string>
+    )[suffix] ?? "plain"
   );
 }
 

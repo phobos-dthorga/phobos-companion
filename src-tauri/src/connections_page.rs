@@ -22,7 +22,7 @@ const TOOL: &str = "connections";
 const HISTORY_LIMIT: &str = "200";
 /// The files whose names the kit reads: C# exactly (1.111.0), Lua, Python and XML by name (1.115.0), and a data file by the
 /// rules of the game's table, where it has one (1.117.0).
-const NAMED: [&str; 5] = [".cs", ".lua", ".py", ".xml", ".json"];
+const NAMED: [&str; 8] = [".cs", ".lua", ".py", ".xml", ".json", ".ts", ".svelte", ".rs"];
 
 /// What the kit answered, or why it refused.
 #[derive(Debug, Clone, PartialEq, Serialize)]

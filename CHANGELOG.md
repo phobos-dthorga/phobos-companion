@@ -21,6 +21,16 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.99.0] - 2026-11-25
+
+### Added
+
+- **The Code map and the code viewer read TypeScript, Svelte and Rust, and join the window's asks to the host's commands** (the
+  owner's answer on the Decisions page, "All three"; tool kit 1.128.0). The Companion's own code now shows on the Code map:
+  functions, components (U) and Rust types (T), imports, and calls by name; and every window request is joined exactly to the
+  Rust command that answers it (all 177 of the Companion's). Pressing a name in those files finds it by name. **Not tested on
+  screen.**
+
 ## [0.98.0] - 2026-11-25
 
 ### Added

@@ -22,7 +22,15 @@ export type Thing = {
   id: string;
   name: string;
   kind: string;
-  language: "csharp" | "xml" | "lua" | "python" | string;
+  language:
+    | "csharp"
+    | "xml"
+    | "lua"
+    | "python"
+    | "typescript"
+    | "svelte"
+    | "rust"
+    | string;
   file: string | null;
   line: number | null;
   end: number | null;

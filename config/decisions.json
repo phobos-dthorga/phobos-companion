@@ -1,31 +1,4 @@
 {
   "schemaVersion": 1,
-  "decisions": [
-    {
-      "id": "code-map-languages",
-      "question": "Teach the Code map to read TypeScript, Svelte and Rust, so the tools entry's own code can be followed?",
-      "context": "0.24.0 lists your tools (the Companion, the kit and the logger) beside your games. The Code map reads C#, XML Defs, Lua and Python, so it follows the kit's Python but not the Companion's Svelte, TypeScript or Rust: for phobos-companion it says nothing was read. Ostranauts and RimWorld are C#; none of your games' mods use these three.",
-      "options": [
-        {
-          "id": "all-three",
-          "label": "All three",
-          "detail": "New readers in the kit for TypeScript, Svelte and Rust: calls, imports, components and Tauri commands joined window to host"
-        },
-        {
-          "id": "typescript-svelte",
-          "label": "TypeScript and Svelte first",
-          "detail": "The window's code; Rust after"
-        },
-        {
-          "id": "later",
-          "label": "Later",
-          "detail": "Leave the Code map to your games' languages for now"
-        }
-      ],
-      "lean": "all-three",
-      "why": "The join that matters most is a window request to the host command that answers it, and that needs both sides read",
-      "from": "CHANGELOG.md, 0.24.0",
-      "asked": "2026-11-19"
-    }
-  ]
+  "decisions": []
 }

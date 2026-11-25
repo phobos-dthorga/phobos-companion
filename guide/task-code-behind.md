@@ -15,7 +15,7 @@ see: term-changelog-entry, page-changes, task-compare-pictures-sounds, term-ring
 Code is coloured as VS Code colours it, with VS Code's own grammars, in your theme's code colours (see [themes](task-change-theme)).
 
 ### Follow a name
-1. In a C#, Lua, Python or XML file, press any name once the line saying the names are being read has gone (a few seconds).
+1. In a C#, Lua, Python, XML, TypeScript, Svelte or Rust file, press any name once the line saying the names are being read has gone (a few seconds).
 2. A card says what it is, its signature and where it is declared; its other uses in the lines are ringed. In Lua, Python and
    XML it says **Found by name**; when a name may stand for several things, choose one from its list.
 3. **Go to its declaration** moves to its line, or opens its lines on the card; **How … connects** shows its picture;

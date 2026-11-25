@@ -91,6 +91,11 @@ export function kindMark(thing: Thing): string {
       return "K";
     case "data object":
       return "O";
+    // 0.99.0: a Svelte component, and a Rust struct, enum or trait.
+    case "component":
+      return "U";
+    case "type":
+      return "T";
     default:
       return "C";
   }

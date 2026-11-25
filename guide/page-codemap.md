@@ -11,6 +11,9 @@ see: page-logs, task-code-behind
 - **Before you search**, it lists the busiest code: where the work has gone lately.
 - **Press anything** in the picture to put it in the middle. The same picture is in the code viewer, as **How it connects**.
 - **C# is exact from what was last built, so build first.** Lua, and C# with nothing built, are read by name, and their lines are drawn dashed.
+- **TypeScript, Svelte and Rust** are read too (since 0.99.0), for a program like the Companion: functions, components (**U**) and
+  Rust types (**T**), their imports, and calls by name. **A window's ask is joined to the host command that answers it**, exactly,
+  so following one leads from a button's code to the Rust that does the work.
 - **Around it**, **Flow of calls** and **As a list** are three ways to see the same connections.
 - **Show its history** reads every commit that changed it.
 - Patches on another author's method say who else patches it and whether their last update changed it; **Read their code** opens it. In the picture, **a red dotted ring** marks a method many other mods patch, or one the last update changed.

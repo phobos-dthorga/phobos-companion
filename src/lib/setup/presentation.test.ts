@@ -89,13 +89,19 @@ describe("setup", () => {
   });
 
   it("offers a repository the starter files it lacks, one for agents only while those show (0.89.0)", () => {
-    const starter = (id: string, present: boolean, forAgents = false) => ({
+    const starter = (
+      id: string,
+      present: boolean,
+      forAgents = false,
+      unavailable: string | null = null,
+    ) => ({
       id,
       path: id,
       present,
       chosen: true,
       forAgents,
       content: "x",
+      unavailable,
     });
     const repository: Readiness = {
       game: "first",
@@ -107,6 +113,7 @@ describe("setup", () => {
         starter("changelog", true),
         starter("open-work", false),
         starter("decisions", false, true),
+        starter("installs", false, false, "no install adapter"),
       ],
     };
     expect(offered(repository, false).map((s) => s.id)).toEqual(["open-work"]);

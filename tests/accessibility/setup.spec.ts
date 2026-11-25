@@ -56,6 +56,7 @@ const starter = (id: string, path: string, present: boolean, more = {}) => ({
   chosen: false,
   forAgents: false,
   content: `# ${id}\n`,
+  unavailable: null,
   ...more,
 });
 const repositories = [
@@ -69,6 +70,32 @@ const repositories = [
       starter("changelog", "CHANGELOG.md", true, { chosen: true }),
       starter("open-work", "docs/development/outstanding-work.md", false),
       starter("decisions", "config/decisions.json", false, { forAgents: true }),
+      starter("installs", "config/installs.json", false, {
+        unavailable: "the tools can't install mods for first yet",
+      }),
+      starter("settings", "config/settings.json", false, {
+        content: "",
+        fields: [
+          {
+            id: "key",
+            kind: "key",
+            label: "The setting's key",
+            hint: "",
+            default: null,
+            optional: false,
+            options: [],
+          },
+          {
+            id: "kind",
+            kind: "choice",
+            label: "It names a",
+            hint: "",
+            default: "folder",
+            optional: false,
+            options: ["folder", "file"],
+          },
+        ],
+      }),
     ],
   },
 ];
@@ -323,6 +350,39 @@ test.describe("Setup", () => {
     await expect(
       (
         await new AxeBuilder({ page }).include(".setup-ai").analyze()
+      ).violations.map((v) => v.id),
+    ).toEqual([]);
+  });
+
+  test("a form's file is shown from what is filled in, and only then can be ticked (0.93.0)", async ({
+    page,
+  }) => {
+    await openSetup(page, {
+      setup_preview_starter: {
+        result:
+          '{\n  "schemaVersion": 1,\n  "settings": [{ "key": "artWorkPath" }]\n}\n',
+      },
+    });
+    await page.keyboard.press("9");
+    await page.getByRole("tab", { name: "Setup" }).click();
+    const panel = page.getByRole("region", { name: "Your repositories" });
+    // The game's tools can't install mods: no installs form is offered.
+    await expect(panel).not.toContainText("config/installs.json");
+    await panel.getByRole("button", { name: "Add starter files…" }).click();
+    const form = panel.getByRole("group", { name: "config/settings.json" });
+    const tick = panel.getByRole("checkbox", { name: "config/settings.json" });
+    await expect(tick).toBeDisabled();
+    await form.getByLabel("The setting's key").fill("artWorkPath");
+    await expect(form.getByLabel("It names a")).toHaveValue("folder");
+    await form.getByRole("button", { name: "Show the file" }).click();
+    await expect(form).toContainText('"key": "artWorkPath"');
+    await expect(tick).toBeEnabled();
+    // A change after it was shown makes it stale again.
+    await form.getByLabel("The setting's key").fill("other");
+    await expect(tick).toBeDisabled();
+    await expect(
+      (
+        await new AxeBuilder({ page }).include(".repositories").analyze()
       ).violations.map((v) => v.id),
     ).toEqual([]);
   });

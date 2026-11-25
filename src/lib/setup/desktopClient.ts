@@ -54,15 +54,34 @@ export async function writeStarters(
   game: string,
   repository: string,
   starters: string[],
+  values: Record<string, Record<string, string>>,
 ): Promise<{ state: "ready"; setup: Setup; refused: string[] } | Failed> {
   return ask<
     { setup: Setup; refused: string[] },
     { state: "ready"; setup: Setup; refused: string[] } | Failed
-  >("setup_write_starters", { game, repository, starters }, (answer) => ({
-    state: "ready",
-    setup: answer.setup,
-    refused: answer.refused,
-  }));
+  >(
+    "setup_write_starters",
+    { game, repository, starters, values },
+    (answer) => ({
+      state: "ready",
+      setup: answer.setup,
+      refused: answer.refused,
+    }),
+  );
+}
+
+/** A form's file as it would be written, with these values (0.93.0): the host checks each and fills the template. Only reads. */
+export async function previewStarter(
+  game: string,
+  repository: string,
+  starter: string,
+  values: Record<string, string>,
+): Promise<{ state: "ready"; content: string } | Failed> {
+  return ask<string, { state: "ready"; content: string } | Failed>(
+    "setup_preview_starter",
+    { game, repository, starter, values },
+    (content) => ({ state: "ready", content }),
+  );
 }
 
 /** Opens the page a program is got from by hand, in the browser. */

@@ -187,7 +187,10 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   repository on the games list **only the starters `config/repository-starters.json` carries**, at their own paths, after the
   window showed each whole and the person ticked it and pressed Write the ticked files: opened as new files, so **nothing there
   is ever replaced**, inside the repository's folder (checked after its folders are made), and **never committed**
-  (`companion_core::starters`). A new starter is a row in that file. **AI, if you want it** (0.90.0): a look for a model running
+  (`companion_core::starters`). A new starter is a row in that file. **A form** (0.93.0) is a starter with `fields` and a JSON
+  `template`: each value is checked by its field's kind in `companion_core::starters` (paths inside the repository, a command's
+  words, a key, a variable's name, a choice), the file is made again by the host from the values at Write, and the window never
+  sends the file itself. **AI, if you want it** (0.90.0): a look for a model running
   on this computer is the AI services' own **Read the models** (loopback only, no key); **Try** starts an agent from
   `config/chat-agents.json` in this program's own folder, only for the handshake, with no terminal, reports, repository or
   conversation, and ends its tree (`chat_page::try_agent`), on the person's press only: **agents and tests never press it**.

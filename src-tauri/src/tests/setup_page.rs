@@ -35,7 +35,20 @@ fn a_repository_says_which_starter_files_it_has() {
     let ready = readiness(&game, &game.repositories[0]);
     assert!(ready.found && ready.git);
     let present: Vec<(&str, bool)> = ready.starters.iter().map(|s| (s.starter.id.as_str(), s.present)).collect();
-    assert_eq!(present, [("changelog", true), ("open-work", false), ("decisions", false)]);
+    assert_eq!(
+        present,
+        [
+            ("changelog", true),
+            ("open-work", false),
+            ("decisions", false),
+            ("installs", false),
+            ("test-evidence", false),
+            ("settings", false)
+        ]
+    );
+    // A game the tools can't install mods for isn't offered the installs form.
+    let installs = ready.starters.iter().find(|s| s.starter.id == "installs").unwrap();
+    assert!(installs.unavailable.as_deref().is_some_and(|why| why.contains("can't install mods for first")));
     let value = serde_json::to_value(&ready).unwrap();
     // The folder stays with the host; each starter is sent whole, for the window to show before writing.
     assert!(value.get("path").is_none());

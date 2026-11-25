@@ -804,7 +804,13 @@ files** (0.89.0): three starters, as data in `config/repository-starters.json`: 
 repository has none up to three folders down), the open-work list and, for agent sessions, an empty decisions file. The files that
 need the person's own facts (`installs.json`'s install command, `test-evidence.json`'s test list, `settings.json`'s folders) are
 not offered: a starter would only be wrong. Nothing is committed; `git init` is not run for a repository without git, only said.
-**Risk: low**, since a starter is only ever a new file, shown first, and git shows it as new. **AI helper** (0.90.0): a section
+**Risk: low**, since a starter is only ever a new file, shown first, and git shows it as new. **Forms** (0.93.0; the owner's
+"Yes, build forms"): `installs.json` (offered only where the tool kit has an install adapter for the game; the install command
+must name `{mod}`), `test-evidence.json` (a test list already in the repository; no rows, which the tool kit's own page explains)
+and `settings.json` (one setting; more are added by hand). Agent choices: the fields' words are English in the data, as the chat
+agents' are; a form's file is shown with Show the file and can be ticked only then, and any change shows it again; a path chosen
+in Windows' picker is written relative to the repository and refused outside it; the install command's words split at spaces,
+"double quotes" keeping a word whole. **AI helper** (0.90.0): a section
 last on the tab, "AI, if you want it". Local model runners (Ollama, LM Studio) are looked for only on a press, by asking for their
 models, the same call Settings → AI makes; a found model is used with one press. Online services are left to Settings → AI, since
 they need a key and the Going online switch. Each chat agent is found or not as Settings → AI already says; **Try** starts a found

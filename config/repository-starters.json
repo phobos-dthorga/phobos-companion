@@ -1,5 +1,5 @@
 {
-  "about": "Starter files Settings → Setup offers a repository on the games list (0.89.0, docs/design-record.md, Setup). Each is written only when the person saw it whole and pressed Write, only where its path is free, and never over a file. `present` says how the Companion knows the repository already has one: `changelog` is any CHANGELOG.md up to three folders down (as the tool kit's changes finds them); `file` is the path itself. A starter `forAgents` is offered only while the features for AI agent sessions are shown.",
+  "about": "Starter files Settings → Setup offers a repository on the games list (0.89.0, docs/design-record.md, Setup). Each is written only when the person saw it whole and pressed Write, only where its path is free, and never over a file. `present` says how the Companion knows the repository already has one: `changelog` is any CHANGELOG.md up to three folders down (as the tool kit's changes finds them); `file` is the path itself. A starter `forAgents` is offered only while the features for AI agent sessions are shown. A starter with `fields` and a `template` is a form (0.93.0): each field is checked by its kind (src-tauri/core/src/starters.rs) and put where the template says {{id}}; `needs: install-adapter` offers it only for a game the tool kit can install mods for. Its words are English here, as the chat agents' are.",
   "starters": [
     {
       "id": "changelog",
@@ -24,6 +24,122 @@
       "chosen": false,
       "forAgents": true,
       "content": "{\n  \"schemaVersion\": 1,\n  \"decisions\": []\n}\n"
+    },
+    {
+      "id": "installs",
+      "path": "config/installs.json",
+      "present": "file",
+      "chosen": false,
+      "forAgents": false,
+      "needs": "install-adapter",
+      "fields": [
+        {
+          "id": "game",
+          "kind": "game"
+        },
+        {
+          "id": "mods",
+          "kind": "folder",
+          "label": "The folder holding your mods",
+          "hint": "One folder per mod inside it, each with its own CHANGELOG.md.",
+          "default": "mods"
+        },
+        {
+          "id": "backups",
+          "kind": "folder",
+          "label": "Where backups go",
+          "hint": "A folder git doesn't keep is best, such as one under .local.",
+          "default": ".local/deploy-backups"
+        },
+        {
+          "id": "install",
+          "kind": "command",
+          "label": "The command that installs one mod",
+          "hint": "Your repository's own script; {mod} is where the mod's folder name goes, and {python} is the tools' Python.",
+          "mustHave": "{mod}"
+        }
+      ],
+      "template": {
+        "schemaVersion": 1,
+        "game": "{{game}}",
+        "mods": "{{mods}}",
+        "backups": "{{backups}}",
+        "install": "{{install}}"
+      }
+    },
+    {
+      "id": "test-evidence",
+      "path": "config/test-evidence.json",
+      "present": "file",
+      "chosen": false,
+      "forAgents": false,
+      "fields": [
+        {
+          "id": "doc",
+          "kind": "file",
+          "label": "Your test list",
+          "hint": "A Markdown file in the repository, whose tables start with a # column and end with what passes.",
+          "ends": ".md",
+          "exists": true
+        }
+      ],
+      "template": {
+        "doc": "{{doc}}",
+        "rows": {}
+      }
+    },
+    {
+      "id": "settings",
+      "path": "config/settings.json",
+      "present": "file",
+      "chosen": false,
+      "forAgents": false,
+      "fields": [
+        {
+          "id": "key",
+          "kind": "key",
+          "label": "The setting's key",
+          "hint": "As your scripts read it, such as artWorkPath."
+        },
+        {
+          "id": "env",
+          "kind": "env",
+          "label": "Its environment variable",
+          "hint": "Such as PHOBOS_ART_WORK."
+        },
+        {
+          "id": "kind",
+          "kind": "choice",
+          "label": "It names a",
+          "options": ["folder", "file"],
+          "default": "folder"
+        },
+        {
+          "id": "name",
+          "kind": "text",
+          "label": "A short name (optional)",
+          "hint": "A few words the list shows.",
+          "optional": true
+        },
+        {
+          "id": "description",
+          "kind": "text",
+          "label": "What it is for",
+          "hint": "One sentence."
+        }
+      ],
+      "template": {
+        "schemaVersion": 1,
+        "settings": [
+          {
+            "key": "{{key}}",
+            "env": "{{env}}",
+            "kind": "{{kind}}",
+            "name": "{{name}}",
+            "description": "{{description}}"
+          }
+        ]
+      }
     }
   ]
 }

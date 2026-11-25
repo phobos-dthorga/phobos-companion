@@ -14,10 +14,11 @@ use companion_core::kit;
 use companion_core::prefs;
 use companion_core::process;
 use companion_core::setup::{self, Row};
-use companion_core::starters::{self, Starter};
+use companion_core::starters::{self, Needs, Starter};
 use companion_core::terminals::{self, Exit, Terminal};
 use serde::Serialize;
 use serde_json::{Value, json};
+use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
@@ -58,6 +59,8 @@ pub struct StarterState {
     pub starter: Starter,
     /// The repository has its kind of file already.
     pub present: bool,
+    /// Why it can't be offered here (0.93.0): the tool kit can't install mods for this game.
+    pub unavailable: Option<String>,
 }
 
 /// A repository on the games list, and which starter files it has (0.89.0). Its folder stays with the host.
@@ -139,9 +142,48 @@ pub fn readiness(game: &games::Game, repository: &games::Repository) -> Readines
         git: root.join(".git").exists(),
         starters: starters::starters()
             .iter()
-            .map(|starter| StarterState { starter: starter.clone(), present: starters::present(root, starter) })
+            .map(|starter| StarterState {
+                starter: starter.clone(),
+                present: starters::present(root, starter),
+                unavailable: unavailable(starter, &game.id),
+            })
             .collect(),
     }
+}
+
+/// Whether the tool kit has an install adapter for a game: its `games/<game>/installs.py`, where the kit runs from.
+fn install_adapter(game: &str) -> bool {
+    games::valid_id(game)
+        && kit::runtime().kit.join("phobos_modkit").join("games").join(game).join("installs.py").is_file()
+}
+
+/// Why a starter can't be offered for a game, if it can't.
+fn unavailable(starter: &Starter, game: &str) -> Option<String> {
+    match starter.needs {
+        Some(Needs::InstallAdapter) if !install_adapter(game) => {
+            Some(format!("the tools can't install mods for {game} yet, so this file would do nothing"))
+        }
+        _ => None,
+    }
+}
+
+/// A starter of the Companion's, by id.
+fn starter_named(id: &str) -> Result<&'static Starter, Failure> {
+    starters::starters()
+        .iter()
+        .find(|starter| starter.id == id)
+        .ok_or_else(|| Failure::refused(format!("{id:?} is not a starter file the Companion carries")))
+}
+
+/// A starter's file as it would be written into one listed repository, with the person's values (0.93.0), for the window to
+/// show whole before Write. Only reads.
+pub fn preview(game: &str, repository: &str, id: &str, values: &BTreeMap<String, String>) -> Result<String, Failure> {
+    let starter = starter_named(id)?;
+    if let Some(why) = unavailable(starter, game) {
+        return Err(Failure::refused(why));
+    }
+    let repository = games::named_repository(game, repository)?;
+    starters::content_of(starter, values, &repository.path, game).map_err(Failure::refused)
 }
 
 /// Every repository of every listed game, in the list's order.
@@ -154,29 +196,29 @@ fn every_readiness(listed: Option<&Vec<games::Game>>) -> Vec<Readiness> {
 }
 
 /// Writes the chosen starter files into one repository of a listed game, on the person's press after they saw each whole:
-/// only starters the Companion carries, only where the path is free. Says what was written and what was not, and why.
+/// only starters the Companion carries, only where the path is free, a form's file made again here from the values. Says what
+/// was written and what was not, and why.
 pub fn write_starters(
     data: &Path,
     game: &str,
     repository: &str,
     ids: &[String],
+    values: &BTreeMap<String, BTreeMap<String, String>>,
 ) -> Result<(Setup, Vec<String>), Failure> {
     if ids.is_empty() || ids.len() > starters::starters().len() {
         return Err(Failure::refused("choose one or more starter files"));
     }
-    let chosen: Vec<&Starter> = ids
-        .iter()
-        .map(|id| {
-            starters::starters()
-                .iter()
-                .find(|starter| &starter.id == id)
-                .ok_or_else(|| Failure::refused(format!("{id:?} is not a starter file the Companion carries")))
-        })
-        .collect::<Result<_, _>>()?;
+    let chosen: Vec<&Starter> = ids.iter().map(|id| starter_named(id)).collect::<Result<_, _>>()?;
     let repository = games::named_repository(game, repository)?;
+    let none = BTreeMap::new();
     let mut refused = Vec::new();
     for starter in chosen {
-        if let Err(why) = starters::write(&repository.path, starter) {
+        let written = match unavailable(starter, game) {
+            Some(why) => Err(why),
+            None => starters::content_of(starter, values.get(&starter.id).unwrap_or(&none), &repository.path, game)
+                .and_then(|content| starters::write(&repository.path, starter, &content)),
+        };
+        if let Err(why) = written {
             refused.push(format!("{}: {why}", starter.path));
         }
     }

@@ -35,7 +35,13 @@ of these files it has: a changelog, the open-work list and, while the features f
 
 1. Press **Add starter files…** beside a repository.
 2. **Each file is shown whole.** Tick the ones you want: a changelog is ticked when it has none.
-3. Press **Write the ticked files**. Each is written only where nothing is there, never over a file.
-4. **The Companion commits nothing**: commit them with git when you're ready.
+3. **Three are small forms** (since 0.93.0): `config/installs.json` (where your mods are, where backups go, and the command that
+   installs one, with `{mod}` where the mod's name goes; offered only for a game the tools can install mods for),
+   `config/test-evidence.json` (your test list, a Markdown file already in the repository) and `config/settings.json` (one
+   setting your scripts read). Fill one in, press **Choose…** beside a folder or file to pick it, then **Show the file**: it can
+   be ticked once it is shown, and a change after that shows it again first.
+4. Press **Write the ticked files**. Each is written only where nothing is there, never over a file.
+5. **The Companion commits nothing**: commit them with git when you're ready. A test list's rows and a setting's value are
+   still yours to add: see the tool kit's own pages for each file.
 
 Nothing else is asked of a repository, and **the Companion never writes into one**, except where a page says so and you press a button.

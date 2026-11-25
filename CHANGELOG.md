@@ -21,6 +21,17 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.93.0] - 2026-11-25
+
+### Added
+
+- **Your repositories offers three more starter files, each as a small form** (the owner's choice by card, 25 Nov 2026: "Yes,
+  build forms"). `config/installs.json`: where your mods are, where backups go and the command that installs one, offered only
+  for a game the tools can install mods for. `config/test-evidence.json`: your test list. `config/settings.json`: one setting your
+  scripts read. Folders and files have **Choose…** beside them; **Show the file** shows it whole, and only then can it be ticked
+  and written. The host checks every value and makes the file again itself. **Not tested on screen; nothing has been written
+  into a real repository.**
+
 ## [0.92.0] - 2026-11-25
 
 ### Changed

@@ -39,6 +39,18 @@ export type Fetching = {
   ended: SetupExit | null;
 };
 
+/** One field of a starter's form (0.93.0), as the Companion's data gives it. */
+export type StarterField = {
+  id: string;
+  kind:
+    "folder" | "file" | "command" | "text" | "key" | "env" | "choice" | "game";
+  label: string;
+  hint: string;
+  default: string | null;
+  optional: boolean;
+  options: string[];
+};
+
 /** One starter file as a repository stands with it (0.89.0). */
 export type StarterState = {
   id: string;
@@ -49,6 +61,10 @@ export type StarterState = {
   /** Offered only while the features for AI agent sessions are shown. */
   forAgents: boolean;
   content: string;
+  /** A form's fields (0.93.0); absent for a starter with fixed content. */
+  fields?: StarterField[];
+  /** Why it can't be offered for this repository's game, if it can't (0.93.0). */
+  unavailable: string | null;
 };
 
 /** A repository on the games list, and which starter files it has (0.89.0). */

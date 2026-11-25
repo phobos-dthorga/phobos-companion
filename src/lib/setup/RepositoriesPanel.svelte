@@ -1,9 +1,10 @@
 <script lang="ts">
   import { agents } from "../agents/state.svelte";
   import { t } from "../i18n/runtime";
-  import { writeStarters } from "./desktopClient";
-  import { offered } from "./presentation";
-  import type { Readiness, Setup } from "./types";
+  import { pickPath } from "../settings/desktopClient";
+  import { previewStarter, writeStarters } from "./desktopClient";
+  import { defaults, offered, shownFields } from "./presentation";
+  import type { Readiness, Setup, StarterField, StarterState } from "./types";
 
   /**
    * Your repositories, on Settings → Setup (0.89.0; the owner's choice by card, 25 Nov 2026: "Starter files for a repository"):
@@ -22,6 +23,9 @@
   let ticked = $state<string[]>([]);
   let busy = $state(false);
   let said = $state<{ ok: boolean; words: string } | null>(null);
+  /** A form's values, by starter (0.93.0), and the file they make, or why not, once Show the file was pressed. */
+  let values = $state<Record<string, Record<string, string>>>({});
+  let shown = $state<Record<string, { content: string } | { why: string }>>({});
 
   const keyOf = (repository: Readiness) =>
     `${repository.game}/${repository.name}`;
@@ -29,10 +33,54 @@
   function start(repository: Readiness) {
     open = keyOf(repository);
     said = null;
-    ticked = offered(repository, agents.shown)
-      .filter((s) => s.chosen)
+    const missing = offered(repository, agents.shown);
+    values = Object.fromEntries(missing.map((s) => [s.id, defaults(s)]));
+    shown = {};
+    ticked = missing
+      .filter((s) => s.chosen && !s.fields?.length)
       .map((s) => s.id);
   }
+
+  const isForm = (starter: StarterState) => (starter.fields?.length ?? 0) > 0;
+
+  /** A changed value makes the file shown stale: it is shown again, and unticked, before it can be written. */
+  function change(starter: StarterState, field: string, value: string) {
+    values = {
+      ...values,
+      [starter.id]: { ...values[starter.id], [field]: value },
+    };
+    const { [starter.id]: _gone, ...rest } = shown;
+    shown = rest;
+    tick(starter.id, false);
+  }
+
+  async function choose(starter: StarterState, field: StarterField) {
+    const picked = await pickPath(
+      field.kind === "file" ? "file" : "folder",
+      field.label,
+      null,
+    );
+    if (picked.state === "picked") change(starter, field.id, picked.path);
+  }
+
+  async function show(repository: Readiness, starter: StarterState) {
+    const answer = await previewStarter(
+      repository.game,
+      repository.name,
+      starter.id,
+      values[starter.id] ?? {},
+    );
+    shown = {
+      ...shown,
+      [starter.id]:
+        answer.state === "ready"
+          ? { content: answer.content }
+          : { why: answer.failure.detail },
+    };
+  }
+
+  const ready = (starter: StarterState) =>
+    !isForm(starter) || "content" in (shown[starter.id] ?? {});
 
   function tick(id: string, on: boolean) {
     ticked = on ? [...ticked, id] : ticked.filter((t) => t !== id);
@@ -44,6 +92,7 @@
       repository.game,
       repository.name,
       ticked,
+      Object.fromEntries(ticked.map((id) => [id, values[id] ?? {}])),
     );
     busy = false;
     if (answer.state === "failed") {
@@ -114,16 +163,84 @@
                 >
               </p>
               {#each missing as starter (starter.id)}
+                {@const preview = shown[starter.id]}
                 <label class="pick">
                   <input
                     type="checkbox"
                     checked={ticked.includes(starter.id)}
+                    disabled={!ready(starter)}
                     onchange={(event) =>
                       tick(starter.id, event.currentTarget.checked)}
                   />
                   <span><code>{starter.path}</code></span>
                 </label>
-                <pre class="content">{starter.content}</pre>
+                {#if isForm(starter)}
+                  <div class="form" role="group" aria-label={starter.path}>
+                    {#each shownFields(starter) as field (field.id)}
+                      {@const id = `starter-${keyOf(repository)}-${starter.id}-${field.id}`}
+                      <label class="field" for={id}>{field.label}</label>
+                      {#if field.hint}<p class="small muted">
+                          {field.hint}
+                        </p>{/if}
+                      <div class="entry">
+                        {#if field.kind === "choice"}
+                          <select
+                            {id}
+                            value={values[starter.id]?.[field.id] ?? ""}
+                            onchange={(event) =>
+                              change(
+                                starter,
+                                field.id,
+                                event.currentTarget.value,
+                              )}
+                          >
+                            {#each field.options as option (option)}
+                              <option value={option}>{option}</option>
+                            {/each}
+                          </select>
+                        {:else}
+                          <input
+                            {id}
+                            type="text"
+                            spellcheck="false"
+                            value={values[starter.id]?.[field.id] ?? ""}
+                            oninput={(event) =>
+                              change(
+                                starter,
+                                field.id,
+                                event.currentTarget.value,
+                              )}
+                          />
+                        {/if}
+                        {#if field.kind === "folder" || field.kind === "file"}
+                          <button
+                            type="button"
+                            class="action"
+                            onclick={() => void choose(starter, field)}
+                            >{t("starters-choose")}</button
+                          >
+                        {/if}
+                      </div>
+                    {/each}
+                    <button
+                      type="button"
+                      class="action"
+                      onclick={() => void show(repository, starter)}
+                      >{t("starters-show-file")}</button
+                    >
+                    {#if preview && "content" in preview}
+                      <pre class="content">{preview.content}</pre>
+                    {:else if preview}
+                      <p class="small refused-line" role="status">
+                        {preview.why}
+                      </p>
+                    {:else}
+                      <p class="small">{t("starters-fill-first")}</p>
+                    {/if}
+                  </div>
+                {:else}
+                  <pre class="content">{starter.content}</pre>
+                {/if}
               {/each}
               <p class="small">{t("starters-how")}</p>
               <div class="buttons">
@@ -228,6 +345,37 @@
   .pick input {
     width: 22px;
     height: 22px;
+  }
+
+  .form {
+    margin: 0 0 10px;
+    padding-inline-start: 30px;
+  }
+
+  .field {
+    display: block;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  .entry {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .entry input,
+  .entry select {
+    flex: 1 1 18rem;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: 8px;
+    font: inherit;
+    color: var(--colour-text);
+    background: var(--colour-canvas);
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
   }
 
   .content {

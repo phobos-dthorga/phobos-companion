@@ -3,6 +3,7 @@ import type {
   Readiness,
   SetupRow,
   SetupState,
+  StarterField,
   StarterState,
 } from "./types";
 
@@ -51,7 +52,22 @@ export function offered(
   agentsShown: boolean,
 ): StarterState[] {
   return repository.starters.filter(
-    (starter) => !starter.present && (agentsShown || !starter.forAgents),
+    (starter) =>
+      !starter.present &&
+      starter.unavailable === null &&
+      (agentsShown || !starter.forAgents),
+  );
+}
+
+/** The fields a person fills in a starter's form (0.93.0): all but the game, which the repository's own entry gives. */
+export function shownFields(starter: StarterState): StarterField[] {
+  return (starter.fields ?? []).filter((field) => field.kind !== "game");
+}
+
+/** A form's values as first offered: each field's default. */
+export function defaults(starter: StarterState): Record<string, string> {
+  return Object.fromEntries(
+    shownFields(starter).map((field) => [field.id, field.default ?? ""]),
   );
 }
 

@@ -184,6 +184,17 @@ async fn setup_set_aside(app: tauri::AppHandle, key: String, aside: bool) -> Res
     blocking(move || setup_page::set_aside(&data, &key, aside)).await
 }
 
+/// A starter's file as it would be written, with the person's values (0.93.0), to show whole before Write. Only reads.
+#[tauri::command]
+async fn setup_preview_starter(
+    game: String,
+    repository: String,
+    starter: String,
+    values: std::collections::BTreeMap<String, String>,
+) -> Result<String, Failure> {
+    blocking(move || setup_page::preview(&game, &repository, &starter, &values)).await
+}
+
 /// Tries an agent for a moment on the person's press (0.90.0): starts it, shakes hands, ends it.
 #[tauri::command]
 async fn chat_try(app: tauri::AppHandle, agent: String) -> Result<chat_page::Tried, Failure> {
@@ -198,10 +209,11 @@ async fn setup_write_starters(
     game: String,
     repository: String,
     starters: Vec<String>,
+    values: std::collections::BTreeMap<String, std::collections::BTreeMap<String, String>>,
 ) -> Result<serde_json::Value, Failure> {
     let data = data_folder(&app)?;
     blocking(move || {
-        let (setup, refused) = setup_page::write_starters(&data, &game, &repository, &starters)?;
+        let (setup, refused) = setup_page::write_starters(&data, &game, &repository, &starters, &values)?;
         Ok(serde_json::json!({ "setup": setup, "refused": refused }))
     })
     .await
@@ -1715,6 +1727,7 @@ pub fn run() {
             setup_set_aside,
             setup_open_page,
             setup_write_starters,
+            setup_preview_starter,
             chat_try,
             cleanup_list,
             cleanup_apply,

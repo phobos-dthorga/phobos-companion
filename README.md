@@ -7,8 +7,9 @@ command. It can also install, back up and publish your mods, always on your pres
 **Press F1 for the Guide.** It opens at the entry for the page you are on: what each page, tab and button does, and How do I…?
 answers in numbered steps. **The Guide is the manual**; this page covers only what you need before the window opens.
 
-- **It isn't released for others yet**: what still stands in the way, and in what order, is the
-  [release audit](docs/release-audit.md).
+- **Early releases are on GitHub** ([download](#download-it-windows)); what still stands in the way of a release for everyone, and
+  in what order, is the [release audit](docs/release-audit.md).
+- **It sends nothing about you**: what it asks the internet, and why, is [docs/privacy.md](docs/privacy.md).
 - **Not yet tested on screen, except where the owner has said so.** It builds and passes its checks; a page or button counts as
   tested only once the owner says it works.
 
@@ -28,7 +29,17 @@ answers in numbered steps. **The Guide is the manual**; this page covers only wh
     about saves, logs, a running game and game files say they have nothing for it. The Companion 0.23.0 and older refuse a list
     with `kind` in it.
 
-## Install it (Windows)
+## Download it (Windows)
+
+**Download `DthorgaCompanion_<version>_x64-setup.exe` from the
+[latest release](https://github.com/phobos-dthorga/phobos-companion/releases/latest), run it, then open the Companion from the
+Start menu.** It installs for your Windows account only and needs no administrator. Once installed, it fetches newer releases by
+itself and installs them when you close it (Settings → Going online → Updates turns that off).
+
+**Windows may warn "Windows protected your PC"**, because the installer is not code-signed yet: press **More info**, then **Run
+anyway**. Signing is being applied for (below).
+
+## Install it from the repository (Windows)
 
 **Build the setup program, run it once, then open the Companion from the Start menu** (type "companion") or the desktop.
 
@@ -77,6 +88,19 @@ python scripts/check-all.py
 It prints only what failed. How it is built is [docs/architecture.md](docs/architecture.md), the decisions behind it
 [docs/design-record.md](docs/design-record.md), and the rules [AGENTS.md](AGENTS.md). What is proposed and not yet built is kept
 in [docs/later.md](docs/later.md), so nothing agreed is lost.
+
+## Code signing policy
+
+**Not signed yet: D'thorga Companion is applying to the SignPath Foundation for free code signing for open-source projects.**
+Once accepted, each release's installer is signed this way: *Free code signing provided by [SignPath.io](https://about.signpath.io),
+certificate by [SignPath Foundation](https://signpath.org)*, and Windows will show "SignPath Foundation" as its publisher.
+
+- **Built only from this repository's source**, by GitHub Actions on GitHub's own machines, from a version's tag
+  (`.github/workflows/release.yml`); nothing is built or signed on a person's PC.
+- **Team roles**: Phobos A. D'thorga ([phobos-dthorga](https://github.com/phobos-dthorga)) is the author, reviewer and approver;
+  every release is approved by hand before it is signed, and published by hand.
+- **Privacy**: [docs/privacy.md](docs/privacy.md) says what the program asks the internet and why; it sends nothing about you.
+- How signing would fit the release workflow, and the alternatives: [docs/signing.md](docs/signing.md).
 
 ## Credits
 

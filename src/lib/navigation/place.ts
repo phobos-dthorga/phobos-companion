@@ -20,6 +20,7 @@ export const PAGE_NAMES = [
   "reports",
   "chat",
   "settings",
+  "safecopies",
   "decisions",
   "picks",
   "about",

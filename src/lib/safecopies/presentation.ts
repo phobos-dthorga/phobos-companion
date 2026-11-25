@@ -35,6 +35,13 @@ export function summarise(repositories: RepositoryCopies[]): {
   };
 }
 
+/** How many files the repositories' copies have not sent yet (0.43.0), counted for the card and Home's note (0.95.0). */
+export function unsentOf(repositories: RepositoryCopies[]): number {
+  return repositories
+    .flatMap((r) => r.status.destinations)
+    .reduce((n, d) => n + (d.unsent ?? 0), 0);
+}
+
 /** The words for a set's kind. A kind this program does not know yet is said to be kept private, never to be ours. */
 export function kindKey(kind: string): string {
   switch (kind) {

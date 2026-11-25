@@ -24,6 +24,7 @@
     listKey,
     setName,
     summarise,
+    unsentOf,
     wantsCopy,
   } from "./presentation";
   import type {
@@ -51,7 +52,7 @@
     | { kind: "let-go"; key: string; where: ListRef; copy: KeptOnly };
 
   /**
-   * Safe copies on Home (0.42.0; the owner, 21 Nov 2026): for each list of what cannot be made again (training sets, style models,
+   * Safe copies (0.42.0 on Home; its own page since 0.95.0, the owner's choice; the owner, 21 Nov 2026): for each list of what cannot be made again (training sets, style models,
    * notes; and from 0.44.0 the game's own saves and settings, wherever a repository keeps its list), whether each is copied,
    * changed since its copy, or never copied, at each place the copies go. Copy now copies what changed and sends the repository's
    * copy; Check the copies hashes every copy again. The daily run of every list is set or turned off at the foot of the card.
@@ -308,9 +309,7 @@
   /** Commits the repository's copy holds that its remote has not had yet, across every list (kit 1.69.0). */
   const unsentCount = $derived(
     reading.state === "ready" && Array.isArray(reading.repositories)
-      ? reading.repositories
-          .flatMap((r) => r.status.destinations)
-          .reduce((n, d) => n + (d.unsent ?? 0), 0)
+      ? unsentOf(reading.repositories)
       : 0,
   );
 

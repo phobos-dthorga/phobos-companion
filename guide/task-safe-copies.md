@@ -1,13 +1,13 @@
 ---
 title: Keep safe copies of what cannot be made again
 kind: task
-go: home
+go: safecopies
 words: safe copies, backup, training set, style model, LoRA, copy now, check the copies, restore, private repository, saves, daily, schedule
-see: term-safe-copy, page-home, task-records-backup
+see: term-safe-copy, page-safecopies, task-records-backup
 ---
 Training sets, the style models made from them, the notes on which picture was picked, and your saves and game settings are hours of work that no tool can make again. **Safe copies** keep them in the places you chose.
 
-1. Open **Home** (the **1** key). The **Safe copies** card shows each set, its kind, and whether it is copied, changed since its copy, or never copied, at each place the copies go. **The game's own files** (its saves and settings) have a list of their own on the card.
+1. Open **Safe copies** (**Shift + B**, or **Open Safe copies** on Home's line when something waits). The page shows each set, its kind, and whether it is copied, changed since its copy, or never copied, at each place the copies go. **The game's own files** (its saves and settings) have a list of their own on the card.
 2. Press **Copy now** to copy whatever changed. The copy to a repository is sent at once.
 3. Press **Check the copies** now and then: it reads every copy again and says if one is missing or damaged. Every night of art work, and every daily run, does this by itself too.
 4. To get files back, press **Restore…** on a set's row, choose a folder in Windows' own picker, and press **Copy it there**. A different file already in that folder is left alone; **Replace older files** then replaces the older ones, never a newer one.

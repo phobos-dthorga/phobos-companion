@@ -137,6 +137,13 @@ export const ACTIONS: Action[] = [
     defaultKey: "w",
     words: "shortcut-page-gamefiles",
   },
+  // 0.95.0: Safe copies, a page of its own (the owner's choice by card, 25 Nov 2026: Shift+B, B for backup).
+  {
+    id: "page.safecopies",
+    scope: "everywhere",
+    defaultKey: "Shift+b",
+    words: "shortcut-page-safecopies",
+  },
   {
     id: "page.memory",
     scope: "everywhere",

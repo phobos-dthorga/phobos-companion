@@ -21,6 +21,15 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.95.0] - 2026-11-25
+
+### Changed
+
+- **Safe copies has a page of its own** (the owner's answer on the Decisions page, "A page of its own", and **Shift+B** by card,
+  25 Nov 2026). Everything the card on Home did is there: each set's kind and state at every place, Copy now, Check the copies,
+  Restore, Let go and the daily run. Home keeps one line, **Safe copies wait**, while a set has never been copied, has changed
+  since its copy, or a copy isn't sent yet. **Not tested on screen.**
+
 ## [0.94.0] - 2026-11-25
 
 ### Changed
@@ -851,7 +860,7 @@ The Picks page (the owner, 23 Nov 2026: "Go ahead and build the picks page", aft
 - **Picks** (Tools, **Shift + P**): every picture and sound the art tools made tries of, waiting for your pick, from every
   repository that keeps a list of them (`config/picks.json`, kit 1.83.0's `picks`). Each shows its tries small and side by side,
   and the try in focus against the one in use with the code viewer's views, on the game's own grounds too (Soil and Dark stone for
-  RimWorld). **J** and **K** step through the tries, **Shift + J** and **Shift + K** through the picks; **Pick Try …** (**Ctrl +
+  RimWorld). **J** and **K** step through the tries, **Shift + J** and **Shift + B** through the picks; **Pick Try …** (**Ctrl +
   Enter**) or **None of these** (**Shift + N**), with words if you like, and the next waiting pick opens. Your pick is kept in the
   Companion's own folder; an agent session applies it and it leaves the list. Home says how many wait. Shown with the other features
   for agent sessions. phobos-rimworld's `review_cards.py` offers every card's tries here, and `sound_review.py --offer` its sounds.

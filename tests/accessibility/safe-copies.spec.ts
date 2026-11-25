@@ -244,6 +244,7 @@ async function open(page: Page, copies: unknown, daily = dailyAnswer(null)) {
     },
   });
   await page.goto("/");
+  await page.keyboard.press("Shift+B");
 }
 
 /** The same repository, with a commit not sent yet and a save that left the newest pair (kit 1.69.0). */
@@ -274,7 +275,29 @@ async function noViolations(page: Page) {
   expect(results.violations.map((v) => v.id)).toEqual([]);
 }
 
-test.describe("Safe copies on Home (0.42.0)", () => {
+test.describe("Safe copies, its own page since 0.95.0 (0.42.0)", () => {
+  test("Home shows a line while something waits, and opens the page (0.95.0)", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      safe_copies_daily: { result: dailyAnswer(null) },
+      safe_copies_status: { result: COPIES },
+    });
+    await page.goto("/");
+    const line = page.getByRole("region", { name: "Safe copies wait" });
+    await expect(line).toContainText("One set has never been copied.");
+    await line.getByRole("button", { name: "Open Safe copies" }).click();
+    await expect(
+      page.getByRole("heading", { level: 1, name: /What can't be made again/ }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Safe copies" }),
+    ).toBeVisible();
+    await noViolations(page);
+  });
+
   test("each set says its kind and its state at each place, and what waits", async ({
     page,
   }) => {

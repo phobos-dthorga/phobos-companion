@@ -21,7 +21,7 @@
   import CleanupNote from "../cleanup/CleanupNote.svelte";
   import ModListNote from "../modlist/ModListNote.svelte";
   import { pageServes } from "./kinds";
-  import SafeCopiesCard from "../safecopies/SafeCopiesCard.svelte";
+  import SafeCopiesNote from "../safecopies/SafeCopiesNote.svelte";
   import ClaimsPanel from "../claims/ClaimsPanel.svelte";
   import DecisionsNote from "../decisions/DecisionsNote.svelte";
   import PicksNote from "../picks/PicksNote.svelte";
@@ -235,7 +235,7 @@
 {/if}
 
 <RecordsNote game={game.id} />
-{#key game.id}<SafeCopiesCard game={game.id} />{/key}
+{#key game.id}<SafeCopiesNote game={game.id} />{/key}
 {#if pageServes(game.kind, "modlist")}
   {#key game.id}<ModListNote game={game.id} />{/key}
 {/if}

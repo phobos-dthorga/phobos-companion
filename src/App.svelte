@@ -62,6 +62,7 @@
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
   import ModListPage from "./lib/modlist/ModListPage.svelte";
   import MemoryPage from "./lib/memory/MemoryPage.svelte";
+  import SafeCopiesPage from "./lib/safecopies/SafeCopiesPage.svelte";
   import ExplorerPage from "./lib/explorer/ExplorerPage.svelte";
   import GuidePage from "./lib/guide/GuidePage.svelte";
   import FirstSteps from "./lib/home/FirstSteps.svelte";
@@ -152,6 +153,7 @@
     ["page.about", "about"],
     ["page.gamefiles", "gamefiles"],
     ["page.memory", "memory"],
+    ["page.safecopies", "safecopies"],
     ["page.explorer", "explorer"],
     ["page.guide", "guide"],
   ];
@@ -373,6 +375,10 @@
         {#key selected.id}
           <GameFilesPage game={selected} />
         {/key}
+      {:else if selected && page === "safecopies"}
+        {#key selected.id}
+          <SafeCopiesPage game={selected} />
+        {/key}
       {:else if selected && page === "memory"}
         {#key selected.id}
           <MemoryPage game={selected} />
@@ -452,9 +458,11 @@
                                     ? t("source-body-publish")
                                     : page === "memory"
                                       ? t("source-body-memory")
-                                      : page === "explorer"
-                                        ? t("source-body-explorer")
-                                        : t("source-body")}
+                                      : page === "safecopies"
+                                        ? t("source-body-safecopies")
+                                        : page === "explorer"
+                                          ? t("source-body-explorer")
+                                          : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

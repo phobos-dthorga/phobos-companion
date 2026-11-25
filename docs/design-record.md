@@ -1030,6 +1030,9 @@ a plain question and needs nothing typed, so the Reports page offers it once the
 
 ## Safe copies on Home (built 21 Nov 2026, 0.42.0)
 
+**Moved to a page of its own in 0.95.0** (the owner's answer on the Decisions page, "A page of its own"; its key **Shift+B** by
+card, 25 Nov 2026, after Shift+K proved to be the Picks page's). Home keeps one line, Safe copies wait, while something waits.
+
 **The owner's request** (21 Nov 2026: "backup functionality for our training sets, models, etc. ... within Companion"), after the
 first style model of their own art took 158 minutes of the graphics card. The tool, its rules and the owner's answers (the name
 "safe copies", the places: a local disk and a private repository; files made from a game's own on the local disk only) are in

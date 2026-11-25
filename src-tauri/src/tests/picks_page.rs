@@ -40,3 +40,14 @@ fn every_file_in_use_and_every_try_is_named() {
     assert_eq!(found.len(), 4);
     assert!(found.contains(&PathBuf::from("K:/art/heater-11.review.ogg")));
 }
+
+#[test]
+fn a_repository_with_a_pick_already_in_the_game_is_settled_with_the_kit_s_own_report() {
+    let data = json!({"repositories": [
+        {"root": "C:/a", "picks": [{"inGame": false}, {"inGame": true}]},
+        {"root": "C:/b", "picks": [{"inGame": false}]},
+        {"root": "C:/c", "picks": []}
+    ]});
+    assert_eq!(with_applied(&data), vec![PathBuf::from("C:/a")]);
+    assert_eq!(settle_arguments(Path::new("C:/a")), ["picks", "settle", "--root", "C:/a", "--applied", "--json"]);
+}

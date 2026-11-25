@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   allPicks,
+  answerFor,
+  joinSlots,
   keyOf,
   nextWaiting,
   stepped,
@@ -74,5 +76,60 @@ describe("picks on the page", () => {
     expect(shown.endsWith("…")).toBe(true);
     expect(shown.length).toBeLessThanOrEqual(41);
     expect(long.replace(/\s+/g, " ").startsWith(shown.slice(0, -1))).toBe(true);
+  });
+});
+
+describe("picks round two (0.96.0)", () => {
+  const card = (
+    id: string,
+    tries: string[],
+    more: Partial<Pick> = {},
+  ): Pick => ({
+    id,
+    title: id,
+    kind: "picture",
+    inUse: null,
+    inUseThere: false,
+    tries: tries.map((t) => ({
+      id: t,
+      label: `Try ${t}`,
+      path: `${id}-${t}.png`,
+      note: "",
+      there: true,
+    })),
+    context: "",
+    from: "",
+    asked: "",
+    answer: null,
+    slot: "mods/Purge.png",
+    ...more,
+  });
+
+  it("joins the cards of one slot into one pick, each try remembering its card", () => {
+    const joined = joinSlots([
+      card("a", ["1", "2"]),
+      card("b", ["1"]),
+      card("c", ["1"], { slot: undefined }),
+    ]);
+    expect(joined.map((p) => p.id)).toEqual(["a", "c"]);
+    expect(joined[0].cards).toBe(2);
+    expect(joined[0].tries.map((t) => t.id)).toEqual(["a.1", "a.2", "b.1"]);
+    expect(answerFor(joined[0], "b.1")).toEqual({ id: "b", pick: "1" });
+    expect(answerFor(joined[0], "none")).toEqual({ id: "a", pick: "none" });
+    expect(answerFor(joined[1], "1")).toEqual({ id: "c", pick: "1" });
+  });
+
+  it("a slot's pick shows the card that was picked", () => {
+    const joined = joinSlots([
+      card("a", ["1"], {
+        answer: {
+          pick: "none",
+          words: "The same file was picked in b: 1",
+          time: "",
+        },
+      }),
+      card("b", ["1"], { answer: { pick: "1", words: "", time: "" } }),
+    ]);
+    expect(joined[0].answer?.pick).toBe("b.1");
   });
 });

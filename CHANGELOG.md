@@ -21,6 +21,17 @@ Maintained from 9 November 2026.
   shared code audit whole, and the built parts of the cross-links proposal, the debugging design (the probe and layer 1's plan)
   and the publishing plan. `cross-links.md` keeps the ids and each page's address keys; stale status lines are brought up to date.
 
+## [0.96.0] - 2026-11-25
+
+### Added
+
+- **Picks: cards made for the same file are one pick, and picks already in the game settle by themselves** (the owner's four
+  answers on the Decisions page, Picks round two; tool kit 1.125.0). A slot's cards show as one pick with every try of every
+  card, marked "… cards, one file", and picking one answers them all. Reading the page settles any answered pick whose try is
+  already the file in use, and says which. **None of these** with no words asks **What was wrong with them?** first, with quick
+  reasons and **Skip**. Until phobos-rimworld's art tools give each card its file, every card is still its own pick. **Not tested
+  on screen.**
+
 ## [0.95.0] - 2026-11-25
 
 ### Changed

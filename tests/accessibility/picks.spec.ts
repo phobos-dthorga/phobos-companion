@@ -318,3 +318,75 @@ for (const [name, viewport] of [
     });
   });
 }
+
+test.describe("Picks round two (0.96.0)", () => {
+  const slotted = (id: string, title: string, tries: string[]) => ({
+    ...pick(id, title, tries),
+    slot: "mods/Sample/Textures/purge.png",
+  });
+  const roundTwo = {
+    waiting: 2,
+    settledByItself: ["tent-lamp"],
+    repositories: [
+      {
+        repository: "first-mods",
+        root: "C:/repo",
+        grounds: [],
+        picks: [
+          slotted("purge-a", "The purge button, wording A", ["1", "2"]),
+          slotted("purge-b", "The purge button, wording B", ["1"]),
+        ],
+      },
+    ],
+  };
+
+  async function openRoundTwo(page: Page) {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      picks_list: { result: roundTwo },
+      viewable_file: { result: SAMPLE_PNG },
+      answer_pick: { result: { ok: true, refusal: null } },
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Go to Picks" }).click();
+  }
+
+  test("cards that ship as one file are one pick, and picks in the game were settled by themselves", async ({
+    page,
+  }) => {
+    await openRoundTwo(page);
+    await expect(page.getByText("2 cards, one file")).toBeVisible();
+    await expect(
+      page.getByText(
+        "One pick was already in the game, so it was settled by itself: tent-lamp.",
+      ),
+    ).toBeVisible();
+    // Every try of both cards, each named with its card.
+    await expect(
+      page
+        .getByRole("button", { name: /Try 1 \(The purge button, wording B\)/ })
+        .first(),
+    ).toBeVisible();
+    await audit(page);
+  });
+
+  test("none of these with no words asks what was wrong, and can be skipped", async ({
+    page,
+  }) => {
+    await openRoundTwo(page);
+    await page.getByRole("button", { name: "None of these" }).click();
+    const why = page.getByRole("region", { name: "What was wrong with them?" });
+    await expect(why).toBeVisible();
+    await expect(
+      why.getByRole("button", { name: "Wrong style" }),
+    ).toBeVisible();
+    await audit(page);
+    await why
+      .getByRole("button", { name: "Skip: none, with no words" })
+      .click();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Kept: none of these" }),
+    ).toBeVisible();
+  });
+});

@@ -18,7 +18,11 @@ use is compared too, and a correction try shows exactly what the fix touched. **
 check's findings in the accent colour, with their counts beside the picture. The zoom, the ground, the view and the marks stay as
 you left them from one pick and try to the next, and the next time you open the Companion.
 
-**Pick Try …** keeps your pick; **None of these** says none will do, with your words for what to try next. The next waiting pick
+**Pick Try …** keeps your pick; **None of these** says none will do, with your words for what to try next. With no words
+yet, it asks **What was wrong with them?** first: press a reason (**Wrong subject**, **Wrong style**, **Hard to read small**,
+**Wrong colours**), type your own and press None of these again, or **Skip: none, with no words** (since 0.96.0). Cards made
+for the same file show as **one pick**, marked "… cards, one file", with every try of every card; picking one answers them all.
+A pick whose try is already in the game is settled by itself when the page reads, and the page says which. The next waiting pick
 opens. An agent session applies it later, and it leaves the list; until then, pressing another changes it.
 
 **Anything to add?** takes your words for the pick: what to change, what to try next, or anything the agent should know. They stay with

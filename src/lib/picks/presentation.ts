@@ -1,4 +1,4 @@
-import type { Pick, PicksList } from "./types";
+import { NONE, type Pick, type PicksList } from "./types";
 
 /** A pick together with the repository it belongs to and that repository's grounds. */
 export type Placed = {
@@ -7,10 +7,58 @@ export type Placed = {
   pick: Pick;
 };
 
-/** Every pick in one list, waiting ones first, then by repository in the list's order. */
+/**
+ * Cards that ship as the same file, as one pick (0.96.0; the owner's answer "One pick per file", Picks round two): every try of
+ * every card, each labelled with its card and remembering it, so a press answers that card (the kit answers the rest). The pick
+ * keeps the first card's id; its answer is the one that picked a try, else the first card's.
+ */
+export function joinSlots(picks: Pick[]): Pick[] {
+  const joined: Pick[] = [];
+  const bySlot = new Map<string, Pick[]>();
+  for (const pick of picks) {
+    if (!pick.slot) {
+      joined.push(pick);
+      continue;
+    }
+    const cards = bySlot.get(pick.slot);
+    if (cards) cards.push(pick);
+    else {
+      const first = [pick];
+      bySlot.set(pick.slot, first);
+      joined.push(pick);
+    }
+  }
+  return joined.map((pick) => {
+    const cards = pick.slot ? (bySlot.get(pick.slot) ?? [pick]) : [pick];
+    if (cards.length < 2) return pick;
+    const picked = cards.find((c) => c.answer && c.answer.pick !== NONE);
+    return {
+      ...pick,
+      cards: cards.length,
+      answer: picked
+        ? {
+            ...picked.answer!,
+            pick: `${picked.id}.${picked.answer!.pick}`,
+          }
+        : pick.answer,
+      inGame: cards.some((c) => c.inGame),
+      tries: cards.flatMap((card) =>
+        card.tries.map((found) => ({
+          ...found,
+          id: `${card.id}.${found.id}`,
+          label: `${found.label} (${card.title})`,
+          card: card.id,
+          cardTry: found.id,
+        })),
+      ),
+    };
+  });
+}
+
+/** Every pick in one list, waiting ones first, then by repository in the list's order; a slot's cards as one pick (0.96.0). */
 export function allPicks(list: PicksList): Placed[] {
   const placed = list.repositories.flatMap((r) =>
-    r.picks.map((pick) => ({
+    joinSlots(r.picks).map((pick) => ({
       repository: r.repository,
       grounds: r.grounds,
       pick,
@@ -54,6 +102,26 @@ export function wordsShown(
   const space = cut.lastIndexOf(" ");
   return `${(space > limit / 2 ? cut.slice(0, space) : cut).trimEnd()}…`;
 }
+
+/** What a press sends for a try: the card and its own try id for a slot's one pick, else the pick's own (0.96.0). */
+export function answerFor(
+  pick: Pick,
+  chosen: string,
+): { id: string; pick: string } {
+  if (chosen === NONE) return { id: pick.id, pick: NONE };
+  const found = pick.tries.find((t) => t.id === chosen);
+  return found?.card && found.cardTry
+    ? { id: found.card, pick: found.cardTry }
+    : { id: pick.id, pick: chosen };
+}
+
+/** The quick reasons offered when "none of these" has no words yet (0.96.0; the owner: "Ask, but let me skip"), as message keys. */
+export const NONE_REASONS = [
+  "picks-reason-subject",
+  "picks-reason-style",
+  "picks-reason-small",
+  "picks-reason-colour",
+] as const;
 
 /** The next pick still waiting after one just answered, else none. */
 export function nextWaiting(list: Placed[], after: string): Placed | undefined {

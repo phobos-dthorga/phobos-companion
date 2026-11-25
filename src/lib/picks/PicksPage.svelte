@@ -14,6 +14,8 @@
     nextWaiting,
     stepped,
     wordsShown,
+    answerFor,
+    NONE_REASONS,
     type Placed,
   } from "./presentation";
   import { NONE, type PicksList, type PickTry } from "./types";
@@ -92,12 +94,26 @@
     if (next) tryOf[keyOf(chosen)] = next.id;
   }
 
+  /** "None of these" with no words yet asks what was wrong first, with quick reasons and a way to skip (0.96.0). */
+  let askingWhy = $state(false);
+
+  function choose(pick: string, words: string) {
+    if (pick === NONE && !words.trim() && !askingWhy) {
+      askingWhy = true;
+      return;
+    }
+    askingWhy = false;
+    void keep(pick, words);
+  }
+
   async function keep(pick: string, words: string) {
     if (!chosen || busy) return;
     const was = chosen;
     busy = true;
     told = null;
-    const answer = await answerPick(was.repository, was.pick.id, pick, words);
+    askingWhy = false;
+    const sent = answerFor(was.pick, pick);
+    const answer = await answerPick(was.repository, sent.id, sent.pick, words);
     busy = false;
     if (answer.state !== "done" || !answer.result.ok) {
       const reason =
@@ -137,7 +153,7 @@
         "picks.choose": () => {
           if (focus?.there) void keep(focus.id, typed());
         },
-        "picks.none": () => void keep(NONE, typed()),
+        "picks.none": () => choose(NONE, typed()),
       },
     });
   });
@@ -151,7 +167,41 @@
   {#if told}
     <p class={told.ok ? "told" : "told refused"} role="status">{told.words}</p>
   {/if}
+  {#if reading.state === "ready" && (reading.list.settledByItself?.length ?? 0) > 0}
+    <p class="told" role="status">
+      {t("picks-settled-by-itself", {
+        count: reading.list.settledByItself?.length ?? 0,
+        names: (reading.list.settledByItself ?? []).join(", "),
+      })}
+    </p>
+  {/if}
 </div>
+
+{#if askingWhy && chosen}
+  <section class="why" aria-labelledby="picks-why-title">
+    <h2 id="picks-why-title">{t("picks-why-title")}</h2>
+    <p class="small">{t("picks-why-body")}</p>
+    <div class="reasons">
+      {#each NONE_REASONS as reason (reason)}
+        <button
+          type="button"
+          class="action"
+          disabled={busy}
+          onclick={() => void keep(NONE, t(reason))}>{t(reason)}</button
+        >
+      {/each}
+      <button
+        type="button"
+        class="action"
+        disabled={busy}
+        onclick={() => void keep(NONE, "")}>{t("picks-why-skip")}</button
+      >
+      <button type="button" class="action" onclick={() => (askingWhy = false)}
+        >{t("picks-why-back")}</button
+      >
+    </div>
+  </section>
+{/if}
 
 {#if reading.state === "reading"}
   <p class="muted">{t("picks-reading")}</p>
@@ -178,6 +228,11 @@
               onclick={() => open(entry)}
             >
               <span class="title">{entry.pick.title}</span>
+              {#if (entry.pick.cards ?? 0) > 1}
+                <span class="muted small"
+                  >{t("picks-one-file", { count: entry.pick.cards ?? 0 })}</span
+                >
+              {/if}
               <span class="muted small"
                 >{entry.repository} · {entry.pick.kind === "picture"
                   ? t("picks-kind-picture")
@@ -212,7 +267,7 @@
         onfocus={(found) => {
           if (chosen) tryOf[keyOf(chosen)] = found.id;
         }}
-        onpick={(pick, words) => void keep(pick, words)}
+        onpick={(pick, words) => choose(pick, words)}
       />
     {/if}
   </div>
@@ -220,6 +275,25 @@
 <p class="muted how">{t("picks-how")}</p>
 
 <style>
+  .why {
+    max-width: 80ch;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    background: var(--colour-surface-raised);
+    border-inline-start: 3px solid var(--colour-accent);
+  }
+
+  .why h2 {
+    margin: 0 0 4px;
+    font-size: var(--type-body);
+  }
+
+  .reasons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
   .count {
     font-weight: 600;
   }

@@ -121,7 +121,11 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   choice of 23 Nov 2026: the Mods page, encoded textures, the Mod list's previews) only read, the same way.
 - **Picks page reads, and a press keeps a pick** (0.55.0; the owner, 23 Nov 2026: "Go ahead and build the picks page"). Every
   file a pick names may be shown. **Pick** and **None of these** append the owner's answer in the program's own folder, only on a press, only for a repository the list
-  names, only while the manifest calls it `writes`. Nothing in a repository changes: a session applies the pick and settles it.
+  names, only while the manifest calls it `writes`. Nothing in a repository changes on a press: a session applies the pick and
+  settles it. **A pick already in the game settles by itself** (0.96.0; the owner's answer "Settle it by itself"): when the kit's
+  list says an answered pick's try is the file in use byte for byte, reading the page runs the kit's `picks settle --applied` for
+  that repository, while the manifest calls it `writes`; it removes only those picks (and their slot's other cards) from the
+  repository's `config/picks.json`, and the page says which.
 - **Timeline page only reads.** The history log it shows is written by the tools as they work, never by this program.
 - **Settings page writes one file, the central settings file**: only when the owner presses Save or Use the default, or chooses a
   path in Windows' own picker (0.29.0; owner, 20 Nov 2026: "file dialog window pickers ... where ever a directory needs to be

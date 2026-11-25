@@ -62,7 +62,13 @@ What outside it notices: the repository's art records, once a session applies th
 
 ## Round two: what the first day of use showed (proposal, 23 Nov 2026)
 
-**Status (23 Nov 2026): a proposal, not built.** The owner, 23 Nov 2026, after the first real batch was picked on the page: "Just point
+**Status (25 Nov 2026): built** in phobos-modkit 1.125.0 (R1 to R4) and Companion 0.96.0 (R1, R2, R6), on the owner's four
+answers on the Decisions page: **one pick per file** (R1), **settle it by itself** (R2), **ask, but let me skip** (R6), and
+**every repository on the games list** (R3). R5 (the art records' wording, and `settle` writing `picked` into a request's
+`art_plan`) and phobos-rimworld's art tools giving each card its `slot` are **not built yet**: until the art tools write `slot`,
+every card is still its own pick. **Not tested on screen.** Agent choices: the quick reasons (wrong subject, wrong style, hard to
+read small, wrong colours); a slot's one pick keeps the first card's id. As proposed, 23 Nov 2026: the owner, after the first real
+batch was picked on the page: "Just point
 out any irregularities to me, I think the Picker could do with some improvements", then "write up the Picker proposal for Companion".
 These come from applying that batch in phobos-rimworld (night 11's purge-button icon in eight cards, five sounds, and three pictures of
 an earlier batch). Four choices are on the Decisions page (`picks-one-slot`, `picks-applied`, `picks-none-words`, `picks-where`); the

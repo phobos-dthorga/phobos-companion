@@ -5,7 +5,12 @@
 //!
 //! Picking runs the kit's `picks answer`, which appends one line to the answers file in this program's folder, only when the owner
 //! presses a pick, only for a repository the list names, and only while the kit's manifest still calls that report `writes`.
-//! Nothing in a repository changes: a session applies the pick and settles it in a commit.
+//! Nothing in a repository changes on a press: a session applies the pick and settles it in a commit.
+//!
+//! **A pick already in the game settles by itself** (0.96.0; the owner's answer "Settle it by itself", Picks round two): when the
+//! list says a repository has an answered pick whose try is the file in use byte for byte (kit 1.125.0's `inGame`), the host runs
+//! the kit's `picks settle --applied` for that repository, while the manifest calls it `writes`, and reads the list again. It is
+//! one of this program's writes without a press, and it removes only picks the kit finds in the game.
 
 use companion_core::args::Args;
 use companion_core::checks;
@@ -19,6 +24,7 @@ use std::path::{Path, PathBuf};
 const TOOL: &str = "picks";
 const LIST: &str = "list";
 const ANSWER: &str = "answer";
+const SETTLE: &str = "settle";
 const CONFIG: [&str; 2] = ["config", "picks.json"];
 const MAX_ID: usize = 80;
 const MAX_WORDS: usize = 4000;
@@ -87,15 +93,45 @@ pub fn files_named(data: &Value) -> Vec<PathBuf> {
         .collect()
 }
 
-/// Every pick in every repository that keeps a picks file, waiting ones first, with any answer.
+pub fn settle_arguments(root: &Path) -> Vec<String> {
+    Args::new(TOOL, SETTLE).root(root).flag("--applied").json()
+}
+
+/// The repositories (by their root, as the list gave it) with an answered pick already in the game.
+pub fn with_applied(data: &Value) -> Vec<PathBuf> {
+    let list = |value: &Value| value.as_array().cloned().unwrap_or_default();
+    list(&data["repositories"])
+        .iter()
+        .filter(|repository| list(&repository["picks"]).iter().any(|pick| pick["inGame"].as_bool() == Some(true)))
+        .filter_map(|repository| repository["root"].as_str().map(PathBuf::from))
+        .collect()
+}
+
+fn listed(paths: &[PathBuf]) -> Result<Value, Failure> {
+    let answer = kit::run(TOOL, &list_arguments(paths))?;
+    Outcome::required(&answer)?;
+    Ok(answer["data"].clone())
+}
+
+/// Every pick in every repository that keeps a picks file, waiting ones first, with any answer; picks already in the game are
+/// settled first (0.96.0), and `settledByItself` names them.
 pub fn read() -> Result<Value, Failure> {
     let paths: Vec<PathBuf> = roots()?.into_iter().map(|(_, path)| path).filter(|path| has_picks(path)).collect();
     if paths.is_empty() {
-        return Ok(serde_json::json!({"waiting": 0, "repositories": []}));
+        return Ok(serde_json::json!({"waiting": 0, "repositories": [], "settledByItself": []}));
     }
-    let answer = kit::run(TOOL, &list_arguments(&paths))?;
-    Outcome::required(&answer)?;
-    let data = answer["data"].clone();
+    let mut data = listed(&paths)?;
+    let applied: Vec<PathBuf> = with_applied(&data).into_iter().filter(|root| paths.contains(root)).collect();
+    let mut settled: Vec<Value> = Vec::new();
+    if !applied.is_empty() && kit::allowed_by_manifest(&kit::read_manifest()?, TOOL, SETTLE).is_ok() {
+        for root in &applied {
+            if let Ok(answer) = kit::run(TOOL, &settle_arguments(root)) {
+                settled.extend(answer["data"]["settled"].as_array().cloned().unwrap_or_default());
+            }
+        }
+        data = listed(&paths)?;
+    }
+    data["settledByItself"] = Value::from(settled);
     crate::viewable::remember(files_named(&data));
     Ok(data)
 }

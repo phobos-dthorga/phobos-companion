@@ -107,8 +107,8 @@ screenshots as a list, and where the space goes; places and the Steam app ID in 
 | --- | --- | --- |
 | **Deleting old autosaves or Real Ruins files** from the Companion | Game-files discussion, 19 Nov 2026 | **The owner's decision.** Until then, sizes only |
 | **Running the Companion on another machine, or for someone else** | Limits in `design-record.md`; the owner's word of 20 Nov 2026 that it is to be released for others | **The [release audit](release-audit.md)**: every finding, in the order a stranger would hit them, with the owner's questions |
-| **S1: design records joined to code** | [history/cross-links-proposal.md](history/cross-links-proposal.md) | A way to tie a design record's sections to the code that builds them |
-| **S5: rules joined to the checks that enforce them** | [history/cross-links-proposal.md](history/cross-links-proposal.md) | A list tying each rule to its check script |
+| **S1: design records joined to code** | [history/cross-links-proposal.md](history/cross-links-proposal.md) | A way to tie a design record's sections to the code that builds them. **The owner's choice** (Decisions page): after the game-files work (saves, screenshots, what changed since you last played) |
+| **S5: rules joined to the checks that enforce them** | [history/cross-links-proposal.md](history/cross-links-proposal.md) | A list tying each rule to its check script. **The owner's choice**: after the game-files work, with S1 |
 | **Size as installed** on Make-up | Make-up, 0.20.0 | Each game's install records read for sizes |
 | **Prefs, KeyPrefs and Knowledge views** | Game-files discussion | Low value; build only if the owner asks |
 | **Saves backup** (15 GB) | Records backup discussion | Its own decision: where, how often, how many |

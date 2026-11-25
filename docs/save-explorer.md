@@ -79,8 +79,8 @@ exactly what the person sees.
 | Typed inputs | The host reads each option from the manifest, checks the text against its kind and a shape (an ID: letters, digits, `_` and `-`; a place in the tree: names separated by `/`; a search: one line of a sane length) and passes it after `--` as one argument, so nothing typed reaches a command line any other way. `AGENTS.md`'s "What the program may do" gains a line in the change that builds it |
 | Reading | The save is read once, from a copy, into the kit's index: about a second and a half for the owner's RimWorld saves, with a bar while it runs. Later presses take well under a second. One thing in full reads only that thing's bytes from the save, and **is refused when the game has saved over it since**: the page says so and offers **Read again** |
 | Drawing | The tree and lists from the components already there; one nested-list view for saved values. No new library. The relationship pictures (a later slice) reuse the Code map's drawing in `src/lib/connections/` |
-| Moving | Every press goes through the trail, with focus keys `save`, `place`, `thing` and `search`, listed in `cross-links.md` when built. Go to anything offers one entry, **Search this save for ...**, rather than searching the save live as you type |
-| Where | Under Play, after Game files; key **V**; every save on the Game files shelf gets **Explore this save** |
+| Moving | Every press goes through the trail, with focus keys `save`, `place`, `thing` and `search`, listed in `cross-links.md` when built. Go to anything offers one entry, **Search this save for ...**, rather than searching the save live as you type (**the owner's choice**, on the Decisions page: "One Search this save entry") |
+| Where | Under Play, after Game files; key **V** (**the owner's choice**, on the Decisions page); every save on the Game files shelf gets **Explore this save** |
 | The Guide | A page entry, a How do I...? answer ("Find where something went in my save") and the words above, in the same change |
 
 ## Games

@@ -30,7 +30,8 @@
    *
    * Check what they mean for ours (0.35.0; the owner's choice of 20 Nov 2026, all four checks) runs the tools' check after an update
    * on the owner's press, for the first repository: our patches' targets, the temporary patches' faults, each update's size and
-   * new types, and our XML patches. It may decompile new builds into the tools' cache, so it never runs by itself.
+   * new types, and our XML patches. It may decompile new builds into the tools' cache, so it never runs by itself (the owner's
+   * choice on the Decisions page: "Only when I press it").
    */
   let {
     game,

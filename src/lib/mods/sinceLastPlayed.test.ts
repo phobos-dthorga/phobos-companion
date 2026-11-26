@@ -15,7 +15,9 @@ import {
   summariseCheck,
   tiedUpdates,
   updateSize,
+  xmlProblems,
   type UpdateRow,
+  type XmlRow,
 } from "./sinceLastPlayed";
 
 const SINCE = "2026-11-19T00:00:00+00:00";
@@ -288,6 +290,29 @@ describe("the check after an update", () => {
     ]);
     expect(summary.xml).toMatchObject({ checked: 371, patched: 1 });
     expect(summary.xml?.problems.map((r) => r.def)).toEqual(["C"]);
+  });
+
+  it("lists identical XML problems once, with how many patches meet them (0.100.1)", () => {
+    // The owner's screen note of 26 Nov 2026: three operations in one file naming a Def that was renamed froze the page.
+    const row = (def: string, status: XmlRow["status"], detail = "gone") => ({
+      mod: "Ours",
+      file: "Munitions.xml",
+      def,
+      status,
+      detail,
+    });
+    const problems = xmlProblems([
+      row("Bomb", "missing"),
+      row("Bomb", "missing"),
+      row("Bomb", "missing"),
+      row("Bomb", "node-missing", "no costList"),
+      row("Rocket", "found", ""),
+    ]);
+    expect(problems.map((p) => [p.def, p.status, p.count])).toEqual([
+      ["Bomb", "missing", 3],
+      ["Bomb", "node-missing", 1],
+    ]);
+    expect(new Set(problems.map((p) => p.key)).size).toBe(problems.length);
   });
 
   it("shows a few updates and counts the rest", () => {

@@ -4,6 +4,15 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.100.1] - 2026-11-26
+
+### Fixed
+
+- **The update check's answer always shows** (the owner's screen notes of 25 and 26 Nov 2026, on the Mods page). When one of our
+  XML patch files had several patches naming a missing Def, the page stopped drawing and the bar stayed on "Checking our XML
+  patches". Those patches now show as one line with how many there are, and an answer that cannot be drawn says so, with Check
+  again. With tool kit 1.128.1, two checks at once no longer fail with "being used by another process". **Not tested on screen.**
+
 ### Changed
 
 - **Five choices about the code viewer are the owner's now** (by card, 24 Nov 2026), each as it was built, so nothing in the

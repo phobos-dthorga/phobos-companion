@@ -175,12 +175,36 @@ export type UpdateCheck = {
   xml?: { checked: number; rows: XmlRow[]; patchedDefs?: string };
 };
 
+/** One problem the XML check found, however many of our patch operations in one file meet it (0.100.1): `key` is unique. */
+export type XmlProblem = XmlRow & { key: string; count: number };
+
 export type CheckSummary = {
   names: { found: number; failing: NamesPart["failing"] } | null;
   temporary: { touched: TemporaryRow[]; total: number } | null;
   updates: { shown: UpdateRow[]; more: number } | null;
-  xml: { checked: number; problems: XmlRow[]; patched: number } | null;
+  xml: { checked: number; problems: XmlProblem[]; patched: number } | null;
 };
+
+/** The XML rows that find nothing, identical ones as one row with a count. The check gives a row per patch operation, so a file
+ *  with three operations naming one missing Def gave three identical rows; listed by file and Def, they froze the page (the
+ *  owner's screen note of 26 Nov 2026, 0.100.1). */
+export function xmlProblems(rows: XmlRow[]): XmlProblem[] {
+  const found = new Map<string, XmlProblem>();
+  for (const row of rows) {
+    if (row.status !== "missing" && row.status !== "node-missing") continue;
+    const key = JSON.stringify([
+      row.mod,
+      row.file,
+      row.def,
+      row.status,
+      row.detail,
+    ]);
+    const seen = found.get(key);
+    if (seen) seen.count += 1;
+    else found.set(key, { ...row, key, count: 1 });
+  }
+  return [...found.values()];
+}
 
 /** How much an update changed: every declaration added, removed or changed. */
 export function updateSize(row: UpdateRow): number {
@@ -213,9 +237,7 @@ export function summariseCheck(data: UpdateCheck, shown = 5): CheckSummary {
     xml: data.xml
       ? {
           checked: data.xml.checked,
-          problems: rows.filter(
-            (row) => row.status === "missing" || row.status === "node-missing",
-          ),
+          problems: xmlProblems(rows),
           patched: rows.filter((row) => row.status === "patched").length,
         }
       : null,

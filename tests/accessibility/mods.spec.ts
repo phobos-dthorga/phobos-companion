@@ -1022,6 +1022,8 @@ test.describe("Since you last played (0.28.0)", () => {
       updates: { result: kept },
       patch_targets: { result: targets },
     });
+    // That day's clock: the stand-in launch (19 Nov) is within the week, so "a week" is the reach whatever today's date is.
+    await page.clock.setFixedTime(new Date("2026-11-21T12:00:00+11:00"));
     await page.goto("/");
     await page.getByRole("button", { name: "Mods", exact: true }).click();
     const since = page.getByRole("group", { name: "Since you last played" });

@@ -4,7 +4,7 @@ kind: page
 page: explorer
 go: explorer
 words: explorer, look inside, snapshot, memory, heap, objects, leak, what holds it, debug
-see: task-find-memory-use, task-find-why-in-memory, term-snapshot, term-garbage
+see: task-find-memory-use, task-find-why-in-memory, term-snapshot, term-garbage, term-check
 ---
 **A look inside your running game's memory**, from a [snapshot](term-snapshot): what is in it by kind and by who it belongs to, any one thing with every value it holds, and why something is still in memory. It only reads: nothing in the game is changed.
 
@@ -15,7 +15,7 @@ see: task-find-memory-use, task-find-why-in-memory, term-snapshot, term-garbage
 - **Run the checks** asks the snapshot you already hold every rule your repositories keep for the running game (their `config/checks.json`), so the game is not paused again. **The checks** shows how many ran, the faults and what is worth a look, each with where it was found and why the rule holds. A finding is something to look at, not a test: a snapshot holds one moment, and a rule can be wrong. A game whose repositories keep no rules is told so.
 - **Let it go** frees the snapshot. It also goes after ten minutes, and when you leave the page. Take another to look again.
 
-Reading saves here comes later, with the save explorer. Only a game whose tools can look inside it has this page; any other is told so.
+The checks on your saves run by themselves instead, with no snapshot (see [find out whether my game is in a state it should never be](task-check-saves)). Reading saves here comes later, with the save explorer. Only a game whose tools can look inside it has this page; any other is told so.
 
 ### Keys
 - **V** opens Explorer. On the page: **E** looks inside (it asks first), **Q** lets the snapshot go, **O** goes back to the overview, **C** runs the checks on the snapshot held.

@@ -59,9 +59,16 @@ export type ReportEntry = {
   question: string;
   /** What the report mostly is when it has a page of its own, such as "globe". */
   surface: string | null;
+  /** The count in its data that waits on you, when it has one (0.101.0; kit 1.129.0's `waits`). */
+  waits?: string | null;
 };
 
-export type ReportResult = { report: Report; command_line: string };
+export type ReportResult = {
+  report: Report;
+  command_line: string;
+  /** That count, read by the host from the report's data; null when the report has none (0.101.0). */
+  waiting?: number | null;
+};
 
 export type CatalogueReading =
   Waiting | { state: "ready"; entries: ReportEntry[] };

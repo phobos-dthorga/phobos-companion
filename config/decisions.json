@@ -1,4 +1,31 @@
 {
   "schemaVersion": 1,
-  "decisions": []
+  "decisions": [
+    {
+      "id": "save-checks-when",
+      "question": "When should the save checks run by themselves?",
+      "context": "0.101.0 runs them at each scan: when a game is shown, on Look again, and when you come back to the window after five minutes. A save made while playing is checked the next time you look at the Companion. Running them the moment a save is written would find a fault sooner, but reading a 400 MB save (a few seconds the first time) takes processor time from the game while you play.",
+      "options": [
+        {
+          "id": "at-each-scan",
+          "label": "At each scan",
+          "detail": "As built: when you look at the Companion"
+        },
+        {
+          "id": "when-saved",
+          "label": "As soon as a save is written",
+          "detail": "Sooner, but it reads the save while the game runs"
+        },
+        {
+          "id": "when-saved-closed",
+          "label": "As soon as a save is written, only once the game is closed",
+          "detail": "Never while you play; a save made mid-session waits until you quit"
+        }
+      ],
+      "lean": "at-each-scan",
+      "why": "It never competes with the game for the processor, and you see the result when you are looking anyway",
+      "from": "docs/design-record.md",
+      "asked": "2026-11-26"
+    }
+  ]
 }

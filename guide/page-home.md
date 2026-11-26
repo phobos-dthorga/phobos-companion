@@ -14,6 +14,7 @@ see: task-first-steps, term-repository, task-repository-ready, task-agent-featur
 - **Not released yet:** mods with changelog entries no released version holds; each opens its changelog on the Changes page.
 - **Open work**, from each repository's list of what is still to do, where it keeps one (see [make a repository ready](task-repository-ready)).
 - Counts that lead elsewhere: settings to look at, and a note when your records want a backup.
+- **The checks found something**, when a game's save checks found a state your mods should never be in, or one worth a look, in your newest save. **See what they found** opens the report (see [find out whether my game is in a state it should never be](task-check-saves)).
 - **Checks on GitHub**, for each repository: commits not pushed, files changed, and whether its last push passed its checks on GitHub, with any nightly run that has stopped running. **Look now** asks GitHub at once; **Going online settings** switches it off (see [choose what the Companion asks the internet](task-going-online)).
 - **Their code changed**, when a repository's nightly watch found commits in other authors' public source that touch a method your code names: each commit, its date and words, the method, and your line that names it. It is an early warning: read the commit before acting, and the check after an update stays the real one.
 - **Which [tool kit](term-tool-kit) each repository uses**, how far behind the newest it is, and what moving its pin would bring.
@@ -29,6 +30,7 @@ The very first time, with no games listed yet, Home shows [First steps](task-fir
   - **Logs:** new errors the game's first run showed after your last change to the mod list.
   - **Mods:** things to do before you play (a build, changes not installed, textures to encode), updates that changed a method your mods patch, and mod settings to look at.
   - **Tests:** rows the game saw working that nobody has judged.
+  - **Reports:** what the save checks found in your newest save, faults and things worth a look together.
   - **Decisions** and **Picks:** those waiting for your answer.
   - **About** shows a mark, not a number, when a newer version of the Companion waits.
 - **The numbers come from scans made by themselves**, which only read: when the Companion starts, on **Look again**, and when you come back to its window after five minutes or more away, such as after an update.

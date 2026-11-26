@@ -10,6 +10,8 @@
   import ReportView from "./ReportView.svelte";
   import { readCatalogue, runReport } from "./desktopClient";
   import { DEFAULT_TOP, hasMoreRows, MAX_TOP, nextTop } from "./presentation";
+  import { watched } from "./watched.svelte";
+  import { waitingFor } from "./watching";
   import type { CatalogueReading, ReportEntry, RunReading } from "./types";
 
   let { game }: { game: GameHome } = $props();
@@ -157,6 +159,7 @@
   {:else}
     <ul>
       {#each catalogue.entries as entry (`${entry.command}-${entry.report}`)}
+        {@const waiting = waitingFor(watched.found[game.id], entry)}
         <li>
           <button
             type="button"
@@ -164,6 +167,11 @@
             onclick={() => show(entry, DEFAULT_TOP)}
           >
             {entry.question}
+            {#if waiting !== null}
+              <span class="waiting"
+                >{t("reports-waiting", { count: waiting })}</span
+              >
+            {/if}
           </button>
         </li>
       {/each}
@@ -209,5 +217,12 @@
 
   .question:hover {
     border-color: var(--colour-comparison);
+  }
+
+  .waiting {
+    display: block;
+    margin-top: 6px;
+    font-weight: 600;
+    color: var(--colour-accent);
   }
 </style>

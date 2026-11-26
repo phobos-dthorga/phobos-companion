@@ -20,6 +20,7 @@
   import RecordsNote from "../records/RecordsNote.svelte";
   import CleanupNote from "../cleanup/CleanupNote.svelte";
   import ModListNote from "../modlist/ModListNote.svelte";
+  import WaitingNote from "../reports/WaitingNote.svelte";
   import { pageServes } from "./kinds";
   import SafeCopiesNote from "../safecopies/SafeCopiesNote.svelte";
   import ClaimsPanel from "../claims/ClaimsPanel.svelte";
@@ -239,6 +240,7 @@
 {#if pageServes(game.kind, "modlist")}
   {#key game.id}<ModListNote game={game.id} />{/key}
 {/if}
+<WaitingNote game={game.id} />
 {#key game.id}<PublishNote game={game.id} />{/key}
 <CleanupNote game={game.id} />
 

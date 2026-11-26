@@ -1035,6 +1035,26 @@ game whose repositories keep none is told so by the tools' own words. **Agent ch
 the overview, its key **C**, and the view's words. The save checks need no page of their own: `rimworld-save checks` only reads, asks
 a plain question and needs nothing typed, so the Reports page offers it once the kit's pin is at 1.122.0 or later.
 
+### The checks on each new save (built 26 Nov 2026, 0.101.0)
+
+**The owner's choice** (26 Nov 2026, "#1 through #3" of the ways offered to improve the test automation; phobos-rimworld's
+`docs/development/test-automation.md`, "Round two"): the save checks run by themselves, so a state the rules say should never be is
+found the morning it begins. (The HEMTT's 975 steel sat in every save for a day because nobody ran the check.) The kit's manifest
+marks a report that counts what waits on the person with `waits` (kit 1.129.0); the host reads that count from the report's data
+(`reports::waits_of`), and the page list's scan runs each such report, one at a time, keeping its count (`watched.svelte.ts`).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Learn that their newest save holds a state their mods should never be in without running anything: a number beside Reports, a count beside the report, a note on Home leading to it |
+| What does it stop them doing? | Nothing; the report only reads, as it did on a press |
+| How does it change the way they work? | Saving while playing is enough: the next look at the Companion checks that save |
+| What outside the thing notices? | Nothing in the game: it reads a copy of the save. The kit indexes a new save once (a few seconds), in its own cache |
+
+**Games:** any game whose tools mark a report with `waits`; RimWorld's save checks today. Phobos Ostranauts has none, so no number
+and no note. **Agent choices, owner to revise:** running at each scan rather than the moment a save is written (a save read while
+the game runs takes processor time from it: the Decisions page asks); faults and things worth a look counted together; the note's
+words and its place on Home, under the mod list's. **Risk (agent's grade): none**: nothing is written but the kit's index.
+
 ## Safe copies on Home (built 21 Nov 2026, 0.42.0)
 
 **Moved to a page of its own in 0.95.0** (the owner's answer on the Decisions page, "A page of its own"; its key **Shift+B** by

@@ -12,6 +12,7 @@ import { split } from "../mods/ledger";
 import { preflight } from "../mods/presentation";
 import { readPatches, readSince } from "../mods/sinceReading";
 import type { PageName } from "../navigation/place";
+import { scanWatched } from "../reports/watched.svelte";
 import { readPicks } from "../picks/desktopClient";
 import { readTestLists } from "../tests/desktopClient";
 import { shelfCount } from "../tests/presentation";
@@ -27,6 +28,7 @@ import { counted, withPart, type Parts } from "./waiting";
  * - Mod list: the check's problems and warnings, plus the mods a sort would move.
  * - Logs: new errors the game's first run showed after the last change to the mod list.
  * - Mods: settings to look at, things Before you play lists as to do, and updates that changed a method our mods patch.
+ * - Reports (0.101.0): what the reports that count what waits on you found, such as the save checks on the newest save.
  * - About: a mark, not a number, when a newer version of the program waits.
  *
  * A page with nothing waiting, or whose reading failed, has no number: a number never stands for "unknown". The scans only read.
@@ -100,6 +102,7 @@ export function readWaiting(game: GameHome) {
     void scanMods(game, keep);
   }
   if (pageServes(game.kind, "modlist")) void scanModList(game.id, keep);
+  void scanWatched(game.id).then((total) => keep("reports", "waiting", total));
   void readAbout().then((answer) => {
     if (ask !== asked) return;
     const { about: _, ...others } = waiting.marks;

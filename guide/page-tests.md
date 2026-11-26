@@ -10,7 +10,7 @@ see: task-pass-test, term-test-row, term-seen-working
 
 The rows are on shelves:
 
-- **Seen working:** the game noted these running without an error. Only you can say whether they looked right.
+- **Seen working:** the game noted these running without an error, or a [check](term-check) read their figures from your saves and found them as the row expects. Only you can say whether they looked right.
 - **Waiting:** nothing has been seen of these yet; try them when you are ready.
 - **Your verdicts:** what you pressed, waiting to be written into the test list (the tool kit's `test-pass apply` does it, run by you or an agent session).
 - **Done:** the test list already says passed or failed.

@@ -1,5 +1,8 @@
 //! Which of the kit's reports the window may offer for a game, and running them. The rule lives here, not in the window:
 //! a report runs only if the manifest says it only reads, has a plain question, and needs nothing typed.
+//!
+//! A report whose manifest names `waits` (0.101.0; kit 1.129.0) says which count in its data is what waits on the person, such
+//! as a save check's faults: the result carries that count, so the window's scans show it without reading the report's words.
 
 use companion_core::failure::Failure;
 use companion_core::kit;
@@ -20,12 +23,16 @@ pub struct ReportEntry {
     pub question: String,
     /// What the report mostly is when the window should give it a page of its own, such as `globe`.
     pub surface: Option<String>,
+    /// The name of the count in the report's data that waits on the person, when it has one (0.101.0).
+    pub waits: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct ReportResult {
     pub report: Value,
     pub command_line: String,
+    /// The count the manifest's `waits` names, read from the report's data; none when it names none or the data lacks it.
+    pub waiting: Option<u64>,
 }
 
 /// The reports on offer for one game.
@@ -45,7 +52,22 @@ pub fn run(
     let options = find_runnable(&manifest, game, command, report)?;
     let arguments = arguments(command, report, options, top);
     let answer = kit::run_hearing(command, &arguments, listener)?;
-    Ok(ReportResult { report: answer["report"].clone(), command_line: command_line(command, report, options, top) })
+    let waiting = waits_of(&manifest, game, command, report).and_then(|name| answer["data"][name.as_str()].as_u64());
+    Ok(ReportResult {
+        report: answer["report"].clone(),
+        command_line: command_line(command, report, options, top),
+        waiting,
+    })
+}
+
+/// The name of the count a report's data holds of what waits on the person, as its manifest says.
+pub(crate) fn waits_of(manifest: &Value, game: &str, command: &str, report: Option<&str>) -> Option<String> {
+    commands_of(manifest)
+        .iter()
+        .find(|c| c["name"].as_str() == Some(command) && c["game"].as_str() == Some(game))
+        .and_then(|c| reports_of(c).iter().find(|r| r["name"].as_str() == report))
+        .and_then(|r| r["waits"].as_str())
+        .map(str::to_owned)
 }
 
 fn commands_of(manifest: &Value) -> &[Value] {
@@ -76,6 +98,7 @@ pub(crate) fn entries(manifest: &Value, game: &str) -> Vec<ReportEntry> {
                 report: report["name"].as_str().map(str::to_owned),
                 question: report["question"].as_str().unwrap_or_default().to_owned(),
                 surface: report["surface"].as_str().map(str::to_owned),
+                waits: report["waits"].as_str().map(str::to_owned),
             })
         })
         .collect()

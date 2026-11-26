@@ -4,6 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.101.0] - 2026-11-26
+
+### Added
+
+- **The save checks run by themselves, and Home says when they find something** (the owner's choice of 26 Nov 2026, "#3").
+  Each scan of the page list (on showing a game, on Look again, on coming back after five minutes) runs every report the tool kit
+  marks as counting what waits on you; for RimWorld, the save checks on the newest save. Their count shows beside Reports and
+  beside the report, and Home's note **The checks found something** opens it. On the owner's PG23 it found 6 jets saved with
+  another jet mod's guns, saved before the fix that repairs them on load. Checked on RimWorld and Phobos Ostranauts (no such
+  report, so no number). With tool kit 1.129.0, whose save checks can also note figures for the Tests page. **Not tested on
+  screen.**
+
 ## [0.100.1] - 2026-11-26
 
 ### Fixed

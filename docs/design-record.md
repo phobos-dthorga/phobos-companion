@@ -1051,9 +1051,9 @@ marks a report that counts what waits on the person with `waits` (kit 1.129.0); 
 | What outside the thing notices? | Nothing in the game: it reads a copy of the save. The kit indexes a new save once (a few seconds), in its own cache |
 
 **Games:** any game whose tools mark a report with `waits`; RimWorld's save checks today. Phobos Ostranauts has none, so no number
-and no note. **Agent choices, owner to revise:** running at each scan rather than the moment a save is written (a save read while
-the game runs takes processor time from it: the Decisions page asks); faults and things worth a look counted together; the note's
-words and its place on Home, under the mod list's. **Risk (agent's grade): none**: nothing is written but the kit's index.
+and no note. **Owner's choice** (Decisions page, 26 Nov 2026: "At each scan"): the checks run at each scan, never the moment a save
+is written, so they never take processor time from the game while it is played. **Agent choices, owner to revise:** faults and
+things worth a look counted together; the note's words and its place on Home, under the mod list's. **Risk (agent's grade): none**: nothing is written but the kit's index.
 
 ## Safe copies on Home (built 21 Nov 2026, 0.42.0)
 

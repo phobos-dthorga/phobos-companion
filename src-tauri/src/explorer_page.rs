@@ -11,6 +11,13 @@
 //! it. **One snapshot is held at a time**, and it is let go after ten minutes at most (owner's choice), on Let it go, when the
 //! page closes, and when the program closes. Addresses are good only within one snapshot, so every request names the snapshot it
 //! belongs to, and one for a snapshot let go is answered "gone".
+//!
+//! **The checks with the game frozen** (0.102.0; the owner, 27 Nov 2026: "build the freeze button for Companion's Run the
+//! checks"): a snapshot needs Windows to copy the game, and on a machine with less free memory than the game holds Windows refuses
+//! (error 1450). The game's `look-check --freeze` reads it in place instead, the game standing still for the whole read (about 30
+//! seconds on the owner's colony; the tools let it go after two minutes at most, and thaw it if their reader is stopped first).
+//! It is one run, never held: the same press-and-confirm, only while the manifest calls `look-check` `runs`, and any snapshot held
+//! is let go first, so the game is never read two ways at once.
 
 use companion_core::args::Args;
 use companion_core::checks;
@@ -26,6 +33,9 @@ use std::time::{Duration, Instant};
 
 const SURFACE: &str = "look-inside";
 const SERVE: &str = "look-serve";
+/// The live checks in one run (0.102.0), read here only with the game frozen.
+const CHECK: &str = "look-check";
+const FREEZE: &str = "--freeze";
 const RUNS: &str = "runs";
 /// How long a snapshot may be held, in seconds: ten minutes at most (owner's choice, 20 Nov 2026). Windows keeps a snapshot by
 /// copying each page the game changes afterwards, so one held longer costs more memory as the game runs on.
@@ -66,6 +76,20 @@ pub struct Offer {
     pub available: bool,
     /// The tools have it, but the manifest no longer gives it the effect this page runs.
     pub refusal: Option<String>,
+    /// The tools can also run the checks with the game frozen (0.102.0): `look-check` on the same surface, still `runs`.
+    pub frozen_checks: bool,
+}
+
+/// What came of running the checks with the game frozen (0.102.0).
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct FrozenChecks {
+    /// False when this game's tools cannot run them.
+    pub available: bool,
+    /// The checks' answer, as the held snapshot's `checks` gives it (`checks`, `faults`, `looks`, `report`); null when refused.
+    pub answer: Value,
+    /// Why nothing was read, in the tools' words (the game is not running, for one).
+    pub refusal: Option<String>,
+    pub command_line: String,
 }
 
 /// What came of taking a snapshot.
@@ -111,10 +135,63 @@ pub fn tool_of(manifest: &Value, game: &str) -> Result<Option<String>, Failure> 
 /// Whether this game's tools can look inside the running game: read when the page opens, so it can say so before any press.
 pub fn offer(game: &str) -> Result<Offer, Failure> {
     let manifest = kit::read_manifest()?;
+    let frozen_checks = matches!(frozen_tool_of(&manifest, game), Ok(Some(_)));
     Ok(match tool_of(&manifest, game) {
-        Ok(Some(_)) => Offer { available: true, refusal: None },
-        Ok(None) => Offer { available: false, refusal: None },
-        Err(failure) => Offer { available: true, refusal: Some(failure.detail) },
+        Ok(Some(_)) => Offer { available: true, refusal: None, frozen_checks },
+        Ok(None) => Offer { available: false, refusal: None, frozen_checks: false },
+        Err(failure) => Offer { available: true, refusal: Some(failure.detail), frozen_checks },
+    })
+}
+
+/// The command running this game's live checks in one run (0.102.0), found by the same surface, checked to still be `runs`.
+pub fn frozen_tool_of(manifest: &Value, game: &str) -> Result<Option<String>, Failure> {
+    match kit::offered(manifest, game, SURFACE, CHECK, RUNS) {
+        Offered::Tool(name) => Ok(Some(name)),
+        Offered::Missing => Ok(None),
+        Offered::Changed(reason) => Err(Failure::refused(reason)),
+    }
+}
+
+/// The arguments that run the live checks with the game frozen: nothing from the window, so the rules come only from the tools.
+pub fn frozen_arguments(tool: &str) -> Vec<String> {
+    Args::new(tool, CHECK).flag(FREEZE).json()
+}
+
+/// The checks' answer from the tools' envelope, in the shape the held snapshot's `checks` gives (so one view shows both), or the
+/// tools' refusal in their words.
+pub fn frozen_answer(envelope: &Value) -> Result<Value, String> {
+    let data = &envelope["data"];
+    if data["ok"] == Value::Bool(false) {
+        return Err(data["refusal"].as_str().unwrap_or("the tools did not say why").to_owned());
+    }
+    if !data["checks"].is_array() || !envelope["report"].is_object() {
+        return Err("the tools gave no checks".to_owned());
+    }
+    let count = |name: &str| data[name].as_u64().unwrap_or(0);
+    Ok(serde_json::json!({
+        "checks": data["checks"].clone(),
+        "faults": count("faults"),
+        "looks": count("looks"),
+        "report": envelope["report"].clone(),
+    }))
+}
+
+/// Runs the live checks with the game frozen, on the person's press and confirmation: lets any snapshot held go first, so the
+/// game is never read two ways at once. One run: nothing is held afterwards.
+pub fn frozen_checks(game: &str, listener: Option<kit::Listener>) -> Result<FrozenChecks, Failure> {
+    let manifest = kit::read_manifest()?;
+    let Some(tool) = frozen_tool_of(&manifest, game)? else {
+        return Ok(FrozenChecks { available: false, answer: Value::Null, refusal: None, command_line: String::new() });
+    };
+    if let Some(old) = take(None) {
+        old.served.close(CLOSE_GRACE);
+    }
+    let arguments = frozen_arguments(&tool);
+    let command_line = command_line(&arguments);
+    let envelope = kit::run_hearing(&tool, &arguments, listener)?;
+    Ok(match frozen_answer(&envelope) {
+        Ok(answer) => FrozenChecks { available: true, answer, refusal: None, command_line },
+        Err(refusal) => FrozenChecks { available: true, answer: Value::Null, refusal: Some(refusal), command_line },
     })
 }
 

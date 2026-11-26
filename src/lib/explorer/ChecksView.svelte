@@ -6,6 +6,7 @@
   import Placeholder from "../shell/Placeholder.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
+  import { formatClock } from "../memory/presentation";
   import { formatCount } from "./presentation";
   import { question, remembered } from "./snapshot.svelte";
   import type { AnswerReading, ChecksAnswer } from "./types";
@@ -18,6 +19,12 @@
    */
   const REQUEST = { op: "checks" } as const;
 
+  /** 0.102.0: an answer already read with the game frozen, shown as it is; with none, the snapshot held is asked. */
+  let {
+    given = null,
+    frozenAt = null,
+  }: { given?: ChecksAnswer | null; frozenAt?: number | null } = $props();
+
   let reading = $state<AnswerReading<ChecksAnswer>>({ state: "reading" });
   let progress = $state(started());
 
@@ -26,6 +33,13 @@
   );
 
   async function load() {
+    if (given) {
+      reading = {
+        state: "ready",
+        answer: { ok: true, data: given, error: null, released: null },
+      };
+      return;
+    }
     const known = remembered<ChecksAnswer>(REQUEST);
     if (known) {
       reading = { state: "ready", answer: known };
@@ -43,7 +57,13 @@
 
 <section class="view" aria-labelledby="explorer-checks">
   <h2 id="explorer-checks">{t("explorer-checks-title")}</h2>
-  <p class="small">{t("explorer-checks-lead")}</p>
+  <p class="small">
+    {given
+      ? t("explorer-frozen-lead", {
+          when: formatClock((frozenAt ?? Date.now()) / 1000),
+        })
+      : t("explorer-checks-lead")}
+  </p>
   {#if reading.state === "reading"}
     <ProgressBar {progress} fallback={t("explorer-bar-checks")} />
     <Placeholder shape="rows" rows={4} />

@@ -11,7 +11,7 @@
   import type { Failure } from "../shell/types";
   import { register } from "../shortcuts/registry";
   import { formatClock } from "../memory/presentation";
-  import { readOffer } from "./desktopClient";
+  import { readOffer, runFrozenChecks } from "./desktopClient";
   import ChecksView from "./ChecksView.svelte";
   import KindView from "./KindView.svelte";
   import ObjectView from "./ObjectView.svelte";
@@ -31,7 +31,7 @@
     openOverview,
     take,
   } from "./snapshot.svelte";
-  import type { OfferReading } from "./types";
+  import type { ChecksAnswer, OfferReading } from "./types";
 
   /**
    * The Explorer (owner's choice, 20 Nov 2026: "one explorer, two sources"; docs/debugging.md, layer 1): a look inside the running
@@ -40,6 +40,10 @@
    * kind and by who it belongs to, one kind's objects, one object in full, what holds it and why it is still in memory. Reading
    * saves here comes with the save explorer, not built yet, and is said in words. Any game whose tools offer a look inside (the
    * kit's `look-inside` surface) gets it; the rest are told so.
+   *
+   * The checks with the game frozen (0.102.0; the owner, 27 Nov 2026): when Windows has no room to copy the game for a snapshot
+   * (error 1450), the tools read it in place instead, the game standing still for the whole read. One run on its own press and
+   * confirmation, nothing held afterwards; its answer shows in the same checks view.
    */
   let { game }: { game: GameHome } = $props();
 
@@ -51,6 +55,12 @@
   let takeFailure = $state<Failure | null>(null);
   let now = $state(Date.now());
   let confirmButton = $state<HTMLButtonElement | null>(null);
+  let freezeConfirming = $state(false);
+  let freezing = $state<ProgressState | null>(null);
+  let frozen = $state<{ answer: ChecksAnswer; at: number } | null>(null);
+  let frozenRefusal = $state<string | null>(null);
+  let frozenFailure = $state<Failure | null>(null);
+  let freezeButton = $state<HTMLButtonElement | null>(null);
 
   const held = $derived(explorer.held?.game === game.id ? explorer.held : null);
   const view = $derived(
@@ -72,6 +82,11 @@
   const minutes = $derived(
     held ? Math.round(held.ready.limitSeconds / 60) : 10,
   );
+  const canFreeze = $derived(
+    offer.state === "ready" && offer.offer.frozen_checks,
+  );
+  // Windows refused the copy a snapshot needs (error 1450): the frozen checks need none.
+  const noRoom = $derived(takeRefusal !== null && takeRefusal.includes("1450"));
 
   onMount(() => {
     void readOffer(game.id).then((reading) => {
@@ -91,6 +106,7 @@
         "explorer.checks": () => {
           if (held) openChecks();
         },
+        "explorer.frozen": askToFreeze,
       },
     });
     return () => {
@@ -113,11 +129,44 @@
     if (confirming) confirmButton?.focus();
   });
 
+  $effect(() => {
+    if (freezeConfirming) freezeButton?.focus();
+  });
+
   function askToStart() {
-    if (!available || taking) return;
+    if (!available || taking || freezing) return;
     takeRefusal = null;
     takeFailure = null;
+    freezeConfirming = false;
     confirming = true;
+  }
+
+  function askToFreeze() {
+    if (!canFreeze || held || taking || freezing) return;
+    frozenRefusal = null;
+    frozenFailure = null;
+    confirming = false;
+    freezeConfirming = true;
+  }
+
+  async function confirmFreeze() {
+    freezeConfirming = false;
+    frozenRefusal = null;
+    frozenFailure = null;
+    freezing = started(t("explorer-bar-freezing"));
+    const reading = await runFrozenChecks(game.id, (message) => {
+      if (freezing) freezing = heard(freezing, message);
+    });
+    freezing = null;
+    if (reading.state === "failed") frozenFailure = reading.failure;
+    else if (reading.state === "ready") {
+      const result = reading.frozen;
+      if (!result.available)
+        frozenRefusal = t("explorer-frozen-none", { game: game.name });
+      else if (result.answer)
+        frozen = { answer: result.answer, at: Date.now() };
+      else frozenRefusal = result.refusal || t("explorer-take-no-reason");
+    }
   }
 
   async function confirmStart() {
@@ -133,7 +182,14 @@
     else if (reading.state === "ready") {
       const taken = reading.taken;
       if (!taken.available)
-        offer = { state: "ready", offer: { available: false, refusal: null } };
+        offer = {
+          state: "ready",
+          offer: {
+            available: false,
+            refusal: null,
+            frozen_checks: false,
+          },
+        };
       else if (taken.snapshot === null)
         takeRefusal = taken.refusal || t("explorer-take-no-reason");
       else openOverview();
@@ -298,11 +354,76 @@
         <p class="said wrong" role="status">
           {t("explorer-take-refused", { reason: takeRefusal })}
         </p>
+        {#if noRoom && canFreeze}
+          <p class="said"><RichText text={t("explorer-no-room")} /></p>
+        {/if}
       {/if}
       {#if takeFailure}
         <FailurePanel failure={takeFailure} onretry={askToStart} />
       {/if}
     </section>
+
+    {#if canFreeze}
+      <section class="panel" aria-labelledby="explorer-frozen">
+        <h2 id="explorer-frozen">{t("explorer-frozen-title")}</h2>
+        <p class="small"><RichText text={t("explorer-frozen-what")} /></p>
+        {#if freezing}
+          <ProgressBar
+            progress={freezing}
+            fallback={t("explorer-bar-freezing")}
+          />
+        {:else if freezeConfirming}
+          <div
+            class="confirm"
+            role="group"
+            aria-label={t("explorer-frozen-confirm-label")}
+          >
+            <p class="confirm-question">
+              {t("explorer-frozen-confirm-question")}
+            </p>
+            <p class="confirm-warning">
+              <RichText text={t("explorer-frozen-confirm-words")} />
+            </p>
+            <div class="buttons">
+              <button
+                type="button"
+                class="move-button"
+                bind:this={freezeButton}
+                onclick={() => void confirmFreeze()}
+                >{t("explorer-frozen-confirm-yes")}</button
+              >
+              <button
+                type="button"
+                class="action"
+                onclick={() => (freezeConfirming = false)}
+                >{t("explorer-confirm-no")}</button
+              >
+            </div>
+          </div>
+        {:else}
+          <div class="buttons">
+            <button type="button" class="action" onclick={askToFreeze}
+              >{t("explorer-frozen-button")}</button
+            >
+            <span class="small muted">{t("explorer-frozen-how")}</span>
+          </div>
+        {/if}
+        {#if frozenRefusal}
+          <p class="said wrong" role="status">
+            {t("explorer-frozen-refused", { reason: frozenRefusal })}
+          </p>
+        {/if}
+        {#if frozenFailure}
+          <FailurePanel failure={frozenFailure} onretry={askToFreeze} />
+        {/if}
+      </section>
+    {/if}
+
+    {#if frozen}
+      {#key frozen.at}
+        <ChecksView given={frozen.answer} frozenAt={frozen.at} />
+      {/key}
+    {/if}
   {/if}
 {/if}
 

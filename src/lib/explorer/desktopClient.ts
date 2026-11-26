@@ -8,6 +8,8 @@ import type { OnProgress } from "../shell/progress";
 import type {
   Answer,
   AnswerReading,
+  FrozenChecks,
+  FrozenReading,
   Offer,
   OfferReading,
   ReleaseReading,
@@ -50,6 +52,19 @@ export async function askSnapshot<T>(
     "explorer_ask",
     { snapshot, request, onProgress: progressChannel(onProgress) },
     (answer) => ({ state: "ready", answer }),
+  );
+}
+
+/** Runs the live checks with the game frozen (0.102.0), once the person has pressed and confirmed; nothing is held afterwards. */
+export async function runFrozenChecks(
+  game: string,
+  onProgress?: OnProgress,
+): Promise<FrozenReading> {
+  if (inBrowser()) return BROWSER;
+  return ask<FrozenChecks, FrozenReading>(
+    "explorer_frozen_checks",
+    { game, onProgress: progressChannel(onProgress) },
+    (frozen) => ({ state: "ready", frozen }),
   );
 }
 

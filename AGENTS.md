@@ -113,7 +113,9 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   `runs`; it pauses the game for about half a second and writes nothing to the game. **Never take one by itself.** One is held at
   a time, and let go on Let it go, on leaving the page, when the program closes, or after ten minutes (the owner's choice). Every
   request is checked for kind, shape and size first. **Run the checks** (0.91.0) asks the snapshot held the live checks the
-  game's repositories keep; its request carries nothing from the window, so the rules come only from the tools.
+  game's repositories keep; its request carries nothing from the window, so the rules come only from the tools. **Run the checks
+  with the game frozen** (0.102.0, the owner's request of 27 Nov 2026) runs the game's `look-check --freeze` once, on its own press
+  and card, for when Windows has no room for a snapshot: the game stands still for the read, two minutes at most; nothing is held.
 - **Changes page and the code viewer only read.** The code viewer's **pictures and sounds** (0.50.0; the owner, 22 Nov 2026:
   "display multimedia in parts like this", with Save a copy and Open with its own program) are only files the kit's last answer
   named, at most 64 MB. **Save a copy** writes only where the owner chose in the Save dialog; **Open with its own program** writes

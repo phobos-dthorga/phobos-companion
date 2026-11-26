@@ -310,7 +310,10 @@ The mechanism behind each page's rule in `AGENTS.md`. Every change also passes t
   `checks::label`, a watch's name has the kit's shape, and a mark is one line under 200 characters, sent after `--`.
 - **Explorer** (`explorer_page.rs`): `look-serve` by the `look-inside` surface. A request's kind is from a fixed list; a type name
   passes `checks::type_name`, an address `checks::memory_address`, a filter is one line under 80 characters, and every number is
-  held to its range (`MAX_SKIP`, `MAX_TAKE`, `MAX_HOLDERS`, `MAX_SAMPLE`).
+  held to its range (`MAX_SKIP`, `MAX_TAKE`, `MAX_HOLDERS`, `MAX_SAMPLE`). **The checks with the game frozen** (0.102.0):
+  `look-check` by the same surface, still `runs`, with fixed arguments (`--freeze --json`) and nothing from the window; any held
+  snapshot is let go first. The kit's reader lets the game go at 120 s and the kit thaws it if the reader stops first; if the
+  program is closed mid-read, the kit's process runs on to its end.
 - **Changes and the code viewer** (`changes_page.rs`, `changed_files.rs`): the repository is one of the game's and the changelog
   a plain path inside it (`checks::changelog_path`). A file's bytes are handed over only for a binary file the kit's last answer
   for that repository and commit named, read with git, at most 64 MB. **Open with its own program** copies into

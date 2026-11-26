@@ -1035,6 +1035,30 @@ game whose repositories keep none is told so by the tools' own words. **Agent ch
 the overview, its key **C**, and the view's words. The save checks need no page of their own: `rimworld-save checks` only reads, asks
 a plain question and needs nothing typed, so the Reports page offers it once the kit's pin is at 1.122.0 or later.
 
+### The checks with the game frozen (built 27 Nov 2026, 0.102.0)
+
+**The owner's request** (27 Nov 2026: "Build the freeze button for Companion's Run the checks"). The first live check on the owner's
+game failed: Windows copies a game for a snapshot, and RimWorld's 21.3 GB of private memory was more than the 19.6 GB of commit
+left, so Windows refused with error 1450. Of four ways offered, the owner chose reading the game frozen, built as phobos-modkit
+1.132.0's `look-check --freeze`: the game stands still for the whole read (28.6 s on the owner's colony), 120 s at most, and the
+kit thaws it if its reader is stopped first. This page runs it on a press and its own confirmation card, through the manifest's
+`look-check` on the `look-inside` surface (`runs`), and shows the answer in the same checks view as the snapshot's. It holds
+nothing, so there is nothing to browse; any snapshot held is let go first, so the game is never read two ways at once. A snapshot
+refused with error 1450 says why and points to it.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Run their live checks on a machine with too little free memory for a snapshot |
+| What does it stop them doing? | Playing for the read: the game stands still, half a minute on a large colony, two minutes at most |
+| How does it change the way they work? | The checks need no larger page file or closed programs first |
+| What outside it notices? | The game, frozen and then let go; nothing in it is changed |
+
+**Games:** any game whose tools offer `look-check` on the `look-inside` surface; RimWorld today (phobos-modkit 1.132.0). Phobos
+Ostranauts' tools have no look inside, so its Explorer says so as before; a game whose tools look inside but cannot freeze is
+simply not offered the panel. **Agent choices, owner to revise:** the panel below Take a snapshot rather than a second button
+beside it, the key **F**, the card's words, and showing the panel always rather than only after a refusal. **Not done:** a frozen
+read of anything but the checks (the overview, one kind): each would freeze the game again, so it waits for the owner's word.
+
 ### The checks on each new save (built 26 Nov 2026, 0.101.0)
 
 **The owner's choice** (26 Nov 2026, "#1 through #3" of the ways offered to improve the test automation; phobos-rimworld's

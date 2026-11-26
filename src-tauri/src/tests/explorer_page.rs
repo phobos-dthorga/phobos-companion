@@ -35,6 +35,44 @@ fn a_snapshot_is_held_for_ten_minutes_at_most_with_the_label_as_one_argument() {
     assert_eq!(command_line(&arguments), "python -m phobos_modkit game-perf look-serve --limit-seconds 600");
 }
 
+fn with_check(effect: &str) -> Value {
+    let mut manifest = manifest("runs");
+    manifest["data"]["commands"][0]["reports"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"name": "look-check", "effect": effect, "surface": "look-inside"}));
+    manifest
+}
+
+#[test]
+fn the_frozen_checks_are_found_by_their_surface_and_run_only_while_the_manifest_says_runs() {
+    assert_eq!(frozen_tool_of(&with_check("runs"), "g").unwrap().as_deref(), Some("game-perf"));
+    assert_eq!(frozen_tool_of(&manifest("runs"), "g").unwrap(), None);
+    assert_eq!(frozen_tool_of(&with_check("runs"), "other").unwrap(), None);
+    assert_eq!(frozen_tool_of(&with_check("reads"), "g").unwrap_err().code, FailureCode::Refused);
+    assert_eq!(frozen_tool_of(&with_check("owner-only"), "g").unwrap_err().code, FailureCode::Refused);
+}
+
+#[test]
+fn the_frozen_checks_take_nothing_from_the_window() {
+    let arguments = frozen_arguments("game-perf");
+    assert_eq!(arguments, ["game-perf", "look-check", "--freeze", "--json"]);
+    assert_eq!(command_line(&arguments), "python -m phobos_modkit game-perf look-check --freeze --json");
+}
+
+#[test]
+fn the_frozen_checks_answer_as_the_held_snapshots_checks_do_or_say_why_not() {
+    let report = json!({"title": "Live checks", "facts": [], "lines": [], "blocks": [], "sections": []});
+    let envelope = json!({"report": report, "data": {"checks": [{"id": "a"}], "faults": 1, "looks": 2, "waiting": 3}});
+    assert_eq!(
+        frozen_answer(&envelope).unwrap(),
+        json!({"checks": [{"id": "a"}], "faults": 1, "looks": 2, "report": report})
+    );
+    let refused = json!({"report": report, "data": {"ok": false, "refusal": "RimWorld is not running."}});
+    assert_eq!(frozen_answer(&refused).unwrap_err(), "RimWorld is not running.");
+    assert!(frozen_answer(&json!({"report": report, "data": {}})).is_err());
+}
+
 #[test]
 fn the_checks_are_asked_with_nothing_from_the_window() {
     // 0.91.0: the live checks take no part from the window; anything sent with them is dropped before the reader sees it.

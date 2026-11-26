@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.102.0] - 2026-11-27
+
+### Added
+
+- **The Explorer runs the checks with the game frozen** (the owner, 27 Nov 2026: "Build the freeze button for Companion's Run the
+  checks"). When Windows has no room to copy the game for a snapshot (error 1450, as on the owner's machine: the game held 21.3 GB
+  and Windows had 19.6 GB free), **Run the checks with the game frozen…** reads it in place instead, after its own confirmation
+  card: the game stands still for the whole read (28.6 s on the owner's colony), two minutes at most, then runs on. The answer shows
+  in the same checks view as a snapshot's; nothing is held afterwards, and any snapshot held is let go first. A snapshot refused
+  with error 1450 now says why and points to it. Key **F**. With tool kit 1.132.0 (`look-check --freeze`), whose live checks also
+  stop refusing a check file over its save checks. Checked on RimWorld and Phobos Ostranauts (no look inside, told so as before).
+  **Not tested on screen.**
+
 ## [0.101.0] - 2026-11-26
 
 ### Added

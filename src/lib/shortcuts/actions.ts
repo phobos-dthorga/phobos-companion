@@ -534,6 +534,13 @@ export const ACTIONS: Action[] = [
     defaultKey: "c",
     words: "shortcut-explorer-checks",
   },
+  // 0.102.0: F for the checks with the game frozen (asks first); the Connections page's F is never on screen with the Explorer.
+  {
+    id: "explorer.frozen",
+    scope: "explorer",
+    defaultKey: "f",
+    words: "shortcut-explorer-frozen",
+  },
 ];
 
 export const SCOPES: { scope: Scope; words: string }[] = [

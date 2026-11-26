@@ -2,7 +2,12 @@ import type { Report } from "../reports/types";
 import type { Failed, Waiting } from "../shell/types";
 
 /** Whether this game's tools can look inside the running game, and why not when the manifest has changed. */
-export type Offer = { available: boolean; refusal: string | null };
+export type Offer = {
+  available: boolean;
+  refusal: string | null;
+  /** 0.102.0: the tools can also run the checks with the game frozen, for when a snapshot has no room. */
+  frozen_checks: boolean;
+};
 
 /** The reader's first line once a snapshot is taken (phobos-modkit 1.65.1, `look-serve`). */
 export type Ready = {
@@ -44,6 +49,14 @@ export type Answer<T = unknown> = {
 };
 
 export type TakenReading = Waiting | { state: "ready"; taken: Taken };
+/** What came of running the checks with the game frozen (0.102.0): one run, nothing held afterwards. */
+export type FrozenChecks = {
+  available: boolean;
+  answer: ChecksAnswer | null;
+  refusal: string | null;
+  command_line: string;
+};
+export type FrozenReading = Waiting | { state: "ready"; frozen: FrozenChecks };
 export type OfferReading = Waiting | { state: "ready"; offer: Offer };
 export type AnswerReading<T = unknown> =
   Waiting | { state: "ready"; answer: Answer<T> };

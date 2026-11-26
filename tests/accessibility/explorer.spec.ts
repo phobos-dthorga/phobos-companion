@@ -143,11 +143,44 @@ const path = {
   timedOut: false,
 };
 
-async function open(page: Page, available = true) {
+/** 0.102.0: the checks read with the game frozen, invented for the audit only. */
+const frozenAnswer = {
+  checks: [
+    {
+      id: "store",
+      title: "A store holds no more than its work could use",
+      level: "look",
+      row: "",
+      read: 216,
+      problem: "",
+      findings: [],
+    },
+  ],
+  faults: 0,
+  looks: 0,
+  report: {
+    format: 1,
+    title: "Live checks",
+    facts: [],
+    lines: [
+      "The game was frozen for 28,552 ms while it was read, then let go.",
+    ],
+    blocks: [],
+    sections: [],
+  },
+};
+
+async function open(
+  page: Page,
+  available = true,
+  more: Record<string, unknown> = {},
+) {
   await mockHost(page, {
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
-    explorer_offer: { result: { available, refusal: null } },
+    explorer_offer: {
+      result: { available, refusal: null, frozen_checks: available },
+    },
     explorer_start: {
       result: {
         available: true,
@@ -170,6 +203,17 @@ async function open(page: Page, available = true) {
       static: null,
     }),
     explorer_release: { result: true },
+    explorer_frozen_checks: {
+      result: {
+        available: true,
+        answer: frozenAnswer,
+        refusal: null,
+        command_line:
+          "python -m phobos_modkit sample-perf look-check --freeze --json",
+      },
+      progress: [{ label: "Freezing the game to read it" }],
+    },
+    ...more,
   });
   await page.goto("/");
   await page.keyboard.press("v");
@@ -294,6 +338,48 @@ for (const [name, viewport] of [
       await expect(
         page.getByRole("button", { name: /^Look inside the running game/ }),
       ).toBeVisible();
+    });
+
+    test("a snapshot with no room says so, and the checks run with the game frozen after asking", async ({
+      page,
+    }) => {
+      await open(page, true, {
+        explorer_start: {
+          result: {
+            available: true,
+            snapshot: null,
+            ready: null,
+            refusal: "Could not create snapshot to process. Error 1450.",
+            command_line: "python -m phobos_modkit sample-perf look-serve",
+          },
+        },
+      });
+      const main = page.locator("main");
+      await page
+        .getByRole("button", { name: /^Look inside the running game/ })
+        .click();
+      await page.getByRole("button", { name: "Take the snapshot" }).click();
+      await expect(main).toContainText("Error 1450");
+      await expect(main).toContainText(
+        "Windows had no room to copy the game for a snapshot.",
+      );
+      await page.keyboard.press("f");
+      const card = page.getByRole("group", {
+        name: "Freeze the game to run the checks?",
+      });
+      await expect(card).toContainText("stands still while it is read");
+      await audit(page);
+      await card
+        .getByRole("button", { name: "Freeze and run the checks" })
+        .click();
+      await expect(
+        page.getByRole("heading", { name: "The checks", exact: true }),
+      ).toBeVisible();
+      await expect(main).toContainText("Read with the game frozen at");
+      await expect(main).toContainText("frozen for 28,552 ms");
+      await audit(page);
+      expect(await smallControls(page)).toBe(0);
+      expect(await overflow(page)).toBeLessThanOrEqual(0);
     });
 
     test("a game whose tools cannot look inside is told so in words", async ({

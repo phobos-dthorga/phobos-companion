@@ -1508,6 +1508,15 @@ async fn explorer_ask(
     blocking(move || explorer_page::ask(snapshot, &request, Some(&hearing(on_progress)))).await
 }
 
+/// Runs the live checks with the game frozen (0.102.0), on the person's press and confirmation: no snapshot is taken or held.
+#[tauri::command]
+async fn explorer_frozen_checks(
+    game: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<explorer_page::FrozenChecks, Failure> {
+    blocking(move || explorer_page::frozen_checks(&game, Some(&hearing(on_progress)))).await
+}
+
 /// Lets the held snapshot go: on Let it go, and when the page closes. True when one was held.
 #[tauri::command]
 async fn explorer_release(snapshot: Option<u64>) -> Result<bool, Failure> {
@@ -1927,6 +1936,7 @@ pub fn run() {
             explorer_start,
             explorer_ask,
             explorer_release,
+            explorer_frozen_checks,
             read_shortcuts,
             save_shortcuts,
             records_automatic,

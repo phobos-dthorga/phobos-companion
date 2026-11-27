@@ -43,3 +43,12 @@ fn a_picture_is_saved_under_a_free_name_and_shown_only_from_the_folder() {
     assert!(show(&folder, &folder.join("missing.png")).is_err());
     fs::remove_dir_all(&folder).unwrap();
 }
+
+#[test]
+fn explorer_is_given_the_path_in_quotes_of_its_own_so_a_space_does_not_send_it_to_documents() {
+    let path = Path::new(r"C:\Users\Sample\Google Drive\RimWorld by Ludeon Studios\Saves\PG1.rws");
+    assert_eq!(
+        select_argument(path),
+        r#"/select,"C:\Users\Sample\Google Drive\RimWorld by Ludeon Studios\Saves\PG1.rws""#
+    );
+}

@@ -4,6 +4,15 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.107.1] - 2026-11-27
+
+### Fixed
+
+- **Show in folder opens the folder, not Documents** (the owner's report of 27 Nov 2026: "it just takes you to the Documents
+  folder, every time", since the earliest versions). A path with a space reached Explorer as one quoted `/select,` argument,
+  which Explorer does not read, so it fell back to Documents; the path now has quotes of its own. On the Game files page (saves,
+  screenshots) and for saved pictures. **Not tested on screen.**
+
 ## [0.107.0] - 2026-11-27
 
 ### Added

@@ -93,16 +93,24 @@ pub fn show(folder: &Path, path: &Path) -> Result<(), Failure> {
     select_in_file_manager(path)
 }
 
+/// Explorer's argument to open a folder with one file selected: `/select,` then the path in quotes of its own. Passed whole, a
+/// path with a space made the argument `"/select,C:\a b\c"`, which Explorer does not read, so it opened Documents instead, every
+/// time (the owner's report of 27 Nov 2026, since the earliest versions; 0.108.0). A Windows path can hold no `"`.
+pub fn select_argument(path: &Path) -> String {
+    format!("/select,\"{}\"", path.display())
+}
+
 /// Opens the file manager with the file selected (on Linux, its folder). The caller checks the path is one it may show.
 pub fn select_in_file_manager(path: &Path) -> Result<(), Failure> {
-    let folder = path.parent().unwrap_or(path);
-    let started = if cfg!(target_os = "windows") {
-        Command::new("explorer").arg(format!("/select,{}", path.display())).spawn()
-    } else if cfg!(target_os = "macos") {
-        Command::new("open").arg("-R").arg(path).spawn()
-    } else {
-        Command::new("xdg-open").arg(folder).spawn()
+    #[cfg(target_os = "windows")]
+    let started = {
+        use std::os::windows::process::CommandExt;
+        Command::new("explorer").raw_arg(select_argument(path)).spawn()
     };
+    #[cfg(target_os = "macos")]
+    let started = Command::new("open").arg("-R").arg(path).spawn();
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    let started = Command::new("xdg-open").arg(path.parent().unwrap_or(path)).spawn();
     started.map(|_| ()).map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))
 }
 

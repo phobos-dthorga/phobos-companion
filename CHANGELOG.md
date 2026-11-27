@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.104.0] - 2026-11-27
+
+### Added
+
+- **I've read it, on a temporary patch an update touched** (the owner's choice of 27 Nov 2026, "Finish today's loop"). In Since
+  you last played, each temporary patch the check asks you to read has **I've read it**: it leaves the list until its mod
+  updates again, with **Undo** beside it. The mark is kept in the program's own folder (tool kit 1.137.0's `reviews`); nothing in
+  the repository changes, and agent sessions' checks read it too.
+- **The update check says when its own answer may be out of date** (the same choice). A line says when the tool kit that ran it
+  is older than the one the repository uses, and when the file of every definition as patched was written before the moment
+  compared with, with the repository's own words for writing it again. With tool kit 1.137.0. Checked on RimWorld and Phobos
+  Ostranauts (no update check, told so as before; its marks list reads empty). **Not tested on screen.**
+
 ## [0.103.1] - 2026-11-27
 
 ### Changed

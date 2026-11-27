@@ -62,6 +62,22 @@ export async function checkUpdates<T>(
   );
 }
 
+/** Marks a temporary patch's update as read, or takes the mark back (`clear`), for a row and build the last check named
+ *  (0.104.0). It writes only into the program's own folder. */
+export async function markUpdateRead<T>(
+  game: string,
+  repository: string,
+  row: string,
+  build: string,
+  clear: boolean,
+): Promise<Ready<T> | Failed> {
+  return ask<OtherAnswer<T>, Ready<T>>(
+    "mark_update_read",
+    { game, repository, row, build, clear },
+    (answer) => ({ state: "ready", answer }),
+  );
+}
+
 /** The builds kept (no file), or what one file's last update changed, and in one member of it. */
 export async function askUpdates<T>(
   game: string,

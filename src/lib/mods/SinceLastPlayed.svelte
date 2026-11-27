@@ -2,19 +2,26 @@
   import { onMount } from "svelte";
   import { t } from "../i18n/runtime";
   import { forgetPatchTargets } from "../connections/patches";
-  import { checkUpdates, keepBuilds } from "../othercode/desktopClient";
+  import {
+    checkUpdates,
+    keepBuilds,
+    markUpdateRead,
+  } from "../othercode/desktopClient";
   import { openUpdate } from "../othercode/navigation";
   import type { KeptFile } from "../othercode/types";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
-  import { formatWhen } from "../shell/dates";
+  import { formatUtcMinute, formatWhen } from "../shell/dates";
   import { rememberChecked } from "./checkedMemory";
   import {
     newTypes,
+    patchedDefsNote,
+    rowKey,
     summariseCheck,
     updateSize,
     type CheckSummary,
     type SinceSummary,
+    type TemporaryRow,
     type UpdateCheck,
   } from "./sinceLastPlayed";
   import { readPatches, readSince, type Patches } from "./sinceReading";
@@ -54,6 +61,44 @@
     | { state: "ready"; summary: CheckSummary };
   let checked = $state<Check>({ state: "idle" });
   let checkProgress = $state(started());
+
+  /** Rows marked as read since this check was shown (0.104.0): they leave the list, each with Undo. */
+  let marked = $state<TemporaryRow[]>([]);
+  let marking = $state("");
+  let markSaid = $state("");
+
+  /** I've read it, or Undo (`clear`): the mark is kept in the program's own folder, for this row's build only. */
+  async function markRead(row: TemporaryRow, clear: boolean) {
+    const repository = repositories[0];
+    if (!repository || !row.build) return;
+    marking = rowKey(row);
+    markSaid = "";
+    const done = await markUpdateRead<unknown>(
+      game,
+      repository,
+      String(row.row),
+      row.build,
+      clear,
+    );
+    marking = "";
+    const refusal =
+      done.state === "failed"
+        ? done.failure.detail
+        : done.answer.ok
+          ? null
+          : (done.answer.refusal ?? "");
+    if (refusal !== null) {
+      markSaid = t("check-read-failed", { reason: refusal });
+      return;
+    }
+    marked = clear
+      ? marked.filter((m) => rowKey(m) !== rowKey(row))
+      : [...marked, row];
+  }
+
+  /** The touched rows still asking to be read. */
+  const asking = (rows: TemporaryRow[]) =>
+    rows.filter((row) => !marked.some((m) => rowKey(m) === rowKey(row)));
 
   // The readings themselves are in sinceReading.ts (0.67.0), which the page list's scan asks too.
   async function read() {
@@ -100,6 +145,8 @@
     if (!repository || !summary) return;
     checked = { state: "running" };
     checkProgress = started();
+    marked = [];
+    markSaid = "";
     // The moment it began, so an update arriving while it runs is still listed next time.
     const began = new Date();
     const done = await checkUpdates<UpdateCheck>(
@@ -248,6 +295,15 @@
             />
           {:else if checked.state === "ready"}
             {@const found = checked.summary}
+            {#if found.olderKit}
+              <p class="small">
+                <span class="mark" aria-hidden="true">◆</span>
+                {t("check-older-kit", {
+                  runs: found.olderKit.runs,
+                  pins: found.olderKit.pins,
+                })}
+              </p>
+            {/if}
             {#if found.names}
               <p class="small">
                 {#if found.names.failing.length === 0}
@@ -265,7 +321,8 @@
               </p>
             {/if}
             {#if found.temporary}
-              {#if found.temporary.touched.length === 0}
+              {@const asked = asking(found.temporary.touched)}
+              {#if asked.length === 0}
                 <p class="small">
                   <span class="mark" aria-hidden="true">✓</span>
                   {t("check-temporary-none", { count: found.temporary.total })}
@@ -273,11 +330,11 @@
               {:else}
                 <p class="small">
                   {t("check-temporary-lead", {
-                    count: found.temporary.touched.length,
+                    count: asked.length,
                   })}
                 </p>
                 <ul class="patched">
-                  {#each found.temporary.touched as row}
+                  {#each asked as row}
                     <li>
                       <span class="mark" aria-hidden="true">◆</span>
                       <span
@@ -296,9 +353,49 @@
                           >{t("since-see-change")}</button
                         >
                       {/each}
+                      {#if row.build && repositories[0]}
+                        <button
+                          type="button"
+                          class="action"
+                          disabled={marking !== ""}
+                          aria-label={t("check-read-it-label", {
+                            row: String(row.row),
+                          })}
+                          onclick={() => markRead(row, false)}
+                          >{marking === rowKey(row)
+                            ? t("check-read-working")
+                            : t("check-read-it")}</button
+                        >
+                      {/if}
                     </li>
                   {/each}
                 </ul>
+              {/if}
+              {#if found.temporary.reviewed > 0}
+                <p class="small muted">
+                  {t("check-temporary-reviewed", {
+                    count: found.temporary.reviewed,
+                  })}
+                </p>
+              {/if}
+              {#each marked as row (rowKey(row))}
+                <p class="small read">
+                  <span class="mark" aria-hidden="true">✓</span>
+                  <span>{t("check-read-done", { row: String(row.row) })}</span>
+                  <button
+                    type="button"
+                    class="action"
+                    disabled={marking !== ""}
+                    aria-label={t("check-read-undo-label", {
+                      row: String(row.row),
+                    })}
+                    onclick={() => markRead(row, true)}
+                    >{t("check-read-undo")}</button
+                  >
+                </p>
+              {/each}
+              {#if markSaid}
+                <p class="small" role="status">{markSaid}</p>
               {/if}
             {/if}
             {#if found.updates && found.updates.shown.length > 0}
@@ -357,6 +454,20 @@
                     </li>
                   {/each}
                 </ul>
+              {/if}
+              {@const fileNote = patchedDefsNote(found.xml.file)}
+              {#if fileNote}
+                <p class="small">
+                  <span class="mark" aria-hidden="true">◆</span>
+                  {fileNote === "stale"
+                    ? t("check-xml-file-stale", {
+                        written: formatUtcMinute(found.xml.file.written),
+                        how: found.xml.file.how ?? "",
+                      })
+                    : t("check-xml-file-missing", {
+                        how: found.xml.file.how ?? "",
+                      })}
+                </p>
               {/if}
             {/if}
             <p class="small muted">{t("check-limits")}</p>
@@ -421,7 +532,8 @@
     list-style: none;
   }
 
-  .patched li {
+  .patched li,
+  .read {
     display: flex;
     flex-wrap: wrap;
     align-items: center;

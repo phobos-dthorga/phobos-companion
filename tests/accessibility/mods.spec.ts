@@ -1091,6 +1091,95 @@ test.describe("Since you last played (0.28.0)", () => {
     ).toBeVisible();
   });
 
+  test("I've read it takes a touched temporary patch off the list, with Undo; old kits and files say so (0.104.0)", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      mod_installs: sampleInstalls(["RimWorld"]),
+      texture_status: sampleTextures(["RimWorld"]),
+      mod_settings: { result: sampleLedger },
+      game_files: { result: gameFiles },
+      updates: { result: kept },
+      patch_targets: { result: targets },
+      update_check: {
+        result: {
+          available: true,
+          ok: true,
+          refusal: null,
+          report: { title: "After the update" },
+          data: {
+            since,
+            kit: { runs: "1.132.0", repositoryPins: "1.137.0", older: true },
+            temporary: [
+              {
+                row: "6 (Harrier)",
+                patch: "RearmOneKind",
+                mod: "Harrier",
+                file: "AV8BHarrier.dll",
+                status: "changed",
+                detail: "FindAmmo changed: read whether the fault is fixed",
+                build: "3d9ff12528d1",
+              },
+              {
+                row: 27,
+                patch: "JetClasses",
+                mod: "Harrier",
+                file: "AV8BHarrier.dll",
+                status: "reviewed",
+                detail: "read on 2026-11-26",
+                reviewedBy: "repository",
+              },
+            ],
+            xml: {
+              checked: 541,
+              rows: [],
+              patchedDefs: "2026-11-19 18:51",
+              patchedDefsStale: true,
+              patchedDefsHow: "Tick the setting, then start the game again.",
+            },
+          },
+        },
+      },
+      mark_update_read: {
+        result: {
+          available: true,
+          ok: true,
+          refusal: null,
+          report: { title: "Marked as read" },
+          data: { ok: true },
+        },
+      },
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Mods", exact: true }).click();
+    const panel = page.getByRole("group", { name: "Since you last played" });
+    await panel
+      .getByRole("button", { name: "Check what they mean for ours" })
+      .click();
+    await expect(panel).toContainText("older than the 1.137.0");
+    await expect(panel).toContainText(
+      "To write it again: Tick the setting, then start the game again.",
+    );
+    await expect(panel).toContainText(
+      "One more was touched by an update already read.",
+    );
+    await audit(page);
+    await panel
+      .getByRole("button", { name: /I've read row 6 \(Harrier\)/ })
+      .click();
+    await expect(panel).toContainText("Row 6 (Harrier) is marked as read");
+    await expect(
+      panel.getByRole("button", { name: /I've read row 6/ }),
+    ).toHaveCount(0);
+    await audit(page);
+    await panel.getByRole("button", { name: /Undo: ask about row 6/ }).click();
+    await expect(
+      panel.getByRole("button", { name: /I've read row 6 \(Harrier\)/ }),
+    ).toBeVisible();
+  });
+
   test("compares a changed picture with the repository's, and a mod's pictures with their encoded textures (0.53.0)", async ({
     page,
   }) => {

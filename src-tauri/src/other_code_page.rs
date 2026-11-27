@@ -6,6 +6,10 @@
 //! tools have none is told so. The host checks every request: a name has the shape of a type or member name and goes after `--`,
 //! so it can never be read as an option; a file is a plain `.dll` name; and **only an assembly the tools' own `holder` named in
 //! this run of the program may be decompiled**, so the window can never point the decompiler at another file.
+//!
+//! **I've read it** (0.104.0; the owner's choice of 27 Nov 2026, "Finish today's loop") marks a temporary patch whose update the
+//! check asked about as read, with the kit's game-free `reviews mark`: only a row and build this run's update check named, and
+//! only into the program's own folder, so nothing in the repository changes. A newer build asks again.
 
 use companion_core::args::Args;
 use companion_core::checks;
@@ -22,6 +26,13 @@ const UPDATES: &str = "updates";
 const UPDATE_CHECK: &str = "update-check";
 const READS: &str = "reads";
 const RUNS: &str = "runs";
+/// The kit's game-free marks of what the owner has read (phobos-modkit 1.137.0), named as `picks` is: a game-free command.
+const REVIEWS: &str = "reviews";
+const MARK: &str = "mark";
+/// The kind of mark the update check reads for its temporary patches.
+const TEMPORARY_PATCH: &str = "temporary-patch";
+/// Longest temporary patch row id the kit accepts.
+const MAX_ROW: usize = 120;
 /// Longest name or file name accepted from the window.
 const MAX_NAME: usize = 300;
 
@@ -31,6 +42,57 @@ static HELD: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
 /// Each repository's last update check (0.72.0), as (game, repository, the kit's report): What does this mean for my mods? asks
 /// about it, and the host takes the report from here.
 static CHECKED: Mutex<Vec<(String, String, Value)>> = Mutex::new(Vec::new());
+
+/// The temporary patches each repository's last update check asked the owner to read, as (game, repository, row, build): the
+/// only ones I've read it may mark.
+static TOUCHED: Mutex<Vec<(String, String, String, String)>> = Mutex::new(Vec::new());
+
+/// Keeps the rows a check asked about (changed or removed, with the build it read), in place of the repository's last.
+pub fn remember_touched(game: &str, repository: &str, data: &Value) {
+    let rows = data["temporary"].as_array().map_or(&[][..], Vec::as_slice);
+    let touched =
+        rows.iter().filter(|row| matches!(row["status"].as_str(), Some("changed" | "removed"))).filter_map(|row| {
+            let id = row["row"].as_str().map(str::to_owned).or_else(|| row["row"].as_i64().map(|n| n.to_string()))?;
+            Some((id, row["build"].as_str()?.to_owned()))
+        });
+    if let Ok(mut kept) = TOUCHED.lock() {
+        kept.retain(|(g, r, ..)| !(g == game && r == repository));
+        kept.extend(touched.map(|(id, build)| (game.to_owned(), repository.to_owned(), id, build)));
+    }
+}
+
+/// Whether this run's last update check of the repository asked about this row, at this build.
+pub fn was_touched(game: &str, repository: &str, row: &str, build: &str) -> bool {
+    TOUCHED
+        .lock()
+        .is_ok_and(|kept| kept.iter().any(|(g, r, id, b)| g == game && r == repository && id == row && b == build))
+}
+
+/// The arguments for `reviews mark`: the row and build checked for shape, the row as one argument.
+pub fn mark_arguments(root: &std::path::Path, row: &str, build: &str, clear: bool) -> Result<Vec<String>, String> {
+    if row.trim().is_empty() || row.len() > MAX_ROW || row.chars().any(char::is_control) {
+        return Err("that is not a temporary patch's row".to_owned());
+    }
+    if !(6..=64).contains(&build.len()) || !build.chars().all(|c| c.is_ascii_hexdigit()) {
+        return Err("that is not a build the check named".to_owned());
+    }
+    let arguments = Args::new(REVIEWS, MARK).root(root).pair("--kind", TEMPORARY_PATCH).given("--id", row.trim());
+    Ok(if clear { arguments.flag("--clear") } else { arguments.given("--build", build) }.json())
+}
+
+/// Marks a temporary patch's update as read, or takes the mark back, on the owner's press: only a row and build this run's
+/// update check of the repository asked about, while the manifest calls `reviews mark` `writes`.
+pub fn mark_read(game: &str, repository: &str, row: &str, build: &str, clear: bool) -> Result<Answer, Failure> {
+    let found = games::named_repository(game, repository)?;
+    if !was_touched(game, repository, row, build) {
+        return Err(Failure::refused(
+            "only a temporary patch this run's update check asked about can be marked as read: check again".to_owned(),
+        ));
+    }
+    kit::allowed_by_manifest(&kit::read_manifest()?, REVIEWS, MARK).map_err(Failure::refused)?;
+    let arguments = mark_arguments(&found.path, row, build, clear).map_err(Failure::refused)?;
+    Ok(Answer::of(&kit::run(REVIEWS, &arguments)?))
+}
 
 /// Keeps a repository's latest update check, in place of the last.
 pub fn remember_check(game: &str, repository: &str, report: &Value) {
@@ -254,6 +316,7 @@ pub fn update_check(
     let answer = Answer::of(&kit::run_hearing(&tool, &arguments, listener)?);
     if answer.ok {
         remember_check(game, repository, &answer.report);
+        remember_touched(game, repository, &answer.data);
     }
     Ok(answer)
 }

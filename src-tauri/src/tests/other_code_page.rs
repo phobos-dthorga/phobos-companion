@@ -77,3 +77,44 @@ fn a_refusal_in_the_data_is_a_refusal() {
     assert_eq!(answer.refusal.as_deref(), Some("No assembly at x"));
     assert!(!Answer::missing().available);
 }
+
+#[test]
+fn only_a_row_the_last_check_asked_about_can_be_marked_read() {
+    let data = json!({"temporary": [
+        {"row": "6 (Harrier)", "status": "changed", "build": "3d9ff12528d1"},
+        {"row": 12, "status": "removed", "build": "46d03aa5af07"},
+        {"row": 2, "status": "unchanged", "build": "aaaaaaaaaaaa"},
+        {"row": 27, "status": "reviewed", "build": "bbbbbbbbbbbb"},
+        {"row": 3, "status": "changed"},
+    ]});
+    remember_touched("marking-game", "marking-repo", &data);
+    assert!(was_touched("marking-game", "marking-repo", "6 (Harrier)", "3d9ff12528d1"));
+    assert!(was_touched("marking-game", "marking-repo", "12", "46d03aa5af07"));
+    assert!(!was_touched("marking-game", "marking-repo", "6 (Harrier)", "46d03aa5af07"), "another build");
+    assert!(!was_touched("marking-game", "marking-repo", "2", "aaaaaaaaaaaa"), "not asked about");
+    assert!(!was_touched("marking-game", "marking-repo", "27", "bbbbbbbbbbbb"), "already reviewed");
+    assert!(!was_touched("marking-game", "other-repo", "12", "46d03aa5af07"));
+    // A later check replaces the repository's rows.
+    remember_touched("marking-game", "marking-repo", &json!({"temporary": []}));
+    assert!(!was_touched("marking-game", "marking-repo", "12", "46d03aa5af07"));
+}
+
+#[test]
+fn a_mark_names_its_kind_and_row_as_one_argument_each() {
+    let arguments = mark_arguments(Path::new("/repo"), "6 (Harrier)", "3d9ff12528d1", false).unwrap();
+    assert_eq!(arguments[..2], ["reviews", "mark"]);
+    assert!(arguments.contains(&"--id=6 (Harrier)".to_owned()), "{arguments:?}");
+    assert!(arguments.contains(&"--build=3d9ff12528d1".to_owned()), "{arguments:?}");
+    assert!(arguments.windows(2).any(|w| w == ["--kind", "temporary-patch"]), "{arguments:?}");
+    let cleared = mark_arguments(Path::new("/repo"), "6 (Harrier)", "3d9ff12528d1", true).unwrap();
+    assert!(cleared.contains(&"--clear".to_owned()) && !cleared.iter().any(|a| a.starts_with("--build")));
+    for (row, build) in [
+        ("", "3d9ff12528d1"),
+        ("a\nb", "3d9ff12528d1"),
+        (&*"x".repeat(121), "3d9ff12528d1"),
+        ("6", "xyz123"),
+        ("6", "abc"),
+    ] {
+        assert!(mark_arguments(Path::new("/repo"), row, build, false).is_err(), "{row:?} {build:?}");
+    }
+}

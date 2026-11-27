@@ -30,6 +30,13 @@ function moment(iso: string | null | undefined): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+/** A moment the tools write as `YYYY-MM-DD HH:MM` in UTC (the update check's file times, 0.104.0), in the viewer's own time;
+ *  anything else is shown as it came. */
+export function formatUtcMinute(text: string | null | undefined): string {
+  const found = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})$/.exec(text ?? "");
+  return found ? formatWhen(`${found[1]}T${found[2]}:00Z`) : (text ?? "");
+}
+
 /** Whole calendar days between a moment and now, in the viewer's own time zone. */
 export function daysSince(unix: number, now: Date): number {
   const days = Math.round(

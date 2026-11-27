@@ -1404,6 +1404,24 @@ is possible". The owner's card answers and the design are in [publishing.md](pub
 **Risk (agent's grade, owner confirmed the default on 23 Nov 2026): moderate.** A broken version can reach players, and public is
 not undone by a press; never sudden (private first, two yeses for public). **Workshop uploads** (Settings, Publishing) starts on.
 
+## Finishing the update check's loop (built 27 Nov 2026, 0.104.0)
+
+**The owner's request** (27 Nov 2026): "What can we do to integrate more of the toolkit with the Companion and its UI?" The agent
+measured the kit's manifest against the program (186 of 212 reports reachable) and offered four steps; the owner chose all four,
+this first. That day an agent had to edit a JSON file to mark eight temporary patches reviewed, an 8-day-old patched-Defs file
+went unnoticed, and the program's own kit was behind the repository's.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Mark a touched temporary patch as read with **I've read it**, and take it back with **Undo**; see when the check's kit or patched-Defs file is older than what it checks, and how to refresh the file |
+| What does it stop them doing? | Nothing: a mark names one build, so a newer one asks again |
+| How does it change the way they work? | No agent or file editing to quiet a row already read; a stale answer says so instead of looking clean |
+| What outside it notices? | The kit's update check, in the program or a session (the mark is in the program's folder, which the kit reads) |
+
+**Risk: low (agent's grade).** A mark only hides a row until its mod's next build. **Agent choices, owner to revise:** marks kept
+in the program's folder rather than the repository (as picks and decisions are, so the program never writes a repository); no
+second yes before marking, since Undo is beside it.
+
 Everything proposed and agreed but not yet built is in [later.md](later.md), with each item's status.
 
 ## Limits

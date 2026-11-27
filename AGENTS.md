@@ -262,6 +262,9 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   - **Decide** (0.22.0): the owner's answer, appended in this program's folder;
   - **Looked at** on a setting the Mods page lists as new (Settings to look at): the mark, appended per repository in this
     program's folder; nothing in a repository or a game changes;
+  - **I've read it** and its **Undo** on a temporary patch the update check asked about (0.104.0; the owner's choice of 27 Nov
+    2026, "Finish today's loop"): the kit's `reviews mark`, appended per repository in this program's folder, only for a row and
+    build this run's check named, while the manifest calls it `writes`; nothing in a repository changes;
   - **Workshop uploads** (Settings, Publishing; 0.69.0): the owner's On or Off, in this program's folder;
   - **Code colours from VS Code** (Settings, Appearance; 0.77.0, `docs/code-reading.md` step 2): a VS Code theme's code colours,
     read on **Bring in** from a theme the host's own listing of VS Code's themes named (checked against a fresh listing) or from a

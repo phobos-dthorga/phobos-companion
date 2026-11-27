@@ -10,7 +10,9 @@ import {
   keptTime,
   newTypes,
   notKeptYet,
+  patchedDefsNote,
   patchedSince,
+  rowKey,
   summarise,
   summariseCheck,
   tiedUpdates,
@@ -313,6 +315,66 @@ describe("the check after an update", () => {
       ["Bomb", "node-missing", 1],
     ]);
     expect(new Set(problems.map((p) => p.key)).size).toBe(problems.length);
+  });
+
+  it("counts reviewed rows, keeps each row's build, and says when the check's kit or file is old (0.104.0)", () => {
+    const row = {
+      patch: "RearmOneKind",
+      mod: "Harrier",
+      file: "H.dll",
+      detail: "",
+    };
+    const summary = summariseCheck({
+      since: SINCE,
+      temporary: [
+        {
+          ...row,
+          row: "6 (Harrier)",
+          status: "changed",
+          build: "3d9ff12528d1",
+        },
+        { ...row, row: 27, status: "reviewed", reviewedBy: "owner" },
+        { ...row, row: 25, status: "reviewed", reviewedBy: "repository" },
+      ],
+      xml: {
+        checked: 1,
+        rows: [],
+        patchedDefs: "2026-11-19 18:51",
+        patchedDefsStale: true,
+        patchedDefsHow: "Tick it, then restart.",
+      },
+      kit: { runs: "1.132.0", repositoryPins: "1.133.1", older: true },
+    });
+    expect(summary.temporary).toMatchObject({ total: 3, reviewed: 2 });
+    expect(summary.temporary?.touched[0]?.build).toBe("3d9ff12528d1");
+    expect(summary.olderKit).toEqual({ runs: "1.132.0", pins: "1.133.1" });
+    expect(summary.xml?.file).toEqual({
+      written: "2026-11-19 18:51",
+      stale: true,
+      how: "Tick it, then restart.",
+    });
+    expect(
+      summariseCheck({
+        since: SINCE,
+        kit: { runs: "1.137.0", repositoryPins: "1.137.0", older: false },
+      }).olderKit,
+    ).toBeNull();
+  });
+
+  it("names a row by its build, and asks for the patched-Defs file only when the repository says how (0.104.0)", () => {
+    expect(rowKey({ row: 6, build: "abc123" })).toBe("6@abc123");
+    expect(rowKey({ row: 6, build: "def456" })).not.toBe(
+      rowKey({ row: 6, build: "abc123" }),
+    );
+    const how = "Tick it.";
+    expect(patchedDefsNote({ written: "x", stale: true, how })).toBe("stale");
+    expect(patchedDefsNote({ written: "x", stale: false, how })).toBeNull();
+    expect(patchedDefsNote({ written: null, stale: false, how })).toBe(
+      "missing",
+    );
+    expect(
+      patchedDefsNote({ written: null, stale: false, how: null }),
+    ).toBeNull();
   });
 
   it("shows a few updates and counts the rest", () => {

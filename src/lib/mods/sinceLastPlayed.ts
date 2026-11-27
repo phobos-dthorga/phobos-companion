@@ -155,6 +155,16 @@ export type TemporaryRow = {
     | "no-update"
     | "one-build";
   detail: string;
+  /** The start of the newest build's SHA-256, for I've read it to name (phobos-modkit 1.136.0). */
+  build?: string;
+  /** Whose note made the row reviewed: the repository's own, or the owner's mark (phobos-modkit 1.137.0). */
+  reviewedBy?: "repository" | "owner";
+};
+/** The kit that ran the check, and the one the repository pins (phobos-modkit 1.137.0). */
+export type CheckKit = {
+  runs: string;
+  repositoryPins: string | null;
+  older: boolean;
 };
 export type UpdateRow = {
   mod: string;
@@ -178,7 +188,22 @@ export type UpdateCheck = {
   names?: NamesPart;
   temporary?: TemporaryRow[];
   updates?: UpdateRow[];
-  xml?: { checked: number; rows: XmlRow[]; patchedDefs?: string };
+  xml?: {
+    checked: number;
+    rows: XmlRow[];
+    patchedDefs?: string;
+    patchedDefsStale?: boolean;
+    patchedDefsHow?: string;
+  };
+  kit?: CheckKit;
+};
+
+/** The file of every definition as patched, when the check read one: when it was written, whether that was before the moment
+ *  compared with, and the repository's own words for writing it again (phobos-modkit 1.137.0). */
+export type PatchedDefsFile = {
+  written: string | null;
+  stale: boolean;
+  how: string | null;
 };
 
 /** One problem the XML check found, however many of our patch operations in one file meet it (0.100.1): `key` is unique. */
@@ -186,9 +211,20 @@ export type XmlProblem = XmlRow & { key: string; count: number };
 
 export type CheckSummary = {
   names: { found: number; failing: NamesPart["failing"] } | null;
-  temporary: { touched: TemporaryRow[]; total: number } | null;
+  temporary: {
+    touched: TemporaryRow[];
+    total: number;
+    reviewed: number;
+  } | null;
   updates: { shown: UpdateRow[]; more: number } | null;
-  xml: { checked: number; problems: XmlProblem[]; patched: number } | null;
+  xml: {
+    checked: number;
+    problems: XmlProblem[];
+    patched: number;
+    file: PatchedDefsFile;
+  } | null;
+  /** Only when the kit that ran the check is older than the one the repository pins. */
+  olderKit: { runs: string; pins: string } | null;
 };
 
 /** The XML rows that find nothing, identical ones as one row with a count. The check gives a row per patch operation, so a file
@@ -232,6 +268,8 @@ export function summariseCheck(data: UpdateCheck, shown = 5): CheckSummary {
             (row) => row.status === "changed" || row.status === "removed",
           ),
           total: data.temporary.length,
+          reviewed: data.temporary.filter((row) => row.status === "reviewed")
+            .length,
         }
       : null,
     updates: data.updates
@@ -245,9 +283,32 @@ export function summariseCheck(data: UpdateCheck, shown = 5): CheckSummary {
           checked: data.xml.checked,
           problems: xmlProblems(rows),
           patched: rows.filter((row) => row.status === "patched").length,
+          file: {
+            written: data.xml.patchedDefs ?? null,
+            stale: data.xml.patchedDefsStale === true,
+            how: data.xml.patchedDefsHow ?? null,
+          },
         }
       : null,
+    olderKit:
+      data.kit?.older && data.kit.repositoryPins
+        ? { runs: data.kit.runs, pins: data.kit.repositoryPins }
+        : null,
   };
+}
+
+/** A temporary patch's row as one key: the same row at another build is another question (0.104.0). */
+export function rowKey(row: Pick<TemporaryRow, "row" | "build">): string {
+  return `${String(row.row)}@${row.build ?? ""}`;
+}
+
+/** Whether the patched-Defs file needs a line: missing or old, and the repository says how to write it again (0.104.0). */
+export function patchedDefsNote(
+  file: PatchedDefsFile,
+): "stale" | "missing" | null {
+  if (!file.how) return null;
+  if (file.written === null) return "missing";
+  return file.stale ? "stale" : null;
 }
 
 /** An update's new types as words: the first few, and how many more. */

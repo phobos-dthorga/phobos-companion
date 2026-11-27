@@ -1566,6 +1566,18 @@ async fn keep_builds(
     blocking(move || other_code_page::keep_builds(&game, &repository, Some(&hearing(on_progress)))).await
 }
 
+/// Marks a temporary patch's update as read, or takes the mark back, for a row this run's update check asked about (0.104.0).
+#[tauri::command]
+async fn mark_update_read(
+    game: String,
+    repository: String,
+    row: String,
+    build: String,
+    clear: bool,
+) -> Result<other_code_page::Answer, Failure> {
+    blocking(move || other_code_page::mark_read(&game, &repository, &row, &build, clear)).await
+}
+
 /// What the updates mean for a repository's code: our targets, temporary patches, update sizes, our XML patches (0.35.0).
 #[tauri::command]
 async fn update_check(
@@ -1840,6 +1852,7 @@ pub fn run() {
             updates,
             keep_builds,
             update_check,
+            mark_update_read,
             kit_status,
             home_status,
             report_catalogue,

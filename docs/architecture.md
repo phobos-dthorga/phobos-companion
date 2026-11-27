@@ -200,6 +200,7 @@ under the same manifest check as the press.
 | `test-verdicts/<repo>.jsonl` | Host, `tests_page.rs` | **Pass**/**Fail** on a row | Repo of the game; each field checked |
 | `test-key-decisions/<repo>.jsonl` | Host, `tests_page.rs` | "Make a row" / "No row needed" | As verdicts |
 | `settings-seen/<repo>.jsonl` | Host, `settings_ledger.rs` | **Looked at** (Mods) | Repo of the game; 1 to 2,000 one-line ids |
+| `reviews/<repo>.jsonl` | Kit, `reviews mark` (0.104.0) | **I've read it**, **Undo** (Mods, Since you last played) | A row and build this run's update check named (`other_code_page::was_touched`); manifest `writes` |
 | `screen-notes/<id>/` | Host, `screen_notes.rs` | The Something's off key | Written whole: `picture.png`, `note.json` |
 | `screen-notes/<id>/resolved.json` | Kit, `screen-notes resolve` | A session deals with it | Not this program; never deleted |
 | `shortcuts.json` | Host, `shortcuts.rs` | Save in the shortcuts dialog | Whole and checked; `prefs` |
@@ -332,7 +333,9 @@ The mechanism behind each page's rule in `AGENTS.md`. Every change also passes t
   renamed over.
 - **Their code** (`other_code_page.rs`): reports by the `other-code` and `updates` surfaces. A name goes after `--` and must have
   the shape of a type or member; a kept file is a plain `.dll` name; **Decompile** only for an assembly the kit's `holder` named
-  in this run. **Keep the new builds** is `rimworld-archive snapshot`, found by the `updates` surface.
+  in this run. **Keep the new builds** is `rimworld-archive snapshot`, found by the `updates` surface. **I've read it** (0.104.0)
+  is the kit's game-free `reviews mark --kind temporary-patch`, only for a row and build the repository's last update check in
+  this run asked about (changed or removed, with its build), the row as one argument and the build hexadecimal.
 - **Clean up** (`cleanup_page.rs`): `cleanup` lists; deleting passes each chosen group as its own `--group` argument.
 - **Code map and How it connects** (`connections_page.rs`): the game (`games::valid_id`, named with every question since
   0.83.0), the repository, a thing's id (`checks::node_id`: a language's prefix, or `data:` for a thing a game's data files

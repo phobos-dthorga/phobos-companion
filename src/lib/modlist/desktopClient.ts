@@ -307,6 +307,31 @@ export async function unsubscribeFrom(
   );
 }
 
+/** What players say about the game, or the DLC a game mod names, in Steam's reviews (0.111.0): only while Workshop pages is on. */
+export async function gameReviews(
+  game: string,
+  name: string,
+  onProgress?: OnProgress,
+): Promise<
+  | {
+      state: "ready";
+      answer: import("../othercode/types").OtherAnswer<unknown>;
+    }
+  | Failed
+> {
+  return ask<
+    import("../othercode/types").OtherAnswer<unknown>,
+    {
+      state: "ready";
+      answer: import("../othercode/types").OtherAnswer<unknown>;
+    }
+  >(
+    "game_reviews",
+    { game, name, onProgress: progressChannel(onProgress) },
+    (answer) => ({ state: "ready", answer }),
+  );
+}
+
 /** What players say about a mod on its Workshop page (0.107.0): only a number this run named, only while Workshop pages is on. */
 export async function playersSay(
   number: string,

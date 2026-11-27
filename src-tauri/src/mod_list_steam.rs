@@ -11,6 +11,12 @@
 //! by the kit's game-free `steam-workshop report` (its update date, the comments that mention problems, the uploader's latest
 //! replies), keyless, on the owner's press, only for a number the last listing or check named, only while **Workshop pages** is
 //! on (Going online) and while the manifest calls it `reads-online`. It only reads.
+//!
+//! **What players say about the game and its DLCs** (0.111.0; the owner, 27 Nov 2026: "We can still have 'what players say' for
+//! the actual vanilla game itself and the DLCs, it'll just be reviews instead"): the kit's game-free `steam-reviews` (1.143.0),
+//! Steam's public review counts and the game's newest reviews, keyless, on the owner's press, under the same **Workshop pages**
+//! switch and only while the manifest calls it `reads-online`. The DLC is found by its name among the game's own DLC; a name that
+//! matches none reads the game itself.
 
 use crate::mod_list_page::{
     ChangeResult, TOOL, WORKSHOP, known_list, named, places, result_of, sane_text, workshop_number,
@@ -30,6 +36,8 @@ const REPORT: &str = "report";
 /// The going-online kind its calls belong to.
 const WORKSHOP_PAGES: &str = "workshop-pages";
 const UNSUBSCRIBE: &str = "unsubscribe";
+/// The kit's game-free reading of a game's or a DLC's Steam reviews (phobos-modkit `steam-reviews`, 1.143.0).
+const REVIEWS_TOOL: &str = "steam-reviews";
 /// The most items one press subscribes to (the kit's own limit).
 pub const MAX_ITEMS: usize = 500;
 /// How long a subscribe waits for Steam's downloads before it answers (agent default): the bar shows how far it is meanwhile.
@@ -122,6 +130,28 @@ pub fn players_say(data: &Path, number: &str, listener: Option<kit::Listener>) -
     }
     kit::reads_online(&kit::read_manifest()?, WORKSHOP_TOOL, REPORT).map_err(Failure::refused)?;
     Ok(Answer::of(&kit::run_hearing(WORKSHOP_TOOL, &players_arguments(number), listener)?))
+}
+
+/// The arguments for What players say about the game or one of its DLCs: the game's Steam app ID and the mod's name to match.
+pub fn reviews_arguments(app_id: u32, name: &str) -> Vec<String> {
+    Args::command(REVIEWS_TOOL).given("--app-id", &app_id.to_string()).given("--match", name.trim()).json()
+}
+
+/// What players say about the game, or the DLC a game mod names, on Steam, on the owner's press (0.111.0): only for a game with a
+/// Steam app ID, only while Workshop pages is on, and only while the manifest calls `steam-reviews` `reads-online`.
+pub fn game_reviews(data: &Path, game: &str, name: &str, listener: Option<kit::Listener>) -> Result<Answer, Failure> {
+    let found = places(game)?;
+    if !sane_text(name) {
+        return Err(Failure::refused("that is not a mod's name"));
+    }
+    let Some(app_id) = found.steam_app_id else {
+        return Err(Failure::refused(format!("{} has no Steam app ID in the games list", found.name)));
+    };
+    if !online::is_on(data, WORKSHOP_PAGES) {
+        return Err(Failure::refused("Workshop pages is off in Settings, Going online, so nothing was asked of Steam"));
+    }
+    kit::reads_online(&kit::read_manifest()?, REVIEWS_TOOL, "").map_err(Failure::refused)?;
+    Ok(Answer::of(&kit::run_hearing(REVIEWS_TOOL, &reviews_arguments(app_id, name), listener)?))
 }
 
 #[cfg(test)]

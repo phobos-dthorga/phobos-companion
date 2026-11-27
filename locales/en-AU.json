@@ -562,6 +562,8 @@
     "modlist-players-kicker": "On the Workshop",
     "modlist-players-title": "What players say about { $name }",
     "modlist-players-reading": "Reading its Workshop page",
+    "modlist-players-kicker-steam": "In Steam's reviews",
+    "modlist-players-reading-reviews": "Reading its Steam reviews",
     "modlist-players-refused": "Steam was not asked, and nothing changed: { $reason }",
     "modlist-preview-label": "The mod in focus",
     "modlist-preview-choose": "Choose a mod in either list to see its picture.",

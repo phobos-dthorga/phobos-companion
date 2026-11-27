@@ -878,6 +878,57 @@ for (const [name, viewport] of [
       await expect(dialog).toHaveCount(0);
     });
 
+    test("What players say about the game itself reads its Steam reviews into a dialog (0.111.0)", async ({
+      page,
+    }) => {
+      await open(page, {
+        game_reviews: {
+          result: {
+            available: true,
+            ok: true,
+            refusal: null,
+            report: {
+              format: 1,
+              title: "What players say about First Sample",
+              lines: [
+                "All time: 97% of 1,000 reviews recommend it.",
+                "The last 30 days: 98% of 50 recommend it.",
+              ],
+              blocks: [],
+              sections: [
+                {
+                  heading: "The newest that do not recommend it",
+                  level: 2,
+                  blocks: [{ type: "text", text: "Too many hours lost." }],
+                },
+              ],
+            },
+            data: {},
+          },
+        },
+      });
+      await page
+        .getByRole("button", { name: "Edit the list", exact: true })
+        .click();
+      const panel = page.getByRole("region", {
+        name: "The mod in focus",
+        exact: true,
+      });
+      await page.getByRole("option", { name: /Core The game/ }).click();
+      await panel.getByRole("button", { name: "What players say" }).click();
+      const dialog = page.getByRole("dialog", {
+        name: "What players say about Core",
+      });
+      await expect(dialog).toContainText("In Steam's reviews");
+      await expect(dialog).toContainText("All time: 97% of 1,000");
+      expect(await asked(page, "game_reviews")).toEqual([
+        expect.objectContaining({ game: "first", name: "Core" }),
+      ]);
+      await audit(page);
+      await dialog.getByRole("button", { name: "Close" }).click();
+      await expect(dialog).toHaveCount(0);
+    });
+
     test("new errors after a change are named, with Undo asked first and a way to a list that ran clean", async ({
       page,
     }) => {

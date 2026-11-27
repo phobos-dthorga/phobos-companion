@@ -9,7 +9,7 @@
    * The picture of the mod in focus on Edit the list (0.53.0; the owner's choice of 23 Nov 2026, "Mod list previews"): the one
    * the game's mod menu and the Workshop show, to know a mod at a glance among hundreds. A mod without one says so in words.
    */
-  let { mod }: { mod: ModRow | null } = $props();
+  let { mod, game = "" }: { mod: ModRow | null; game?: string } = $props();
 
   let address = $state<string | null>(null);
   let failed = $state(false);
@@ -55,6 +55,9 @@
       {/if}
       {#if mod.source === "workshop" && mod.workshop_id}
         <PlayersSay number={mod.workshop_id} name={mod.name} />
+      {:else if mod.source === "game" && game}
+        <!-- 0.111.0: the game itself and each DLC, from Steam's reviews. -->
+        <PlayersSay {game} name={mod.name} />
       {/if}
     {/if}
   </div>

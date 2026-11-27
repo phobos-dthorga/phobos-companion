@@ -4,6 +4,17 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.111.0] - 2026-11-28
+
+### Added
+
+- **What players say about the game itself and each DLC** (the owner, 27 Nov 2026: "it'll just be reviews instead"). On the
+  Mod list's Edit the list, the base game and each DLC in focus now have **What players say** too: Steam's reviews, how many
+  recommend it all time and in the last 30 days, and for the game the newest reviews, those that do not recommend it first. A
+  DLC shows its counts alone, since Steam keeps no written reviews on a DLC's page. Keyless, on your press, under **Workshop
+  pages** in Going online, which now also names store.steampowered.com. From the kit's new `steam-reviews` (1.143.0), now pinned.
+  **Not tested on screen.**
+
 ## [0.110.0] - 2026-11-28
 
 ### Added

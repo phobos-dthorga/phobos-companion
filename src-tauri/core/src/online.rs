@@ -47,10 +47,11 @@ pub const KINDS: [Kind; 7] = [
     Kind { id: "their-reports", contacts: "api.github.com", loss: Loss::Small, starts_on: true },
     // Each Workshop item read back from Steam's public API (keyless) on the Publish page's Read Steam back (0.69.0,
     // `docs/publishing.md`): its visibility and the day it went public. Uploading is the owner's press, not a call of this kind.
-    // Since 0.107.0 also the Mod list's What players say: an item's public page and comments (steamcommunity.com), on a press.
+    // Since 0.107.0 also the Mod list's What players say: an item's public page and comments (steamcommunity.com), on a press;
+    // since 0.111.0 the game's and its DLCs' review counts and DLC names (store.steampowered.com), on a press.
     Kind {
         id: "workshop-pages",
-        contacts: "api.steampowered.com, steamcommunity.com",
+        contacts: "api.steampowered.com, steamcommunity.com, store.steampowered.com",
         loss: Loss::Small,
         starts_on: true,
     },

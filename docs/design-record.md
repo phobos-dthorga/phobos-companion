@@ -1473,6 +1473,22 @@ mod abandoned?" is a press instead of a script (phobos-rimworld's rule: read a m
 steamcommunity.com) rather than a new kind; a dialog over the window, since the preview panel keeps one height so the list never
 moves under the pointer.
 
+### The game and its DLCs: Steam's reviews (built 28 Nov 2026, 0.111.0, R5)
+
+**The owner's request** (27 Nov 2026): "We can still have 'what players say' for the actual vanilla game itself and the DLCs,
+it'll just be reviews instead." The same **What players say** button on a game mod (the game itself and each DLC) reads the kit's
+game-free `steam-reviews` (1.143.0): how many recommend it, all time and in the last 30 days, and for the game the newest reviews,
+those that do not recommend it first, reviewers' names left out.
+
+**Engine limits found (observed 27 Nov 2026):** Steam's JSON reviews feed (`appreviews`) now sends every request to its front page,
+so the kit reads the store's review histogram and the community page's review cards, as a browser does. A DLC keeps no review
+cards there, so a DLC shows its counts alone and says so.
+
+**Risk: none (agent's grade).** **Agent choices, owner to revise:** the same Workshop pages switch (now also
+store.steampowered.com) rather than a new kind; the DLC found by every word of the mod's name in the DLC's Steam name, a name
+matching none reading the game itself; 50 newest reviews read (about 4 seconds), 8 that do not recommend it shown and 3 that do.
+**For a next game:** nothing more than its Steam app ID in the games list.
+
 ## The Mod list's Edit the list, rebuilt (built 27 Nov 2026, 0.108.0)
 
 **The owner's request** (27 Nov 2026): "The mod list page needs a total redo in my opinion and we need to take lessons from

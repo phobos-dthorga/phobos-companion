@@ -51,3 +51,17 @@ fn what_players_say_reads_only_a_named_item_and_only_while_workshop_pages_is_on(
     assert!(players_say(&data, "not-a-number", None).is_err());
     std::fs::remove_dir_all(&data).unwrap();
 }
+
+#[test]
+fn the_games_reviews_name_its_app_and_the_mod_to_match_and_wait_for_workshop_pages() {
+    let arguments = reviews_arguments(294100, " Royalty ");
+    assert_eq!(arguments[0], "steam-reviews");
+    assert!(arguments.contains(&"--app-id=294100".to_owned()) && arguments.contains(&"--match=Royalty".to_owned()));
+    assert!(arguments.contains(&"--json".to_owned()));
+    // A name a game mod could never have, or a game not on the list: refused before Steam is asked.
+    let data = std::env::temp_dir().join(format!("game-reviews-{}", std::process::id()));
+    std::fs::create_dir_all(&data).unwrap();
+    assert!(game_reviews(&data, "not a game", "Core", None).is_err());
+    assert!(game_reviews(&data, "rimworld", "two\nlines", None).is_err());
+    std::fs::remove_dir_all(&data).unwrap();
+}

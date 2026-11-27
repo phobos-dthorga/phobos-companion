@@ -700,7 +700,7 @@
   <p class="small muted how">{t("modlist-board-how")}</p>
 
   <section class="info" aria-label={t("modlist-board-info-label")}>
-    <ModPreview mod={focused} />
+    <ModPreview mod={focused} game={game.id} />
     {#if focused}
       <dl class="small">
         {#if focused.folder}

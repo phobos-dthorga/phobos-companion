@@ -1804,6 +1804,18 @@ async fn players_say(
     blocking(move || mod_list_steam::players_say(&data, &number, Some(&hearing(on_progress)))).await
 }
 
+/// What players say about the game or one of its DLCs on Steam, read on the owner's press (0.111.0). Only reads, keyless.
+#[tauri::command]
+async fn game_reviews(
+    app: tauri::AppHandle,
+    game: String,
+    name: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<kit::Answer, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || mod_list_steam::game_reviews(&data, &game, &name, Some(&hearing(on_progress)))).await
+}
+
 /// One definition looked up by name: who defines it, as written, or as patched (0.106.0). Only reads.
 #[tauri::command]
 async fn look_up(
@@ -1865,6 +1877,7 @@ pub fn run() {
             crash_status,
             look_up,
             players_say,
+            game_reviews,
             mod_list_write,
             crash_look_now,
             cleanup_apply,

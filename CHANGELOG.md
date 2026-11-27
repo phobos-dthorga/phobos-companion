@@ -4,6 +4,14 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.102.1] - 2026-11-27
+
+### Fixed
+
+- **The update check reads what an earlier patch adds** (the owner's screenshot of 27 Nov 2026). Its XML part flagged
+  phobos-rimworld's C-17 airdrop patch as finding nothing, though the same file adds the missing node first; the kit (pin
+  1.132.0 to 1.133.1) now reads earlier patches' values, so **Check again** shows every patch found.
+
 ## [0.102.0] - 2026-11-27
 
 ### Added

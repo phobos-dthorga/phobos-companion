@@ -4,6 +4,15 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.117.1] - 2026-11-28
+
+### Fixed
+
+- **The Timeline no longer stalls on its bar** (the owner's screen note of 28 Nov 2026: "stalled for 10+ minutes"). The tool kit
+  had begun writing three kinds of fact the page had no words for (backups packed, safe copies made, a mod list changed), and
+  drawing one threw, leaving the bar where it stopped. The page now names all three, shows any kind it does not know plainly, and
+  says so with Read again if its answer ever cannot be drawn. **Not tested on screen.**
+
 ## [0.117.0] - 2026-11-28
 
 ### Added

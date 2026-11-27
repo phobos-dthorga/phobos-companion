@@ -28,8 +28,28 @@ export const KIND_LOOKS: Record<FactKind, KindLook> = {
   "backed-up": { mark: "▣", tone: "comparison", weight: 30 },
   "duplicates-removed": { mark: "≡", tone: "comparison", weight: 25 },
   built: { mark: "⚙", tone: "comparison", weight: 20 },
+  "mod-list-change": { mark: "⇅", tone: "observed", weight: 45 },
+  "safe-copies": { mark: "⧉", tone: "comparison", weight: 28 },
+  "backups-packed": { mark: "▤", tone: "comparison", weight: 22 },
   encoded: { mark: "▦", tone: "comparison", weight: 10 },
 };
+
+/**
+ * How a kind the page has no words for is shown (0.117.1; the owner's screen note of 28 Nov 2026): a newer tool kit may write
+ * kinds this page has never heard of, and looking one up in `KIND_LOOKS` alone threw and froze the page. It is shown plainly,
+ * weakest of all, never thrown.
+ */
+export const OTHER_LOOK: KindLook = { mark: "◦", tone: "observed", weight: 0 };
+
+/** Whether this page knows a kind: has a mark and words for it. */
+export function isKnownKind(kind: string): kind is FactKind {
+  return Object.hasOwn(KIND_LOOKS, kind);
+}
+
+/** A kind's look, or `OTHER_LOOK` for a kind this page does not know. Every look-up of a fact's kind goes through here. */
+export function lookOf(kind: string): KindLook {
+  return isKnownKind(kind) ? KIND_LOOKS[kind] : OTHER_LOOK;
+}
 
 /** Which facts to show: everything, only what the repositories did, or only what was done on this PC. */
 export type Showing = "all" | "git" | "log";
@@ -106,7 +126,7 @@ export function lanes(facts: Fact[]): { days: string[]; lanes: Lane[] } {
       lane.cells.set(day, { day, facts: [fact], strongest: fact.kind });
     else {
       cell.facts.push(fact);
-      if (KIND_LOOKS[fact.kind].weight > KIND_LOOKS[cell.strongest].weight)
+      if (lookOf(fact.kind).weight > lookOf(cell.strongest).weight)
         cell.strongest = fact.kind;
     }
   }

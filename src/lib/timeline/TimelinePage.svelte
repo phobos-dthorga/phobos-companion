@@ -9,7 +9,8 @@
   import { onMount, tick, untrack } from "svelte";
   import type { EntryRequest } from "../code/types";
   import type { GameHome } from "../home/types";
-  import { t } from "../i18n/runtime";
+  import { LOCALE, t } from "../i18n/runtime";
+  import { formatSize } from "../shell/sizes";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import RichText from "../shell/RichText.svelte";
@@ -22,8 +23,10 @@
     canShowCode,
     dayOf,
     dayWords,
+    isKnownKind,
     KIND_LOOKS,
     lanes,
+    lookOf,
     mergedFrom,
     laneOf,
     monthStarts,
@@ -141,8 +144,29 @@
       "setting-default": () => t("timeline-kind-setting-default"),
       "duplicates-removed": () =>
         t("timeline-kind-duplicates-removed", { count }),
+      "backups-packed": () =>
+        t("timeline-kind-backups-packed", {
+          count,
+          before: sizeOf(fact.before),
+          after: sizeOf(fact.after),
+        }),
+      "safe-copies": () =>
+        t("timeline-kind-safe-copies", {
+          files: fact.files ?? 0,
+          size: sizeOf(fact.bytes),
+        }),
+      "mod-list-change": () =>
+        t("timeline-kind-mod-list-change", { change: fact.change ?? "" }),
     };
-    return words[fact.kind]();
+    // 0.117.1: a kind from a newer tool kit is named as the kit names it, never thrown on.
+    return isKnownKind(fact.kind)
+      ? words[fact.kind]()
+      : t("timeline-kind-other", { kind: String(fact.kind) });
+  }
+
+  /** A size the kit gave in bytes, in the units a person reads. */
+  function sizeOf(bytes: unknown): string {
+    return formatSize(typeof bytes === "number" ? bytes : 0, LOCALE);
   }
 
   /** A mark's short name, for the key beside the overview. */
@@ -165,6 +189,9 @@
     "setting-removed": "timeline-mark-setting-removed",
     "setting-default": "timeline-mark-setting-default",
     "duplicates-removed": "timeline-mark-duplicates-removed",
+    "backups-packed": "timeline-mark-backups-packed",
+    "safe-copies": "timeline-mark-safe-copies",
+    "mod-list-change": "timeline-mark-mod-list-change",
   };
 
   /** One setting's words: its label, or its key where the settings window's label is not known, and what happened to it. */
@@ -303,467 +330,503 @@
 <h1>{t("timeline-title", { game: game.name })}</h1>
 <p class="lead">{t("timeline-lead")}</p>
 
-{#if reading.state === "reading"}
-  <ProgressBar {progress} fallback={t("timeline-reading")} />
-  <Placeholder shape="chart" height={160} />
-  <Placeholder shape="rows" rows={5} />
-{:else if reading.state === "browser"}
-  <p class="muted">{t("timeline-browser")}</p>
-{:else if reading.state === "failed"}
-  <FailurePanel failure={reading.failure} onretry={load} />
-{:else if reading.timeline.facts.length === 0}
-  <p class="lead">{t("timeline-none", { game: game.name })}</p>
-{:else}
-  <div class="controls">
-    <div class="toggles" role="group" aria-label={t("timeline-showing-label")}>
-      <button
-        type="button"
-        class="toggle"
-        aria-pressed={showing === "all"}
-        onclick={() => (showing = "all")}>{t("timeline-showing-all")}</button
+<!-- 0.117.1: an answer that cannot be drawn says so, rather than leaving the bar where it stopped (the owner's screen note of
+     28 Nov 2026). -->
+<svelte:boundary>
+  {#snippet failed(error, reset)}
+    <p>
+      {t("timeline-show-failed", {
+        reason: error instanceof Error ? error.message : String(error),
+      })}
+    </p>
+    <button
+      type="button"
+      class="action"
+      onclick={() => {
+        reset();
+        void load();
+      }}>{t("timeline-read-again")}</button
+    >
+  {/snippet}
+  {#if reading.state === "reading"}
+    <ProgressBar {progress} fallback={t("timeline-reading")} />
+    <Placeholder shape="chart" height={160} />
+    <Placeholder shape="rows" rows={5} />
+  {:else if reading.state === "browser"}
+    <p class="muted">{t("timeline-browser")}</p>
+  {:else if reading.state === "failed"}
+    <FailurePanel failure={reading.failure} onretry={load} />
+  {:else if reading.timeline.facts.length === 0}
+    <p class="lead">{t("timeline-none", { game: game.name })}</p>
+  {:else}
+    <div class="controls">
+      <div
+        class="toggles"
+        role="group"
+        aria-label={t("timeline-showing-label")}
       >
-      <button
-        type="button"
-        class="toggle"
-        aria-pressed={showing === "git"}
-        onclick={() => (showing = "git")}>{t("timeline-showing-git")}</button
-      >
-      <button
-        type="button"
-        class="toggle"
-        aria-pressed={showing === "log"}
-        onclick={() => (showing = "log")}>{t("timeline-showing-log")}</button
+        <button
+          type="button"
+          class="toggle"
+          aria-pressed={showing === "all"}
+          onclick={() => (showing = "all")}>{t("timeline-showing-all")}</button
+        >
+        <button
+          type="button"
+          class="toggle"
+          aria-pressed={showing === "git"}
+          onclick={() => (showing = "git")}>{t("timeline-showing-git")}</button
+        >
+        <button
+          type="button"
+          class="toggle"
+          aria-pressed={showing === "log"}
+          onclick={() => (showing = "log")}>{t("timeline-showing-log")}</button
+        >
+      </div>
+      <span class="muted small">
+        {t("timeline-summary", {
+          facts: facts.length,
+          days: overview.days.length,
+        })}
+      </span>
+      <button type="button" class="action" onclick={load}
+        >{t("timeline-read-again")}</button
       >
     </div>
-    <span class="muted small">
-      {t("timeline-summary", {
-        facts: facts.length,
-        days: overview.days.length,
-      })}
-    </span>
-    <button type="button" class="action" onclick={load}
-      >{t("timeline-read-again")}</button
-    >
-  </div>
-  {#if !reading.timeline.log_exists}
-    <p class="muted small note">{t("timeline-no-log", { game: game.name })}</p>
-  {/if}
+    {#if !reading.timeline.log_exists}
+      <p class="muted small note">
+        {t("timeline-no-log", { game: game.name })}
+      </p>
+    {/if}
 
-  {#if overview.lanes.length > 0 || shots.size > 0}
-    <section class="overview" aria-labelledby="timeline-overview-title">
-      <h2 id="timeline-overview-title">{t("timeline-overview-title")}</h2>
-      <p class="muted small">{t("timeline-overview-about")}</p>
-      <div
-        class="scroller"
-        bind:this={scroller}
-        role="group"
-        aria-label={t("timeline-overview-label")}
-      >
+    {#if overview.lanes.length > 0 || shots.size > 0}
+      <section class="overview" aria-labelledby="timeline-overview-title">
+        <h2 id="timeline-overview-title">{t("timeline-overview-title")}</h2>
+        <p class="muted small">{t("timeline-overview-about")}</p>
         <div
-          class="grid"
-          style:grid-template-columns={`${LANE_NAME_PX}px repeat(${overviewDays.length}, 44px)`}
+          class="scroller"
+          bind:this={scroller}
+          role="group"
+          aria-label={t("timeline-overview-label")}
         >
-          <span class="corner"></span>
-          {#each overviewDays as day (day)}
-            <span class="month muted" aria-hidden="true"
-              >{months.has(day) ? shortDay(day).month : ""}</span
-            >
+          <div
+            class="grid"
+            style:grid-template-columns={`${LANE_NAME_PX}px repeat(${overviewDays.length}, 44px)`}
+          >
+            <span class="corner"></span>
+            {#each overviewDays as day (day)}
+              <span class="month muted" aria-hidden="true"
+                >{months.has(day) ? shortDay(day).month : ""}</span
+              >
+            {/each}
+            <span class="corner"></span>
+            {#each overviewDays as day (day)}
+              <span class="date muted" aria-hidden="true"
+                >{shortDay(day).date}</span
+              >
+            {/each}
+            {#each overview.lanes as lane (lane.name)}
+              <button
+                type="button"
+                class="lane-name toggle"
+                aria-pressed={only === lane.name}
+                title={t("timeline-only", { product: lane.name })}
+                onclick={() => (only = only === lane.name ? null : lane.name)}
+              >
+                {lane.name}
+                {#if lane.ended}<span class="muted"
+                    >{lane.mergedInto
+                      ? t("timeline-lane-merged", { into: lane.mergedInto })
+                      : t("timeline-lane-ended")}</span
+                  >{/if}
+              </button>
+              {#each overviewDays as day (day)}
+                {@const cell = lane.cells.get(day)}
+                {#if cell}
+                  <button
+                    type="button"
+                    class="cell tone-{lookOf(cell.strongest).tone}"
+                    aria-label={cellWords(
+                      lane.name,
+                      day,
+                      cell.facts,
+                      cell.strongest,
+                    )}
+                    title={cellWords(
+                      lane.name,
+                      day,
+                      cell.facts,
+                      cell.strongest,
+                    )}
+                    onclick={() => jump(day)}
+                  >
+                    <span aria-hidden="true">{lookOf(cell.strongest).mark}</span
+                    >
+                    {#if cell.facts.length > 1}<span
+                        class="count"
+                        aria-hidden="true">{cell.facts.length}</span
+                      >{/if}
+                  </button>
+                {:else}
+                  <span class="empty" aria-hidden="true"></span>
+                {/if}
+              {/each}
+            {/each}
+            {#if shots.size > 0}
+              <span class="lane-name shots-lane"
+                >{t("timeline-shots-lane")}</span
+              >
+              {#each overviewDays as day (day)}
+                {@const taken = shots.get(day)?.length ?? 0}
+                {#if taken > 0}
+                  <button
+                    type="button"
+                    class="cell tone-observed"
+                    aria-label={t("timeline-shots-cell", {
+                      day: dayWords(day),
+                      count: taken,
+                    })}
+                    title={t("timeline-shots-cell", {
+                      day: dayWords(day),
+                      count: taken,
+                    })}
+                    onclick={() => jump(day)}
+                  >
+                    <span aria-hidden="true">▣</span>
+                    {#if taken > 1}<span class="count" aria-hidden="true"
+                        >{taken}</span
+                      >{/if}
+                  </button>
+                {:else}
+                  <span class="empty" aria-hidden="true"></span>
+                {/if}
+              {/each}
+            {/if}
+          </div>
+        </div>
+        <details class="legend">
+          <summary>{t("timeline-legend-title")}</summary>
+          <ul>
+            {#each Object.entries(KIND_LOOKS) as [kind, look] (kind)}
+              <li>
+                <span class="mark tone-{look.tone}" aria-hidden="true"
+                  >{look.mark}</span
+                >
+                {t(MARK_NAMES[kind as FactKind])}
+              </li>
+            {/each}
+          </ul>
+        </details>
+      </section>
+    {/if}
+
+    <section class="days" aria-labelledby="timeline-days-title">
+      <div class="days-head">
+        <h2 id="timeline-days-title">{t("timeline-days-title")}</h2>
+        {#if only}
+          <button type="button" class="action" onclick={() => (only = null)}>
+            {t("timeline-only-clear", { product: only })}
+          </button>
+          {@const into = overview.lanes.find(
+            (l) => l.name === only,
+          )?.mergedInto}
+          {#if into && overview.lanes.some((l) => l.name === into)}
+            <button type="button" class="action" onclick={() => (only = into)}>
+              {t("timeline-follow-into", { into })}
+            </button>
+          {/if}
+          {#each mergedFrom(overview.lanes, only) as from (from)}
+            <button type="button" class="action" onclick={() => (only = from)}>
+              {t("timeline-follow-from", { from })}
+            </button>
           {/each}
-          <span class="corner"></span>
-          {#each overviewDays as day (day)}
-            <span class="date muted" aria-hidden="true"
-              >{shortDay(day).date}</span
-            >
-          {/each}
-          {#each overview.lanes as lane (lane.name)}
+        {/if}
+      </div>
+      <FilterBox bind:value={filterText} label={t("timeline-filter")} />
+      {@render dayPager()}
+      {#each pagedDays.items as group (group.day)}
+        <section
+          class="day"
+          class:focused={focusedDay === group.day}
+          aria-labelledby={`timeline-day-${group.day}`}
+        >
+          <div class="day-head">
+            <h3 id={`timeline-day-${group.day}`} tabindex="-1">
+              {dayWords(group.day)}
+            </h3>
             <button
               type="button"
-              class="lane-name toggle"
-              aria-pressed={only === lane.name}
-              title={t("timeline-only", { product: lane.name })}
-              onclick={() => (only = only === lane.name ? null : lane.name)}
+              class="toggle"
+              aria-pressed={runningDay === group.day}
+              aria-expanded={runningDay === group.day}
+              aria-controls={`timeline-running-${group.day}`}
+              onclick={() =>
+                (runningDay = runningDay === group.day ? null : group.day)}
+              >{t("timeline-running-button")}</button
             >
-              {lane.name}
-              {#if lane.ended}<span class="muted"
-                  >{lane.mergedInto
-                    ? t("timeline-lane-merged", { into: lane.mergedInto })
-                    : t("timeline-lane-ended")}</span
-                >{/if}
-            </button>
-            {#each overviewDays as day (day)}
-              {@const cell = lane.cells.get(day)}
-              {#if cell}
-                <button
-                  type="button"
-                  class="cell tone-{KIND_LOOKS[cell.strongest].tone}"
-                  aria-label={cellWords(
-                    lane.name,
-                    day,
-                    cell.facts,
-                    cell.strongest,
-                  )}
-                  title={cellWords(lane.name, day, cell.facts, cell.strongest)}
-                  onclick={() => jump(day)}
-                >
-                  <span aria-hidden="true"
-                    >{KIND_LOOKS[cell.strongest].mark}</span
-                  >
-                  {#if cell.facts.length > 1}<span
-                      class="count"
-                      aria-hidden="true">{cell.facts.length}</span
-                    >{/if}
-                </button>
+          </div>
+          {#if runningDay === group.day && reading.state === "ready"}
+            {@const running = runningOn(reading.timeline.facts, group.day)}
+            <section
+              class="running"
+              id={`timeline-running-${group.day}`}
+              aria-label={t("timeline-running-title", {
+                day: dayWords(group.day),
+              })}
+            >
+              <h4>
+                {t("timeline-running-title", { day: dayWords(group.day) })}
+              </h4>
+              {#if running.length === 0}
+                <p class="muted small">{t("timeline-running-none")}</p>
               {:else}
-                <span class="empty" aria-hidden="true"></span>
-              {/if}
-            {/each}
-          {/each}
-          {#if shots.size > 0}
-            <span class="lane-name shots-lane">{t("timeline-shots-lane")}</span>
-            {#each overviewDays as day (day)}
-              {@const taken = shots.get(day)?.length ?? 0}
-              {#if taken > 0}
-                <button
-                  type="button"
-                  class="cell tone-observed"
-                  aria-label={t("timeline-shots-cell", {
-                    day: dayWords(day),
-                    count: taken,
-                  })}
-                  title={t("timeline-shots-cell", {
-                    day: dayWords(day),
-                    count: taken,
-                  })}
-                  onclick={() => jump(day)}
-                >
-                  <span aria-hidden="true">▣</span>
-                  {#if taken > 1}<span class="count" aria-hidden="true"
-                      >{taken}</span
-                    >{/if}
-                </button>
-              {:else}
-                <span class="empty" aria-hidden="true"></span>
-              {/if}
-            {/each}
-          {/if}
-        </div>
-      </div>
-      <details class="legend">
-        <summary>{t("timeline-legend-title")}</summary>
-        <ul>
-          {#each Object.entries(KIND_LOOKS) as [kind, look] (kind)}
-            <li>
-              <span class="mark tone-{look.tone}" aria-hidden="true"
-                >{look.mark}</span
-              >
-              {t(MARK_NAMES[kind as FactKind])}
-            </li>
-          {/each}
-        </ul>
-      </details>
-    </section>
-  {/if}
-
-  <section class="days" aria-labelledby="timeline-days-title">
-    <div class="days-head">
-      <h2 id="timeline-days-title">{t("timeline-days-title")}</h2>
-      {#if only}
-        <button type="button" class="action" onclick={() => (only = null)}>
-          {t("timeline-only-clear", { product: only })}
-        </button>
-        {@const into = overview.lanes.find((l) => l.name === only)?.mergedInto}
-        {#if into && overview.lanes.some((l) => l.name === into)}
-          <button type="button" class="action" onclick={() => (only = into)}>
-            {t("timeline-follow-into", { into })}
-          </button>
-        {/if}
-        {#each mergedFrom(overview.lanes, only) as from (from)}
-          <button type="button" class="action" onclick={() => (only = from)}>
-            {t("timeline-follow-from", { from })}
-          </button>
-        {/each}
-      {/if}
-    </div>
-    <FilterBox bind:value={filterText} label={t("timeline-filter")} />
-    {@render dayPager()}
-    {#each pagedDays.items as group (group.day)}
-      <section
-        class="day"
-        class:focused={focusedDay === group.day}
-        aria-labelledby={`timeline-day-${group.day}`}
-      >
-        <div class="day-head">
-          <h3 id={`timeline-day-${group.day}`} tabindex="-1">
-            {dayWords(group.day)}
-          </h3>
-          <button
-            type="button"
-            class="toggle"
-            aria-pressed={runningDay === group.day}
-            aria-expanded={runningDay === group.day}
-            aria-controls={`timeline-running-${group.day}`}
-            onclick={() =>
-              (runningDay = runningDay === group.day ? null : group.day)}
-            >{t("timeline-running-button")}</button
-          >
-        </div>
-        {#if runningDay === group.day && reading.state === "ready"}
-          {@const running = runningOn(reading.timeline.facts, group.day)}
-          <section
-            class="running"
-            id={`timeline-running-${group.day}`}
-            aria-label={t("timeline-running-title", {
-              day: dayWords(group.day),
-            })}
-          >
-            <h4>{t("timeline-running-title", { day: dayWords(group.day) })}</h4>
-            {#if running.length === 0}
-              <p class="muted small">{t("timeline-running-none")}</p>
-            {:else}
-              <ul class="running-list">
-                {#each running as item (`${item.fact.repository}/${item.fact.mod}`)}
-                  <li>
-                    <strong>{item.name}</strong>
-                    <span class="version">{item.version}</span>
-                    <span class="muted small"
-                      >{t("timeline-running-since", {
-                        time:
-                          dayWords(dayOf(item.fact.time)) +
-                          " " +
-                          timeWords(item.fact.time),
-                      })}</span
-                    >
-                    {#if canReadAsItStood(item.fact)}
-                      <button
-                        type="button"
-                        class="action"
-                        aria-label={t("timeline-read-stood-for", {
-                          product: item.name,
-                          day: dayWords(dayOf(item.fact.time)),
-                        })}
-                        onclick={() => readStood(item.fact)}
-                        >{t("timeline-read-stood")}</button
+                <ul class="running-list">
+                  {#each running as item (`${item.fact.repository}/${item.fact.mod}`)}
+                    <li>
+                      <strong>{item.name}</strong>
+                      <span class="version">{item.version}</span>
+                      <span class="muted small"
+                        >{t("timeline-running-since", {
+                          time:
+                            dayWords(dayOf(item.fact.time)) +
+                            " " +
+                            timeWords(item.fact.time),
+                        })}</span
                       >
-                    {/if}
-                  </li>
-                {/each}
-              </ul>
-              <p class="muted small">{t("timeline-running-how")}</p>
-            {/if}
-          </section>
-        {/if}
-        {#if shots.get(group.day)}
-          {@const dayShots = shots.get(group.day) ?? []}
-          <h4 class="shots-head">
-            {t("timeline-shots-day", { count: dayShots.length })}
-          </h4>
-          <ShotStrip
-            shots={dayShots}
-            label={t("timeline-shots-label", { day: dayWords(group.day) })}
-          />
-        {/if}
-        {#if group.facts.length === 0}
-          <p class="muted small">{t("timeline-shots-only")}</p>
-        {/if}
-        <ol class="facts" hidden={group.facts.length === 0}>
-          {#each rows(group.facts) as row, index (index)}
-            {#if row.kind === "settings"}
-              {@const first = row.facts[0]}
-              <li class="fact">
-                <span
-                  class="mark tone-{KIND_LOOKS[first.kind].tone}"
-                  aria-hidden="true">{KIND_LOOKS[first.kind].mark}</span
-                >
-                <div class="fact-body">
-                  <div class="fact-top">
-                    <p class="fact-head">
-                      {#if laneOf(first)}<strong>{laneOf(first)}</strong>{/if}
-                      <span>{settingsHead(row.facts)}</span>
-                      <span class="muted small">{whenWords(first)}</span>
-                    </p>
-                    {#if canShowCode(first)}
-                      <div class="fact-actions">
+                      {#if canReadAsItStood(item.fact)}
                         <button
                           type="button"
                           class="action"
-                          aria-label={t("timeline-show-code-for", {
-                            subject: first.subject ?? "",
-                          })}
-                          title={first.subject}
-                          onclick={() => showCode(first)}
-                          >{t("code-show")}</button
-                        >
-                      </div>
-                    {/if}
-                  </div>
-                  {#if first.subject}
-                    <p class="small about-line">{first.subject}</p>
-                  {/if}
-                  <ul class="entries settings">
-                    {#each row.facts as fact, settingIndex (settingIndex)}
-                      <li>
-                        <span
-                          class="mark-inline tone-{KIND_LOOKS[fact.kind].tone}"
-                          aria-hidden="true">{KIND_LOOKS[fact.kind].mark}</span
-                        >
-                        {settingWords(fact)}
-                        {#if fact.label && fact.key}<code class="key"
-                            >{fact.key}</code
-                          >{/if}
-                      </li>
-                    {/each}
-                  </ul>
-                </div>
-              </li>
-            {:else if row.kind === "batch"}
-              <li class="fact">
-                <span
-                  class="mark tone-{KIND_LOOKS[row.factKind].tone}"
-                  aria-hidden="true">{KIND_LOOKS[row.factKind].mark}</span
-                >
-                <div class="fact-body">
-                  <p class="fact-head">
-                    <strong>{batchWords(row.factKind, row.facts.length)}</strong
-                    >
-                    <span class="muted small">{whenWords(row.facts[0])}</span>
-                  </p>
-                  <p class="muted small">{t("timeline-batch-hint")}</p>
-                  <div class="chips">
-                    {#each row.facts as fact, chipIndex (chipIndex)}
-                      {#if canReadAsItStood(fact)}
-                        <button
-                          type="button"
-                          class="chip"
                           aria-label={t("timeline-read-stood-for", {
-                            product: laneOf(fact) ?? "",
-                            day: dayWords(group.day),
+                            product: item.name,
+                            day: dayWords(dayOf(item.fact.time)),
                           })}
-                          onclick={() => readStood(fact)}
+                          onclick={() => readStood(item.fact)}
+                          >{t("timeline-read-stood")}</button
                         >
-                          {laneOf(fact)}
-                          {#if fact.version}<span class="version"
-                              >{versionWords(fact.version)}</span
-                            >{/if}
-                        </button>
-                      {:else}
-                        <span class="chip">
-                          {laneOf(fact)}
-                          {#if fact.version}<span class="version"
-                              >{versionWords(fact.version)}</span
-                            >{/if}
-                        </span>
                       {/if}
-                    {/each}
-                  </div>
-                </div>
-              </li>
-            {:else}
-              {@const fact = row.fact}
-              <li class="fact">
-                <span
-                  class="mark tone-{KIND_LOOKS[fact.kind].tone}"
-                  aria-hidden="true">{KIND_LOOKS[fact.kind].mark}</span
-                >
-                <div class="fact-body">
-                  <div class="fact-top">
-                    <p class="fact-head">
-                      {#if laneOf(fact)}<strong>{laneOf(fact)}</strong>{/if}
-                      {#if fact.version}<span class="version"
-                          >{versionWords(fact.version)}</span
-                        >{/if}
-                      <span>{kindWords(fact)}</span>
-                      <span class="muted small">{whenWords(fact)}</span>
-                    </p>
-                    {#if canReadAsItStood(fact) || canShowCode(fact)}
-                      <div class="fact-actions">
-                        {#if canReadAsItStood(fact)}
+                    </li>
+                  {/each}
+                </ul>
+                <p class="muted small">{t("timeline-running-how")}</p>
+              {/if}
+            </section>
+          {/if}
+          {#if shots.get(group.day)}
+            {@const dayShots = shots.get(group.day) ?? []}
+            <h4 class="shots-head">
+              {t("timeline-shots-day", { count: dayShots.length })}
+            </h4>
+            <ShotStrip
+              shots={dayShots}
+              label={t("timeline-shots-label", { day: dayWords(group.day) })}
+            />
+          {/if}
+          {#if group.facts.length === 0}
+            <p class="muted small">{t("timeline-shots-only")}</p>
+          {/if}
+          <ol class="facts" hidden={group.facts.length === 0}>
+            {#each rows(group.facts) as row, index (index)}
+              {#if row.kind === "settings"}
+                {@const first = row.facts[0]}
+                <li class="fact">
+                  <span
+                    class="mark tone-{lookOf(first.kind).tone}"
+                    aria-hidden="true">{lookOf(first.kind).mark}</span
+                  >
+                  <div class="fact-body">
+                    <div class="fact-top">
+                      <p class="fact-head">
+                        {#if laneOf(first)}<strong>{laneOf(first)}</strong>{/if}
+                        <span>{settingsHead(row.facts)}</span>
+                        <span class="muted small">{whenWords(first)}</span>
+                      </p>
+                      {#if canShowCode(first)}
+                        <div class="fact-actions">
                           <button
                             type="button"
                             class="action"
+                            aria-label={t("timeline-show-code-for", {
+                              subject: first.subject ?? "",
+                            })}
+                            title={first.subject}
+                            onclick={() => showCode(first)}
+                            >{t("code-show")}</button
+                          >
+                        </div>
+                      {/if}
+                    </div>
+                    {#if first.subject}
+                      <p class="small about-line">{first.subject}</p>
+                    {/if}
+                    <ul class="entries settings">
+                      {#each row.facts as fact, settingIndex (settingIndex)}
+                        <li>
+                          <span
+                            class="mark-inline tone-{lookOf(fact.kind).tone}"
+                            aria-hidden="true">{lookOf(fact.kind).mark}</span
+                          >
+                          {settingWords(fact)}
+                          {#if fact.label && fact.key}<code class="key"
+                              >{fact.key}</code
+                            >{/if}
+                        </li>
+                      {/each}
+                    </ul>
+                  </div>
+                </li>
+              {:else if row.kind === "batch"}
+                <li class="fact">
+                  <span
+                    class="mark tone-{lookOf(row.factKind).tone}"
+                    aria-hidden="true">{lookOf(row.factKind).mark}</span
+                  >
+                  <div class="fact-body">
+                    <p class="fact-head">
+                      <strong
+                        >{batchWords(row.factKind, row.facts.length)}</strong
+                      >
+                      <span class="muted small">{whenWords(row.facts[0])}</span>
+                    </p>
+                    <p class="muted small">{t("timeline-batch-hint")}</p>
+                    <div class="chips">
+                      {#each row.facts as fact, chipIndex (chipIndex)}
+                        {#if canReadAsItStood(fact)}
+                          <button
+                            type="button"
+                            class="chip"
                             aria-label={t("timeline-read-stood-for", {
                               product: laneOf(fact) ?? "",
                               day: dayWords(group.day),
                             })}
                             onclick={() => readStood(fact)}
-                            >{t("timeline-read-stood")}</button
                           >
+                            {laneOf(fact)}
+                            {#if fact.version}<span class="version"
+                                >{versionWords(fact.version)}</span
+                              >{/if}
+                          </button>
+                        {:else}
+                          <span class="chip">
+                            {laneOf(fact)}
+                            {#if fact.version}<span class="version"
+                                >{versionWords(fact.version)}</span
+                              >{/if}
+                          </span>
                         {/if}
-                        {#if canShowCode(fact)}
-                          <button
-                            type="button"
-                            class="action"
-                            aria-label={t("timeline-show-code-for", {
-                              subject: fact.subject ?? "",
-                            })}
-                            title={fact.subject}
-                            onclick={() => showCode(fact)}
-                            >{t("code-show")}</button
-                          >
-                        {/if}
-                      </div>
-                    {/if}
-                  </div>
-                  {#if fact.summary || fact.subject}
-                    <p class="small about-line">
-                      {fact.summary || fact.subject}
-                    </p>
-                  {/if}
-                  {#if fact.kind === "went-back" && fact.fromVersion}
-                    <p class="muted small">
-                      {t("timeline-went-back-from", {
-                        version: fact.fromVersion,
-                      })}
-                    </p>
-                  {/if}
-                  {#if fact.entries && fact.entries.length > 0}
-                    <div class="sections">
-                      {#each sections(fact.entries) as section, sectionIndex (sectionIndex)}
-                        <span class="section-name">{section.section}</span>
-                        <ul class="entries">
-                          {#each section.entries as entry, entryIndex (entryIndex)}
-                            <li>
-                              <RichText text={entry.lead} />
-                              {#if entry.was && entry.now}
-                                <details>
-                                  <summary
-                                    >{t("timeline-show-rewording")}</summary
-                                  >
-                                  <p class="small">
-                                    <span class="muted"
-                                      >{t("timeline-was")}</span
-                                    >
-                                    <RichText text={entry.was} />
-                                  </p>
-                                  <p class="small">
-                                    <span class="muted"
-                                      >{t("timeline-now")}</span
-                                    >
-                                    <RichText text={entry.now} />
-                                  </p>
-                                </details>
-                              {/if}
-                            </li>
-                          {/each}
-                        </ul>
                       {/each}
                     </div>
-                    {#if unlisted(fact) > 0}
-                      <p class="muted small">
-                        {t("timeline-unlisted", { count: unlisted(fact) })}
+                  </div>
+                </li>
+              {:else}
+                {@const fact = row.fact}
+                <li class="fact">
+                  <span
+                    class="mark tone-{lookOf(fact.kind).tone}"
+                    aria-hidden="true">{lookOf(fact.kind).mark}</span
+                  >
+                  <div class="fact-body">
+                    <div class="fact-top">
+                      <p class="fact-head">
+                        {#if laneOf(fact)}<strong>{laneOf(fact)}</strong>{/if}
+                        {#if fact.version}<span class="version"
+                            >{versionWords(fact.version)}</span
+                          >{/if}
+                        <span>{kindWords(fact)}</span>
+                        <span class="muted small">{whenWords(fact)}</span>
+                      </p>
+                      {#if canReadAsItStood(fact) || canShowCode(fact)}
+                        <div class="fact-actions">
+                          {#if canReadAsItStood(fact)}
+                            <button
+                              type="button"
+                              class="action"
+                              aria-label={t("timeline-read-stood-for", {
+                                product: laneOf(fact) ?? "",
+                                day: dayWords(group.day),
+                              })}
+                              onclick={() => readStood(fact)}
+                              >{t("timeline-read-stood")}</button
+                            >
+                          {/if}
+                          {#if canShowCode(fact)}
+                            <button
+                              type="button"
+                              class="action"
+                              aria-label={t("timeline-show-code-for", {
+                                subject: fact.subject ?? "",
+                              })}
+                              title={fact.subject}
+                              onclick={() => showCode(fact)}
+                              >{t("code-show")}</button
+                            >
+                          {/if}
+                        </div>
+                      {/if}
+                    </div>
+                    {#if fact.summary || fact.subject}
+                      <p class="small about-line">
+                        {fact.summary || fact.subject}
                       </p>
                     {/if}
-                  {/if}
-                </div>
-              </li>
-            {/if}
-          {/each}
-        </ol>
-      </section>
-    {/each}
-    {@render dayPager()}
-  </section>
-  <p class="muted how">{t("timeline-how")}</p>
-{/if}
+                    {#if fact.kind === "went-back" && fact.fromVersion}
+                      <p class="muted small">
+                        {t("timeline-went-back-from", {
+                          version: fact.fromVersion,
+                        })}
+                      </p>
+                    {/if}
+                    {#if fact.entries && fact.entries.length > 0}
+                      <div class="sections">
+                        {#each sections(fact.entries) as section, sectionIndex (sectionIndex)}
+                          <span class="section-name">{section.section}</span>
+                          <ul class="entries">
+                            {#each section.entries as entry, entryIndex (entryIndex)}
+                              <li>
+                                <RichText text={entry.lead} />
+                                {#if entry.was && entry.now}
+                                  <details>
+                                    <summary
+                                      >{t("timeline-show-rewording")}</summary
+                                    >
+                                    <p class="small">
+                                      <span class="muted"
+                                        >{t("timeline-was")}</span
+                                      >
+                                      <RichText text={entry.was} />
+                                    </p>
+                                    <p class="small">
+                                      <span class="muted"
+                                        >{t("timeline-now")}</span
+                                      >
+                                      <RichText text={entry.now} />
+                                    </p>
+                                  </details>
+                                {/if}
+                              </li>
+                            {/each}
+                          </ul>
+                        {/each}
+                      </div>
+                      {#if unlisted(fact) > 0}
+                        <p class="muted small">
+                          {t("timeline-unlisted", { count: unlisted(fact) })}
+                        </p>
+                      {/if}
+                    {/if}
+                  </div>
+                </li>
+              {/if}
+            {/each}
+          </ol>
+        </section>
+      {/each}
+      {@render dayPager()}
+    </section>
+    <p class="muted how">{t("timeline-how")}</p>
+  {/if}
+</svelte:boundary>
 
 {#snippet dayPager()}
   <Pager

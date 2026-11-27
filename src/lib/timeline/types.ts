@@ -19,7 +19,10 @@ export type FactKind =
   | "setting-added"
   | "setting-removed"
   | "setting-default"
-  | "duplicates-removed";
+  | "duplicates-removed"
+  | "backups-packed"
+  | "safe-copies"
+  | "mod-list-change";
 
 /** An entry a fact names: its opening words and section; a reworded one with its words before and after. */
 export type FactEntry = {
@@ -55,13 +58,23 @@ export type Fact = {
   fromVersion?: string;
   ok?: boolean;
   mods?: string[];
-  /** For a setting (kit 1.40.0): its saved key, the settings window's label where known, and its default before and after. */
+  /**
+   * For a setting (kit 1.40.0): its saved key, the settings window's label where known, and its default before and after. For
+   * backups packed, `before` and `after` are the backups' size in bytes instead.
+   */
   key?: string;
   label?: string | null;
-  before?: string | null;
-  after?: string | null;
+  before?: string | number | null;
+  after?: string | number | null;
   /** For repeated backups removed: how much room it freed. */
   size?: number;
+  /** For safe copies made: how many files, how many bytes, and where they went. */
+  files?: number;
+  bytes?: number;
+  destinations?: string[];
+  /** For a mod list change: which list, and the change in the kit's words. */
+  list?: string;
+  change?: string;
 };
 
 export type Timeline = {

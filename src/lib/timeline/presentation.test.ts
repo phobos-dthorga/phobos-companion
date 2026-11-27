@@ -4,9 +4,12 @@ import {
   canReadAsItStood,
   canShowCode,
   dayOf,
+  isKnownKind,
   KIND_LOOKS,
   lanes,
+  lookOf,
   mergedFrom,
+  OTHER_LOOK,
   monthStarts,
   rows,
   runningOn,
@@ -109,6 +112,28 @@ describe("the overview's lanes", () => {
     expect(
       Object.values(KIND_LOOKS).every((look) => look.mark.length > 0),
     ).toBe(true);
+  });
+
+  it("shows a kind it has never heard of plainly, weakest of all, and never throws (0.117.1)", () => {
+    // The owner's screen note of 28 Nov 2026: a newer kit's kind froze the page, because its look-up threw.
+    const unheardOf = "something-new" as FactKind;
+    expect(isKnownKind(unheardOf)).toBe(false);
+    expect(lookOf(unheardOf)).toBe(OTHER_LOOK);
+    expect(lookOf("installed")).toBe(KIND_LOOKS.installed);
+    const weights = Object.values(KIND_LOOKS).map((look) => look.weight);
+    expect(Math.min(...weights)).toBeGreaterThan(OTHER_LOOK.weight);
+    const day = noon("2026-11-27");
+    const found = lanes([
+      fact(unheardOf, day, { source: "log", mod: "Thing", product: undefined }),
+      fact("installed", day, { source: "log" }),
+      fact(unheardOf, day, { source: "log" }),
+    ]);
+    expect(found.lanes[0].cells.get("2026-11-27")?.strongest).toBe("installed");
+  });
+
+  it("knows the kinds the kit's history log writes for this PC's upkeep", () => {
+    for (const kind of ["backups-packed", "safe-copies", "mod-list-change"])
+      expect(isKnownKind(kind)).toBe(true);
   });
 });
 

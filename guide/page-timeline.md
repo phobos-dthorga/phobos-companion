@@ -12,7 +12,7 @@ see: task-see-screenshots, term-install-record
 - **The days**, newest first, with every fact. **Read it as it stood** opens a changelog exactly as it was then, marking what has been reworded or taken out since.
 - **What was I running then?** on any day: every mod's installed version at the end of that day.
 
-Installs, go-backs, backups, builds and encodings are recorded from 19 Nov 2026 on, in the history log in the Companion's own folder.
+Installs, go-backs, backups, builds and encodings are recorded from 19 Nov 2026 on, in the history log in the Companion's own folder; so are packed backups, safe copies and changes to a mod list, from the days the tools began writing them. If the page ever cannot show what it read, it says so: press **Read again**.
 
 ### Keys
 - **8** opens the Timeline.

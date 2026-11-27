@@ -10,9 +10,12 @@
 //! tools while it answers (`ai_tools`), at most six times a question. For a model on this computer each report runs and is sent at
 //! once, and the card lists it. **For an online model each report runs here first and waits, shown whole, for the person's yes**
 //! (`Step::Waiting`, then `answer_call`): only then is it sent; a no tells the model it was declined.
+//!
+//! **A program the person logs in to** (0.115.0, `docs/ai.md`, A4) is asked the same way: `ai_client::ask` starts it for each
+//! turn. It is not on this computer in the sense that matters (it sends the question online), so each report waits for a yes.
 
 use crate::{ai_tools, changes_page, logs_page, other_code_page};
-use companion_core::ai::{self, Length};
+use companion_core::ai::{self, Kind, Length, LoginHow};
 use companion_core::ai_client::{self, Answer, Request, Stop, Tool, ToolCall};
 use companion_core::failure::Failure;
 use companion_core::games;
@@ -50,6 +53,10 @@ pub struct Prepared {
     pub model: String,
     /// Whether it stays on this computer.
     pub local: bool,
+    /// Which kind of service answers (0.115.0): on this computer, a program the person logs in to, or one charged per use.
+    pub kind: Kind,
+    /// Whether this question is charged per use: a service with a key, or a program whose own login check said it uses a key.
+    pub charged: bool,
     /// Whether the model may ask the tool kit's reports.
     pub tools: bool,
     pub instruction: String,
@@ -211,12 +218,20 @@ fn keep(data: &Path, what: &str, template: &str, text: String) -> Result<Prepare
     if ready.tools {
         said = format!("{said}\n\n{}", TOOLS.replace("{calls}", &MAX_CALLS.to_string()).trim());
     }
+    let kind = ready.service.kind();
+    let charged = match kind {
+        Kind::Local => false,
+        Kind::Key => true,
+        Kind::Program => ai::login_of(&ready.service.id).is_some_and(|l| l.how == LoginHow::Key),
+    };
     let prepared = Prepared {
         id: NEXT.fetch_add(1, Ordering::Relaxed),
         what: what.to_owned(),
         service: ready.service.name.clone(),
         model: ready.model.clone(),
         local: ready.service.local(),
+        kind,
+        charged,
         tools: ready.tools,
         instruction: said,
         characters: text.chars().count(),

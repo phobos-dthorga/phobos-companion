@@ -11,7 +11,7 @@ see: page-settings, page-home, page-about, page-logs, page-modlist, page-publish
 2. Each kind says what it does and the address it contacts. Press **On** or **Off**.
 3. Switching off a kind you would miss a lot asks first, and says what stops working. Press **Switch it off** or **Keep it on**.
 
-**AI services**: help on pages, such as **Explain this fault** on the [Logs](page-logs) page, from an online AI service you chose, with your own key ([set it up](task-ai-services)). It sends only what the page showed you, and only when you press **Send**. **Off until you turn it on.** A model on this computer, such as Ollama or LM Studio, is not going online and works either way.
+**AI services**: help on pages, such as **Explain this fault** on the [Logs](page-logs) page, from an online AI service you chose, with your own key, or from a program you log in to, such as Claude Code, which sends the question to its own service on your plan ([set it up](task-ai-services)). It sends only what the page showed you, and only when you press **Send**. **Off until you turn it on.** A model on this computer, such as Ollama or LM Studio, is not going online and works either way.
 
 **Workshop pages**: on the [Publish](page-publish) page, **Read Steam back** asks Steam's public pages, without an account, how each of your Workshop items stands: whether it is public, and the day it went public, which it writes into the changelog. On the [Mod list](page-modlist), **What players say** reads a Workshop mod's public page and comments, or the game's and its DLCs' Steam reviews. Each only when you press it.
 

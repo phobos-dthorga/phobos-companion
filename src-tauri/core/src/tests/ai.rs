@@ -37,13 +37,97 @@ fn no_environment(_: &str) -> Option<String> {
 }
 
 #[test]
-fn the_shipped_services_are_all_usable_local_ones_first() {
+fn the_shipped_services_are_all_usable_local_ones_first_then_programs_then_keys() {
     let found = checked_services(SERVICES).unwrap();
     assert_eq!(found.len(), services().len());
-    assert!(found.len() >= 5);
+    assert!(found.len() >= 8);
     assert!(found[0].local() && found[1].local());
-    assert!(found.iter().filter(|s| !s.local()).all(|s| s.address.starts_with("https://") && s.key_variable.is_some()));
+    let kinds: Vec<Kind> = found.iter().map(Service::kind).collect();
+    assert!(
+        kinds.is_sorted(),
+        "Settings lists them in the file's order: on this computer, programs, then charged per use"
+    );
+    assert!(
+        found
+            .iter()
+            .filter(|s| s.kind() == Kind::Key)
+            .all(|s| s.address.starts_with("https://") && s.key_variable.is_some())
+    );
     assert_eq!(found.iter().find(|s| s.id == "anthropic").unwrap().api, Api::Anthropic);
+    let claude = found.iter().find(|s| s.id == "claude-code").unwrap();
+    let program = claude.program.as_ref().unwrap();
+    assert_eq!((claude.api, claude.kind(), claude.local()), (Api::Program, Kind::Program, false));
+    assert!(program.args.windows(2).any(|w| w == ["--tools", ""]), "Claude Code runs with no tools");
+    assert!(!program.args.iter().any(|a| a == "--bare"), "--bare never reads the subscription login");
+    assert!(program.drop_variables.iter().any(|v| v == "ANTHROPIC_API_KEY"), "a key in the environment never charges");
+    assert_eq!(program.models[0], OWN_CHOICE);
+    for program in found.iter().filter_map(|s| s.program.as_ref()) {
+        assert!(!program.tried, "a program is marked tried only once the owner has tried it");
+    }
+}
+
+#[test]
+fn a_program_row_that_breaks_the_rules_is_refused() {
+    let row = |program: &str| {
+        format!(r#"{{"services": [{{"id":"x","name":"X","api":"program","keyVariable":null,"program":{program}}}]}}"#)
+    };
+    let good = r#"{"command":"sample","args":["-p","{instruction-file}","{model-args}"],"modelArgs":["--model","{model}"],
+                   "reads":"claude-stream","dropVariables":["SAMPLE_KEY"],"models":["default","fast"],
+                   "login":{"args":["auth","status"],"reads":"claude-auth"},"get":"Install it."}"#;
+    assert!(checked_services(&row(good)).is_ok());
+    for (broken, why) in [
+        (good.replace(r#""command":"sample""#, r#""command":"../sample""#), "a path, not a name"),
+        (good.replace(r#""command":"sample""#, r#""command":"-sample""#), "a name read as an option"),
+        (good.replace(r#""-p","#, r#""{other}","#), "an unknown placeholder"),
+        (good.replace(r#""-p","#, r#""{model-args}","#), "a placeholder twice"),
+        (good.replace(r#""--model","{model}""#, r#""--model""#), "model arguments without the model"),
+        (good.replace(r#""default","fast""#, r#""default","default""#), "a model twice"),
+        (good.replace(r#""models":["default","fast"]"#, r#""models":[]"#), "no model"),
+        (good.replace("SAMPLE_KEY", "sample key"), "a variable that is not a name"),
+        (good.replace("Install it.", " "), "no words on where to get it"),
+        (good.replace(r#""reads":"claude-stream""#, r#""reads":"other""#), "an unknown reader"),
+        (
+            good.replace(r#""get":"Install it.""#, r#""get":"Install it.","shell":true"#),
+            "a field the program does not know",
+        ),
+    ] {
+        assert!(checked_services(&row(&broken)).is_err(), "{why}");
+    }
+    let with = |extra: &str| {
+        format!(
+            r#"{{"services": [{{"id":"x","name":"X","api":"program","keyVariable":null,{extra}"program":{good}}}]}}"#
+        )
+    };
+    assert!(checked_services(&with(r#""address":"https://example.com","#)).is_err(), "a program has no address");
+    let keyed = with("").replace(r#""keyVariable":null"#, r#""keyVariable":"X_KEY""#);
+    assert!(checked_services(&keyed).is_err(), "a program has no key");
+    let not_program = with("").replace(r#""api":"program""#, r#""api":"openai""#);
+    assert!(checked_services(&not_program).is_err(), "a program block only on a program");
+    assert!(
+        checked_services(r#"{"services": [{"id":"x","name":"X","api":"program","keyVariable":null}]}"#).is_err(),
+        "a program needs its block"
+    );
+}
+
+#[test]
+fn a_program_is_offered_only_its_own_models_and_is_ready_only_when_it_is_here() {
+    let data = scratch();
+    choose_service(&data, "claude-code").unwrap();
+    assert!(
+        choose_model(&data, "claude-code", "--dangerously-skip-permissions").is_err(),
+        "only a model its row names"
+    );
+    choose_model(&data, "claude-code", "sonnet").unwrap();
+    assert!(!status_with(&data, &no_environment, &Empty).ready, "AI services starts off, and a program goes online");
+    online::choose(&data, ONLINE_KIND, true).unwrap();
+    let status = status_with(&data, &no_environment, &Empty);
+    let claude = status.services.iter().find(|s| s.id == "claude-code").unwrap();
+    let here = program_found(services().iter().find(|s| s.id == "claude-code").unwrap().program.as_ref().unwrap());
+    assert_eq!((claude.kind, claude.needs_key, claude.found), (Kind::Program, false, here));
+    assert_eq!(status.ready, here, "ready exactly when Claude Code is on this computer, with no key");
+    assert!(claude.get.as_deref().is_some_and(|g| g.contains("log in")));
+    assert_eq!(ready(&data).is_ok(), here);
+    fs::remove_dir_all(&data).unwrap();
 }
 
 #[test]

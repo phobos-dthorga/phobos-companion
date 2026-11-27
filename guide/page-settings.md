@@ -17,7 +17,7 @@ see: task-set-up, task-change-folder, task-change-key, task-change-theme, task-a
 - **Backups and space:** [where copies of your records go, and how fresh they are](task-records-backup), and [clean up what the tools left behind](task-clean-up).
 - **Agent sessions:** [show or hide the features for AI agent sessions](task-agent-features).
 - **Publishing:** **Workshop uploads**, **On** or **Off**: whether the [Publish](page-publish) page offers Upload, Make public and Update all waiting. On by default.
-- **AI:** [the AI that explains things on pages](task-ai-services): a model on this computer or an online service with your key, its model and answer length; [the lines that let an AI program you use ask the tool kit's reports](task-ai-programs), with **Copy the list** and **Copy the command**; and [the Chat page and its agent](task-chat-agent), **Off** until you turn it on.
+- **AI:** [the AI that explains things on pages](task-ai-services): a model on this computer, a program you log in to (such as Claude Code on your plan, with no key), or a service charged per use with your key, and its model and answer length; [the lines that let an AI program you use ask the tool kit's reports](task-ai-programs), with **Copy the list** and **Copy the command**; and [the Chat page and its agent](task-chat-agent), **Off** until you turn it on.
 
 ### Keys
 - **S** opens Settings.

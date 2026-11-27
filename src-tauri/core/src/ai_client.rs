@@ -7,6 +7,9 @@
 //! When it asks for one, the answer stops with [`Stop::Calling`], carrying the calls and the model's own message as it gave it (its
 //! thinking included, which Claude requires back unchanged); the program runs each call through the kit and sends the results back
 //! with [`tool_results`]. Nothing here runs a tool: that is the caller's, behind the kit's own checks.
+//!
+//! **A program the person logs in to** (`program`, 0.115.0) is asked through `ai_programs`, which starts it for one answer; its
+//! conversation is plain text, so its messages here are plain too.
 
 use crate::ai::{Api, Service};
 use serde::Serialize;
@@ -90,7 +93,7 @@ pub struct Answer {
 }
 
 impl Answer {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             text: String::new(),
             stop: Stop::Finished,
@@ -103,7 +106,7 @@ impl Answer {
         }
     }
 
-    fn failed(problem: impl Into<String>) -> Self {
+    pub(crate) fn failed(problem: impl Into<String>) -> Self {
         Self { stop: Stop::Failed, problem: Some(problem.into()), ..Self::new() }
     }
 }
@@ -126,6 +129,11 @@ pub fn tool_results(api: Api, results: &[(String, String, bool)]) -> Vec<Value> 
                 let content = if *failed { format!("Error: {text}") } else { text.clone() };
                 json!({"role": "tool", "tool_call_id": id, "content": content})
             })
+            .collect(),
+        // A program reads the conversation as text (`ai_programs::prompt`): each answer is the person's next message, marked.
+        Api::Program => results
+            .iter()
+            .map(|(_, text, failed)| json!({"role": "user", "report": true, "failed": failed, "content": text}))
             .collect(),
     }
 }
@@ -169,6 +177,7 @@ pub fn body(request: &Request) -> Value {
             }
             body
         }
+        Api::Program => Value::Null,
     }
 }
 
@@ -183,7 +192,7 @@ pub fn headers(service: &Service, key: Option<&str>) -> Vec<(&'static str, Strin
             }
         }
         (Api::Openai, Some(key)) => found.push(("authorization", format!("Bearer {key}"))),
-        (Api::Openai, None) => {}
+        (Api::Openai, None) | (Api::Program, _) => {}
     }
     found
 }
@@ -412,6 +421,7 @@ pub fn read_stream(api: Api, reader: impl BufRead, on_text: &mut dyn FnMut(&str)
     match api {
         Api::Anthropic => read_anthropic(reader, on_text),
         Api::Openai => read_openai(reader, on_text),
+        Api::Program => Answer::failed("a program's answer is read by the program's own reader"),
     }
 }
 
@@ -464,13 +474,16 @@ pub fn refuses_tools(status: u16, problem: &str) -> bool {
     status == 400 && problem.to_ascii_lowercase().contains("tool")
 }
 
-/// Asks one question and streams the answer to `on_text`.
+/// Asks one question and streams the answer to `on_text`. A program the person logs in to is started for it (`ai_programs`).
 pub fn ask(request: &Request, on_text: &mut dyn FnMut(&str)) -> Answer {
+    if request.service.api == Api::Program {
+        return crate::ai_programs::ask(request, on_text);
+    }
     let mut call = agent().post(endpoint(
         request.service,
         match request.service.api {
             Api::Anthropic => "messages",
-            Api::Openai => "chat/completions",
+            Api::Openai | Api::Program => "chat/completions",
         },
     ));
     for (name, value) in headers(request.service, request.key) {
@@ -506,11 +519,14 @@ pub fn model_ids(answer: &Value) -> Vec<String> {
     ids
 }
 
-/// The service's own list of models.
+/// The service's own list of models; a program's are those its row names.
 pub fn list_models(service: &Service, key: Option<&str>) -> Result<Vec<String>, String> {
+    if let Some(program) = &service.program {
+        return Ok(program.models.clone());
+    }
     let path = match service.api {
         Api::Anthropic => "models?limit=1000",
-        Api::Openai => "models",
+        Api::Openai | Api::Program => "models",
     };
     let mut call = agent().get(endpoint(service, path));
     for (name, value) in headers(service, key) {

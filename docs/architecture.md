@@ -274,7 +274,10 @@ Each change passes every gate below that applies to it, in the host, at the mome
   `companion_core::terminals` (no shell, no input, its tree ended by Stop). A web page opens only at the `https://` address the kit
   names (`setup::address_of`).
 - **An AI service's gate** (0.71.0): `companion_core::ai::allowed` before every call to one, a question or **Read the models**: a
-  loopback service always; any other only while AI services is on and with a key. **Send** takes only the question
+  loopback service always; any other only while AI services is on, and then with a key, or for a program the person logs in to
+  (0.115.0, `docs/ai.md`, A4) only when it is on the search path. A program is started by `companion_core::ai_programs` for one
+  answer, with its tools off by its own arguments, in an empty folder of its own, without the variables its row names, and is
+  asked only for a model its row names. **Send** takes only the question
   `ai_help` built and showed, from what the page's last reading named. The model's only tools are the kit's three read-only ones
   (0.73.0), each call run by the kit's `mcp call` behind its own checks; for an online model each report waits, shown whole, for
   the person's yes (`ai_help::answer_call`) before it is sent.
@@ -288,7 +291,7 @@ AI services, which starts off (`starts_on`):
 
 | Kind | Contacts | Losing it | Used by |
 | --- | --- | --- | --- |
-| AI services | The AI service the person chose | Small | Logs, `ai_help.rs`: **Explain this fault**, on **Send**; Settings, **Read the models** |
+| AI services | The AI service the person chose, or the service of the program they log in to (0.115.0) | Small | Logs, `ai_help.rs`: **Explain this fault**, on **Send**; Settings, **Read the models** (for a program, its own login check) |
 | Gate lights | api.github.com | Severe | Home, `repo_status.rs`: the kit's `repos status` |
 | Nightly watch | raw.githubusercontent.com | Severe | Home, `nightly.rs`: `feeds read --root`, each `companion-results` branch |
 | Community lists | raw.githubusercontent.com | Small | Mod list, `mod_list_databases.rs`: `mod-list databases --fetch` (kit 1.144.0, 0.112.0), the stale ones once a run and all on **Fetch them now** |

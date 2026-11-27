@@ -244,7 +244,10 @@ export const agentsShown: Answer = {
   },
 };
 
-/** AI services (0.71.0): a model on this computer chosen and ready, and an online service with no key yet. Invented. */
+/**
+ * AI services (0.71.0): a model on this computer chosen and ready, a program you log in to that is here and logged in with a plan
+ * (0.115.0), one that is not here, and a service charged per use with no key yet. Invented.
+ */
 export const sampleAiStatus = {
   services: [
     {
@@ -252,18 +255,56 @@ export const sampleAiStatus = {
       name: "Ollama",
       api: "openai",
       local: true,
+      kind: "local",
       needsKey: false,
       key: { from: "none" },
       model: "sample-model:8b",
+      found: true,
+      get: null,
+      tried: true,
+      login: null,
+    },
+    {
+      id: "claude-code",
+      name: "Claude Code",
+      api: "program",
+      local: false,
+      kind: "program",
+      needsKey: false,
+      key: { from: "none" },
+      model: "default",
+      found: true,
+      get: "Install Claude Code, then run claude once in a terminal and log in.",
+      tried: false,
+      login: { loggedIn: true, how: "plan", plan: "sample" },
+    },
+    {
+      id: "codex",
+      name: "Codex",
+      api: "program",
+      local: false,
+      kind: "program",
+      needsKey: false,
+      key: { from: "none" },
+      model: null,
+      found: false,
+      get: "Install Codex, then run codex once in a terminal and sign in.",
+      tried: false,
+      login: null,
     },
     {
       id: "anthropic",
       name: "Claude (Anthropic)",
       api: "anthropic",
       local: false,
+      kind: "key",
       needsKey: true,
       key: { from: "none" },
       model: null,
+      found: true,
+      get: null,
+      tried: true,
+      login: null,
     },
   ],
   chosen: "ollama",

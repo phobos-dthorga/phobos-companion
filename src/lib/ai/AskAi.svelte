@@ -121,6 +121,24 @@
     settle(prepared, now.step === "sending" ? now.text : text, answer);
   }
 
+  /** A model's name as the person reads it: a program's own choice in words (0.115.0). */
+  function modelWords(prepared: AiPrepared): string {
+    return prepared.kind === "program" && prepared.model === "default"
+      ? t("ai-services-model-default")
+      : prepared.model;
+  }
+
+  /** Where the question goes, and whether it is charged per use (0.115.0: a program you log in to is not, unless keyed). */
+  function goesWords(prepared: AiPrepared): string {
+    const where = { service: prepared.service, model: modelWords(prepared) };
+    if (prepared.kind === "local") return t("ask-goes-local", where);
+    if (prepared.kind === "program")
+      return prepared.charged
+        ? t("ask-goes-program-charged", where)
+        : t("ask-goes-program", where);
+    return t("ask-goes-online", where);
+  }
+
   function stopWords(answer: AiAnswer): string | null {
     if (answer.stop === "cut") return t("ask-stop-cut");
     if (answer.stop === "refused") return t("ask-stop-refused");
@@ -179,17 +197,7 @@
     {@const prepared = now.prepared}
     <section class="card" aria-labelledby={`ask-title-${key}`}>
       <h4 id={`ask-title-${key}`}>{t("ask-shown-title")}</h4>
-      <p class="small now">
-        {prepared.local
-          ? t("ask-goes-local", {
-              service: prepared.service,
-              model: prepared.model,
-            })
-          : t("ask-goes-online", {
-              service: prepared.service,
-              model: prepared.model,
-            })}
-      </p>
+      <p class="small now">{goesWords(prepared)}</p>
       {#if prepared.tools}
         <p class="small">
           {prepared.local ? t("ask-tools-local") : t("ask-tools-online")}
@@ -253,7 +261,7 @@
       <h4 id={`ask-answer-${key}`}>
         {t("ask-answer-title", {
           service: now.prepared.service,
-          model: now.prepared.model,
+          model: modelWords(now.prepared),
         })}
       </h4>
       {#if answer.text}

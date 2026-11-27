@@ -10,6 +10,7 @@ fn service(api: Api, address: &str, key: Option<&str>, stream_usage: bool) -> Se
         address: address.into(),
         key_variable: key.map(str::to_owned),
         stream_usage,
+        program: None,
     }
 }
 

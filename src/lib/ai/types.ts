@@ -26,15 +26,35 @@ export type AiKeySource =
 
 export type AiLength = "short" | "medium" | "long";
 
+/** Settings' three groups, in order (0.115.0): on this computer, a program the person logs in to, a service charged per use. */
+export type AiKind = "local" | "program" | "key";
+
+/** What a program's own login check said (0.115.0): only these three facts are read from it. */
+export type AiLogin = {
+  loggedIn: boolean;
+  how: "plan" | "key" | "unknown";
+  /** The plan's name as the program gave it, such as "max". */
+  plan: string | null;
+};
+
 export type AiServiceStatus = {
   id: string;
   name: string;
-  api: "anthropic" | "openai";
+  api: "anthropic" | "openai" | "program";
   /** It runs on this computer: nothing leaves it, and it needs no key. */
   local: boolean;
+  kind: AiKind;
   needsKey: boolean;
   key: AiKeySource;
   model: string | null;
+  /** For a program: whether it is on this computer. Always true for the other kinds. */
+  found: boolean;
+  /** For a program: where to get it, in words. */
+  get: string | null;
+  /** For a program: whether it has been tried with the Companion. Always true for the other kinds. */
+  tried: boolean;
+  /** For a program: what its login check said, once looked at in this run. */
+  login: AiLogin | null;
 };
 
 export type AiMonth = {
@@ -72,6 +92,10 @@ export type AiPrepared = {
   service: string;
   model: string;
   local: boolean;
+  /** Which kind of service answers (0.115.0). */
+  kind: AiKind;
+  /** Whether this question is charged per use: a key, or a program whose login check said it uses one. */
+  charged: boolean;
   /** Whether the model may ask the tool kit's reports (0.73.0). */
   tools: boolean;
   instruction: string;

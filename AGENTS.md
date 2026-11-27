@@ -157,8 +157,14 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
 - **Settings → AI services keeps the person's choices and their key** (0.71.0; `docs/ai.md`, A2): the service, its model and the
   answer length in `ai.json`, written whole, on a press; a key only in the system's key store, on **Keep this key**, and gone on
   **Forget this key**. **The services are data** (`config/ai-services.json`), checked by `companion_core::ai` before use: a
-  loopback one runs on this computer, any other must be https and needs a key. **Read the models** asks a service on a press,
-  through the same gate as a question.
+  loopback one runs on this computer, one elsewhere must be https and needs a key, and **a program the person logs in to**
+  (0.115.0; the owner's choices by card, 28 Nov 2026, `docs/ai.md`, A4) has neither: it is found by name on the search path, as
+  the Chat page's agents are, and `companion_core::ai_programs` starts it for one answer **with its tools off by its own
+  arguments**, in an empty folder of its own, without the variables that would make it charge per use, and only for a model its
+  row names. **The program never holds, reads or passes such a program's login**: its own login check is read for three facts
+  only (logged in, plan or key, the plan's name), kept in memory for this run. **Read the models** asks a service on a press,
+  through the same gate as a question; for a program it runs that login check. Settings lists the services cheapest first: on
+  this computer, programs you log in to, then those charged per use, each marked.
 - **Help on pages sends only what the person was shown, on their press** (0.71.0; the owner's choice of 23 Nov 2026: "shown first,
   then my press"; `docs/ai.md`, A2): **Explain this fault** on Logs, and since 0.72.0 **Summarise this version** on Changes and
   **What does this mean for my mods?** under the Mods page's update check, all through `src/lib/ai/AskAi.svelte`. The host builds
@@ -171,7 +177,9 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   "go ahead with the kit's tools for the model"), unless the person switches them off: `ai_tools.rs` hands each call whole to the
   kit's `mcp call`, which runs only reports the manifest calls `reads`, names repositories only from the games list, refuses
   paths and redacts; at most six a question. **For an online model each report runs first and waits, shown whole, for the
-  person's Send this report** (`Step::Waiting`); a no tells the model it was declined. **Never give the model a tool that writes,
+  person's Send this report** (`Step::Waiting`); a no tells the model it was declined. **A program the person logs in to is
+  handed no tools** (0.115.0): it asks for a report in plain text (`ai_programs::MARK`), and each report waits for the same yes.
+  **Never give the model a tool that writes,
   runs code or goes online.** Its answer is shown as text, never acted on, never put into `{@html}`. Each answer's token count is appended to `ai-usage.jsonl`. **Agents and tests never send a real question**:
   tests stand in the service, and a question to a model on the owner's computer loads their graphics card, so ask first.
 - **Chat page: a whole agent in a repository, on the person's press, with its switch off until turned on** (0.74.0; the owner,
@@ -242,7 +250,7 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   that takes it online only while the manifest calls it `reads-online`; a look the program makes by itself says so
   (`--automatic`), keeping the hour's last keyless GitHub calls for a press. **Nothing is ever sent about the person by
   itself**: calls only read public pages, keyless, **except AI services** (0.71.0; the owner's choice of 23 Nov 2026), which sends
-  only text the person was shown and chose to send, with their key, on their press; **it starts off** (`Kind::starts_on`), the
+  only text the person was shown and chose to send, with their key or through a program they log in to (0.115.0), on their press; **it starts off** (`Kind::starts_on`), the
   only kind that does. Settings → Going online and About show the same list of kinds: today six (Gate lights, Nightly watch,
   Known problems, Their reports, Workshop pages and AI services; `docs/architecture.md` says what each contacts). **A new kind
   joins `companion_core::online::KINDS`, the window's words and the Guide's Going online entry in one change.**

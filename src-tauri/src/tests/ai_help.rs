@@ -143,6 +143,8 @@ fn prepared(local: bool) -> Prepared {
         service: if local { "Ollama" } else { "Claude (Anthropic)" }.into(),
         model: "sample-model".into(),
         local,
+        kind: if local { ai::Kind::Local } else { ai::Kind::Key },
+        charged: !local,
         tools: true,
         instruction: "Be brief.".into(),
         text: "Why?".into(),
@@ -289,4 +291,30 @@ fn after_six_reports_the_model_is_told_to_answer_with_what_it_has() {
 fn the_tools_paragraph_is_part_of_what_is_shown() {
     let said = TOOLS.replace("{calls}", &MAX_CALLS.to_string());
     assert!(said.contains("at most 6 times") && said.contains("Every report only reads"));
+}
+
+// A program the person logs in to (0.115.0, `docs/ai.md`, A4): asked through the same conversation, a stand-in in its place.
+
+#[test]
+fn a_program_waits_for_a_yes_and_is_then_given_the_report_as_text() {
+    let service = StandIn::new(vec![calling("", &["report-1"]), answered("It is a null reference.")]);
+    let program =
+        ai::Ready { service: ai::service("claude-code").unwrap(), key: None, model: "default".into(), ..ready(false) };
+    assert_eq!(program.service.kind(), ai::Kind::Program);
+    let mut talk = conversation(false);
+    let step = drive(&mut talk, &program, &|r, t| service.ask(r, t), &kit, &mut |_| ());
+    assert!(
+        matches!(step, Step::Waiting { .. }),
+        "a program sends the question online, so each report waits for a yes"
+    );
+    let (id, view) = talk.waiting.remove(0);
+    talk.results.push((id, view.text.clone(), false));
+    let step = drive(&mut talk, &program, &|r, t| service.ask(r, t), &kit, &mut |_| ());
+    assert!(matches!(step, Step::Answered { .. }));
+    let report = &service.seen.borrow()[1].0[2];
+    assert_eq!(
+        *report,
+        json!({"role": "user", "report": true, "failed": false, "content": "2 reports found."}),
+        "a program reads the conversation as text, the report marked as one"
+    );
 }

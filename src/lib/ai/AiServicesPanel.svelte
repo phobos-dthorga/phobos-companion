@@ -15,13 +15,34 @@
     readAiStatus,
   } from "./desktopClient";
   import { ai, useAi } from "./state.svelte";
-  import type { AiLength, AiServiceStatus, AiStatus } from "./types";
+  import type { AiKind, AiLength, AiServiceStatus, AiStatus } from "./types";
 
   /**
    * Settings → AI, AI services (0.71.0; `docs/ai.md`, A2; the owner's choices of 23 Nov 2026): which service and model answer
    * help on pages, the service's key, and how long an answer may be. The host keeps every choice; a key goes to the system's key
    * store and never comes back to the window. An online service also needs AI services on in Going online, which starts off.
+   *
+   * Since 0.115.0 (`docs/ai.md`, A4; the owner's choices of 28 Nov 2026) the services are listed in three groups: on this
+   * computer, programs the person logs in to (Claude Code, Codex, Gemini CLI: no key, nothing charged per question), and those
+   * charged per use, last. A program says whether it is here, and Read the models also asks it whether the person is logged in.
    */
+  const GROUPS: { kind: AiKind; title: string; body: string }[] = [
+    {
+      kind: "local",
+      title: "ai-services-group-local",
+      body: "ai-services-group-local-body",
+    },
+    {
+      kind: "program",
+      title: "ai-services-group-program",
+      body: "ai-services-group-program-body",
+    },
+    {
+      kind: "key",
+      title: "ai-services-group-key",
+      body: "ai-services-group-key-body",
+    },
+  ];
   const LENGTHS: { length: AiLength; key: string }[] = [
     { length: "short", key: "ai-services-length-short" },
     { length: "medium", key: "ai-services-length-medium" },
@@ -71,6 +92,44 @@
     }
   }
 
+  /** Where a service is, under its name on its button. */
+  function whereWords(service: AiServiceStatus): string {
+    if (service.kind === "local") return t("ai-services-local");
+    if (service.kind === "key") return t("ai-services-online");
+    const here = service.found
+      ? t("ai-services-program")
+      : t("ai-services-program-missing");
+    return service.tried ? here : t("ai-services-untried", { where: here });
+  }
+
+  /** What a program's own login check said, or that Read the models will ask it. */
+  function loginWords(service: AiServiceStatus): string {
+    const login = service.login;
+    if (!login) return t("ai-services-login-unread", { service: service.name });
+    if (!login.loggedIn)
+      return t("ai-services-login-out", {
+        service: service.name,
+        get: service.get ?? "",
+      });
+    if (login.how === "key")
+      return t("ai-services-login-key", { service: service.name });
+    if (login.how === "plan")
+      return login.plan
+        ? t("ai-services-login-plan", {
+            service: service.name,
+            plan: login.plan,
+          })
+        : t("ai-services-login-plan-unnamed", { service: service.name });
+    return t("ai-services-login-unknown", { service: service.name });
+  }
+
+  /** A model's name as the person reads it: a program's own choice in words. */
+  function modelWords(service: AiServiceStatus, model: string): string {
+    return service.kind === "program" && model === "default"
+      ? t("ai-services-model-default")
+      : model;
+  }
+
   function keyWords(service: AiServiceStatus, store: string | null): string {
     if (service.key.from === "environment")
       return t("ai-services-key-environment", {
@@ -99,6 +158,8 @@
     said = null;
     const answer = await readAiModels(service.id);
     readingModels = false;
+    // A program's login check ran with it: read the status again to show what it said.
+    if (service.kind === "program") await load();
     if (answer.state === "ready") {
       models = { service: service.id, list: answer.models };
       said = {
@@ -133,38 +194,61 @@
     <FailurePanel failure={unread} onretry={load} />
   {:else if ai.status}
     {@const status = ai.status}
-    <div
-      class="toggles services"
-      role="group"
-      aria-label={t("ai-services-choose-label")}
-    >
-      {#each status.services as service (service.id)}
-        <button
-          type="button"
-          class="toggle"
-          aria-pressed={status.chosen === service.id}
-          disabled={busy}
-          onclick={() =>
-            void change(
-              () => chooseAiService(service.id),
-              () => t("ai-services-chosen", { service: service.name }),
-            )}
-          >{service.name}
-          <span class="where"
-            >{service.local
-              ? t("ai-services-local")
-              : t("ai-services-online")}</span
-          ></button
+    {#each GROUPS as group (group.kind)}
+      {@const listed = status.services.filter((s) => s.kind === group.kind)}
+      {#if listed.length > 0}
+        <h3 id={`ai-services-group-${group.kind}`}>{t(group.title)}</h3>
+        <p class="small">{t(group.body)}</p>
+        <div
+          class="toggles services"
+          role="group"
+          aria-labelledby={`ai-services-group-${group.kind}`}
         >
-      {/each}
-    </div>
+          {#each listed as service (service.id)}
+            <button
+              type="button"
+              class="toggle"
+              aria-pressed={status.chosen === service.id}
+              disabled={busy}
+              onclick={() =>
+                void change(
+                  () => chooseAiService(service.id),
+                  () => t("ai-services-chosen", { service: service.name }),
+                )}
+              >{service.name}
+              <span class="where">{whereWords(service)}</span></button
+            >
+          {/each}
+        </div>
+      {/if}
+    {/each}
 
     {#if chosen}
+      <h3 id="ai-services-chosen-title">{chosen.name}</h3>
       <p class="small">
-        {chosen.local
+        {chosen.kind === "local"
           ? t("ai-services-local-body", { service: chosen.name })
-          : t("ai-services-online-body", { service: chosen.name })}
+          : chosen.kind === "program"
+            ? t("ai-services-program-body", { service: chosen.name })
+            : t("ai-services-online-body", { service: chosen.name })}
       </p>
+
+      {#if chosen.kind === "program"}
+        {#if !chosen.found}
+          <p class="refused-line small">
+            {t("ai-services-program-not-found", {
+              service: chosen.name,
+              get: chosen.get ?? "",
+            })}
+          </p>
+        {/if}
+        {#if !chosen.tried}
+          <p class="small">
+            {t("ai-services-program-untried-body", { service: chosen.name })}
+          </p>
+        {/if}
+        <p class="small now">{loginWords(chosen)}</p>
+      {/if}
 
       {#if !chosen.local && !status.onlineOn}
         <p class="refused-line small">{t("ai-services-switch-off")}</p>
@@ -222,17 +306,23 @@
       <h3 id="ai-services-model-title">{t("ai-services-model-title")}</h3>
       <p class="small now">
         {chosen.model
-          ? t("ai-services-model-now", { model: chosen.model })
+          ? t("ai-services-model-now", {
+              model: modelWords(chosen, chosen.model),
+            })
           : t("ai-services-model-none")}
       </p>
       <button
         type="button"
         class="action"
-        disabled={readingModels || busy}
+        disabled={readingModels ||
+          busy ||
+          (chosen.kind === "program" && !chosen.found)}
         onclick={() => void showModels(chosen)}
         >{readingModels
           ? t("ai-services-models-reading")
-          : t("ai-services-models-read-button")}</button
+          : chosen.kind === "program"
+            ? t("ai-services-models-read-program")
+            : t("ai-services-models-read-button")}</button
       >
       {#if models && models.service === chosen.id && models.list.length > 0}
         <label class="model" for="ai-services-model"
@@ -247,13 +337,16 @@
             if (model)
               void change(
                 () => chooseAiModel(chosen.id, model),
-                () => t("ai-services-model-chosen", { model }),
+                () =>
+                  t("ai-services-model-chosen", {
+                    model: modelWords(chosen, model),
+                  }),
               );
           }}
         >
           <option value="" disabled>{t("ai-services-model-pick")}</option>
           {#each models.list as model (model)}
-            <option value={model}>{model}</option>
+            <option value={model}>{modelWords(chosen, model)}</option>
           {/each}
         </select>
       {/if}

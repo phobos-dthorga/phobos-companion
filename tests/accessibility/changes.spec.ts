@@ -780,6 +780,8 @@ for (const [name, viewport] of [
             service: "Ollama",
             model: "sample-model:8b",
             local: true,
+            kind: "local",
+            charged: false,
             instruction: "You help a person who makes or plays game mods.",
             text: "Product: Sample Mod\nVersion: 1.3.0\n\nAdded:\n- Sample boats float.",
             characters: 60,

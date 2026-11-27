@@ -12,7 +12,11 @@ mods?** under the Mods page's update check, through one shared card. **Slice 3b 
 its switch off until turned on; **no real agent started yet** (none is on the owner's computer), and nothing tested on screen.
 **Slice 5 built** in Companion 0.75.0 (the owner, 23 Nov 2026: "go ahead with slice 5"): an agent may change a file through the
 Companion, shown line by line, only on the person's yes; commands through it stay refused, pending the decision `chat-commands`.
-Every slice of the build order is now built; none is tested on screen or with a real model or agent. The owner asked for "AI integration
+Every slice of the build order is now built; none is tested on screen or with a real model or agent. **Slice 7 (A4, below)**, help
+on pages through a program the person already logs in to (Claude Code, Codex, Gemini CLI) so no key is charged per use, was asked
+for and chosen by card on 28 Nov 2026, and **built in Companion 0.115.0**: checked by tests (the three readers on invented lines,
+a real program followed to its end, the Settings groups in the browser), **not tested on screen, and no program has answered a
+real question yet**. The owner asked for "AI integration
 directly into Companion", through an open framework that reaches "a multitude of services, preferably with some of the bigger
 ones at least", chose all three parts below by card the same day, and then took the agent's lean on all four open questions
 ("go with your leans on all four and start building"). Agent choices are labelled so the owner can revise them.
@@ -34,9 +38,11 @@ ones at least", chose all three parts below by card the same day, and then took 
 - **Never pass `--no-redact` for a model.** Every report has it. A1 and A2 take a report's answer only as redacted, so the home
   folder reads `~` in anything a model sees. The one exception is `mcp setup`'s lines, shown only to the person, since they must
   name real folders.
-- **A Claude, ChatGPT or Gemini subscription does not pay for calls a program of ours makes** (agent's knowledge, not checked on
-  23 Nov 2026). A2 needs a key charged per use, or a model on the person's own computer, which costs nothing. A3 is different:
-  the agent is its own program with its own login, so it uses whatever that login includes.
+- **A Claude, ChatGPT or Gemini subscription does not pay for calls a program of ours makes** (checked against Anthropic's pages on
+  28 Nov 2026). A2's own requests need a key charged per use, or a model on the person's own computer, which costs nothing. **A
+  program the person logs in to is different** (A3's agents, and since slice 7 A4's programs): it is its own program with its own
+  login, so it uses whatever that login includes. **The Companion never holds, reads or passes that login** (Anthropic: third-party
+  developers may not "collect, store, or intermediate Claude.ai credentials or session tokens").
 - **An agent in A3 is not bounded by the Companion's gates.** It is another program, started with the person's own access to
   the disk. The Companion answers only the questions the agent chooses to ask. The page says so in words before a first start.
 - **Text from a log or another author's code can be aimed at a model** ("ignore your instructions and ..."). In A2 the model's
@@ -235,6 +241,89 @@ starts the agent as a process, in a repository from the games list, and shows wh
 
 **Not verified:** which logins the Claude adapter accepts, and whether Goose and OpenCode run with a local model through ACP.
 
+## A4: help on pages through a program you log in to (slice 7)
+
+**What it is.** A third kind of AI service for help on pages, beside "on this computer" and "online, with your key": **a program on
+this computer that the person installed and logged in to themselves**, such as Claude Code on a Claude plan. The Companion starts it
+for one answer, with its tools switched off, gives it the question on standard input, and reads its answer. **No key, and no charge
+per question**: the answer comes out of the person's plan and its usage limits.
+
+**The owner's question** (28 Nov 2026): "since I and most likely others do not want to use the API as it involves extra costs, how
+shall we proceed?" **The owner's answers, by card** (each card as put, the chosen option first):
+
+| Card | Chosen | The other options offered |
+| --- | --- | --- |
+| How should the help buttons reach Claude on a subscription instead of the paid API? | **Own program, tools off**: a new kind starts the person's own Claude Code for one question (`claude -p`) with its tools switched off; text in a log cannot make the model change anything | **Through the Chat page's agents**: reuse the listed chat agents for one-shot questions; no new mechanism, but a whole agent with its own disk access answers a simple question, so a hostile line in a log has more to work with. **Chat page only, build nothing**: leave the buttons on local models and keys; the person installs `claude-agent-acp` and uses the Chat page on their subscription |
+| Which programs should the first version list? | **Claude, Codex, Gemini**: three rows of data, Codex and Gemini written from their own pages and marked "not yet tried" until someone runs them | **Claude Code only**: the one row the owner can test; the others added later as rows |
+| May the model still ask the tool kit's read-only reports? | **Reports with a press each**: each report waits for Send this report or Don't send, as it does for key services | **No reports at first**: only the text shown and sent; reports for programs a later slice. **Reports, listed after**: hand the program the kit's report server; it runs reports itself and the card lists them afterwards, so report text leaves without a press |
+| What happens to the pay-per-use key services? | **Listed last, marked**: below local models and login programs, each marked "charged per use" | **Hidden behind a switch** ("Show services that charge per use"). **Leave the list as it is**: the programs simply added as more rows |
+
+**What Anthropic's pages say** (read 28 Nov 2026, `code.claude.com/docs/en/legal-and-compliance` and `authentication`):
+
+- "OAuth authentication is intended exclusively for purchasers of Claude Free, Pro, Max, Ultra, Team, and Enterprise subscription
+  plans and is designed to support ordinary use of Claude Code and other native Anthropic applications."
+- "Anthropic does not permit third-party developers to offer Claude.ai login into their own applications, or to route requests
+  through Free, Pro, Max, or Ultra plan credentials on behalf of their users"; developers "may not collect, store, or intermediate
+  Claude.ai credentials or session tokens". A person may still sign in "to the unmodified Claude Code binary with their own Claude
+  subscription".
+- "Advertised usage limits for Pro, Max, and Ultra plans assume ordinary, individual usage of Claude Code and the Agent SDK."
+- **The line A4 keeps:** the Companion starts the unmodified program the person installed and logged in to, on their own computer,
+  for their own question; it never offers a login, never reads one and never passes one. **Agent's reading, not Anthropic's
+  ruling:** whether a program given to others may start Claude Code for its user is not addressed directly; before a public release,
+  read these pages again.
+
+**The four questions (`rules/designs.md`):**
+
+| | A4 |
+| --- | --- |
+| **Lets the person** | Use help on pages with the plan they already pay for, with no key and no charge per question |
+| **Stops them** | Nothing new. A program that is not installed or not logged in says so in words, with where to get it |
+| **Changes how they work** | No key to make or keep; the answer counts against their plan's usage limits, as their own use of the program does |
+| **What outside notices** | The program's own service (it receives the text and charges the plan's limits), as when the person uses the program themselves |
+| **Risk (agent's grade)** | **Moderate**, as A2: text leaves the computer, seen before each press; no money per use, but the plan's limits are spent |
+| **Its switch** | The same **AI services** kind of going online, which starts off: these programs go online |
+
+**How it works (agent choices, owner to revise):**
+
+| Part | Design |
+| --- | --- |
+| The rows | Data in `config/ai-services.json`, `"api": "program"`, with a `program` block: the command found by name on the search path (as the Chat page finds its agents), its arguments, which of three readers reads its output, the variables taken out of its environment, its models, its login check, where to get it in words, and whether it has been tried |
+| No tools for the program | **Claude Code**: `--tools ""` (no built-in tools), `--safe-mode` (no CLAUDE.md, skills, plugins, hooks or MCP servers; **the subscription login still works**, unlike `--bare`, which never reads it), `--permission-mode dontAsk`, `--no-session-persistence`. **Codex**: `--sandbox read-only`, `-c web_search="disabled"`, `-c features.shell_tool=false`, `--ephemeral`, `--skip-git-repo-check`; its docs name no way to take every tool away. **Gemini CLI**: `--approval-mode default`, under which a tool that would ask is denied when no one can be asked; reading tools remain. **Every program runs in an empty folder of its own** in the system's temporary folder, removed afterwards, so even a reading tool finds nothing |
+| The instruction | Claude Code: `--system-prompt-file`, a file in that empty folder, so no text of ours crosses a command line (an npm program is a `.cmd` file on Windows). Codex and Gemini: at the head of what goes on standard input |
+| No key by accident | The variables that would switch a program to paid API billing (`ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, `OPENAI_API_KEY`, `CODEX_API_KEY`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`) are taken out of its environment: in `-p`, Claude Code uses a set `ANTHROPIC_API_KEY` "always", with no question |
+| Its login, looked at | **Read the models** also runs the program's own login check where it has one: `claude auth status` (JSON; only `loggedIn`, `authMethod` and `subscriptionType` are read, **never the email or organisation it also prints**) and `codex login status` (its exit code). Gemini CLI names none, so its first question shows. Kept in memory for this run only |
+| Its models | A short list in the row: "the program's own choice" first, then its aliases (Claude Code `fable`, `opus`, `sonnet`, `haiku`; Gemini `auto`, `pro`, `flash`). Codex's `codex debug models` is not asked yet |
+| Reports with a press each | **A plain-text request, not the program's own tools**: when the person lets the AI ask the tool kit's reports, the instruction lists the three tools and says to ask for one by answering with only `ASK-REPORT {"tool": …, "arguments": {…}}`. The host reads that line, runs the report through the kit (`ai_tools`, unchanged), and it waits, shown whole, for **Send this report** or **Don't send** (`Step::Waiting`, unchanged). Then **the program is started again with the whole conversation so far** as one text, since each run forgets. At most six reports a question, as now |
+| Why not the programs' own tools | Considered and set aside (agent): **resuming the program's session** (`--resume`, `codex exec resume`): each program its own way, Gemini's not read, and sessions kept on disk. **Claude Code's permission tool** (`--permission-prompt-tool` over an MCP server of ours): Claude only, and the server would need a channel back to the window while the program waits. The plain-text request works the same for every program and needs neither |
+| Its answer | Read as it streams where the program streams (Claude Code's `stream_event` text pieces; Gemini's `message` events), whole where it does not (Codex's `item.completed` `agent_message`). Its token counts are kept as for the other kinds; **Claude Code's `total_cost_usd` is not shown**: on a plan it is an estimate of an API bill the person is not paying |
+| How long | Ten minutes at most, as an online service's answer; then the program and everything it started are ended (`process::end_tree`) |
+| The list in Settings | Three groups, in order: **On this computer** (free; nothing leaves it), **Programs you log in to** (your plan; no key), **Charged per use** (your key). A program row says whether it was found, where to get it if not, and what its login check said |
+
+**Not verified (28 Nov 2026):** Codex's `exec` with a ChatGPT login (its docs say "Use API key authentication for programmatic
+Codex CLI workflows, such as CI/CD jobs", and name no exit codes); whether `features.shell_tool=false` takes away Codex's shell;
+Gemini CLI's `stream-json` lines (named, not shown) and its token fields; and **Gemini CLI itself: its pages carry a banner that it
+"was replaced by Antigravity CLI on June 18th, 2026" for unpaid-tier and Google One users**, so for many people with a Google
+login the row may not work. Antigravity CLI is a row to add once its one-shot mode is read. **Codex and Gemini rows stay marked
+"not yet tried" until someone runs them.**
+
+**As built (0.115.0), where it adds to the table above** (agent choices):
+
+- **The rows' shape**: `"api": "program"` with a `program` block (`command`, `args`, `modelArgs`, `reads`, `dropVariables`,
+  `models`, `login`, `get`, `tried`), unknown fields refused. The placeholders are `{instruction-file}` and `{model-args}`, each at
+  most once and only as a whole argument; `{model}` only inside `modelArgs`. A model is one the row names, checked when chosen and
+  again before each question, since it goes on the program's command line.
+- **Codex's `-c` values carry no quotes** (`web_search=disabled`): its docs say a value that is not TOML is read as plain text,
+  and an npm program is a `.cmd` file on Windows, where quotes inside an argument are best avoided.
+- **Text that could still be the request is held back** while it streams, so `ASK-REPORT` never shows as an answer; the moment it
+  stops looking like one, everything so far is shown.
+- **Claude Code's counts** add its cache reads and writes to the tokens sent, as they are all read by the model.
+- **Each run's folder** is `dthorga-companion-ai` in the system's temporary folder, one per answer, removed afterwards.
+- **Claude Code's flags were read from its own `--help`** (2.1.332, the copy VS Code carries, 28 Nov 2026): `--tools`,
+  `--safe-mode`, `--system-prompt-file`, `--permission-mode dontAsk`, `--no-session-persistence`, `--include-partial-messages` and
+  `auth status` (whose JSON also prints the email address and organisation: never read).
+
+**What a next game would need: nothing.** A program row is game-free, as the services are.
+
 ## Every operating system
 
 | Part | Windows | Linux | macOS | Note |
@@ -271,6 +360,7 @@ Each slice is a working thing by itself, with its own version and commit.
 | 4 | **A3, first slice** (built, 0.74.0): one agent, the chat page, permission cards, reads only through the Companion | phobos-companion | A new page; process tree ending on every system |
 | 5 | **A3 with the kit's tools**, and changes through the Companion with a yes on each (built, 0.75.0; the kit's tools came in 0.74.0) | phobos-companion | None |
 | 6 | **Commands**, sorted, in three modes (built, 0.84.0; the owner's decision `chat-commands`, answered by card 25 Nov 2026) | phobos-companion | The Chat page's rule in `AGENTS.md` |
+| 7 | **A4: programs you log in to** for help on pages, with reports a press each (built, 0.115.0; the owner's choices by card, 28 Nov 2026) | phobos-companion | AI services' rule in `AGENTS.md` (a third kind) |
 
 **Slice 5 as built (0.75.0)** (agent choices, to revise): the Companion now offers `fs.writeTextFile`. Each `fs/write_text_file`
 is checked first (an absolute path inside the repository, its nearest existing folder followed through links, never inside

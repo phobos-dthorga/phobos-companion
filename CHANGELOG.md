@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.115.0] - 2026-11-28
+
+### Added
+
+- **Help on pages through a program you log in to** (the owner's choices by card, 28 Nov 2026: "own program, tools off", for the
+  cost of keys charged per use). Settings → AI services now lists three kinds, cheapest first: on this computer, programs you log
+  in to (Claude Code, Codex, Gemini CLI: no key, nothing charged per question, using your own plan's limits), and services charged
+  per use, marked as such. The Companion starts the program for each answer with its tools switched off, in an empty folder,
+  without any key in its environment, and never sees its login; **Check the login and models** says whether it is logged in with
+  your plan. The tool kit's reports still wait for Send this report each. How it works, and what is not yet verified (Codex's and
+  Gemini CLI's own modes), is in [docs/ai.md](docs/ai.md), A4. **Not tested on screen, and no program has answered a real question
+  yet.**
+
 ## [0.114.0] - 2026-11-28
 
 ### Added

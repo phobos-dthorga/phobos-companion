@@ -90,6 +90,7 @@ async function open(
     refusal: null,
     central_file: "C:\\Sample\\settings.json",
   },
+  aiStatus: unknown = sampleAiStatus,
 ) {
   await mockHost(page, {
     home_status: { result: sampleHome() },
@@ -97,7 +98,7 @@ async function open(
     settings_list: { result: sampleSettings },
     set_setting: { result: saved },
     ai_programs_setup: { result: sampleAiSetup },
-    ai_status: { result: sampleAiStatus },
+    ai_status: { result: aiStatus },
     ai_choose_service: {
       result: { ...sampleAiStatus, chosen: "anthropic", ready: false },
     },
@@ -252,6 +253,23 @@ for (const [name, viewport] of [
         "Ready: Explain this fault shows on the Logs page.",
       );
       await expect(panel).toContainText("This month: 3 answers");
+      // Three groups, cheapest first (0.115.0): the key service last, and marked as charged per use.
+      const groups = await panel
+        .getByRole("group")
+        .evaluateAll((all) =>
+          all.map((g) => g.getAttribute("aria-labelledby")),
+        );
+      expect(groups.slice(0, 3)).toEqual([
+        "ai-services-group-local",
+        "ai-services-group-program",
+        "ai-services-group-key",
+      ]);
+      await expect(
+        panel.getByRole("button", { name: /^Claude \(Anthropic\)/ }),
+      ).toContainText("charged per use, with your key");
+      await expect(panel.getByRole("button", { name: /^Codex/ })).toContainText(
+        "not on this computer, not yet tried",
+      );
       await audit(page);
       await panel
         .getByRole("button", { name: /^Claude \(Anthropic\)/ })
@@ -261,6 +279,49 @@ for (const [name, viewport] of [
       await expect(
         panel.getByLabel("A key for Claude (Anthropic)"),
       ).toHaveAttribute("type", "password");
+      await audit(page);
+    });
+
+    test("a program you log in to shows what its login check said and asks for no key (0.115.0)", async ({
+      page,
+    }) => {
+      await open(page, undefined, {
+        ...sampleAiStatus,
+        chosen: "claude-code",
+        onlineOn: true,
+      });
+      await openTab(page, "AI");
+      const panel = page.locator("#settings-ai-services");
+      await expect(panel).toContainText(
+        "Claude Code says you are logged in with your plan (sample): nothing is charged per question.",
+      );
+      await expect(panel).toContainText("Model: The program's own choice");
+      await expect(panel).toContainText(
+        "Claude Code has not yet been tried with the Companion",
+      );
+      await expect(
+        panel.getByRole("button", { name: "Check the login and models" }),
+      ).toBeEnabled();
+      await expect(panel.getByLabel(/A key for/)).toHaveCount(0);
+      await audit(page);
+    });
+
+    test("a program not on this computer says where to get it (0.115.0)", async ({
+      page,
+    }) => {
+      await open(page, undefined, {
+        ...sampleAiStatus,
+        chosen: "codex",
+        ready: false,
+      });
+      await openTab(page, "AI");
+      const panel = page.locator("#settings-ai-services");
+      await expect(panel).toContainText(
+        "Codex is not on this computer. Install Codex, then run codex once in a terminal and sign in.",
+      );
+      await expect(
+        panel.getByRole("button", { name: "Check the login and models" }),
+      ).toBeDisabled();
       await audit(page);
     });
 

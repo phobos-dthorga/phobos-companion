@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "The AI services the Companion can ask for help on pages (0.71.0, docs/ai.md, A2). Data, checked by the host: a new service is a row. A service at a loopback address runs on this computer and needs no key and no Going online switch; any other must be https and needs a key. api: anthropic (Claude's own Messages API) or openai (the chat completions API most others offer). streamUsage: whether the service counts tokens in a stream when asked (stream_options).",
+  "description": "The AI services the Companion can ask for help on pages (0.71.0, docs/ai.md, A2; programs since 0.115.0, A4). Data, checked by the host: a new service is a row, in the order Settings lists them: on this computer, then programs you log in to, then services charged per use. A service at a loopback address runs on this computer and needs no key and no Going online switch; a service elsewhere must be https and needs a key. api: anthropic (Claude's own Messages API), openai (the chat completions API most others offer), or program (a program the person installed and logged in to, started for one answer with its tools off; no address and no key). streamUsage: whether the service counts tokens in a stream when asked (stream_options). A program's args may hold {instruction-file} (a file holding the instruction; otherwise the instruction heads what goes on standard input) and {model-args} (modelArgs with {model} filled in, or nothing for the program's own choice). dropVariables: taken out of the program's environment, so a key there never makes it charge per use. login: the program's own check, read by claude-auth (only loggedIn, authMethod and subscriptionType) or codex-status (its exit code and words). tried: whether it has been tried with the Companion; the window says so when not.",
   "services": [
     {
       "id": "ollama",
@@ -17,6 +17,101 @@
       "address": "http://127.0.0.1:1234/v1",
       "keyVariable": null,
       "streamUsage": false
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "api": "program",
+      "keyVariable": null,
+      "program": {
+        "command": "claude",
+        "args": [
+          "-p",
+          "--output-format",
+          "stream-json",
+          "--verbose",
+          "--include-partial-messages",
+          "--tools",
+          "",
+          "--safe-mode",
+          "--permission-mode",
+          "dontAsk",
+          "--no-session-persistence",
+          "--system-prompt-file",
+          "{instruction-file}",
+          "{model-args}"
+        ],
+        "modelArgs": ["--model", "{model}"],
+        "reads": "claude-stream",
+        "dropVariables": [
+          "ANTHROPIC_API_KEY",
+          "ANTHROPIC_AUTH_TOKEN",
+          "CLAUDE_CODE_USE_BEDROCK",
+          "CLAUDE_CODE_USE_VERTEX",
+          "CLAUDE_CODE_USE_FOUNDRY"
+        ],
+        "models": ["default", "sonnet", "opus", "haiku", "fable"],
+        "login": { "args": ["auth", "status"], "reads": "claude-auth" },
+        "get": "Install Claude Code (claude.com/claude-code), then run claude once in a terminal and log in with your Claude account.",
+        "tried": false
+      }
+    },
+    {
+      "id": "codex",
+      "name": "Codex",
+      "api": "program",
+      "keyVariable": null,
+      "program": {
+        "command": "codex",
+        "args": [
+          "exec",
+          "--json",
+          "--sandbox",
+          "read-only",
+          "--ephemeral",
+          "--skip-git-repo-check",
+          "-c",
+          "web_search=disabled",
+          "-c",
+          "features.shell_tool=false",
+          "{model-args}",
+          "-"
+        ],
+        "modelArgs": ["--model", "{model}"],
+        "reads": "codex-json",
+        "dropVariables": ["OPENAI_API_KEY", "CODEX_API_KEY", "OPENAI_BASE_URL"],
+        "models": ["default"],
+        "login": { "args": ["login", "status"], "reads": "codex-status" },
+        "get": "Install Codex (npm install -g @openai/codex), then run codex once in a terminal and sign in with ChatGPT.",
+        "tried": false
+      }
+    },
+    {
+      "id": "gemini-cli",
+      "name": "Gemini CLI",
+      "api": "program",
+      "keyVariable": null,
+      "program": {
+        "command": "gemini",
+        "args": [
+          "--output-format",
+          "stream-json",
+          "--approval-mode",
+          "default",
+          "{model-args}"
+        ],
+        "modelArgs": ["--model", "{model}"],
+        "reads": "gemini-stream",
+        "dropVariables": [
+          "GEMINI_API_KEY",
+          "GOOGLE_API_KEY",
+          "GOOGLE_GENAI_USE_VERTEXAI"
+        ],
+        "models": ["default", "auto", "pro", "flash"],
+        "login": null,
+        "get": "Install Gemini CLI (npm install -g @google/gemini-cli), then run gemini once in a terminal and log in with Google.",
+        "tried": false
+      }
     },
     {
       "id": "anthropic",

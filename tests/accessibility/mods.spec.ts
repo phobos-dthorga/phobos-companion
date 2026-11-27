@@ -1062,6 +1062,8 @@ test.describe("Since you last played (0.28.0)", () => {
           service: "Ollama",
           model: "sample-model:8b",
           local: true,
+          kind: "local",
+          charged: false,
           instruction: "You help a person who makes game mods.",
           text: "After the update\nNames:\nEvery name still found.",
           characters: 47,

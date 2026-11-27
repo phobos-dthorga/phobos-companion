@@ -32,6 +32,7 @@ fn online() -> Service {
         address: "https://example.invalid/v1".into(),
         key_variable: Some("SAMPLE_API_KEY".into()),
         stream_usage: false,
+        program: None,
     }
 }
 

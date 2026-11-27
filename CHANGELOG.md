@@ -4,6 +4,16 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.103.0] - 2026-11-27
+
+### Added
+
+- **The Explorer browses with the game frozen** (the owner's choice of 27 Nov 2026). On a machine with no room for a snapshot,
+  **Browse with the game frozen…** asks once, then reads each view with the game frozen: what is in memory and who it belongs to,
+  any kind's first page, and the checks, about half a minute each. Nothing is held between views, so things cannot be opened in
+  full or followed. Key **B**. With tool kit 1.135.0. Checked on RimWorld and Phobos Ostranauts (no look inside, told so as before).
+  **Not tested on screen.**
+
 ## [0.102.1] - 2026-11-27
 
 ### Fixed

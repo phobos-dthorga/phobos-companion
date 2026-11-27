@@ -541,6 +541,13 @@ export const ACTIONS: Action[] = [
     defaultKey: "f",
     words: "shortcut-explorer-frozen",
   },
+  // 0.103.0: B to browse with the game frozen (asks first); the Publish and Memory pages' B are never on screen with the Explorer.
+  {
+    id: "explorer.browse-frozen",
+    scope: "explorer",
+    defaultKey: "b",
+    words: "shortcut-explorer-browse-frozen",
+  },
 ];
 
 export const SCOPES: { scope: Scope; words: string }[] = [

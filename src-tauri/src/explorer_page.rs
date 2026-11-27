@@ -35,6 +35,9 @@ const SURFACE: &str = "look-inside";
 const SERVE: &str = "look-serve";
 /// The live checks in one run (0.102.0), read here only with the game frozen.
 const CHECK: &str = "look-check";
+/// The overview and one kind in one run each (0.103.0), read here only with the game frozen.
+const LOOK: &str = "look";
+const LOOK_KIND: &str = "look-kind";
 const FREEZE: &str = "--freeze";
 const RUNS: &str = "runs";
 /// How long a snapshot may be held, in seconds: ten minutes at most (owner's choice, 20 Nov 2026). Windows keeps a snapshot by
@@ -78,6 +81,8 @@ pub struct Offer {
     pub refusal: Option<String>,
     /// The tools can also run the checks with the game frozen (0.102.0): `look-check` on the same surface, still `runs`.
     pub frozen_checks: bool,
+    /// The tools can also read the overview and one kind with the game frozen (0.103.0): `look` and `look-kind`, still `runs`.
+    pub frozen_browse: bool,
 }
 
 /// What came of running the checks with the game frozen (0.102.0).
@@ -136,10 +141,79 @@ pub fn tool_of(manifest: &Value, game: &str) -> Result<Option<String>, Failure> 
 pub fn offer(game: &str) -> Result<Offer, Failure> {
     let manifest = kit::read_manifest()?;
     let frozen_checks = matches!(frozen_tool_of(&manifest, game), Ok(Some(_)));
+    let frozen_browse =
+        [LOOK, LOOK_KIND].iter().all(|report| matches!(report_tool(&manifest, game, report), Ok(Some(_))));
     Ok(match tool_of(&manifest, game) {
-        Ok(Some(_)) => Offer { available: true, refusal: None, frozen_checks },
-        Ok(None) => Offer { available: false, refusal: None, frozen_checks: false },
-        Err(failure) => Offer { available: true, refusal: Some(failure.detail), frozen_checks },
+        Ok(Some(_)) => Offer { available: true, refusal: None, frozen_checks, frozen_browse },
+        Ok(None) => Offer { available: false, refusal: None, frozen_checks: false, frozen_browse: false },
+        Err(failure) => Offer { available: true, refusal: Some(failure.detail), frozen_checks, frozen_browse },
+    })
+}
+
+/// The command offering one report on the look-inside surface, checked to still be `runs`.
+fn report_tool(manifest: &Value, game: &str, report: &str) -> Result<Option<String>, Failure> {
+    match kit::offered(manifest, game, SURFACE, report, RUNS) {
+        Offered::Tool(name) => Ok(Some(name)),
+        Offered::Missing => Ok(None),
+        Offered::Changed(reason) => Err(Failure::refused(reason)),
+    }
+}
+
+/// The report and arguments that answer one checked request with the game frozen (0.103.0): the overview (`look`), the first
+/// page of one kind (`look-kind`, largest first or filtered by a word) and the checks (`look-check`). Nothing else can be read
+/// frozen: an address names an object only within one read, so nothing is followed from one freeze to the next.
+pub fn frozen_request(tool: &str, checked: &Value) -> Result<(&'static str, Vec<String>), String> {
+    match checked["op"].as_str().unwrap_or_default() {
+        "overview" => Ok((LOOK, Args::new(tool, LOOK).flag(FREEZE).json())),
+        "checks" => Ok((CHECK, frozen_arguments(tool))),
+        "kind" => {
+            if checked["skip"].as_u64().unwrap_or(0) > 0 {
+                return Err("with the game frozen, only a kind's first page is read".to_owned());
+            }
+            let mut arguments = Args::new(tool, LOOK_KIND)
+                .extend([checked["type"].as_str().unwrap_or_default().to_owned()])
+                .flag(FREEZE)
+                .pair("--top", &checked["take"].as_u64().unwrap_or(50).to_string());
+            if checked["sort"] == "size" {
+                arguments = arguments.flag("--largest");
+            }
+            let filter = checked["match"].as_str().unwrap_or_default();
+            if !filter.is_empty() {
+                arguments = arguments.given("--match", filter);
+            }
+            Ok((LOOK_KIND, arguments.json()))
+        }
+        _ => Err("with the game frozen, only the overview, one kind and the checks can be read".to_owned()),
+    }
+}
+
+/// Answers one question with the game frozen (0.103.0), on a page the person opened after the frozen card: each is one read of
+/// its own, the game standing still for it. Any snapshot held is let go first. The answer has the held snapshot's shape, so the
+/// same views show it; nothing is held afterwards.
+pub fn frozen_ask(game: &str, request: &Value, listener: Option<kit::Listener>) -> Result<Answer, Failure> {
+    let checked = checked_request(request).map_err(Failure::refused)?;
+    let manifest = kit::read_manifest()?;
+    let Some(tool) = frozen_tool_of(&manifest, game)? else {
+        return Err(Failure::refused("this game's tools cannot read it frozen"));
+    };
+    let (report, arguments) = frozen_request(&tool, &checked).map_err(Failure::refused)?;
+    if report_tool(&manifest, game, report)?.is_none() {
+        return Err(Failure::refused(format!("this game's tools have no {report} to read it frozen")));
+    }
+    if let Some(old) = take(None) {
+        old.served.close(CLOSE_GRACE);
+    }
+    let envelope = kit::run_hearing(&tool, &arguments, listener)?;
+    let refused = |error: String| Answer { ok: false, data: Value::Null, error: Some(error), released: None };
+    if envelope["data"]["ok"] == Value::Bool(false) {
+        return Ok(refused(envelope["data"]["refusal"].as_str().unwrap_or("the tools did not say why").to_owned()));
+    }
+    Ok(match report {
+        CHECK => match frozen_answer(&envelope) {
+            Ok(data) => Answer { ok: true, data, error: None, released: None },
+            Err(error) => refused(error),
+        },
+        _ => Answer { ok: true, data: envelope["data"].clone(), error: None, released: None },
     })
 }
 

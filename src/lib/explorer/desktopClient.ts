@@ -68,6 +68,20 @@ export async function runFrozenChecks(
   );
 }
 
+/** Answers one question with the game frozen (0.103.0): the overview, one kind's first page or the checks, each one read. */
+export async function frozenAsk<T>(
+  game: string,
+  request: Request,
+  onProgress?: OnProgress,
+): Promise<AnswerReading<T>> {
+  if (inBrowser()) return BROWSER;
+  return ask<Answer<T>, AnswerReading<T>>(
+    "explorer_frozen_ask",
+    { game, request, onProgress: progressChannel(onProgress) },
+    (answer) => ({ state: "ready", answer }),
+  );
+}
+
 /** Lets the held snapshot go. */
 export async function releaseSnapshot(
   snapshot: number | null,

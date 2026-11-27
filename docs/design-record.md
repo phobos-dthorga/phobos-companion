@@ -1058,6 +1058,26 @@ Ostranauts' tools have no look inside, so its Explorer says so as before; a game
 simply not offered the panel. **Agent choices, owner to revise:** the panel below Take a snapshot rather than a second button
 beside it, the key **F**, the card's words, and showing the panel always rather than only after a refusal. **Not done:** a frozen
 read of anything but the checks (the overview, one kind): each would freeze the game again, so it waits for the owner's word.
+**Built in 0.103.0** (below).
+
+### Browsing with the game frozen (built 27 Nov 2026, 0.103.0)
+
+**The owner's choice** (27 Nov 2026, of building it, setting it aside for a larger page file, or both: "Build frozen overview +
+kinds"). One card starts a frozen session in place of a held snapshot; then each view is one frozen read through the game's tools
+(`look`, `look-kind` and `look-check`, each with `--freeze`, phobos-modkit 1.135.0), answered in the held snapshot's shape so the
+same views show it. A view already read is shown again from memory. Nothing is held, so an address means nothing after its read:
+no object view, no holders, no "why", and only a kind's first page.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See what is in memory, by kind and by owner, on a machine with no room for a snapshot |
+| What does it stop them doing? | Playing while each view is read: about half a minute each, two minutes at most |
+| How does it change the way they work? | The Explorer works without a larger page file, its deeper views apart |
+| What outside it notices? | The game, frozen once a view and let go; nothing in it is changed |
+
+**Games:** any game whose tools offer `look` and `look-kind` on the `look-inside` surface; RimWorld today. **Agent choices, owner to
+revise:** no card per view after the first (the first card says every view freezes the game), the key **B**, and **Stop browsing**
+on **Q**.
 
 ### The checks on each new save (built 26 Nov 2026, 0.101.0)
 

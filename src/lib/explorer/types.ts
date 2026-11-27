@@ -7,6 +7,8 @@ export type Offer = {
   refusal: string | null;
   /** 0.102.0: the tools can also run the checks with the game frozen, for when a snapshot has no room. */
   frozen_checks: boolean;
+  /** 0.103.0: the tools can also read the overview and one kind with the game frozen. */
+  frozen_browse: boolean;
 };
 
 /** The reader's first line once a snapshot is taken (phobos-modkit 1.65.1, `look-serve`). */

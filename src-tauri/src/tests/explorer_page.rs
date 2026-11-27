@@ -74,6 +74,46 @@ fn the_frozen_checks_answer_as_the_held_snapshots_checks_do_or_say_why_not() {
 }
 
 #[test]
+fn a_frozen_read_is_the_overview_one_kinds_first_page_or_the_checks_and_nothing_else() {
+    let overview = checked_request(&json!({"op": "overview"})).unwrap();
+    assert_eq!(
+        frozen_request("game-perf", &overview).unwrap(),
+        ("look", strings(&["game-perf", "look", "--freeze", "--json"]))
+    );
+    let kind =
+        checked_request(&json!({"op": "kind", "type": "Boats.Hull", "take": 50, "sort": "size", "match": "Queen"}))
+            .unwrap();
+    assert_eq!(
+        frozen_request("game-perf", &kind).unwrap(),
+        (
+            "look-kind",
+            strings(&[
+                "game-perf",
+                "look-kind",
+                "Boats.Hull",
+                "--freeze",
+                "--top",
+                "50",
+                "--largest",
+                "--match=Queen",
+                "--json"
+            ])
+        )
+    );
+    let checks = checked_request(&json!({"op": "checks"})).unwrap();
+    assert_eq!(frozen_request("game-perf", &checks).unwrap().0, "look-check");
+    let later = checked_request(&json!({"op": "kind", "type": "Boats.Hull", "skip": 50})).unwrap();
+    assert!(frozen_request("game-perf", &later).unwrap_err().contains("first page"));
+    for op in [json!({"op": "object", "address": "0x10"}), json!({"op": "why", "type": "Boats.Hull"})] {
+        assert!(frozen_request("game-perf", &checked_request(&op).unwrap()).is_err());
+    }
+}
+
+fn strings(parts: &[&str]) -> Vec<String> {
+    parts.iter().map(|p| (*p).to_owned()).collect()
+}
+
+#[test]
 fn the_checks_are_asked_with_nothing_from_the_window() {
     // 0.91.0: the live checks take no part from the window; anything sent with them is dropped before the reader sees it.
     assert_eq!(

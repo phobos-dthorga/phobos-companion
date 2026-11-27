@@ -17,7 +17,12 @@
     skipOf,
     WHY_SAMPLE,
   } from "./presentation";
-  import { openObject, question, remembered } from "./snapshot.svelte";
+  import {
+    explorer,
+    openObject,
+    question,
+    remembered,
+  } from "./snapshot.svelte";
   import type { AnswerReading, KindPage, Request, WhyAnswer } from "./types";
 
   /**
@@ -56,6 +61,8 @@
     reading.state === "ready" && reading.answer.ok ? reading.answer.data : null,
   );
   const pager = $derived(found ? kindPager(found, page) : null);
+  // 0.103.0: read with the game frozen, nothing is held, so no object can be opened and only the first page is read.
+  const frozen = $derived(explorer.held?.frozen === true);
   const whyAnswer = $derived(
     why?.state === "ready" && why.answer.ok ? why.answer.data : null,
   );
@@ -182,81 +189,96 @@
       <ul class="items" aria-label={t("explorer-kind-items", { kind })}>
         {#each found.items as item (item.address)}
           <li>
-            <button
-              type="button"
-              class="action item"
-              onclick={() =>
-                openObject({
-                  address: item.address,
-                  type: kind,
-                  summary: item.summary,
-                })}
-            >
-              <span class="address">{item.address}</span>
-              <span class="size">{formatMemory(item.size)}</span>
-              <span class="summary"
-                >{item.summary || t("explorer-no-summary")}</span
+            {#if frozen}
+              <span class="item frozen-item">
+                <span class="size">{formatMemory(item.size)}</span>
+                <span class="summary"
+                  >{item.summary || t("explorer-no-summary")}</span
+                >
+              </span>
+            {:else}
+              <button
+                type="button"
+                class="action item"
+                onclick={() =>
+                  openObject({
+                    address: item.address,
+                    type: kind,
+                    summary: item.summary,
+                  })}
               >
-            </button>
+                <span class="address">{item.address}</span>
+                <span class="size">{formatMemory(item.size)}</span>
+                <span class="summary"
+                  >{item.summary || t("explorer-no-summary")}</span
+                >
+              </button>
+            {/if}
           </li>
         {/each}
       </ul>
     {/if}
-    <Pager
-      page={pager.page}
-      pages={pager.pages}
-      first={pager.first}
-      last={pager.last}
-      total={pager.total}
-      more={found.more}
-      plain
-      label={t("explorer-kind-items", { kind })}
-      onchange={(next) => setFocus({ page: String(next) })}
-    />
+    {#if frozen}
+      <p class="small muted">{t("explorer-frozen-kind-note")}</p>
+    {:else}
+      <Pager
+        page={pager.page}
+        pages={pager.pages}
+        first={pager.first}
+        last={pager.last}
+        total={pager.total}
+        more={found.more}
+        plain
+        label={t("explorer-kind-items", { kind })}
+        onchange={(next) => setFocus({ page: String(next) })}
+      />
+    {/if}
   {/if}
 
-  <section class="panel" aria-labelledby="explorer-kind-why">
-    <h3 id="explorer-kind-why">{t("explorer-why-title")}</h3>
-    <p class="small muted">
-      {t("explorer-kind-why-how", { sample: WHY_SAMPLE })}
-    </p>
-    <button
-      type="button"
-      class="action"
-      disabled={why?.state === "reading"}
-      onclick={() => void askWhy()}
-      >{why?.state === "reading"
-        ? t("explorer-working")
-        : t("explorer-why-button")}</button
-    >
-    {#if why?.state === "reading"}
-      <ProgressBar progress={whyProgress} fallback={t("explorer-bar-why")} />
-    {:else if why?.state === "failed"}
-      <FailurePanel failure={why.failure} onretry={() => void askWhy()} />
-    {:else if why?.state === "ready" && !why.answer.ok && !why.answer.released}
-      <p class="said wrong" role="status">
-        {t("explorer-could-not-answer", { reason: why.answer.error ?? "" })}
+  {#if !frozen}
+    <section class="panel" aria-labelledby="explorer-kind-why">
+      <h3 id="explorer-kind-why">{t("explorer-why-title")}</h3>
+      <p class="small muted">
+        {t("explorer-kind-why-how", { sample: WHY_SAMPLE })}
       </p>
-    {:else if whyAnswer}
-      {#if whyAnswer.noneReachable}
-        <p>{t("explorer-why-none-held", { checked: whyAnswer.checked })}</p>
-      {:else if whyAnswer.paths.length === 0 && whyAnswer.timedOut}
-        <p>{t("explorer-path-timed-out")}</p>
-      {:else if whyAnswer.paths.length === 0}
-        <p>{t("explorer-why-none")}</p>
+      <button
+        type="button"
+        class="action"
+        disabled={why?.state === "reading"}
+        onclick={() => void askWhy()}
+        >{why?.state === "reading"
+          ? t("explorer-working")
+          : t("explorer-why-button")}</button
+      >
+      {#if why?.state === "reading"}
+        <ProgressBar progress={whyProgress} fallback={t("explorer-bar-why")} />
+      {:else if why?.state === "failed"}
+        <FailurePanel failure={why.failure} onretry={() => void askWhy()} />
+      {:else if why?.state === "ready" && !why.answer.ok && !why.answer.released}
+        <p class="said wrong" role="status">
+          {t("explorer-could-not-answer", { reason: why.answer.error ?? "" })}
+        </p>
+      {:else if whyAnswer}
+        {#if whyAnswer.noneReachable}
+          <p>{t("explorer-why-none-held", { checked: whyAnswer.checked })}</p>
+        {:else if whyAnswer.paths.length === 0 && whyAnswer.timedOut}
+          <p>{t("explorer-path-timed-out")}</p>
+        {:else if whyAnswer.paths.length === 0}
+          <p>{t("explorer-why-none")}</p>
+        {/if}
+        {#each whyAnswer.paths as path, index (index)}
+          <PathChain
+            {path}
+            label={t("explorer-path-label", { number: index + 1 })}
+            onopen={openObject}
+          />
+        {/each}
+        {#if whyAnswer.paths.length > 0 && whyAnswer.timedOut}
+          <p class="small muted">{t("explorer-why-partial")}</p>
+        {/if}
       {/if}
-      {#each whyAnswer.paths as path, index (index)}
-        <PathChain
-          {path}
-          label={t("explorer-path-label", { number: index + 1 })}
-          onopen={openObject}
-        />
-      {/each}
-      {#if whyAnswer.paths.length > 0 && whyAnswer.timedOut}
-        <p class="small muted">{t("explorer-why-partial")}</p>
-      {/if}
-    {/if}
-  </section>
+    </section>
+  {/if}
 </section>
 
 <style>

@@ -1,6 +1,11 @@
 import { go, here } from "../navigation/navigation.svelte";
 import type { OnProgress } from "../shell/progress";
-import { askSnapshot, releaseSnapshot, takeSnapshot } from "./desktopClient";
+import {
+  askSnapshot,
+  frozenAsk,
+  releaseSnapshot,
+  takeSnapshot,
+} from "./desktopClient";
 import type {
   Answer,
   AnswerReading,
@@ -17,7 +22,29 @@ export type Held = {
   ready: Ready;
   receivedAt: number;
   commandLine: string;
+  /**
+   * 0.103.0: browsing with the game frozen, with no snapshot held: each question is one frozen read of its own, and nothing found
+   * in one can be followed into another (an address names an object only within one read).
+   */
+  frozen?: boolean;
 };
+
+/** A frozen session's stand-in for a snapshot's first line: nothing is held, so there is no pause, size or time limit to show. */
+const FROZEN_READY: Ready = {
+  ready: true,
+  pid: 0,
+  snapshotMs: 0,
+  ageSeconds: 0,
+  runtime: "",
+  runtimeFolder: "",
+  dac: "",
+  modules: 0,
+  threads: 0,
+  segments: 0,
+  objects: null,
+  limitSeconds: 0,
+};
+let frozenSessions = 0;
 
 /** Why the last snapshot went: the host's reasons, or "left" when the person left the page. */
 export type LetGoReason = Released | "left";
@@ -99,6 +126,25 @@ export async function take(
   return reading;
 }
 
+/**
+ * Starts browsing with the game frozen (0.103.0), after the person's press and the frozen card: lets any snapshot held go first,
+ * and holds nothing. Its number is below zero, so it is never taken for a snapshot's.
+ */
+export async function startFrozen(game: string): Promise<void> {
+  const held = explorer.held;
+  if (held && !held.frozen) await releaseSnapshot(held.snapshot);
+  forget();
+  explorer.held = {
+    game,
+    snapshot: -++frozenSessions,
+    ready: FROZEN_READY,
+    receivedAt: Date.now(),
+    commandLine: "",
+    frozen: true,
+  };
+  explorer.letGo = null;
+}
+
 /** An answer already given in the held snapshot, so going back to it asks nothing again. */
 export function remembered<T>(request: Request): Answer<T> | undefined {
   return answers.get(JSON.stringify(request)) as Answer<T> | undefined;
@@ -118,7 +164,9 @@ export async function question<T>(
   const key = JSON.stringify(request);
   const known = answers.get(key) as Answer<T> | undefined;
   if (known) return { state: "ready", answer: known };
-  const reading = await askSnapshot<T>(held.snapshot, request, onProgress);
+  const reading = held.frozen
+    ? await frozenAsk<T>(held.game, request, onProgress)
+    : await askSnapshot<T>(held.snapshot, request, onProgress);
   if (reading.state === "ready") {
     const answer = reading.answer;
     if (answer.released)
@@ -133,6 +181,13 @@ export async function question<T>(
 export async function letGo(reason: LetGoReason = "asked"): Promise<void> {
   const held = explorer.held;
   if (!held) return;
+  if (held.frozen) {
+    // Nothing is held while browsing frozen: ending it only forgets what it read.
+    explorer.held = null;
+    explorer.letGo = null;
+    forget();
+    return;
+  }
   noteLetGo(held.snapshot, reason, null);
   await releaseSnapshot(held.snapshot);
 }

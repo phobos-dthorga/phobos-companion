@@ -8,7 +8,7 @@
   import { heard, started } from "../shell/progress";
   import { formatClock } from "../memory/presentation";
   import { formatCount } from "./presentation";
-  import { question, remembered } from "./snapshot.svelte";
+  import { explorer, question, remembered } from "./snapshot.svelte";
   import type { AnswerReading, ChecksAnswer } from "./types";
 
   /**
@@ -24,6 +24,10 @@
     given = null,
     frozenAt = null,
   }: { given?: ChecksAnswer | null; frozenAt?: number | null } = $props();
+
+  // 0.103.0: asked while browsing frozen, it is one frozen read of its own.
+  const frozenSession = $derived(explorer.held?.frozen === true);
+  let readAt = $state(Date.now());
 
   let reading = $state<AnswerReading<ChecksAnswer>>({ state: "reading" });
   let progress = $state(started());
@@ -47,6 +51,7 @@
     }
     reading = { state: "reading" };
     progress = started();
+    readAt = Date.now();
     reading = await question<ChecksAnswer>(REQUEST, (message) => {
       progress = heard(progress, message);
     });
@@ -58,9 +63,9 @@
 <section class="view" aria-labelledby="explorer-checks">
   <h2 id="explorer-checks">{t("explorer-checks-title")}</h2>
   <p class="small">
-    {given
+    {given || frozenSession
       ? t("explorer-frozen-lead", {
-          when: formatClock((frozenAt ?? Date.now()) / 1000),
+          when: formatClock((frozenAt ?? readAt) / 1000),
         })
       : t("explorer-checks-lead")}
   </p>

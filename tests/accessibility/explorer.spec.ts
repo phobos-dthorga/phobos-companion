@@ -179,7 +179,12 @@ async function open(
     home_status: { result: sampleHome() },
     kit_status: healthyKit,
     explorer_offer: {
-      result: { available, refusal: null, frozen_checks: available },
+      result: {
+        available,
+        refusal: null,
+        frozen_checks: available,
+        frozen_browse: available,
+      },
     },
     explorer_start: {
       result: {
@@ -213,6 +218,8 @@ async function open(
       },
       progress: [{ label: "Freezing the game to read it" }],
     },
+    "explorer_frozen_ask:overview": answer(overview),
+    "explorer_frozen_ask:kind": answer(kind),
     ...more,
   });
   await page.goto("/");
@@ -380,6 +387,46 @@ for (const [name, viewport] of [
       await audit(page);
       expect(await smallControls(page)).toBe(0);
       expect(await overflow(page)).toBeLessThanOrEqual(0);
+    });
+
+    test("browses with the game frozen after asking: the overview and a kind, nothing opened in full", async ({
+      page,
+    }) => {
+      await open(page);
+      const main = page.locator("main");
+      await page.keyboard.press("b");
+      const card = page.getByRole("group", {
+        name: "Browse with the game frozen?",
+      });
+      await expect(card).toContainText(
+        "Every view you open freezes the game again",
+      );
+      await audit(page);
+      await card
+        .getByRole("button", { name: "Freeze and read the overview" })
+        .click();
+      await expect(main).toContainText("Browsing with the game frozen");
+      await expect(
+        page.getByRole("table", { name: "Who it belongs to" }),
+      ).toContainText("Sample Boats");
+      await page
+        .getByRole("button", { name: "Boats.Hull", exact: true })
+        .click();
+      await expect(main).toContainText("Harbour Queen");
+      await expect(main).toContainText("the first page only");
+      await expect(
+        page.getByRole("button", { name: /Harbour Queen/ }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Why is it still in memory?" }),
+      ).toHaveCount(0);
+      await audit(page);
+      expect(await smallControls(page)).toBe(0);
+      expect(await overflow(page)).toBeLessThanOrEqual(0);
+      await page.getByRole("button", { name: "Stop browsing" }).click();
+      await expect(
+        page.getByRole("button", { name: /^Look inside the running game/ }),
+      ).toBeVisible();
     });
 
     test("a game whose tools cannot look inside is told so in words", async ({

@@ -116,6 +116,8 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   game's repositories keep; its request carries nothing from the window, so the rules come only from the tools. **Run the checks
   with the game frozen** (0.102.0, the owner's request of 27 Nov 2026) runs the game's `look-check --freeze` once, on its own press
   and card, for when Windows has no room for a snapshot: the game stands still for the read, two minutes at most; nothing is held.
+  **Browse with the game frozen** (0.103.0, the owner's choice) starts on its own card, then reads each view (the overview, a kind's
+  first page, the checks) as one frozen run of its own; nothing is held, so no object is opened or followed.
 - **Changes page and the code viewer only read.** The code viewer's **pictures and sounds** (0.50.0; the owner, 22 Nov 2026:
   "display multimedia in parts like this", with Save a copy and Open with its own program) are only files the kit's last answer
   named, at most 64 MB. **Save a copy** writes only where the owner chose in the Save dialog; **Open with its own program** writes

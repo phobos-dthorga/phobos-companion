@@ -29,6 +29,7 @@
     openChecks,
     openedAs,
     openOverview,
+    startFrozen,
     take,
   } from "./snapshot.svelte";
   import type { ChecksAnswer, OfferReading } from "./types";
@@ -61,6 +62,8 @@
   let frozenRefusal = $state<string | null>(null);
   let frozenFailure = $state<Failure | null>(null);
   let freezeButton = $state<HTMLButtonElement | null>(null);
+  let browseConfirming = $state(false);
+  let browseButton = $state<HTMLButtonElement | null>(null);
 
   const held = $derived(explorer.held?.game === game.id ? explorer.held : null);
   const view = $derived(
@@ -85,6 +88,9 @@
   const canFreeze = $derived(
     offer.state === "ready" && offer.offer.frozen_checks,
   );
+  const canBrowseFrozen = $derived(
+    offer.state === "ready" && offer.offer.frozen_browse,
+  );
   // Windows refused the copy a snapshot needs (error 1450): the frozen checks need none.
   const noRoom = $derived(takeRefusal !== null && takeRefusal.includes("1450"));
 
@@ -107,6 +113,7 @@
           if (held) openChecks();
         },
         "explorer.frozen": askToFreeze,
+        "explorer.browse-frozen": askToBrowseFrozen,
       },
     });
     return () => {
@@ -122,7 +129,7 @@
 
   // The ten minutes are up: the host lets it go too, by its own clock.
   $effect(() => {
-    if (held && left <= 0) void letGo("limit");
+    if (held && !held.frozen && left <= 0) void letGo("limit");
   });
 
   $effect(() => {
@@ -132,6 +139,24 @@
   $effect(() => {
     if (freezeConfirming) freezeButton?.focus();
   });
+
+  $effect(() => {
+    if (browseConfirming) browseButton?.focus();
+  });
+
+  function askToBrowseFrozen() {
+    if (!canBrowseFrozen || held || taking || freezing) return;
+    confirming = false;
+    freezeConfirming = false;
+    browseConfirming = true;
+  }
+
+  async function confirmBrowseFrozen() {
+    browseConfirming = false;
+    frozen = null;
+    await startFrozen(game.id);
+    openOverview();
+  }
 
   function askToStart() {
     if (!available || taking || freezing) return;
@@ -188,6 +213,7 @@
             available: false,
             refusal: null,
             frozen_checks: false,
+            frozen_browse: false,
           },
         };
       else if (taken.snapshot === null)
@@ -225,22 +251,29 @@
 
   {#if held}
     <section class="panel live" aria-labelledby="explorer-held">
-      <h2 id="explorer-held">{t("explorer-held-title")}</h2>
-      <p>
-        {t("explorer-held-figures", {
-          when: formatClock(held.receivedAt / 1000),
-          paused: formatCount(held.ready.snapshotMs),
-        })}
-      </p>
-      <p class="left" role="timer" aria-live="off">
-        {t("explorer-held-left", { clock: clockOf(left), minutes })}
-      </p>
+      {#if held.frozen}
+        <h2 id="explorer-held">{t("explorer-frozen-held-title")}</h2>
+        <p><RichText text={t("explorer-frozen-held-words")} /></p>
+      {:else}
+        <h2 id="explorer-held">{t("explorer-held-title")}</h2>
+        <p>
+          {t("explorer-held-figures", {
+            when: formatClock(held.receivedAt / 1000),
+            paused: formatCount(held.ready.snapshotMs),
+          })}
+        </p>
+        <p class="left" role="timer" aria-live="off">
+          {t("explorer-held-left", { clock: clockOf(left), minutes })}
+        </p>
+      {/if}
       <div class="buttons">
         <button
           type="button"
           class="move-button"
           onclick={() => void letGo("asked")}
-          >{t("explorer-let-go-button")}</button
+          >{held.frozen
+            ? t("explorer-frozen-stop-button")
+            : t("explorer-let-go-button")}</button
         >
         {#if view.name !== "overview"}
           <button type="button" class="action" onclick={openOverview}
@@ -252,7 +285,11 @@
             >{t("explorer-checks-button")}</button
           >
         {/if}
-        <span class="small muted">{t("explorer-let-go-how")}</span>
+        <span class="small muted"
+          >{held.frozen
+            ? t("explorer-frozen-stop-how")
+            : t("explorer-let-go-how")}</span
+        >
       </div>
     </section>
 
@@ -400,6 +437,34 @@
               >
             </div>
           </div>
+        {:else if browseConfirming}
+          <div
+            class="confirm"
+            role="group"
+            aria-label={t("explorer-browse-confirm-label")}
+          >
+            <p class="confirm-question">
+              {t("explorer-browse-confirm-question")}
+            </p>
+            <p class="confirm-warning">
+              <RichText text={t("explorer-browse-confirm-words")} />
+            </p>
+            <div class="buttons">
+              <button
+                type="button"
+                class="move-button"
+                bind:this={browseButton}
+                onclick={() => void confirmBrowseFrozen()}
+                >{t("explorer-browse-confirm-yes")}</button
+              >
+              <button
+                type="button"
+                class="action"
+                onclick={() => (browseConfirming = false)}
+                >{t("explorer-confirm-no")}</button
+              >
+            </div>
+          </div>
         {:else}
           <div class="buttons">
             <button type="button" class="action" onclick={askToFreeze}
@@ -407,6 +472,14 @@
             >
             <span class="small muted">{t("explorer-frozen-how")}</span>
           </div>
+          {#if canBrowseFrozen}
+            <div class="buttons">
+              <button type="button" class="action" onclick={askToBrowseFrozen}
+                >{t("explorer-browse-button")}</button
+              >
+              <span class="small muted">{t("explorer-browse-how")}</span>
+            </div>
+          {/if}
         {/if}
         {#if frozenRefusal}
           <p class="said wrong" role="status">

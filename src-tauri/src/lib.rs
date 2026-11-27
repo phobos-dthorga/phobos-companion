@@ -1517,6 +1517,16 @@ async fn explorer_frozen_checks(
     blocking(move || explorer_page::frozen_checks(&game, Some(&hearing(on_progress)))).await
 }
 
+/// Answers one question with the game frozen (0.103.0): the overview, one kind's first page or the checks, each one frozen read.
+#[tauri::command]
+async fn explorer_frozen_ask(
+    game: String,
+    request: serde_json::Value,
+    on_progress: Channel<kit::Progress>,
+) -> Result<explorer_page::Answer, Failure> {
+    blocking(move || explorer_page::frozen_ask(&game, &request, Some(&hearing(on_progress)))).await
+}
+
 /// Lets the held snapshot go: on Let it go, and when the page closes. True when one was held.
 #[tauri::command]
 async fn explorer_release(snapshot: Option<u64>) -> Result<bool, Failure> {
@@ -1937,6 +1947,7 @@ pub fn run() {
             explorer_ask,
             explorer_release,
             explorer_frozen_checks,
+            explorer_frozen_ask,
             read_shortcuts,
             save_shortcuts,
             records_automatic,

@@ -594,7 +594,9 @@ for (const [name, viewport] of [
         ),
       ).toBeVisible();
       const grouped = page.getByText(/^1 more moved into its group/);
-      const ordered = page.getByText("1 more moved only to put names in order");
+      const ordered = page.getByText(
+        "1 more moved only because others moved around it",
+      );
       await expect(grouped).toBeVisible();
       await expect(ordered).toBeVisible();
       await expect(page.getByText("3 → 2")).toBeHidden();

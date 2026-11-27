@@ -4,6 +4,15 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.107.2] - 2026-11-27
+
+### Fixed
+
+- **A full re-sort keeps your order wherever no rule decides** (the owner's choice of 27 Nov 2026, "Sort first", after a full
+  re-sort left a game unable to make a map). It put such mods in order of their names: on the owner's RimSort-sorted list of 387
+  it moved 135, ten UI Rethemed parts from about place 258 to 28. With tool kit 1.141.0, only rules and groups move a mod, and the
+  same list re-sorts with none moved. The first step of the Mod list's redo. **Not tested in game.**
+
 ## [0.107.1] - 2026-11-27
 
 ### Fixed

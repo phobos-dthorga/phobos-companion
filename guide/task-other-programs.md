@@ -17,4 +17,4 @@ see: task-set-up, page-about, term-tool-kit
 - **The .NET 10 SDK:** watching a game's memory, on the **Memory** page (the tools install Microsoft's diagnostics tools with it).
 - **ilspycmd:** reading another author's code, and What did an update change?
 - **Steam:** Game files, and Add a game from Steam.
-- **A game's own:** for RimWorld, RimSort's texture encoder, to encode textures on the **Mods** page.
+- **A game's own:** for RimWorld, todds, the texture encoder, to encode textures on the **Mods** page. RimSort ships it; to keep it once RimSort goes, put `todds.exe` from [todds 0.4.1](https://github.com/joseasoler/todds/releases/tag/0.4.1) (the Windows zip, the same file RimSort ships) in `%LOCALAPPDATA%\Programs\todds`. Setup says which copy it found.

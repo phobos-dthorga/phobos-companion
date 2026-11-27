@@ -4,6 +4,21 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.113.0] - 2026-11-28
+
+### Added
+
+- **Start the game from the Mod list** (the owner's choice of 28 Nov 2026, "Save and start the game", as RimSort's Run game). Edit
+  the list's bar has **Start RimWorld** beside Save: it asks Steam to start the game, as pressing Play in its library. With changes
+  waiting it reads **Save and start RimWorld**, saves first, and starts nothing if the save is refused. Refused while the game
+  already runs. From kit 1.146.0's `mod-list start`, now pinned. **Not tested on screen.**
+
+### Changed
+
+- **todds without RimSort** (kit 1.145.0): texture encoding finds todds on the PATH, then on its own in
+  `%LOCALAPPDATA%\Programs\todds`, then in RimSort's install. Setup says which copy it found and where your own goes; the Guide's
+  other programs page says how to keep one.
+
 ## [0.112.0] - 2026-11-28
 
 ### Added

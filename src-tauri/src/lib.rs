@@ -1673,6 +1673,12 @@ async fn mod_list_rules(game: String, on_progress: Channel<kit::Progress>) -> Re
     blocking(move || mod_list_page::rules(&game, Some(&hearing(on_progress)))).await
 }
 
+/// Starts the game through the Steam client, on the owner's press (0.113.0).
+#[tauri::command]
+async fn mod_list_start(game: String) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_steam::start_game(&game)).await
+}
+
 /// The community lists the sorter and the check read, and how old; with `fetch`, fetched first (0.112.0). The fetch goes online.
 #[tauri::command]
 async fn mod_list_databases(
@@ -1911,6 +1917,7 @@ pub fn run() {
             mod_list_add_rule,
             mod_list_databases,
             mod_list_import_rules,
+            mod_list_start,
             mod_list_drop_rule,
             mod_list_lists,
             mod_list_compare,

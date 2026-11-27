@@ -420,6 +420,9 @@ async function open(page: Page, replies: Record<string, unknown> = {}) {
     mod_list_sort: sorted,
     mod_list_rules: rules,
     mod_list_databases: { result: communityLists },
+    mod_list_start: {
+      result: { ok: true, title: "started", refusal: null, data: {} },
+    },
     mod_list_import_rules: {
       result: {
         ok: true,
@@ -994,6 +997,23 @@ for (const [name, viewport] of [
         page.getByText("Brought over 1 of your rules"),
       ).toBeVisible();
       expect(await asked(page, "mod_list_import_rules")).toHaveLength(1);
+    });
+
+    test("Start the game asks Steam on a press, and offers to save first when changes wait (0.113.0)", async ({
+      page,
+    }) => {
+      await open(page);
+      await page
+        .getByRole("button", { name: "Edit the list", exact: true })
+        .click();
+      const bar = page.getByRole("group", { name: /./ }).filter({
+        has: page.getByRole("button", { name: "Save", exact: true }),
+      });
+      await bar.getByRole("button", { name: /^Start / }).click();
+      await expect(page.getByText(/Steam was asked to start/)).toBeVisible();
+      expect(await asked(page, "mod_list_start")).toHaveLength(1);
+      expect(await asked(page, "mod_list_write")).toHaveLength(0);
+      await audit(page);
     });
 
     test("new errors after a change are named, with Undo asked first and a way to a list that ran clean", async ({

@@ -160,6 +160,14 @@ export async function readCommunityLists(
   );
 }
 
+/** Starts the game through the Steam client (0.113.0), on a press; refused while it runs. */
+export async function startTheGame(game: string): Promise<Changed | Failed> {
+  return ask<ModListChange, Changed>("mod_list_start", { game }, (result) => ({
+    state: "ready",
+    result,
+  }));
+}
+
 /** Brings the owner's RimSort rules into their own (0.112.0), on a press. */
 export async function bringRulesOver(game: string): Promise<Changed | Failed> {
   return ask<ModListChange, Changed>(

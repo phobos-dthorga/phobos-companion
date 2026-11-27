@@ -12,6 +12,7 @@
   import SteamSubscribe from "./SteamSubscribe.svelte";
   import {
     readMods,
+    startTheGame,
     undoEdit,
     unsubscribeFrom,
     writeModList,
@@ -319,8 +320,9 @@
 
   // ------------------------------------------------------------ Save, and going back on it
 
-  async function save() {
-    if (!draft || !listing || !pending || busy || running.length) return;
+  /** Writes the draft; true once it is saved. */
+  async function save(): Promise<boolean> {
+    if (!draft || !listing || !pending || busy || running.length) return false;
     said = null;
     busy = true;
     progress = started(t("modlist-board-saving"));
@@ -343,7 +345,7 @@
         text: t("modlist-board-save-failed", { reason: refusal }),
         refused: true,
       };
-      return;
+      return false;
     }
     delete drafts[draftKey(game.id, listKey)];
     savedOnce = true;
@@ -356,6 +358,38 @@
       }),
       refused: false,
     };
+    return true;
+  }
+
+  /** Start the game through Steam (0.113.0; the owner's "Save and start the game", as RimSort's Run game): saves first when changes
+   *  wait, and starts nothing when the save is refused. */
+  async function startGame() {
+    if (busy) return;
+    const saving = pending;
+    if (saving && !(await save())) return;
+    busy = true;
+    progress = started(t("modlist-board-starting"));
+    const answer = await startTheGame(game.id);
+    busy = false;
+    const refusal =
+      answer.state === "failed"
+        ? answer.failure.detail
+        : !answer.result.ok
+          ? (answer.result.refusal ?? "")
+          : null;
+    said =
+      refusal !== null
+        ? {
+            text: t("modlist-board-start-failed", { reason: refusal }),
+            refused: true,
+          }
+        : {
+            text: t(
+              saving ? "modlist-board-saved-started" : "modlist-board-started",
+              { game: game.name },
+            ),
+            refused: false,
+          };
   }
 
   async function goBack() {
@@ -581,6 +615,15 @@
         class="action strong"
         disabled={!pending || busy || running.length > 0}
         onclick={save}>{t("modlist-board-save")}</button
+      >
+      <button
+        type="button"
+        class="action"
+        disabled={busy || (pending && running.length > 0)}
+        onclick={startGame}
+        >{t(pending ? "modlist-board-save-start" : "modlist-board-start", {
+          game: game.name,
+        })}</button
       >
       <button
         type="button"

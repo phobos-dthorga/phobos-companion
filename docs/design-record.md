@@ -1489,6 +1489,27 @@ store.steampowered.com) rather than a new kind; the DLC found by every word of t
 matching none reading the game itself; 50 newest reviews read (about 4 seconds), 8 that do not recommend it shown and 3 that do.
 **For a next game:** nothing more than its Steam app ID in the games list.
 
+## todds without RimSort, and Start the game (built 28 Nov 2026, kit 1.145.0 and 1.146.0, 0.113.0; M6b and M6c)
+
+**The owner's choices** (card, 28 Nov 2026): "todds without RimSort" and "Save and start the game", the second and third pieces of
+retiring RimSort.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Encode textures with their own copy of todds; start the game from the Mod list, saving first |
+| What does it stop them doing? | Nothing |
+| How does it change the way they work? | No trip to RimSort or Steam's library to play after changing the list |
+| What outside it notices? | The Steam client, which starts the game as from its library, with its own launch options |
+
+**Observed (28 Nov 2026):** todds 0.4.1's Windows release is byte for byte the todds.exe RimSort ships (SHA-256 9b27def7...), and the
+project is archived (MPL-2.0), so nothing newer is coming. The kit looks for todds on the PATH, then in
+`%LOCALAPPDATA%\Programs\todds`, then in RimSort's install; Setup's fetch commands may start only winget, dotnet or pkexec, and todds is
+on none, so it is put in place by hand (the owner). `mod-list start` refused while the owner's game was running.
+
+**Risk: none (agent's grade).** **Agent choices, owner to revise:** Start sits on Edit the list's bar beside Save, reading **Save and
+start** when changes wait; it stays pressable while RimSort is open unless changes wait (Save is refused then); the place for todds
+on its own. **For a next game:** its Steam app ID (Start) and, where it has one, its texture encoder as a `PROGRAMS` row.
+
 ## The community lists and your rules, without RimSort (built 28 Nov 2026, 0.112.0, M6a)
 
 **The owner's choice** (card, 28 Nov 2026, "Own data + your rules"): the first piece of retiring RimSort. The sorter and What's wrong

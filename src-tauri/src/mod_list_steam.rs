@@ -36,6 +36,8 @@ const REPORT: &str = "report";
 /// The going-online kind its calls belong to.
 const WORKSHOP_PAGES: &str = "workshop-pages";
 const UNSUBSCRIBE: &str = "unsubscribe";
+/// The kit's start of the game through Steam (phobos-modkit 1.146.0).
+const START: &str = "start";
 /// The kit's game-free reading of a game's or a DLC's Steam reviews (phobos-modkit `steam-reviews`, 1.143.0).
 const REVIEWS_TOOL: &str = "steam-reviews";
 /// The most items one press subscribes to (the kit's own limit).
@@ -109,6 +111,18 @@ pub fn unsubscribe(
     }
     allowed_by_manifest(&kit::read_manifest()?, TOOL, UNSUBSCRIBE).map_err(Failure::refused)?;
     Ok(result_of(&kit::run_hearing(TOOL, &unsubscribe_arguments(&found, list, numbers), listener)?))
+}
+
+pub fn start_arguments(game: &GamePlaces) -> Vec<String> {
+    named(Args::new(TOOL, START), game).flag("--apply").flag("--no-redact").json()
+}
+
+/// Starts the game through the Steam client (0.113.0; the owner's choice of 28 Nov 2026, "Save and start the game", as RimSort's Run
+/// game): on the owner's press, while the manifest calls `mod-list start` `runs`; the kit refuses while the game runs.
+pub fn start_game(game: &str) -> Result<ChangeResult, Failure> {
+    let found = places(game)?;
+    allowed_by_manifest(&kit::read_manifest()?, TOOL, START).map_err(Failure::refused)?;
+    Ok(result_of(&kit::run_hearing(TOOL, &start_arguments(&found), None)?))
 }
 
 /// The arguments for What players say: one Workshop number, after `--`.

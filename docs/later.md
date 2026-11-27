@@ -123,8 +123,8 @@ owner chose all four, each its own version:
 | # | Item | Status |
 | --- | --- | --- |
 | M6a | **Own data + your rules**: the four community lists RimSort clones fetched by the kit itself; your RimSort rules brought over once | **Built**, 0.112.0 with kit 1.144.0 (see `design-record.md`) |
-| M6b | **todds without RimSort**: texture encoding looks for todds installed by itself first (you install it) | To build |
-| M6c | **Save and start the game** from the Mod list, as RimSort's Run game | To build |
+| M6b | **todds without RimSort**: texture encoding looks for todds installed by itself first (you install it) | **Built**, kit 1.145.0 (and phobos-rimworld's deploy); the Guide and Setup say where it goes, 0.113.0 |
+| M6c | **Save and start the game** from the Mod list, as RimSort's Run game | **Built**, 0.113.0 with kit 1.146.0 (see `design-record.md`) |
 | M6d | **Workshop updates waiting**: subscribed items Steam says need an update or are stuck, with a button to fetch them again | To build |
 
 RimSort itself goes when the owner says; nothing here removes it.

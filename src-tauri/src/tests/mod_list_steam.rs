@@ -65,3 +65,11 @@ fn the_games_reviews_name_its_app_and_the_mod_to_match_and_wait_for_workshop_pag
     assert!(game_reviews(&data, "rimworld", "two\nlines", None).is_err());
     std::fs::remove_dir_all(&data).unwrap();
 }
+
+#[test]
+fn starting_the_game_names_it_and_always_applies() {
+    let arguments = start_arguments(&zed());
+    assert_eq!(arguments[..2], ["mod-list", "start"]);
+    assert!(arguments.contains(&"--name=Zed Game".to_owned()) && arguments.contains(&"--apply".to_owned()));
+    assert!(start_game("not a game").is_err());
+}

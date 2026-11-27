@@ -158,7 +158,7 @@ test.describe("Setup", () => {
     page,
   }) => {
     await openSetup(page);
-    const line = page.getByRole("region", {
+    const line = page.getByRole("listitem", {
       name: "A program the pages use isn't here",
     });
     await expect(line).toContainText("Missing: Steam");
@@ -417,7 +417,9 @@ test.describe("Setup", () => {
     ).toBeVisible();
     await page.keyboard.press("1");
     await expect(
-      page.getByRole("region", { name: "A program the pages use isn't here" }),
+      page.getByRole("listitem", {
+        name: "A program the pages use isn't here",
+      }),
     ).toHaveCount(0);
   });
 });

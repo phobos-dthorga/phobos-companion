@@ -72,12 +72,13 @@ test.describe("Screen notes", () => {
     page,
   }) => {
     await open(page);
-    const panel = page.getByRole("region", { name: "Screen notes" });
+    const panel = page.getByRole("listitem", { name: "Screen notes" });
     await expect(panel).toContainText("One note waits for an agent session");
     await expect(panel).toContainText(
       "The backups list runs off the right edge",
     );
-    await panel.getByText("One dealt with").click();
+    await panel.getByText("Each note").click();
+    await expect(panel).toContainText("One dealt with");
     await expect(panel).toContainText("Lanes now wrap");
     await expect(
       panel.getByRole("button", { name: "Show the picture" }),
@@ -93,7 +94,7 @@ test.describe("Screen notes", () => {
   }) => {
     await open(page);
     await expect(
-      page.getByRole("region", { name: "Screen notes" }),
+      page.getByRole("listitem", { name: "Screen notes" }),
     ).toBeVisible();
     await page.keyboard.press("!");
     const dialog = page.getByRole("dialog", { name: "A note about Home" });

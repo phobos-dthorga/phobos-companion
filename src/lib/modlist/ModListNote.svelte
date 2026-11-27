@@ -1,4 +1,5 @@
 <script lang="ts">
+  import NoteRow from "../home/NoteRow.svelte";
   import { onMount } from "svelte";
   import { t } from "../i18n/runtime";
   import { goPage } from "../navigation/navigation.svelte";
@@ -20,41 +21,22 @@
 </script>
 
 {#if count !== null || broke !== null}
-  <section class="panel attention" aria-labelledby="modlist-note-title">
-    <h2 id="modlist-note-title">{t("modlist-note-title")}</h2>
+  <NoteRow title={t("modlist-note-title")} attention>
     {#if broke !== null}
       <p class="broke">{t("modlist-note-broke", { count: broke })}</p>
     {/if}
     {#if count !== null}
       <p>{t("modlist-note-body", { count })}</p>
     {/if}
-    <button type="button" class="action" onclick={() => goPage("modlist")}
-      >{t("modlist-note-go")}</button
-    >
-  </section>
+    {#snippet actions()}
+      <button type="button" class="action" onclick={() => goPage("modlist")}
+        >{t("modlist-note-go")}</button
+      >
+    {/snippet}
+  </NoteRow>
 {/if}
 
 <style>
-  .panel {
-    margin-bottom: 16px;
-    padding: 20px 24px;
-    background: var(--colour-surface-raised);
-    border: 1px solid var(--colour-line);
-    border-inline-start: 3px solid var(--colour-accent);
-    border-radius: 4px;
-  }
-
-  h2 {
-    margin-bottom: 8px;
-    font-family: var(--font-display);
-    font-size: 1.375rem;
-    font-weight: 600;
-  }
-
-  p {
-    margin-bottom: 10px;
-  }
-
   .broke {
     padding: 6px 10px;
     border-inline-start: 3px solid var(--colour-risk);

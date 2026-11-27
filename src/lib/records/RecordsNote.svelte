@@ -1,4 +1,5 @@
 <script lang="ts">
+  import NoteRow from "../home/NoteRow.svelte";
   import { onMount } from "svelte";
   import { t } from "../i18n/runtime";
   import { go } from "../navigation/navigation.svelte";
@@ -33,8 +34,7 @@
 </script>
 
 {#if status?.stale || failed}
-  <section class="panel" aria-labelledby="records-note-title">
-    <h2 id="records-note-title">{t("records-note-title")}</h2>
+  <NoteRow title={t("records-note-title")}>
     {#if failed && automatic}
       <p>
         {t("records-note-failed", {
@@ -49,29 +49,10 @@
           : t("records-note-never")}
       </p>
     {/if}
-    <button type="button" class="action" onclick={open}
-      >{t("records-note-go")}</button
-    >
-  </section>
+    {#snippet actions()}
+      <button type="button" class="action" onclick={open}
+        >{t("records-note-go")}</button
+      >
+    {/snippet}
+  </NoteRow>
 {/if}
-
-<style>
-  .panel {
-    margin-bottom: 16px;
-    padding: 20px 24px;
-    background: var(--colour-surface-raised);
-    border: 1px solid var(--colour-line);
-    border-radius: 4px;
-  }
-
-  h2 {
-    margin-bottom: 8px;
-    font-family: var(--font-display);
-    font-size: 1.375rem;
-    font-weight: 600;
-  }
-
-  p {
-    margin-bottom: 10px;
-  }
-</style>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import NoteRow from "../home/NoteRow.svelte";
   import { onMount } from "svelte";
   import { LOCALE, t } from "../i18n/runtime";
   import { go } from "../navigation/navigation.svelte";
@@ -20,36 +21,16 @@
 </script>
 
 {#if worthMentioning(latest.listing)}
-  <section class="panel" aria-labelledby="cleanup-note-title">
-    <h2 id="cleanup-note-title">{t("cleanup-note-title")}</h2>
+  <NoteRow title={t("cleanup-note-title")}>
     <p>
       {t("cleanup-note-body", {
         size: formatSize(latest.listing?.bytes ?? 0, LOCALE),
       })}
     </p>
-    <button type="button" class="action" onclick={open}
-      >{t("cleanup-note-go")}</button
-    >
-  </section>
+    {#snippet actions()}
+      <button type="button" class="action" onclick={open}
+        >{t("cleanup-note-go")}</button
+      >
+    {/snippet}
+  </NoteRow>
 {/if}
-
-<style>
-  .panel {
-    margin-bottom: 16px;
-    padding: 20px 24px;
-    background: var(--colour-surface-raised);
-    border: 1px solid var(--colour-line);
-    border-radius: 4px;
-  }
-
-  h2 {
-    margin-bottom: 8px;
-    font-family: var(--font-display);
-    font-size: 1.375rem;
-    font-weight: 600;
-  }
-
-  p {
-    margin-bottom: 10px;
-  }
-</style>

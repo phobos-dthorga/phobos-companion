@@ -83,7 +83,7 @@ test.describe("Decisions", () => {
     page,
   }) => {
     await open(page);
-    const note = page.getByRole("region", {
+    const note = page.getByRole("listitem", {
       name: "Decisions waiting for you",
     });
     await expect(note).toContainText("One decision waits for your word.");

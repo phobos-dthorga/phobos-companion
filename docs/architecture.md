@@ -369,6 +369,11 @@ repeated here.
 
 ### Home ("where was I?", 0.2.0)
 
+**In three tabs since 0.109.0** (the owner's choice of 27 Nov 2026, "Inbox + 2 tabs"; `PAGE_TABS.home`): **Needs you**, every
+note as one row of one list (`src/lib/home/NoteRow.svelte`, the one part every note draws with; its count read from the list as
+notes come and go, for the tab's mark), **Recent work** and **Repositories**. A note decides whether it shows; it no longer draws
+a panel of its own.
+
 | On the page | Where it comes from |
 | --- | --- |
 | Games, most recently worked on first | The newest commit across the game's repositories |

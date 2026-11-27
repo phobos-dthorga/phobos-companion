@@ -34,6 +34,7 @@ test.describe("Claims board", () => {
       claims_list: { result: BOARD },
     });
     await page.goto("/");
+    await page.getByRole("tab", { name: "Repositories" }).click();
     const panel = page.getByRole("region", { name: "Who is working on what" });
     await expect(panel).toContainText("sample-kit 2.0.0");
     await expect(panel).toContainText("sample-session-1, for 36 hours: old");
@@ -52,6 +53,7 @@ test.describe("Claims board", () => {
       claims_list: { result: { ...BOARD, claims: [] } },
     });
     await page.goto("/");
+    await page.getByRole("tab", { name: "Repositories" }).click();
     await expect(
       page.getByRole("region", { name: "Who is working on what" }),
     ).toContainText("No agent session holds anything right now.");

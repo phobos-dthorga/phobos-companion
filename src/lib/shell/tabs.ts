@@ -61,6 +61,12 @@ export const PAGE_TABS: Partial<Record<PageName, Tab[]>> = {
     },
     { id: "textures", words: "mods-tab-textures" },
   ],
+  // 0.109.0: Home in three (the owner's choice of 27 Nov 2026, "Inbox + 2 tabs").
+  home: [
+    { id: "needs", words: "home-tab-needs" },
+    { id: "recent", words: "home-tab-recent" },
+    { id: "repositories", words: "home-tab-repositories", panels: ["pins"] },
+  ],
   // 0.106.0: Look up one definition by name, beside the questions.
   reports: [
     { id: "questions", words: "reports-tab-questions", keys: ["command"] },

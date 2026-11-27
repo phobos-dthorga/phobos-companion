@@ -68,6 +68,7 @@ for (const [name, viewport] of [
         await expect(page.locator(".canvas")).toContainText(
           "The last thing you did: A sample change made today",
         );
+        await page.getByRole("tab", { name: "Recent work" }).click();
         await expect(page.locator(".canvas")).toContainText(
           "4 files changed but not committed",
         );
@@ -131,6 +132,7 @@ for (const [name, viewport] of [
       test("lists your games on Home, each with when you last worked on it", async ({
         page,
       }) => {
+        await page.getByRole("tab", { name: "Recent work" }).click();
         const panel = page.getByRole("region", { name: "Your games" });
         await expect(panel).toContainText("Second Sample");
         await panel
@@ -154,6 +156,7 @@ for (const [name, viewport] of [
       });
 
       test("says so when a game has no history", async ({ page }) => {
+        await page.getByRole("tab", { name: "Recent work" }).click();
         await page.getByRole("button", { name: /Third Sample/ }).click();
         await expect(page.getByRole("heading", { level: 1 })).toContainText(
           "Nothing recorded for Third Sample yet.",

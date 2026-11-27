@@ -91,7 +91,7 @@ test.describe("Records backup", () => {
     page,
   }) => {
     await open(page, status({}));
-    const note = page.getByRole("region", {
+    const note = page.getByRole("listitem", {
       name: "Your records want a copy",
     });
     await expect(note).toContainText("never been copied");
@@ -122,7 +122,7 @@ test.describe("Records backup", () => {
     );
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(
-      page.getByRole("region", { name: "Your records want a copy" }),
+      page.getByRole("listitem", { name: "Your records want a copy" }),
     ).toHaveCount(0);
   });
 
@@ -315,7 +315,7 @@ test.describe("Records backup", () => {
         },
       },
     );
-    const note = page.getByRole("region", {
+    const note = page.getByRole("listitem", {
       name: "Your records want a copy",
     });
     await expect(note).toContainText(

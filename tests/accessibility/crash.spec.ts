@@ -55,15 +55,21 @@ test.describe("After a crash on Home (0.105.0)", () => {
       },
     });
     await page.goto("/");
-    const note = page.getByRole("region", { name: "After a crash" });
-    await expect(note).toContainText("A program crashed since you last looked");
-    await expect(note).toContainText("Sample,");
-    await expect(note).toContainText("left one file filled with zeros");
-    await expect(note).toContainText("Version.txt");
+    const crashed = page.getByRole("listitem", { name: "A program crashed" });
+    const look = page.getByRole("listitem", {
+      name: "After the unexpected shutdown",
+    });
+    await expect(crashed).toContainText(
+      "A program crashed since you last looked",
+    );
+    await expect(crashed).toContainText("Sample,");
+    await expect(look).toContainText("left one file filled with zeros");
+    await look.getByText("The file and what puts it right").click();
+    await expect(look).toContainText("Version.txt");
     await audit(page);
-    await note.getByRole("button", { name: "Got it" }).click();
-    await expect(note).not.toContainText("A program crashed");
-    await expect(note).toContainText("left one file filled with zeros");
+    await crashed.getByRole("button", { name: "Got it" }).click();
+    await expect(crashed).toHaveCount(0);
+    await expect(look).toContainText("left one file filled with zeros");
   });
 
   test("says nothing when nothing crashed and no look is due", async ({
@@ -75,7 +81,7 @@ test.describe("After a crash on Home (0.105.0)", () => {
     });
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: "After a crash" }),
+      page.getByRole("listitem", { name: "A program crashed" }),
     ).toHaveCount(0);
   });
 });

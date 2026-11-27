@@ -1,4 +1,5 @@
 <script lang="ts">
+  import NoteRow from "../home/NoteRow.svelte";
   import { onMount } from "svelte";
   import { t } from "../i18n/runtime";
   import { goPage } from "../navigation/navigation.svelte";
@@ -19,16 +20,15 @@
 </script>
 
 {#if status?.state === "ready"}
-  <section class="panel" aria-labelledby="update-ready-title">
-    <h2 id="update-ready-title">
-      {t("app-update-ready", { version: status.version })}
-    </h2>
+  <NoteRow title={t("app-update-ready", { version: status.version })}>
     <p>{t("app-update-ready-how")}</p>
-    <button
-      type="button"
-      class="action"
-      onclick={() => goPage("about", { tab: "version" })}
-      >{t("app-update-see")}</button
-    >
-  </section>
+    {#snippet actions()}
+      <button
+        type="button"
+        class="action"
+        onclick={() => goPage("about", { tab: "version" })}
+        >{t("app-update-see")}</button
+      >
+    {/snippet}
+  </NoteRow>
 {/if}

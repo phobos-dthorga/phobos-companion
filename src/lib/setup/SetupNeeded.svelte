@@ -1,4 +1,5 @@
 <script lang="ts">
+  import NoteRow from "../home/NoteRow.svelte";
   import { onMount } from "svelte";
   import { t } from "../i18n/runtime";
   import { goPage } from "../navigation/navigation.svelte";
@@ -15,18 +16,17 @@
 </script>
 
 {#if needs.length > 0}
-  <section class="panel" aria-labelledby="setup-needed-title">
-    <h2 id="setup-needed-title">
-      {t("setup-home-title", { count: needs.length })}
-    </h2>
+  <NoteRow title={t("setup-home-title", { count: needs.length })}>
     <p>
       {t("setup-home-body", { names: needs.map((row) => row.name).join(", ") })}
     </p>
-    <button
-      type="button"
-      class="action"
-      onclick={() => goPage("settings", { panel: "setup" })}
-      >{t("setup-home-open")}</button
-    >
-  </section>
+    {#snippet actions()}
+      <button
+        type="button"
+        class="action"
+        onclick={() => goPage("settings", { panel: "setup" })}
+        >{t("setup-home-open")}</button
+      >
+    {/snippet}
+  </NoteRow>
 {/if}

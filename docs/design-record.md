@@ -1490,6 +1490,23 @@ choices by card: "Sort first, then screen" (the sort came first, 0.107.2) and "H
 rows warn from the mod's own files only (the full check runs after Save); a switched-on mod goes before the first that needs it,
 else last; unsaved changes last for the run of the program, not across restarts.
 
+## Home in three tabs (built 27 Nov 2026, 0.109.0)
+
+**The owner's request** (27 Nov 2026): "We might have to start putting things under tabs within the Home page, as it is getting
+quite long", and "Is there anything you can suggest that can be merged ... to tidy-up the aesthetics". Their choice by card:
+"Inbox + 2 tabs". Home had about 22 panels, a dozen of them one-line notes each drawing a box of its own.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See everything that needs them in one short list, first; reach recent work and the repositories' state a tab away |
+| What does it stop them doing? | Nothing |
+| How does it change the way they work? | No scrolling past a dozen boxes to find what waits; "Nothing needs you right now" when nothing does |
+| What outside it notices? | Nothing: it only reads |
+
+**Risk: none (agent's grade).** **Agent choices, owner to revise:** your games moved to Recent work (the game picker at the top
+of the window still switches games); safe copies are a card on Repositories, not a row; a clean look after a crash adds no row;
+the count on the tab is the last one seen while Needs you was open.
+
 Everything proposed and agreed but not yet built is in [later.md](later.md), with each item's status.
 
 ## Limits

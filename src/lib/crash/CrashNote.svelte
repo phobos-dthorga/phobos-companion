@@ -3,6 +3,7 @@
   import { t } from "../i18n/runtime";
   import { go } from "../navigation/navigation.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
+  import NoteRow from "../home/NoteRow.svelte";
   import { formatWhen } from "../shell/dates";
   import { latest, refreshIfStale } from "./latest.svelte";
   import { newDumps, newestTime } from "./presentation";
@@ -41,92 +42,69 @@
   }
 </script>
 
-{#if fresh.length > 0 || latest.look.state !== "idle"}
-  <section class="panel" aria-labelledby="crash-note-title">
-    <h2 id="crash-note-title">{t("crash-note-title")}</h2>
-    {#if fresh.length > 0}
-      <p>{t("crash-note-dumps", { count: fresh.length })}</p>
-      <ul>
-        {#each fresh as dump (dump.file)}
+{#if fresh.length > 0}
+  <NoteRow title={t("crash-note-title")} attention>
+    <p>
+      {t("crash-note-dumps", { count: fresh.length })}
+      {fresh
+        .map((dump) =>
+          t("crash-note-dump", {
+            program: dump.program,
+            when: formatWhen(dump.time),
+          }),
+        )
+        .join("; ")}
+    </p>
+    {#snippet actions()}
+      <button type="button" class="action" onclick={why}
+        >{t("crash-note-why")}</button
+      >
+      <button type="button" class="action" onclick={gotIt}
+        >{t("crash-note-got-it")}</button
+      >
+    {/snippet}
+  </NoteRow>
+{/if}
+{#if latest.look.state === "looking"}
+  <NoteRow title={t("crash-note-look-title")}>
+    <p>{t("crash-note-looking", { when: shutdown })}</p>
+    <ProgressBar
+      progress={latest.look.progress}
+      fallback={t("crash-note-looking-bar")}
+    />
+  </NoteRow>
+{:else if latest.look.state === "done" && latest.look.look.files.length > 0}
+  {@const files = latest.look.look.files}
+  <NoteRow title={t("crash-note-look-title")} attention>
+    <p>
+      {t("crash-note-zeroed", {
+        count: files.length,
+        when: formatWhen(latest.look.look.lastShutdown),
+      })}
+    </p>
+    <details>
+      <summary>{t("crash-note-files", { count: files.length })}</summary>
+      <ul class="files">
+        {#each files as file (file.path)}
           <li>
-            {t("crash-note-dump", {
-              program: dump.program,
-              when: formatWhen(dump.time),
-            })}
+            <code>{file.path}</code>
+            <span class="small">{file.kind}: {file.advice}</span>
           </li>
         {/each}
       </ul>
-      <div class="buttons">
-        <button type="button" class="action" onclick={why}
-          >{t("crash-note-why")}</button
-        >
-        <button type="button" class="action" onclick={gotIt}
-          >{t("crash-note-got-it")}</button
-        >
-      </div>
-    {/if}
-    {#if latest.look.state === "looking"}
-      <p>{t("crash-note-looking", { when: shutdown })}</p>
-      <ProgressBar
-        progress={latest.look.progress}
-        fallback={t("crash-note-looking-bar")}
-      />
-    {:else if latest.look.state === "done"}
-      {#if latest.look.look.files.length === 0}
-        <p>
-          <span class="mark" aria-hidden="true">✓</span>
-          {t("crash-note-clean", {
-            when: formatWhen(latest.look.look.lastShutdown),
-          })}
-        </p>
-      {:else}
-        <p>
-          {t("crash-note-zeroed", {
-            count: latest.look.look.files.length,
-            when: formatWhen(latest.look.look.lastShutdown),
-          })}
-        </p>
-        <ul class="files">
-          {#each latest.look.look.files as file (file.path)}
-            <li>
-              <code>{file.path}</code>
-              <span class="small">{file.kind}: {file.advice}</span>
-            </li>
-          {/each}
-        </ul>
-        <p class="small muted">{t("crash-note-zeroed-how")}</p>
-      {/if}
-    {:else if latest.look.state === "failed"}
-      <p class="small">
-        {t("crash-note-look-failed", { reason: latest.look.reason })}
-      </p>
-    {/if}
-  </section>
+      <p class="small muted">{t("crash-note-zeroed-how")}</p>
+    </details>
+  </NoteRow>
+{:else if latest.look.state === "failed"}
+  <NoteRow title={t("crash-note-look-title")}>
+    <p>{t("crash-note-look-failed", { reason: latest.look.reason })}</p>
+  </NoteRow>
 {/if}
 
 <style>
-  .panel {
-    margin-bottom: 16px;
-    padding: 20px 24px;
-    background: var(--colour-surface-raised);
-    border: 1px solid var(--colour-line);
-    border-radius: 4px;
-  }
-
-  h2 {
-    margin-bottom: 8px;
-    font-family: var(--font-display);
-    font-size: 1.375rem;
-    font-weight: 600;
-  }
-
-  p {
-    margin-bottom: 10px;
-  }
-
-  ul {
-    margin: 0 0 10px;
-    padding-inline-start: 20px;
+  .files {
+    margin: 6px 0;
+    padding-inline-start: 18px;
   }
 
   .files li {
@@ -139,13 +117,10 @@
     overflow-wrap: anywhere;
   }
 
-  .buttons {
+  summary {
+    min-height: 44px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .mark {
-    color: var(--colour-accent);
+    align-items: center;
+    cursor: pointer;
   }
 </style>

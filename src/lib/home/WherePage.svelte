@@ -34,6 +34,9 @@
   import SetupNeeded from "../setup/SetupNeeded.svelte";
   import TheirCodeChanged from "../online/TheirCodeChanged.svelte";
   import GamesPanel from "./GamesPanel.svelte";
+  import NoteRow from "./NoteRow.svelte";
+  import Tabs from "../shell/Tabs.svelte";
+  import { PAGE_TABS } from "../shell/tabs";
 
   const PENDING_SHOWN = 6;
   const OPEN_SHOWN = 6;
@@ -106,6 +109,31 @@
     });
   }
 
+  /**
+   * How many rows Needs you shows (0.109.0), counted from the list as its notes come and go, for the tab's mark. A tab's parts
+   * are drawn only while it is shown, so the last count is kept while another tab is open; Needs you opens first.
+   */
+  let inbox = $state<HTMLElement | null>(null);
+  let waitingRows = $state<number | null>(null);
+  $effect(() => {
+    const list = inbox;
+    if (!list) return;
+    const count = () => {
+      waitingRows = list.querySelectorAll(":scope > li").length;
+    };
+    count();
+    const watching = new MutationObserver(count);
+    watching.observe(list, { childList: true });
+    return () => watching.disconnect();
+  });
+  const tabs = $derived(
+    (PAGE_TABS.home ?? []).map((tab) =>
+      tab.id === "needs" && waitingRows
+        ? { ...tab, mark: t("home-needs-mark", { count: waitingRows }) }
+        : tab,
+    ),
+  );
+
   /** Something not yet released opens its changelog on the Changes page. */
   function openChangelog(repository: string, product: string) {
     go({
@@ -127,272 +155,300 @@
   {/if}
 </p>
 
-<GamesPanel {games} selected={game.id} {now} />
-
-{#if game.unfinished.length > 0}
-  <section class="panel attention">
-    <h2><span aria-hidden="true">◆</span> {t("unfinished-title")}</h2>
-    <ul>
-      {#each game.unfinished as item (item.repository)}
-        <li>
-          <div>{t("unfinished-files", { count: item.files })}</div>
-          <div class="muted small">{item.repository}</div>
-        </li>
-      {/each}
-    </ul>
-  </section>
-{/if}
-
-{#if game.latest.length > 0}
-  <section class="panel">
-    <h2>{t("latest-title")}</h2>
-    <ul>
-      {#each game.latest as item, index (`${item.repository}-${index}`)}
-        <li class="dated">
-          <div class="read">{formatUnixDate(item.unix)}</div>
-          <div class="body">
-            {#if item.hash}
-              <button
-                type="button"
-                class="link"
-                aria-label={t("home-open-commit", { subject: item.subject })}
-                onclick={() =>
-                  openCommit(item.repository, item.hash ?? "", item.subject)}
-                >{item.subject}</button
-              >
-            {:else}
-              <div>{item.subject}</div>
-            {/if}
-            <div class="muted small">{item.repository}</div>
-          </div>
-        </li>
-      {/each}
-    </ul>
-  </section>
-{/if}
-
-{#if game.pending.length > 0}
-  {@const shown = game.pending.slice(0, PENDING_SHOWN)}
-  <section class="panel">
-    <h2>{t("pending-title")}</h2>
-    <ul>
-      {#each shown as item (`${item.repository}-${item.product}`)}
-        {@const words = pendingWords(item)}
-        <li>
-          <button
-            type="button"
-            class="link"
-            aria-label={t("home-open-changelog", { product: item.product })}
-            onclick={() => openChangelog(item.repository, item.product)}
-            >{item.product}</button
+{#snippet needsYou()}
+  <ul class="inbox" bind:this={inbox} aria-label={t("home-needs-label")}>
+    <UpdateReady />
+    <SetupNeeded />
+    {#if settingsToLook !== null && settingsToLook > 0}
+      <NoteRow title={t("home-settings-title")}>
+        <p>{t("home-settings-count", { count: settingsToLook })}</p>
+        {#snippet actions()}
+          <button type="button" class="action" onclick={openSettings}
+            >{t("home-settings-open")}</button
           >
-          <div class="muted small">
-            {t(words.key, words.args)}{#if item.earlier_drafts > 0}{" "}{t(
-                "pending-earlier",
-                { count: item.earlier_drafts },
-              )}{/if}
-          </div>
-        </li>
-      {/each}
-    </ul>
-    {#if game.pending.length > shown.length}
-      <p class="muted small more">
-        {t("list-more", { count: game.pending.length - shown.length })}
-      </p>
+        {/snippet}
+      </NoteRow>
     {/if}
-  </section>
-{/if}
-
-{#if game.open_work.length > 0}
-  {@const shown = game.open_work.slice(0, OPEN_SHOWN)}
-  <section class="panel">
-    <h2>{t("open-title")}</h2>
-    <p class="count">{t("open-count", { count: game.open_work.length })}</p>
-    <ul>
-      {#each shown as item, index (index)}
-        <li>{item}</li>
-      {/each}
-    </ul>
-    {#if game.open_work.length > shown.length}
-      <p class="muted small more">
-        {t("list-more", { count: game.open_work.length - shown.length })}
-      </p>
+    {#if pageServes(game.kind, "modlist")}
+      {#key game.id}<ModListNote game={game.id} />{/key}
     {/if}
-  </section>
-{/if}
-
-{#if settingsToLook !== null && settingsToLook > 0}
-  <section class="panel" aria-labelledby="home-settings-title">
-    <h2 id="home-settings-title">{t("home-settings-title")}</h2>
-    <p>{t("home-settings-count", { count: settingsToLook })}</p>
-    <button type="button" class="action" onclick={openSettings}
-      >{t("home-settings-open")}</button
-    >
-  </section>
-{/if}
-
-{#if agents.shown}
-  <DecisionsNote game={game.id} />
-  <PicksNote game={game.id} />
-{/if}
-
-<RecordsNote game={game.id} />
-{#key game.id}<SafeCopiesNote game={game.id} />{/key}
-{#if pageServes(game.kind, "modlist")}
-  {#key game.id}<ModListNote game={game.id} />{/key}
-{/if}
-<WaitingNote game={game.id} />
-{#key game.id}<PublishNote game={game.id} />{/key}
-<CleanupNote game={game.id} />
-<CrashNote game={game.id} />
-
-{#if agents.shown && notes && (notes.open.length > 0 || notes.dealt_count > 0)}
-  <section
-    class="panel"
-    class:attention={notes.open.length > 0}
-    aria-labelledby="notes-title"
-  >
-    <h2 id="notes-title">
-      {#if notes.open.length > 0}<span aria-hidden="true">◆</span>{/if}
-      {t("notes-title")}
-    </h2>
-    <p class="count">
-      {notes.open.length > 0
-        ? t("notes-open", { count: notes.open.length })
-        : t("notes-none-open")}
-    </p>
-    <ul>
-      {#each notes.open as note (note.id)}
-        <li class="dated">
-          <span class="read">{formatWhen(note.time)}</span>
-          <div class="body">
-            <div>{note.words || t("notes-no-words")}</div>
-            <div class="muted small">{note.page} · {note.game}</div>
-            <div class="note-actions">
-              {#if note.has_picture}
-                <button
-                  type="button"
-                  class="action"
-                  onclick={() => void showScreenNote(note.id)}
-                  >{t("notes-show")}</button
-                >
-              {/if}
-              {#if placeOf(note.address)}
-                <button
-                  type="button"
-                  class="action"
-                  onclick={() => openNotePage(note.address)}
-                  >{t("notes-go")}</button
-                >
-              {/if}
-            </div>
-          </div>
-        </li>
-      {/each}
-    </ul>
-    {#if notes.dealt.length > 0}
-      <details class="pin-versions">
-        <summary
-          >{t("notes-dealt", {
-            count: notes.dealt_count,
-            shown: notes.dealt.length,
-          })}</summary
-        >
-        <ul>
-          {#each notes.dealt as note (note.id)}
-            <li class="dated">
-              <span class="read">{formatWhen(note.time)}</span>
-              <div class="body">
-                <div>{note.words || t("notes-no-words")}</div>
-                <div class="muted small">
-                  {note.page} · {note.resolved?.how}
+    <WaitingNote game={game.id} />
+    <CrashNote game={game.id} />
+    {#if agents.shown}
+      <DecisionsNote game={game.id} />
+      <PicksNote game={game.id} />
+    {/if}
+    {#if agents.shown && notes && notes.open.length > 0}
+      <NoteRow title={t("notes-title")} attention>
+        <p>{t("notes-open", { count: notes.open.length })}</p>
+        <details>
+          <summary>{t("home-notes-each")}</summary>
+          <ul class="notes">
+            {#each notes.open as note (note.id)}
+              <li class="dated">
+                <span class="read">{formatWhen(note.time)}</span>
+                <div class="body">
+                  <div>{note.words || t("notes-no-words")}</div>
+                  <div class="muted small">{note.page} · {note.game}</div>
+                  <div class="note-actions">
+                    {#if note.has_picture}
+                      <button
+                        type="button"
+                        class="action"
+                        onclick={() => void showScreenNote(note.id)}
+                        >{t("notes-show")}</button
+                      >
+                    {/if}
+                    {#if placeOf(note.address)}
+                      <button
+                        type="button"
+                        class="action"
+                        onclick={() => openNotePage(note.address)}
+                        >{t("notes-go")}</button
+                      >
+                    {/if}
+                  </div>
                 </div>
-              </div>
-            </li>
-          {/each}
-        </ul>
-      </details>
+              </li>
+            {/each}
+          </ul>
+          {#if notes.dealt.length > 0}
+            <p class="muted small">
+              {t("notes-dealt", {
+                count: notes.dealt_count,
+                shown: notes.dealt.length,
+              })}
+            </p>
+            <ul class="notes">
+              {#each notes.dealt as note (note.id)}
+                <li class="dated">
+                  <span class="read">{formatWhen(note.time)}</span>
+                  <div class="body">
+                    <div>{note.words || t("notes-no-words")}</div>
+                    <div class="muted small">
+                      {note.page} · {note.resolved?.how}
+                    </div>
+                  </div>
+                </li>
+              {/each}
+            </ul>
+          {/if}
+          <p class="muted small">{t("notes-how")}</p>
+        </details>
+      </NoteRow>
     {/if}
-    <p class="muted small more">{t("notes-how")}</p>
-  </section>
-{/if}
+    <RecordsNote game={game.id} />
+    {#key game.id}<PublishNote game={game.id} />{/key}
+    <CleanupNote game={game.id} />
+  </ul>
+  {#if waitingRows === 0}
+    <p class="fine">
+      <span aria-hidden="true">✓</span>
+      {t("home-needs-none")}
+    </p>
+  {/if}
+{/snippet}
 
-<UpdateReady />
-<SetupNeeded />
-<GateLights game={game.id} />
-<TheirCodeChanged game={game.id} />
+{#snippet recentWork()}
+  <GamesPanel {games} selected={game.id} {now} />
+  {#if game.unfinished.length > 0}
+    <section class="panel attention">
+      <h2><span aria-hidden="true">◆</span> {t("unfinished-title")}</h2>
+      <ul>
+        {#each game.unfinished as item (item.repository)}
+          <li>
+            <div>{t("unfinished-files", { count: item.files })}</div>
+            <div class="muted small">{item.repository}</div>
+          </li>
+        {/each}
+      </ul>
+    </section>
+  {/if}
+  {#if game.latest.length > 0}
+    <section class="panel">
+      <h2>{t("latest-title")}</h2>
+      <ul>
+        {#each game.latest as item, index (`${item.repository}-${index}`)}
+          <li class="dated">
+            <div class="read">{formatUnixDate(item.unix)}</div>
+            <div class="body">
+              {#if item.hash}
+                <button
+                  type="button"
+                  class="link"
+                  aria-label={t("home-open-commit", { subject: item.subject })}
+                  onclick={() =>
+                    openCommit(item.repository, item.hash ?? "", item.subject)}
+                  >{item.subject}</button
+                >
+              {:else}
+                <div>{item.subject}</div>
+              {/if}
+              <div class="muted small">{item.repository}</div>
+            </div>
+          </li>
+        {/each}
+      </ul>
+    </section>
+  {/if}
+  {#if game.pending.length > 0}
+    {@const shown = game.pending.slice(0, PENDING_SHOWN)}
+    <section class="panel">
+      <h2>{t("pending-title")}</h2>
+      <ul>
+        {#each shown as item (`${item.repository}-${item.product}`)}
+          {@const words = pendingWords(item)}
+          <li>
+            <button
+              type="button"
+              class="link"
+              aria-label={t("home-open-changelog", { product: item.product })}
+              onclick={() => openChangelog(item.repository, item.product)}
+              >{item.product}</button
+            >
+            <div class="muted small">
+              {t(words.key, words.args)}{#if item.earlier_drafts > 0}{" "}{t(
+                  "pending-earlier",
+                  { count: item.earlier_drafts },
+                )}{/if}
+            </div>
+          </li>
+        {/each}
+      </ul>
+      {#if game.pending.length > shown.length}
+        <p class="muted small more">
+          {t("list-more", { count: game.pending.length - shown.length })}
+        </p>
+      {/if}
+    </section>
+  {/if}
+  {#if game.open_work.length > 0}
+    {@const shown = game.open_work.slice(0, OPEN_SHOWN)}
+    <section class="panel">
+      <h2>{t("open-title")}</h2>
+      <p class="count">{t("open-count", { count: game.open_work.length })}</p>
+      <ul>
+        {#each shown as item, index (index)}
+          <li>{item}</li>
+        {/each}
+      </ul>
+      {#if game.open_work.length > shown.length}
+        <p class="muted small more">
+          {t("list-more", { count: game.open_work.length - shown.length })}
+        </p>
+      {/if}
+    </section>
+  {/if}
+{/snippet}
 
-{#if agents.shown}
-  <ClaimsPanel />
-{/if}
-
-{#if pins && pins.pins.length > 0}
-  <section class="panel" aria-labelledby="pins-title">
-    <h2 id="pins-title">{t("pins-title")}</h2>
-    <ul>
-      {#each pins.pins as pin (`${pin.repository}/${pin.path}`)}
-        <li>
-          <div>
-            {pin.ahead
-              ? t("pins-ahead", {
-                  repository: pin.repository,
-                  version: pin.version,
-                  kit: pin.kit,
-                })
-              : pin.behind === 0
-                ? t("pins-current", {
-                    repository: pin.repository,
-                    version: pin.version,
-                  })
-                : t("pins-behind", {
+{#snippet repositories()}
+  <GateLights game={game.id} />
+  <TheirCodeChanged game={game.id} />
+  {#key game.id}<SafeCopiesNote game={game.id} />{/key}
+  {#if pins && pins.pins.length > 0}
+    <section class="panel" aria-labelledby="pins-title">
+      <h2 id="pins-title">{t("pins-title")}</h2>
+      <ul>
+        {#each pins.pins as pin (`${pin.repository}/${pin.path}`)}
+          <li>
+            <div>
+              {pin.ahead
+                ? t("pins-ahead", {
                     repository: pin.repository,
                     version: pin.version,
                     kit: pin.kit,
-                    count: pin.behind,
-                  })}
-          </div>
-          {#if pin.versions.length > 0}
-            <details class="pin-versions">
-              <summary
-                >{t("pins-gains", { count: pin.versions.length })}</summary
-              >
-              <ul>
-                {#each pin.versions as version (version.version)}
-                  <li>
-                    <strong>{version.version}</strong>
-                    <span class="muted small">{version.heading}</span>
-                    <ul class="leads">
-                      {#each version.entries as lead, index (index)}
-                        <li>{lead}</li>
-                      {/each}
-                    </ul>
-                  </li>
-                {/each}
-              </ul>
-            </details>
-          {/if}
-        </li>
-      {/each}
-    </ul>
-    <p class="muted small more">{t("pins-how")}</p>
-  </section>
-{/if}
+                  })
+                : pin.behind === 0
+                  ? t("pins-current", {
+                      repository: pin.repository,
+                      version: pin.version,
+                    })
+                  : t("pins-behind", {
+                      repository: pin.repository,
+                      version: pin.version,
+                      kit: pin.kit,
+                      count: pin.behind,
+                    })}
+            </div>
+            {#if pin.versions.length > 0}
+              <details class="pin-versions">
+                <summary
+                  >{t("pins-gains", { count: pin.versions.length })}</summary
+                >
+                <ul>
+                  {#each pin.versions as version (version.version)}
+                    <li>
+                      <strong>{version.version}</strong>
+                      <span class="muted small">{version.heading}</span>
+                      <ul class="leads">
+                        {#each version.entries as lead, index (index)}
+                          <li>{lead}</li>
+                        {/each}
+                      </ul>
+                    </li>
+                  {/each}
+                </ul>
+              </details>
+            {/if}
+          </li>
+        {/each}
+      </ul>
+      <p class="muted small more">{t("pins-how")}</p>
+    </section>
+  {/if}
+  {#if agents.shown}
+    <ClaimsPanel />
+  {/if}
+  {#if game.problems.length > 0}
+    <section class="panel">
+      <h2 class="problem">{t("problems-title")}</h2>
+      <ul>
+        {#each game.problems as item (item.repository)}
+          <li>
+            <div>{item.repository}</div>
+            <div class="muted small">{t(problemKey(item.problem))}</div>
+          </li>
+        {/each}
+      </ul>
+    </section>
+  {/if}
+{/snippet}
 
-{#if game.problems.length > 0}
-  <section class="panel">
-    <h2 class="problem">{t("problems-title")}</h2>
-    <ul>
-      {#each game.problems as item (item.repository)}
-        <li>
-          <div>{item.repository}</div>
-          <div class="muted small">{t(problemKey(item.problem))}</div>
-        </li>
-      {/each}
-    </ul>
-  </section>
-{/if}
+<Tabs {tabs} id="home" label={t("home-tabs-label")}>
+  {#snippet children(tab)}
+    {#if tab === "recent"}
+      {@render recentWork()}
+    {:else if tab === "repositories"}
+      {@render repositories()}
+    {:else}
+      {@render needsYou()}
+    {/if}
+  {/snippet}
+</Tabs>
 
 <style>
+  .inbox {
+    margin: 0 0 16px;
+    padding: 0;
+    list-style: none;
+    background: var(--colour-surface-raised);
+    border: 1px solid var(--colour-line);
+    border-radius: 4px;
+  }
+
+  .inbox:not(:has(> li)) {
+    display: none;
+  }
+
+  .fine {
+    margin-bottom: 16px;
+    color: var(--colour-comparison);
+  }
+
+  .notes li {
+    border-top: 1px solid var(--colour-line);
+  }
+
   .panel {
     margin-bottom: 16px;
     padding: 20px 24px;

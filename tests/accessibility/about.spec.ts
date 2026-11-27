@@ -122,7 +122,7 @@ test.describe("About", () => {
     await page.goto("/");
     // Home says one is ready, and leads to About.
     await expect(
-      page.getByRole("heading", { name: "Version 9.2.0 is ready" }),
+      page.getByRole("listitem", { name: "Version 9.2.0 is ready" }),
     ).toBeVisible();
     await page.getByRole("button", { name: "See what's new" }).click();
     const panel = page.getByRole("region", { name: "Updates from GitHub" });

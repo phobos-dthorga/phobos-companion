@@ -4,6 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.109.0] - 2026-11-27
+
+### Changed
+
+- **Home in three tabs, with everything waiting on you in one list** (the owner, 27 Nov 2026: Home "is getting quite long", and
+  the choice "Inbox + 2 tabs"). **Needs you** shows every note as one line with its button (a newer version, a missing program,
+  settings to look at, the mod list, the save checks, a crash, decisions, picks, screen notes, records, publishing, room to clear),
+  and says "Nothing needs you right now" when nothing does; its tab says how many wait. **Recent work** holds your games, the
+  latest commits, what is unfinished, not released and open; **Repositories** holds the checks on GitHub, their code changed, safe
+  copies, tool kit pins, claims and any repository that couldn't be read. Every note now draws with one shared row instead of a box
+  of its own. The same for every game. **Not tested on screen.**
+
 ## [0.108.0] - 2026-11-27
 
 ### Changed

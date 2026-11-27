@@ -266,6 +266,7 @@ test.describe("The way back, the search and addresses", () => {
     page,
   }) => {
     await open(page);
+    await page.getByRole("tab", { name: "Recent work" }).click();
     await page
       .getByRole("button", {
         name: "A sample change made today: open this commit's code",
@@ -291,6 +292,7 @@ test.describe("The way back, the search and addresses", () => {
     page,
   }) => {
     await open(page);
+    await page.getByRole("tab", { name: "Repositories" }).click();
     const panel = page.getByRole("region", {
       name: "The tool kit each repository uses",
     });
@@ -311,7 +313,7 @@ test.describe("The way back, the search and addresses", () => {
     page,
   }) => {
     await open(page);
-    const panel = page.getByRole("region", { name: "Settings to look at" });
+    const panel = page.getByRole("listitem", { name: "Settings to look at" });
     await expect(panel).toContainText(
       "One mod setting is new since you last looked.",
     );

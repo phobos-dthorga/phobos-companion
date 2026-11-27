@@ -286,6 +286,7 @@ test.describe("Safe copies, its own page since 0.95.0 (0.42.0)", () => {
       safe_copies_status: { result: COPIES },
     });
     await page.goto("/");
+    await page.getByRole("tab", { name: "Repositories" }).click();
     const line = page.getByRole("region", { name: "Safe copies wait" });
     await expect(line).toContainText("One set has never been copied.");
     await line.getByRole("button", { name: "Open Safe copies" }).click();

@@ -97,7 +97,7 @@ test.describe("Clean up (0.27.0)", () => {
     page,
   }) => {
     await open(page);
-    const note = page.getByRole("region", { name: "Room to clear" });
+    const note = page.getByRole("listitem", { name: "Room to clear" });
     await expect(note).toContainText("left 32.2 GB behind");
     await note.getByRole("button", { name: "Look at it in Settings" }).click();
     await expect(

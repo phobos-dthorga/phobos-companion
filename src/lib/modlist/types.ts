@@ -109,6 +109,13 @@ export type ModRow = {
   needs: string[];
   /** Its own picture on this PC (phobos-modkit 1.82.0); null when it has none. */
   preview?: string | null;
+  /** Where it is, and what its own files say of other mods (phobos-modkit 1.142.0), for the info panel and the draft's marks. */
+  folder?: string;
+  load_after?: string[];
+  load_before?: string[];
+  incompatible?: string[];
+  /** Each need's ids, any one of which meets it. */
+  need_ids?: string[][];
 };
 
 /** One entry of a list, in order. `remembered` is the name a check once saw, for a mod no longer here. */

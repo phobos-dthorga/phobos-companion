@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.108.0] - 2026-11-27
+
+### Changed
+
+- **Edit the list, rebuilt with lessons from RimSort** (the owner, 27 Nov 2026: "the mod list page needs a total redo ... we
+  are asking way too much of them", and the choice "Hold until Save"). Mods switched off on the left and on on the right, each
+  with a filter; choose with a click, Ctrl + click or Shift + click; switch with Enter, a double-click or the buttons; move with
+  Alt + the arrow keys, the buttons or by dragging. Each row says what its own files warn of as the list stands, and a panel shows
+  the mod in focus. **Nothing is written until Save** (Ctrl + S), which writes the whole list at once after a backup, and refuses
+  if the game or another manager changed the list meanwhile; Undo (Ctrl + Z) and Throw away changes touch only what is waiting.
+  The carry mode, find-to-place and place numbers are gone. With tool kit 1.142.0. Checked on RimWorld and Project Zomboid lists.
+  **Not tested on screen.**
+
 ## [0.107.2] - 2026-11-27
 
 ### Fixed

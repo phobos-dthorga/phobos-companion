@@ -1654,19 +1654,6 @@ async fn mod_list_mods(game: String, on_progress: Channel<kit::Progress>) -> Res
     blocking(move || mod_list_page::mods(&game, Some(&hearing(on_progress)))).await
 }
 
-/// One change from Edit the list, saved at once on the owner's press: switch off, switch on or move one mod or several (0.47.0).
-#[tauri::command]
-async fn mod_list_edit(
-    game: String,
-    list: String,
-    action: String,
-    ids: Vec<String>,
-    place: Option<u32>,
-    on_progress: Channel<kit::Progress>,
-) -> Result<mod_list_page::ChangeResult, Failure> {
-    blocking(move || mod_list_page::edit(&game, &list, &action, &ids, place, Some(&hearing(on_progress)))).await
-}
-
 /// A list sorted from every rule, each move explained; written only on Use this order (0.47.0).
 #[tauri::command]
 async fn mod_list_sort(
@@ -1794,6 +1781,18 @@ async fn mod_list_open_in_steam(number: String) -> Result<(), Failure> {
     blocking(move || mod_list_page::open_in_steam(&number)).await
 }
 
+/// Saves the rebuilt Edit the list's draft whole, on the owner's press (0.108.0).
+#[tauri::command]
+async fn mod_list_write(
+    game: String,
+    list: String,
+    ids: Vec<String>,
+    was: Vec<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_page::write(&game, &list, &ids, &was, Some(&hearing(on_progress)))).await
+}
+
 /// What players say about a mod on its Workshop page, read on the owner's press (0.107.0). Only reads, keyless.
 #[tauri::command]
 async fn players_say(
@@ -1866,6 +1865,7 @@ pub fn run() {
             crash_status,
             look_up,
             players_say,
+            mod_list_write,
             crash_look_now,
             cleanup_apply,
             mod_list_check,
@@ -1873,7 +1873,6 @@ pub fn run() {
             mod_list_undo,
             mod_list_open_in_steam,
             mod_list_mods,
-            mod_list_edit,
             mod_list_sort,
             mod_list_rules,
             mod_list_add_rule,

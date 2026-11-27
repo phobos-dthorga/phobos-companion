@@ -80,10 +80,12 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   - *Fix and Undo*: only after the owner's yes on the card; only a change the last check offered, or a list it named. The kit
     keeps a byte-for-byte backup first, refuses while the game or a mod manager (RimSort) runs, and refuses to undo over a list
     changed since.
-  - *Edit the list* (0.46.0; the owner's choice "each change saved at once"): each press of Switch on, Switch off or a move is
-    saved at once, with no second yes; only a mod and a list the last listing named, a place from 1, at most 500 mods moved or
-    switched as one block (0.47.0). Each keeps a backup; Undo walks back one change at a time. Dragging is a shortcut: every move
-    has keys.
+  - *Edit the list* (rebuilt in 0.108.0; the owner's choices of 27 Nov 2026, "the mod list page needs a total redo ... take
+    lessons from RimSort" and "Hold until Save", replacing 22 Nov's "each change saved at once"): moves and switches change only a
+    draft in the window; **Save** writes the whole list at once with the kit's `mod-list write`, the list on standard input, only
+    mods and a list the last listing named, while the manifest calls it `writes`. The kit keeps a backup and refuses a list
+    changed since the draft began. **Undo** and **Throw away changes** touch only the draft; **Go back on the last change** is the
+    kit's undo. Dragging is a shortcut: every move has keys and buttons.
   - *Sort* (0.47.0) shows the moves and writes only on **Use this order**; *Your rules* keeps or takes away one of the owner's
     rules, for mods the last listing named.
   - *Saved lists* (0.48.0) show what loading would change and load only on **Use this list**, for a list the last listing named or

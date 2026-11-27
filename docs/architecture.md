@@ -301,7 +301,7 @@ The mechanism behind each page's rule in `AGENTS.md`. Every change also passes t
 
 - **Mods** (`installs_page.rs`): the repository is one of the game's and keeps `config/installs.json`; the move is `build`,
   `install`, `backup` or `restore`; every mod name is checked. Encoding finds the game's tool by the `textures` surface.
-- **Mod list** (`mod_list_page.rs`, `mod_list_lists.rs`, `mod_list_steam.rs`): `mod-list fix --apply`, `undo --apply`, `sort`,
+- **Mod list** (`mod_list_page.rs`, `mod_list_lists.rs`, `mod_list_steam.rs`): `mod-list write --apply` (Save, 0.108.0: every id one the last listing named, at most 5,000, none twice, sent on standard input), `fix --apply`, `undo --apply`, `sort`,
   `rules --apply`, `compare`, `load --apply`, `save`, `forget`, `export`, `subscribe --apply`, `unsubscribe --apply`. A mod or a
   list must be one the last `mod-list mods`, `lists` or check named in this run; at most 500 mods in one change; a place from 1;
   a Workshop number well formed. Known problems run `feeds read --root --from published`, best effort, then
@@ -648,7 +648,7 @@ offers the overview. Trail steps name an object by a token and the snapshot's nu
 | The tools | The kit's `mod-list` (1.72.0 onwards: `check`, with `--online` when Ask Steam too is on; `fix`, `undo`; 1.73.0 `mods`, `--move`, `--enable`; 1.74.0 `sort`, `rules`; 1.76.0 `lists`, `compare`, `load`, `save`, `forget`, `export`; 1.77.0 `subscribe`, `unsubscribe`) |
 | Games | RimWorld and Project Zomboid (kit adapters); any other game is told in words its list is not read yet |
 | Home | A note when a game's list has problems or warnings, read without Steam at most every half hour. The check is kept in `modlist/latest.svelte.ts`, so Home's note and the page see the same answer |
-| Editing | 40 rows a page; a switched-on mod goes just before the first that needs it, else last; Put it at takes the place number of the row pressed. The carry keys are the list's own (Up, Down, Page Up, Page Down, Home, End, Enter, Escape, Space) |
+| Editing (rebuilt 0.108.0) | `ModListBoard.svelte` over a pure draft (`draft.ts`: switch on before the first mod that needs it, else last; a block moved by steps or beside a mod; Undo; the marks each row shows from the mod's own files, as the draft stands), kept per game and list for the run (`drafts.svelte.ts`). Save is `mod-list write` (kit 1.142.0) with `{ids, was}` on standard input (`mod_list_page::write`, `kit::run_with_input`). Save and Undo are shortcuts in the `modlist` scope (Ctrl + S, Ctrl + Z); the lists' own keys are the board's |
 | Sort | Loops are broken by strength (yours, own, needs, community), the weakest rule set aside and named. The full re-sort puts the game's own first, then by name. The first 60 moves are shown |
 | Shades | 14 % of a role over the raised surface, worked out from each theme; both theme checks hold words to them |
 | Saved lists | A game start is RimWorld's log's `Started:` line (else the Logs folder's time); the copy is kept only when the list is unchanged more than two minutes after the game last wrote its log. 8 lists shown per source |

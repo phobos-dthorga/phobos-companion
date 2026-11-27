@@ -383,7 +383,7 @@ async function open(page: Page, replies: Record<string, unknown> = {}) {
     mod_list_check: { result: check },
     mod_list_mods: { result: listing },
     viewable_file: { result: SAMPLE_PNG },
-    mod_list_edit: changed(ON),
+    mod_list_write: changed(ON),
     mod_list_sort: sorted,
     mod_list_rules: rules,
     mod_list_add_rule: {
@@ -454,98 +454,101 @@ for (const [name, viewport] of [
   test.describe(`Mod list, ${name}`, () => {
     test.use({ viewport });
 
-    test("carrying with the keys moves the chosen mods as one block and saves once", async ({
+    test("chosen mods move with Alt + arrow keys, held until Save writes the whole list once (0.108.0)", async ({
       page,
     }) => {
       await open(page);
       await page
         .getByRole("button", { name: "Edit the list", exact: true })
         .click();
-      const on = page.getByRole("listbox", { name: /Switched on/ });
-      await on.getByRole("option", { name: /Core/ }).focus();
-      await page.keyboard.press("ArrowDown");
-      await page.keyboard.press("ArrowDown");
-      await page.keyboard.press("Space");
-      await page.keyboard.press("ArrowDown");
-      await page.keyboard.press("Space");
-      await expect(page.getByText("2 mods chosen.")).toBeVisible();
-      await shot(page, `${name}-chosen`);
-      await audit(page);
-      await page.keyboard.press("Enter");
+      const on = page.getByRole("listbox", {
+        name: "Mods switched on, in load order",
+      });
+      await on.getByRole("option", { name: /Bravo Beds/ }).click();
+      await on
+        .getByRole("option", { name: /Charlie Crops/ })
+        .click({ modifiers: ["Control"] });
+      await page.keyboard.press("Alt+ArrowUp");
       await expect(
-        page.getByText(/Carrying 2 mods: they will go to place 3/),
+        page.getByText(
+          "Not saved yet: 0 switched on, 0 switched off, 3 moved.",
+          { exact: false },
+        ),
       ).toBeVisible();
-      await page.keyboard.press("ArrowUp");
-      await expect(page.getByText(/they will go to place 2/)).toBeVisible();
-      await shot(page, `${name}-carrying`);
+      expect(await asked(page, "mod_list_write")).toEqual([]);
+      await shot(page, `${name}-board`);
       await audit(page);
-      await page.keyboard.press("Enter");
+      await page.keyboard.press("Control+s");
       await expect
-        .poll(() => asked(page, "mod_list_edit"))
+        .poll(() => asked(page, "mod_list_write"))
         .toEqual([
           {
-            command: "mod_list_edit",
+            command: "mod_list_write",
             game: "first",
             list: "active",
-            action: "move",
-            ids: ["bravo", "charlie"],
-            place: 2,
+            ids: ["core", "bravo", "charlie", "alpha", "delta"],
+            was: ON,
           },
         ]);
     });
 
-    test("a mod found by name takes the chosen mods just after it", async ({
+    test("Enter switches a mod on, Undo takes it back, a double-click switches one off, Throw away returns to the list as read", async ({
       page,
     }) => {
       await open(page);
       await page
         .getByRole("button", { name: "Edit the list", exact: true })
         .click();
-      await page.getByRole("option", { name: /Delta Doors/ }).click();
-      await page.getByRole("button", { name: "Put after…" }).click();
-      await page.keyboard.type("alp");
-      await expect(
-        page.getByRole("button", { name: "After Alpha Tools (place 2)" }),
-      ).toBeVisible();
-      await shot(page, `${name}-finder`);
+      const on = page.getByRole("listbox", {
+        name: "Mods switched on, in load order",
+      });
+      const off = page.getByRole("listbox", { name: "Mods switched off" });
+      const bar = page.getByRole("group", { name: "Changes not saved yet" });
+      await off.getByRole("option", { name: /Echo Engines/ }).click();
       await page.keyboard.press("Enter");
-      await expect
-        .poll(() => asked(page, "mod_list_edit"))
-        .toEqual([
-          {
-            command: "mod_list_edit",
-            game: "first",
-            list: "active",
-            action: "move",
-            ids: ["delta"],
-            place: 3,
-          },
-        ]);
+      await expect(
+        on.getByRole("option", { name: /Echo Engines/ }),
+      ).toBeVisible();
+      await expect(bar).toContainText("1 switched on");
+      await bar.getByRole("button", { name: "Undo" }).click();
+      await expect(
+        off.getByRole("option", { name: /Echo Engines/ }),
+      ).toBeVisible();
+      await on.getByRole("option", { name: /Delta Doors/ }).dblclick();
+      await expect(bar).toContainText("1 switched off");
+      await bar.getByRole("button", { name: "Throw away changes" }).click();
+      await expect(bar).toContainText("No changes waiting");
+      await audit(page);
     });
 
-    test("a mod switched off can be switched on just after one found by name", async ({
+    test("a row says what its own files warn of, as the list being edited stands", async ({
       page,
     }) => {
-      await open(page);
+      await open(page, {
+        mod_list_mods: {
+          result: {
+            ...listing,
+            mods: listing.mods.map((m) =>
+              m.key === "alpha" ? { ...m, load_after: ["charlie"] } : m,
+            ),
+          },
+        },
+      });
       await page
         .getByRole("button", { name: "Edit the list", exact: true })
         .click();
-      await page.getByRole("option", { name: /Echo Engines/ }).click();
-      await page.getByRole("button", { name: "Switch on after…" }).click();
-      await page.keyboard.type("core");
-      await page.keyboard.press("Enter");
-      await expect
-        .poll(() => asked(page, "mod_list_edit"))
-        .toEqual([
-          {
-            command: "mod_list_edit",
-            game: "first",
-            list: "active",
-            action: "enable",
-            ids: ["echo"],
-            place: 2,
-          },
-        ]);
+      const on = page.getByRole("listbox", {
+        name: "Mods switched on, in load order",
+      });
+      await expect(
+        on.getByRole("option", { name: /Alpha Tools/ }),
+      ).toContainText("should load after Charlie Crops, which is below it");
+      await on.getByRole("option", { name: /Alpha Tools/ }).click();
+      await page.keyboard.press("Alt+End");
+      await expect(
+        on.getByRole("option", { name: /Alpha Tools/ }),
+      ).not.toContainText("should load after");
+      await audit(page);
     });
 
     test("the sort shows each move and whose rule, and writes only on Use this order", async ({
@@ -764,13 +767,14 @@ for (const [name, viewport] of [
         ]);
     });
 
-    test("a pasted Workshop link subscribes, waits for the download, then offers to switch it on", async ({
+    test("a pasted Workshop link subscribes, waits for the download, then the mod is chosen to switch on", async ({
       page,
     }) => {
       await open(page);
       await page
         .getByRole("button", { name: "Edit the list", exact: true })
         .click();
+      await page.getByText("Add a mod from the Workshop").click();
       await page
         .getByLabel("Subscribe by Workshop link or number")
         .fill(
@@ -789,22 +793,21 @@ for (const [name, viewport] of [
             wait: true,
           },
         ]);
-      const offer = page
-        .getByRole("paragraph")
-        .filter({ hasText: "Echo Engines is on this PC now." });
-      await expect(offer).toBeVisible();
+      await expect(
+        page.getByText("Echo Engines is on this PC now, chosen on the left"),
+      ).toBeVisible();
       await shot(page, `${name}-subscribed`);
-      await offer.getByRole("button", { name: "Switch on" }).click();
+      await page.getByRole("button", { name: "Switch on →" }).click();
+      await page.keyboard.press("Control+s");
       await expect
-        .poll(() => asked(page, "mod_list_edit"))
+        .poll(() => asked(page, "mod_list_write"))
         .toEqual([
           {
-            command: "mod_list_edit",
+            command: "mod_list_write",
             game: "first",
             list: "active",
-            action: "enable",
-            ids: ["echo"],
-            place: null,
+            ids: [...ON, "echo"],
+            was: ON,
           },
         ]);
     });
@@ -813,7 +816,10 @@ for (const [name, viewport] of [
       await page
         .getByRole("button", { name: "Edit the list", exact: true })
         .click();
-      const panel = page.getByRole("region", { name: "The mod in focus" });
+      const panel = page.getByRole("region", {
+        name: "The mod in focus",
+        exact: true,
+      });
       await expect(panel).toContainText("Choose a mod in either list");
       await page.getByRole("option", { name: /Delta Doors/ }).click();
       await expect(
@@ -853,7 +859,10 @@ for (const [name, viewport] of [
       await page
         .getByRole("button", { name: "Edit the list", exact: true })
         .click();
-      const panel = page.getByRole("region", { name: "The mod in focus" });
+      const panel = page.getByRole("region", {
+        name: "The mod in focus",
+        exact: true,
+      });
       await page.getByRole("option", { name: /Delta Doors/ }).click();
       await expect(
         panel.getByRole("button", { name: "What players say" }),

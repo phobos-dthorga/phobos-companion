@@ -90,17 +90,11 @@ fn text_and_numbers_are_checked_for_shape() {
 }
 
 #[test]
-fn the_editor_lists_and_changes_with_a_place_when_one_is_given() {
+fn the_editor_lists_every_mod() {
     assert_eq!(
         mods_arguments(&zed()),
         ["mod-list", "mods", "--name=Zed Game", "--app-id=108600", "--data", "/games/zed", "--no-redact", "--json"]
     );
-    let moved = edit_arguments(&zed(), "default", "move", &["Some Mod".to_owned(), "Other".to_owned()], Some(3));
-    assert!(moved.contains(&"--move=Some Mod".to_owned()));
-    assert!(moved.contains(&"--move=Other".to_owned()));
-    assert!(moved.windows(2).any(|pair| pair == ["--to", "3"]));
-    assert!(moved.contains(&"--apply".to_owned()));
-    assert!(!edit_arguments(&zed(), "default", "remove", &["Some Mod".to_owned()], None).contains(&"--to".to_owned()));
 }
 
 #[test]
@@ -115,16 +109,6 @@ fn the_sort_writes_only_when_asked_and_rules_keep_the_window_s_text_one_argument
     let top = add_rule_arguments(&zed(), "x", "top", "");
     assert!(top.contains(&"--top".to_owned()) && top.contains(&"--apply".to_owned()));
     assert!(drop_rule_arguments(&zed(), 2).windows(2).any(|pair| pair == ["--drop", "2"]));
-}
-
-#[test]
-fn several_mods_at_once_are_checked_for_shape() {
-    let two = ["a".to_owned(), "b".to_owned()];
-    assert!(sane_ids(&two));
-    assert!(!sane_ids(&[]));
-    assert!(!sane_ids(&["a".to_owned(), "a".to_owned()]));
-    let many: Vec<String> = (0..=MAX_TOGETHER).map(|n| format!("m{n}")).collect();
-    assert!(!sane_ids(&many));
 }
 
 #[test]
@@ -145,13 +129,10 @@ fn a_listing_names_its_mods_entries_and_the_lists_the_kit_changes() {
 }
 
 #[test]
-fn the_editor_refuses_unknown_mods_odd_places_and_other_changes() {
-    let x = ["x".to_owned()];
-    assert!(edit("rimworld", "active", "remove-extra", &x, None, None).is_err());
-    assert!(edit("rimworld", "active", "move", &x, None, None).is_err());
-    assert!(edit("rimworld", "active", "move", &x, Some(0), None).is_err());
-    assert!(edit("rimworld", "active", "move", &x, Some(MAX_PLACE + 1), None).is_err());
-    assert!(edit("rimworld", "active", "remove", &["never.listed".to_owned()], None, None).is_err());
+fn save_refuses_mods_and_lists_no_listing_named() {
+    let was = ["never.listed".to_owned()];
+    assert!(write("rimworld", "active", &["x".to_owned()], &was, None).is_err());
+    assert!(write("rimworld", "never.a.list", &was, &was, None).is_err());
 }
 
 #[test]
@@ -161,4 +142,20 @@ fn the_sort_and_rules_refuse_unknown_lists_mods_kinds_and_numbers() {
     assert!(add_rule("rimworld", "never.listed", "after", "also.never").is_err());
     assert!(drop_rule("rimworld", 0).is_err());
     assert!(drop_rule("rimworld", MAX_RULE + 1).is_err());
+}
+
+#[test]
+fn save_hands_the_kit_the_whole_list_on_its_input_never_as_arguments() {
+    let ids: Vec<String> = ["ludeon.rimworld", "Some Mod With Spaces"].iter().map(|s| (*s).to_owned()).collect();
+    let was: Vec<String> = vec!["ludeon.rimworld".to_owned()];
+    let input: serde_json::Value = serde_json::from_slice(&write_input(&ids, &was).unwrap()).unwrap();
+    assert_eq!(input["ids"][1], "Some Mod With Spaces");
+    assert_eq!(input["was"][0], "ludeon.rimworld");
+    let twice: Vec<String> = vec!["a".to_owned(), "a".to_owned()];
+    assert!(write_input(&twice, &was).is_err());
+    assert!(write_input(&["a\nb".to_owned()], &was).is_err());
+    let too_many: Vec<String> = (0..=MAX_WRITTEN).map(|n| format!("m{n}")).collect();
+    assert!(write_input(&too_many, &was).is_err());
+    // An unread list is refused before the kit is asked.
+    assert!(write("no-such-game-here", "active", &ids, &was, None).is_err());
 }

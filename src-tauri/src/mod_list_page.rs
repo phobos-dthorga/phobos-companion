@@ -34,21 +34,18 @@ use std::sync::Mutex;
 pub(crate) const TOOL: &str = "mod-list";
 const CHECK: &str = "check";
 const FIX: &str = "fix";
+/// A whole new list at once: the board's Save (phobos-modkit 1.142.0).
+const WRITE: &str = "write";
+/// The most mods one Save may name (the kit's own limit).
+pub const MAX_WRITTEN: usize = 5000;
 const UNDO: &str = "undo";
 const MODS: &str = "mods";
 const SORT: &str = "sort";
 const RULES: &str = "rules";
-/// The editor's changes (0.46.0): switch off, switch on, move; each saved at once on the owner's press.
-pub const EDITS: [&str; 3] = ["remove", "enable", "move"];
-/// The most mods one press changes together (0.47.0): every mod a list could sensibly hold, and short of the system's longest
-/// command line at the kit's longest ids.
-pub const MAX_TOGETHER: usize = 500;
 /// Where one of the owner's rules says a mod loads (the kit's `mod-list rules`).
 pub const RULE_KINDS: [&str; 4] = ["after", "before", "top", "bottom"];
 /// The highest rule number the host passes on: far beyond any owner's list of rules.
 pub const MAX_RULE: u32 = 10_000;
-/// The furthest place the host passes on: far beyond any list's length; the kit keeps a place inside the list.
-pub const MAX_PLACE: u32 = 100_000;
 /// The changes the kit makes (`mod-list fix --remove`, `--remove-extra`, `--enable`).
 pub const ACTIONS: [&str; 3] = ["remove", "remove-extra", "enable"];
 /// The longest list key or mod id the host passes on: the kit's own are far shorter.
@@ -133,19 +130,6 @@ pub fn mods_arguments(game: &GamePlaces) -> Vec<String> {
     named(Args::new(TOOL, MODS), game).flag("--no-redact").json()
 }
 
-pub fn edit_arguments(game: &GamePlaces, list: &str, action: &str, ids: &[String], place: Option<u32>) -> Vec<String> {
-    let mut arguments = named(Args::new(TOOL, FIX), game).given("--list", list);
-    for id in ids {
-        arguments = arguments.given(&format!("--{action}"), id);
-    }
-    let arguments = match place {
-        Some(place) => arguments.pair("--to", &place.to_string()),
-        None => arguments,
-    };
-    arguments.flag("--apply").flag("--no-redact").json()
-}
-
-/// The mods a listing names (on this PC, or on one of its lists) and the lists the kit changes.
 pub fn known_by(game: &str, data: &Value) -> (Vec<ListOf>, Vec<ListOf>) {
     let array = |value: &Value| value.as_array().map_or(&[][..], Vec::as_slice).to_vec();
     let mut ids: Vec<ListOf> = array(&data["mods"])
@@ -202,36 +186,39 @@ pub(crate) fn known_list(game: &str, list: &str) -> bool {
     sane_text(list) && LISTS.lock().map(|lists| lists.contains(&(game.to_owned(), list.to_owned()))).unwrap_or(false)
 }
 
-/// Several mods named at once: each a sane id the last listing named, none twice, and not too many.
-pub fn sane_ids(ids: &[String]) -> bool {
+/// The input Save hands the kit on standard input: the new list, and the one the editing began from.
+pub fn write_input(ids: &[String], was: &[String]) -> Result<Vec<u8>, String> {
+    let sane = |all: &[String]| all.len() <= MAX_WRITTEN && all.iter().all(|id| sane_text(id));
     let unique: BTreeSet<&String> = ids.iter().collect();
-    !ids.is_empty() && ids.len() <= MAX_TOGETHER && unique.len() == ids.len() && ids.iter().all(|id| sane_text(id))
+    if !sane(ids) || !sane(was) || unique.len() != ids.len() {
+        return Err("that is not a list the tools write".to_owned());
+    }
+    serde_json::to_vec(&serde_json::json!({"ids": ids, "was": was})).map_err(|e| e.to_string())
 }
 
-/// One change from Edit the list, saved at once: switch mods off or on, or move them to a place (1 is first); several mods
-/// named together move or switch as one block (0.47.0).
-pub fn edit(
+pub fn write_arguments(game: &GamePlaces, list: &str) -> Vec<String> {
+    named(Args::new(TOOL, WRITE), game).given("--list", list).flag("--apply").flag("--no-redact").json()
+}
+
+/// Save on the rebuilt Edit the list (0.108.0; the owner's choice of 27 Nov 2026, "Hold until Save"): the whole draft at once,
+/// on the owner's press, only mods and a list the last listing named, while the manifest calls `mod-list write` `writes`. The
+/// kit keeps a backup, refuses while the game or a mod manager runs, and refuses a list changed since the editing began.
+pub fn write(
     game: &str,
     list: &str,
-    action: &str,
     ids: &[String],
-    place: Option<u32>,
+    was: &[String],
     listener: Option<kit::Listener>,
 ) -> Result<ChangeResult, Failure> {
     let found = places(game)?;
-    if !EDITS.contains(&action) || !sane_text(list) || !sane_ids(ids) {
-        return Err(Failure::refused("that is not a change the tools make"));
-    }
-    if place.is_some_and(|place| place == 0 || place > MAX_PLACE) || (action == "move" && place.is_none()) {
-        return Err(Failure::refused("that is not a place on the list"));
-    }
-    if !ids.iter().all(|id| known_mod(game, id)) || !known_list(game, list) {
+    let input = write_input(ids, was).map_err(Failure::refused)?;
+    if !known_list(game, list) || !ids.iter().chain(was).all(|id| known_mod(game, id)) {
         return Err(Failure::refused(
-            "only a mod and a list the last listing named can be changed: read the list again first",
+            "only mods and a list the last listing named can be saved: read the list again first",
         ));
     }
-    allowed_by_manifest(&kit::read_manifest()?, TOOL, FIX).map_err(Failure::refused)?;
-    Ok(result_of(&kit::run_hearing(TOOL, &edit_arguments(&found, list, action, ids, place), listener)?))
+    allowed_by_manifest(&kit::read_manifest()?, TOOL, WRITE).map_err(Failure::refused)?;
+    Ok(result_of(&kit::run_with_input(TOOL, &write_arguments(&found, list), listener, Some(&input))?))
 }
 
 pub fn sort_arguments(game: &GamePlaces, list: &str, full: bool, apply: bool) -> Vec<String> {

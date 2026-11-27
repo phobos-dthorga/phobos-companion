@@ -85,21 +85,17 @@ export async function readMods(
   );
 }
 
-/**
- * One change from Edit the list, saved at once: remove (switch off), enable (switch on) or move one mod or several (0.47.0);
- * `place` counts from 1, and several mods go there as one block.
- */
-export async function editModList(
+/** Save on the rebuilt Edit the list (0.108.0): the whole draft at once, with the list it began from; the tools keep a backup. */
+export async function writeModList(
   game: string,
   list: string,
-  action: "remove" | "enable" | "move",
   ids: string[],
-  place: number | null,
+  was: string[],
   onProgress?: OnProgress,
 ): Promise<Edited | Failed> {
   return ask<EditAnswer, Edited>(
-    "mod_list_edit",
-    { game, list, action, ids, place, onProgress: progressChannel(onProgress) },
+    "mod_list_write",
+    { game, list, ids, was, onProgress: progressChannel(onProgress) },
     (result) => ({ state: "ready", result }),
   );
 }

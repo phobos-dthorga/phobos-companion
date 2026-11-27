@@ -1473,6 +1473,23 @@ mod abandoned?" is a press instead of a script (phobos-rimworld's rule: read a m
 steamcommunity.com) rather than a new kind; a dialog over the window, since the preview panel keeps one height so the list never
 moves under the pointer.
 
+## The Mod list's Edit the list, rebuilt (built 27 Nov 2026, 0.108.0)
+
+**The owner's request** (27 Nov 2026): "The mod list page needs a total redo in my opinion and we need to take lessons from
+RimSort ... how the players move mods around and how mods are displayed. Right now, we are asking way too much of them." Their
+choices by card: "Sort first, then screen" (the sort came first, 0.107.2) and "Hold until Save".
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Move and switch mods freely, as in RimSort (two lists, a filter each, drag, Ctrl and Shift choosing, double-click), see each mod's warnings change as they go, and write once with Save |
+| What does it stop them doing? | Writing a half-finished list by accident: nothing reaches the game until Save; Save refuses a list the game or another manager changed meanwhile |
+| How does it change the way they work? | No carry mode, find-to-place or place numbers to learn; one Save instead of a backup per move |
+| What outside it notices? | The game's list of active mods, on Save only; the kit's backups and history log |
+
+**Risk (agent's grade): low.** Save keeps a backup and Go back on the last change undoes it. **Agent choices, owner to revise:**
+rows warn from the mod's own files only (the full check runs after Save); a switched-on mod goes before the first that needs it,
+else last; unsaved changes last for the run of the program, not across restarts.
+
 Everything proposed and agreed but not yet built is in [later.md](later.md), with each item's status.
 
 ## Limits

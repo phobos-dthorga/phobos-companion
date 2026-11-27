@@ -20,15 +20,17 @@ Four views, chosen at the top: **What's wrong**, **Edit the list**, **Sort** and
 **A change offered here waits for your yes on its card.** **Open in Steam** opens a mod's Workshop page in Steam, where you subscribe. **Ask Steam too** (on by default) checks which Workshop items still exist; it takes a few seconds more.
 
 ### Edit the list
-Every mod on this PC, in one scroll: **Switched on**, in load order, and **Switched off**, by name. **Find a mod** searches names, ids and authors; **Show** and **From** narrow the list. A badge says where each mod comes from: **Workshop**, **Your own folder** or **The game**.
+Two lists side by side, as RimSort lays them out: **Switched off** on the left, by name, and **switched on** on the right, in load order. Each has its own **filter** (by name, id or author). A badge says where each mod comes from: **Workshop**, **Your own folder** or **The game**.
 
-- **Choose** mods with **Space** or a click (a tick shows); **Up** and **Down** walk the list.
-- **Carry (Enter)**: **Up** and **Down** move the chosen mods one place, **Page Up** and **Page Down** ten, **Home** and **End** to either end; **Enter** puts them down, **Escape** cancels.
-- **Put after…** or **Put before…**: type part of another mod's name, then press **Enter** on the match.
-- **Place** and **Move to**: a place number. **Switch off**, **Switch on**, **Switch on after…**.
-- **Dragging** rows with the mouse works too, as a shortcut.
-- **What players say**, beside the picture of a Workshop mod in focus: its last update, the newest comments that mention problems, and the author's latest replies, read from its public Workshop page in a window over the list. Useful before trusting a mod, or to see whether its author is still about. It only reads, and needs **Workshop pages** on in [Going online](task-going-online).
-- **Each change is saved once, when you make it**: several mods moved together are one change.
+- **Choose** with a click; **Ctrl + click** adds one, **Shift + click** a run; **↑** and **↓** walk a list, **Space** chooses, **Ctrl + A** chooses everything shown.
+- **Switch** the chosen mods to the other list with **Enter**, a **double-click**, or **Switch on →** and **← Switch off**. A mod switched on goes just before the first mod that needs it, else last.
+- **Move** the chosen mods with **Alt + ↑ ↓** (**Alt + Page Up, Page Down, Home, End** go further), or **To the top**, **Up**, **Down**, **To the bottom**. **Dragging** works too, as a shortcut.
+- **Each row says what its own files warn of**, as the list you are making stands: a mod it needs that is off, one it should load after that sits below it, one it should load before that sits above it, one it does not work with, or files not on this PC. Move it and the warning goes.
+- **Details of the mod in focus**: its picture, folder, what it needs and loads after or before, **What players say** (its Workshop page: last update, comments that mention problems, the author's latest replies; needs **Workshop pages** on in [Going online](task-going-online)) and **Unsubscribe…** (asked first).
+- **Nothing is written until you press Save** (**Ctrl + S**). The bar above says what is waiting: how many switched on, switched off and moved. **Undo** (**Ctrl + Z**) takes back one step, **Throw away changes** returns to the list as the game reads it. Save keeps a backup, and waits while the game or another mod manager is open. If the game, a save or RimSort changed the list meanwhile, Save says so and writes nothing.
+- **Go back on the last change** puts the list back as it was before the last save (or any change made here).
+- Unsaved changes stay while you visit other pages, until the program closes.
+- **Add a mod from the Workshop** takes a link or number, subscribes, and chooses the mod on the left once it is here.
 
 ### Sort
 - **Sort: fewest moves** keeps your order and moves only the mods a rule says are in the wrong place. **Full re-sort** rebuilds the order from the rules and groups, and **keeps your order wherever no rule decides**: no mod moves just for its name.

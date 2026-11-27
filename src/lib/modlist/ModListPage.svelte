@@ -16,7 +16,7 @@
     undoModList,
   } from "./desktopClient";
   import { keep } from "./latest.svelte";
-  import ModListEditor from "./ModListEditor.svelte";
+  import ModListBoard from "./ModListBoard.svelte";
   import ModListSaved from "./ModListSaved.svelte";
   import ModListSort from "./ModListSort.svelte";
   import SinceNote from "./SinceNote.svelte";
@@ -187,7 +187,7 @@
 </div>
 
 {#if view === "edit"}
-  <ModListEditor {game} />
+  <ModListBoard {game} />
 {:else if view === "sort"}
   <ModListSort {game} />
 {:else if view === "saved"}

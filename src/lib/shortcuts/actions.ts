@@ -14,7 +14,9 @@ export type Scope =
   /** The Picks page (0.55.0). */
   | "picks"
   /** The Publish page (0.69.0). */
-  | "publish";
+  | "publish"
+  /** The Mod list's Edit the list (0.108.0). */
+  | "modlist";
 
 export type Action = {
   id: string;
@@ -548,6 +550,19 @@ export const ACTIONS: Action[] = [
     defaultKey: "b",
     words: "shortcut-explorer-browse-frozen",
   },
+  // 0.108.0: the rebuilt Edit the list holds changes until Save (the owner's choice of 27 Nov 2026, "Hold until Save").
+  {
+    id: "modlist.save",
+    scope: "modlist",
+    defaultKey: "Ctrl+s",
+    words: "shortcut-modlist-save",
+  },
+  {
+    id: "modlist.undo",
+    scope: "modlist",
+    defaultKey: "Ctrl+z",
+    words: "shortcut-modlist-undo",
+  },
 ];
 
 export const SCOPES: { scope: Scope; words: string }[] = [
@@ -559,6 +574,7 @@ export const SCOPES: { scope: Scope; words: string }[] = [
   { scope: "media", words: "shortcut-scope-media" },
   { scope: "picks", words: "shortcut-scope-picks" },
   { scope: "publish", words: "shortcut-scope-publish" },
+  { scope: "modlist", words: "shortcut-scope-modlist" },
 ];
 
 /**
@@ -576,6 +592,7 @@ const TOGETHER: Record<Scope, Scope[]> = {
     "media",
     "picks",
     "publish",
+    "modlist",
   ],
   code: ["everywhere", "code", "connections", "media"],
   connections: ["everywhere", "code", "connections"],
@@ -584,6 +601,7 @@ const TOGETHER: Record<Scope, Scope[]> = {
   media: ["everywhere", "code", "media", "picks"],
   picks: ["everywhere", "media", "picks"],
   publish: ["everywhere", "publish"],
+  modlist: ["everywhere", "modlist"],
 };
 
 /** Whether two scopes' keys can work at the same moment, so may not share a key. */

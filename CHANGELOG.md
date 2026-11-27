@@ -4,6 +4,16 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.114.0] - 2026-11-28
+
+### Added
+
+- **Workshop updates waiting** (the owner's choice of 28 Nov 2026, the last piece of retiring RimSort). The Mod list's What's
+  wrong now opens with the Workshop mods Steam has not brought up to date (a newer version waits, part downloaded, or subscribed but
+  never downloaded), read from Steam's own record, and says when the game is running, since Steam usually fetches them once it
+  closes. **Fetch them again** asks the running Steam client to download them now, refused while the game runs. From kit
+  1.147.0's `mod-list updates`, now pinned. **Not tested on screen, and Fetch them again not yet against a real Steam client.**
+
 ## [0.113.0] - 2026-11-28
 
 ### Added

@@ -1489,6 +1489,28 @@ store.steampowered.com) rather than a new kind; the DLC found by every word of t
 matching none reading the game itself; 50 newest reviews read (about 4 seconds), 8 that do not recommend it shown and 3 that do.
 **For a next game:** nothing more than its Steam app ID in the games list.
 
+## Workshop updates waiting (built 28 Nov 2026, kit 1.147.0, 0.114.0; M6d)
+
+**The owner's choice** (card, 28 Nov 2026): "Workshop updates waiting", the last piece of retiring RimSort. What's wrong now opens with
+the Workshop mods Steam has not brought up to date, read from Steam's own record of them, and **Fetch them again**.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See which mods Steam holds an update for, or never finished downloading; ask Steam for them now |
+| What does it stop them doing? | Nothing; Fetch them again is refused while the game runs |
+| How does it change the way they work? | No trip to RimSort or Steam's Workshop page to find a stuck or waiting mod |
+| What outside it notices? | The Steam client, asked as the game to download the named items, on the press only |
+
+**Observed (28 Nov 2026):** Steam's record (`appworkshop_294100.acf`) keeps each item's files on disk beside the newest version it
+knows; with the owner's game running it named two mods with a newer version waiting (Fortified Features Framework and The Dead
+Man's Switch - Expedition) and none downloading. Reading it needs no login; the record's account fields are never read out.
+**Untested against a real Steam client:** Fetch them again uses the same Steamworks session as subscribing, which agents never run
+on the owner's account; its first real use is the owner's press.
+
+**Risk: none (agent's grade).** **Agent choices, owner to revise:** one button for every item shown; the panel only when something
+is not up to date; Steam's holding updates while the game runs is said as its usual behaviour, not confirmed. **For a next game:**
+its Steam app ID; the record is Steam's own for every game.
+
 ## todds without RimSort, and Start the game (built 28 Nov 2026, kit 1.145.0 and 1.146.0, 0.113.0; M6b and M6c)
 
 **The owner's choices** (card, 28 Nov 2026): "todds without RimSort" and "Save and start the game", the second and third pieces of

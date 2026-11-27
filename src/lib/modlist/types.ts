@@ -227,6 +227,28 @@ export type RulesListing = {
   };
 };
 
+/** One Workshop item Steam has not brought up to date (0.114.0, kit 1.147.0). */
+export type WorkshopUpdate = {
+  workshop_id: string;
+  state: "waiting" | "downloading" | "missing";
+  id: string;
+  name: string;
+  words: string;
+  installed_at: number;
+  newest_at: number;
+  downloaded: number;
+  to_download: number;
+};
+
+/** The Workshop items Steam has not brought up to date, and whether the game runs (Steam holds its updates meanwhile). */
+export type WorkshopUpdates = {
+  record: boolean;
+  items: WorkshopUpdate[];
+  needsUpdate: boolean;
+  needsDownload: boolean;
+  gameRunning: boolean;
+};
+
 /** One community list the sorter and the check read (0.112.0, kit 1.144.0): whose copy is read and how old it is. */
 export type CommunityList = {
   name: string;

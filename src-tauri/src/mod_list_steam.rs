@@ -26,6 +26,7 @@ use companion_core::failure::Failure;
 use companion_core::games::GamePlaces;
 use companion_core::kit::{self, Answer, allowed_by_manifest};
 use companion_core::online;
+use serde_json::Value;
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -36,6 +37,8 @@ const REPORT: &str = "report";
 /// The going-online kind its calls belong to.
 const WORKSHOP_PAGES: &str = "workshop-pages";
 const UNSUBSCRIBE: &str = "unsubscribe";
+/// The kit's reading of Workshop items Steam has not brought up to date, and fetching them again (phobos-modkit 1.147.0).
+const UPDATES: &str = "updates";
 /// The kit's start of the game through Steam (phobos-modkit 1.146.0).
 const START: &str = "start";
 /// The kit's game-free reading of a game's or a DLC's Steam reviews (phobos-modkit `steam-reviews`, 1.143.0).
@@ -111,6 +114,44 @@ pub fn unsubscribe(
     }
     allowed_by_manifest(&kit::read_manifest()?, TOOL, UNSUBSCRIBE).map_err(Failure::refused)?;
     Ok(result_of(&kit::run_hearing(TOOL, &unsubscribe_arguments(&found, list, numbers), listener)?))
+}
+
+pub fn updates_arguments(game: &GamePlaces) -> Vec<String> {
+    named(Args::new(TOOL, UPDATES), game).flag("--no-redact").json()
+}
+
+pub fn fetch_again_arguments(game: &GamePlaces, numbers: &[String]) -> Vec<String> {
+    let mut arguments = named(Args::new(TOOL, UPDATES), game);
+    for number in numbers {
+        arguments = arguments.given("--item", number);
+    }
+    arguments.flag("--apply").flag("--no-redact").json()
+}
+
+/// The Workshop items Steam has not brought up to date (0.114.0; the owner's choice of 28 Nov 2026, "Workshop updates waiting"),
+/// from Steam's own record of them. Only reads; the items it names may then be fetched again.
+pub fn updates(game: &str, listener: Option<kit::Listener>) -> Result<Value, Failure> {
+    let found = places(game)?;
+    let data = kit::run_hearing(TOOL, &updates_arguments(&found), listener)?["data"].clone();
+    if let (Ok(mut known), Some(items)) = (WORKSHOP.lock(), data["items"].as_array()) {
+        known.extend(items.iter().filter_map(|item| item["workshop_id"].as_str()).map(str::to_owned));
+    }
+    Ok(data)
+}
+
+/// Asks the running Steam client to download these items now, on the owner's press: only numbers a listing named, while the
+/// manifest calls `mod-list updates` `writes`; the kit refuses while the game runs.
+pub fn fetch_again(game: &str, numbers: &[String], listener: Option<kit::Listener>) -> Result<ChangeResult, Failure> {
+    let found = places(game)?;
+    if !sane_numbers(numbers) {
+        return Err(Failure::refused("those are not Workshop numbers"));
+    }
+    let known = WORKSHOP.lock().map(|known| numbers.iter().all(|n| known.contains(n))).unwrap_or(false);
+    if !known {
+        return Err(Failure::refused("only items the last reading named can be fetched again: read them again first"));
+    }
+    allowed_by_manifest(&kit::read_manifest()?, TOOL, UPDATES).map_err(Failure::refused)?;
+    Ok(result_of(&kit::run_hearing(TOOL, &fetch_again_arguments(&found, numbers), listener)?))
 }
 
 pub fn start_arguments(game: &GamePlaces) -> Vec<String> {

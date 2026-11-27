@@ -73,3 +73,14 @@ fn starting_the_game_names_it_and_always_applies() {
     assert!(arguments.contains(&"--name=Zed Game".to_owned()) && arguments.contains(&"--apply".to_owned()));
     assert!(start_game("not a game").is_err());
 }
+
+#[test]
+fn fetching_again_names_each_item_applies_and_takes_only_named_items() {
+    let read = updates_arguments(&zed());
+    assert_eq!(read[..2], ["mod-list", "updates"]);
+    assert!(!read.contains(&"--apply".to_owned()));
+    let again = fetch_again_arguments(&zed(), &["3498575851".to_owned()]);
+    assert!(again.contains(&"--item=3498575851".to_owned()) && again.contains(&"--apply".to_owned()));
+    assert!(fetch_again("rimworld", &["not a number".to_owned()], None).is_err());
+    assert!(fetch_again("rimworld", &["7777777777".to_owned()], None).is_err());
+}

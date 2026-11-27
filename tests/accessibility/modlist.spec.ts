@@ -210,6 +210,27 @@ const fullSorted = {
   },
 };
 
+/** One invented Workshop mod with a newer version waiting (0.114.0); the game is not running. */
+const workshopUpdates = {
+  record: true,
+  items: [
+    {
+      workshop_id: "1000000098",
+      state: "waiting",
+      id: "bravo",
+      name: "Bravo Beds",
+      words: "a newer version waits",
+      installed_at: 100,
+      newest_at: 200,
+      downloaded: 0,
+      to_download: 0,
+    },
+  ],
+  needsUpdate: true,
+  needsDownload: false,
+  gameRunning: false,
+};
+
 /** The community lists (0.112.0), one the Companion's copy and one RimSort's, gone stale. */
 const communityLists = {
   databases: [
@@ -420,6 +441,10 @@ async function open(page: Page, replies: Record<string, unknown> = {}) {
     mod_list_sort: sorted,
     mod_list_rules: rules,
     mod_list_databases: { result: communityLists },
+    mod_list_updates: { result: workshopUpdates },
+    mod_list_fetch_again: {
+      result: { ok: true, title: "asked", refusal: null, data: {} },
+    },
     mod_list_start: {
       result: { ok: true, title: "started", refusal: null, data: {} },
     },
@@ -1014,6 +1039,25 @@ for (const [name, viewport] of [
       expect(await asked(page, "mod_list_start")).toHaveLength(1);
       expect(await asked(page, "mod_list_write")).toHaveLength(0);
       await audit(page);
+    });
+
+    test("Workshop mods Steam has not brought up to date are named, and fetched again on a press (0.114.0)", async ({
+      page,
+    }) => {
+      await open(page);
+      const updates = page.getByRole("region", {
+        name: "One Workshop mod is not up to date",
+      });
+      await expect(updates).toContainText("Bravo Beds");
+      await expect(updates).toContainText("a newer version waits");
+      await audit(page);
+      await updates.getByRole("button", { name: "Fetch them again" }).click();
+      await expect(updates.getByRole("status")).toContainText(
+        "Steam was asked",
+      );
+      expect(await asked(page, "mod_list_fetch_again")).toEqual([
+        expect.objectContaining({ numbers: ["1000000098"] }),
+      ]);
     });
 
     test("new errors after a change are named, with Undo asked first and a way to a list that ran clean", async ({

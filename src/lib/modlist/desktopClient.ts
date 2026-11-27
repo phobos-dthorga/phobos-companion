@@ -2,6 +2,7 @@ import { ask, progressChannel } from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
 import type {
+  WorkshopUpdates,
   CommunityLists,
   CompareAnswer,
   SubscribeAnswer,
@@ -157,6 +158,31 @@ export async function readCommunityLists(
     "mod_list_databases",
     { game, fetch, stale, onProgress: progressChannel(onProgress) },
     (lists) => ({ state: "ready", lists }),
+  );
+}
+
+/** The Workshop items Steam has not brought up to date (0.114.0). Only reads. */
+export async function readWorkshopUpdates(
+  game: string,
+  onProgress?: OnProgress,
+): Promise<{ state: "ready"; updates: WorkshopUpdates } | Failed> {
+  return ask<WorkshopUpdates, { state: "ready"; updates: WorkshopUpdates }>(
+    "mod_list_updates",
+    { game, onProgress: progressChannel(onProgress) },
+    (updates) => ({ state: "ready", updates }),
+  );
+}
+
+/** Asks Steam to download these Workshop items again now (0.114.0), on a press; refused while the game runs. */
+export async function fetchAgain(
+  game: string,
+  numbers: string[],
+  onProgress?: OnProgress,
+): Promise<Changed | Failed> {
+  return ask<ModListChange, Changed>(
+    "mod_list_fetch_again",
+    { game, numbers, onProgress: progressChannel(onProgress) },
+    (result) => ({ state: "ready", result }),
   );
 }
 

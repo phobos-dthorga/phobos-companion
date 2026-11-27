@@ -22,6 +22,7 @@
   import ModListSaved from "./ModListSaved.svelte";
   import ModListSort from "./ModListSort.svelte";
   import SinceNote from "./SinceNote.svelte";
+  import WorkshopUpdates from "./WorkshopUpdates.svelte";
   import {
     HEADING,
     MARK,
@@ -255,6 +256,7 @@
           {t("modlist-running", { names: check.running.join(", ") })}
         </p>
       {/if}
+      <WorkshopUpdates game={game.id} name={game.name} />
       {#if check.lists.length === 0}
         <p>{t("modlist-no-lists")}</p>
       {/if}

@@ -207,6 +207,8 @@ under the same manifest check as the press.
 | `features.json` | Core, `agents.rs` | Settings → Agents | One of the known choices; `prefs` |
 | `online.json` | Core, `online.rs` | Settings → Going online | A kind from `KINDS` (`updates` since 0.85.0); `prefs` |
 | `publishing.json` | Host, `publish_page.rs` | Settings → Publishing | `prefs` |
+| `reading-ahead.json` | Host, `kept_answers.rs` (0.116.0) | Settings → Games, Read the slow pages ahead | On or off (starts on); `prefs` |
+| `answers/<command>/<key>.json` | Host, `kept_answers.rs` (0.116.0) | After each slow reading `KEPT` names, **without a press** | Only those commands, keys of plain names; written whole and moved into place; never a record (the kit's `records` leaves it out) |
 | `setup.json` | Host, `setup_page.rs` | Settings → Setup, I don't need it (0.87.0) | Keys of programs the tools list, sorted, each once; `prefs` |
 | `chat.json` | Host, `chat_page.rs` | Settings → AI, Chat with an agent | On or off (starts off), an agent from `config/chat-agents.json`, and since 0.84.0 how its commands are handled (`refused`, `ask`, `automatic`; Ask when absent), sorted by `companion_core::commands` from `config/chat-commands.json` and run by `companion_core::terminals`; `prefs` |
 | `ai.json` | Core, `ai.rs` | Settings → AI services: a service, a model, a length | A service from `config/ai-services.json`; a model of one line; `prefs` |

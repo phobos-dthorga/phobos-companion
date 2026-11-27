@@ -272,7 +272,13 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   - **Back up now** (0.22.0): a copy of this program's records into a new dated folder in the folder the owner chose, while the
     manifest calls it `writes`; it never deletes a copy. **It also runs by itself** (0.29.0; owner, 20 Nov 2026: "every few hours
     when it's open, and if the schedule is missed, the soonest next opportunity"), under the same check, and Home says when one
-    failed and why. **It is the one write this program makes without a press;**
+    failed and why. **It is the one record this program writes without a press;**
+  - **Kept answers** (0.116.0; the owner's choices of 28 Nov 2026, `docs/design-record.md`, "Speed"): after each of the slow
+    readings `kept_answers::KEPT` names, its answer is written whole into `answers/` in this program's folder, without a press, so
+    the page shows it at once next time while it reads again. **Never a record**: the kit's `records` leaves the folder out. A page
+    showing one **holds every button that changes something until the fresh answer lands**; a new slow reading that keeps its
+    answer does the same. **Reading ahead** (Settings → Games, on by default: it only reads) has the window ask those readings by
+    itself, in the Background lane; the host refuses one asked ahead while it is off;
   - **Copy now** (0.42.0), for a repository with `config/safe-copies.json`, while the manifest calls it `writes`: into the folders
     the owner chose and marked, and a push of the private repository the owner chose. It deletes nothing at a source and lets go
     only older copies beyond the number a set keeps (the saves, kit 1.68.0); the kit keeps anything made from a game's or the
@@ -318,6 +324,11 @@ The layers, the folder map, a page's parts, how the kit runs and how to add a pa
   `@tauri-apps/*` (`src/lib/shell/tauriImports.test.ts` holds it). Tauri commands stay thin: one line of delegation each, through
   `blocking` in `src-tauri/src/lib.rs`. **The one exception is a command sent raw bytes** (`save_picture`, `save_screen_note`): a
   raw body comes only with the request itself, so the command takes the bytes and its one header out first, then delegates.
+- **Slow readings take turns; presses never wait** (0.116.0; the owner's speed round of 28 Nov 2026: a page's reading ran three to
+  four times slower beside a dozen others). A command that only reads and can take seconds runs through `queued`, or `reading`
+  when its answer is kept, in `src-tauri/src/lib.rs` (`companion_core::lanes`: at most three at once, readings ahead one at a time
+  behind them). **A press, a write and a long run (a watch, a snapshot, an agent) stay in the Free lane**, so the queue never holds
+  up what the person asked to happen. The kit's manifest is kept in memory until the kit's files change (`kit::read_manifest`).
 - **Code more than one part uses lives once** (owner, 19 Nov 2026; `docs/history/shared-code-audit.md`): in the host, the `companion-core`
   crate (`src-tauri/core`), which holds no Tauri; in the window, `src/lib/shell/`, `src/lib/changelog/` and `src/app.css`. A
   page's own module keeps only what is its own. Every request goes through `ask` (and `BROWSER` outside the program), every kit

@@ -16,8 +16,12 @@ use companion_core::games::{self, Repository};
 use companion_core::kit::{self, Outcome, allowed_by_manifest};
 use serde::Serialize;
 use serde_json::Value;
+use std::collections::BTreeMap;
+use std::collections::hash_map::DefaultHasher;
 use std::fs;
+use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 
 const TOOL: &str = "installs";
 const STATUS: &str = "status";
@@ -63,17 +67,84 @@ fn config_path(path: &Path) -> PathBuf {
 /// Every repository of a game that opts in, read through the kit.
 pub fn read(game: &str, listener: Option<kit::Listener>) -> Result<Vec<RepositoryInstalls>, Failure> {
     let mut found = Vec::new();
+    let mut looked = Vec::new();
     for repository in with_installs(game)? {
         let answer = kit::run_hearing(TOOL, &status_arguments(&repository.path), listener)?;
         Outcome::required(&answer)?;
         crate::viewable::remember(crate::viewable::in_installs(&answer["data"]));
+        looked.push((repository.path.clone(), installed_folders(&answer["data"])));
         found.push(RepositoryInstalls {
             status: answer["data"].clone(),
             command_line: format!("python scripts/installs.py status   (in {})", repository.name),
             repository: repository.name,
         });
     }
+    LOOKED_AT.lock().unwrap_or_else(std::sync::PoisonError::into_inner).insert(game.to_owned(), looked);
     Ok(found)
+}
+
+// ---------------------------------------------------------------- a quick look on coming back (0.116.0)
+
+/// What the last read of each game named, for this run only: each repository's folder, and its install folder and the folders
+/// its mods are installed in.
+static LOOKED_AT: Mutex<BTreeMap<String, Vec<Looked>>> = Mutex::new(BTreeMap::new());
+
+/// One repository's folder, with the install folder and the installed mods' folders its last read named.
+type Looked = (PathBuf, Vec<PathBuf>);
+
+/// The install folder and every installed mod's folder an `installs status` answer names.
+pub fn installed_folders(data: &Value) -> Vec<PathBuf> {
+    let mods = data["mods"].as_array().map_or(&[][..], Vec::as_slice);
+    data["target"]
+        .as_str()
+        .into_iter()
+        .chain(mods.iter().filter_map(|m| m["installed"]["folder"].as_str()))
+        .map(PathBuf::from)
+        .collect()
+}
+
+/// A fingerprint of what the Mods page reads, taken without the kit (the owner's choice of 28 Nov 2026, "Only if something
+/// changed", for coming back to the window): each repository's last commit and changed files, and each folder the last read named
+/// (the install folder's entries; each mod folder's files, how many and the newest time). None before a first read this run, so
+/// the window reads. It cannot see the game start or stop: the kit says so at the next read, and refuses a move while it runs.
+pub fn glance(game: &str) -> Option<String> {
+    let looked = LOOKED_AT.lock().unwrap_or_else(std::sync::PoisonError::into_inner).get(game).cloned()?;
+    let mut hasher = DefaultHasher::new();
+    for (repository, folders) in looked {
+        companion_core::git::text(&repository, &["rev-parse", "HEAD"]).hash(&mut hasher);
+        companion_core::git::text(&repository, &["status", "--porcelain"]).hash(&mut hasher);
+        for (place, folder) in folders.iter().enumerate() {
+            if place == 0 {
+                let mut names: Vec<_> =
+                    fs::read_dir(folder).into_iter().flatten().filter_map(Result::ok).map(|e| e.file_name()).collect();
+                names.sort();
+                names.hash(&mut hasher);
+            } else {
+                files_of(folder).hash(&mut hasher);
+            }
+        }
+    }
+    Some(format!("{:016x}", hasher.finish()))
+}
+
+/// How many files a folder holds, all the way down, and the newest one's time.
+fn files_of(folder: &Path) -> (usize, Option<std::time::SystemTime>) {
+    let (mut count, mut newest) = (0, None);
+    let mut folders = vec![folder.to_path_buf()];
+    while let Some(next) = folders.pop() {
+        for entry in fs::read_dir(&next).into_iter().flatten().filter_map(Result::ok) {
+            match entry.file_type() {
+                Ok(kind) if kind.is_dir() => folders.push(entry.path()),
+                Ok(_) => {
+                    count += 1;
+                    let time = entry.metadata().and_then(|m| m.modified()).ok();
+                    newest = newest.max(time);
+                }
+                Err(_) => {}
+            }
+        }
+    }
+    (count, newest)
 }
 
 /// Unredacted (0.53.0): each copy's folder is where the window's pictures and sounds are read from.

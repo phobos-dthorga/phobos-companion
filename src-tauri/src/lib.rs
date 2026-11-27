@@ -23,6 +23,7 @@ mod games_page;
 mod history_page;
 mod home;
 mod installs_page;
+mod kept_answers;
 mod kit_pins;
 mod logs_page;
 mod lookup;
@@ -59,6 +60,7 @@ mod viewable;
 
 use companion_core::failure::{Failure, FailureCode};
 use companion_core::kit;
+use companion_core::lanes;
 use tauri::Manager;
 use tauri::ipc::Channel;
 
@@ -71,6 +73,74 @@ where
     tauri::async_runtime::spawn_blocking(work)
         .await
         .map_err(|problem| Failure::new(FailureCode::ToolFailed, problem.to_string()))?
+}
+
+/// The lane a slow reading runs in (0.116.0, `companion_core::lanes`): Background when the window reads it ahead, else Read.
+fn lane_of(ahead: Option<bool>) -> lanes::Lane {
+    if ahead == Some(true) { lanes::Lane::Background } else { lanes::Lane::Read }
+}
+
+/// A slow reading that only reads (0.116.0): it takes its turn in the queue, so a dozen at once never slow each other down.
+async fn queued<T, F>(ahead: Option<bool>, work: F) -> Result<T, Failure>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T, Failure> + Send + 'static,
+{
+    blocking(move || lanes::within(lane_of(ahead), work)).await
+}
+
+/// A slow reading whose answer is kept (0.116.0, `kept_answers`): queued as above, refused ahead while reading ahead is off, and
+/// its answer kept for the page to show at once next time. A failure to keep it is only a slower next start.
+async fn reading<T, F>(
+    app: &tauri::AppHandle,
+    command: &'static str,
+    key: Vec<String>,
+    ahead: Option<bool>,
+    work: F,
+) -> Result<T, Failure>
+where
+    T: serde::Serialize + Send + 'static,
+    F: FnOnce() -> Result<T, Failure> + Send + 'static,
+{
+    let data = data_folder(app)?;
+    kept_answers::allowed_ahead(&data, ahead == Some(true))?;
+    queued(ahead, move || {
+        let answer = work()?;
+        let _ = kept_answers::keep(&data, command, &key, &answer);
+        Ok(answer)
+    })
+    .await
+}
+
+/// A slow reading's last answer and when it was read, for the page to show while it reads again (0.116.0).
+#[tauri::command]
+async fn kept_answer(
+    app: tauri::AppHandle,
+    command: String,
+    key: Vec<String>,
+) -> Result<Option<kept_answers::Kept>, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || kept_answers::read(&data, &command, &key)).await
+}
+
+/// The Mods page's quick look on coming back to the window (0.116.0): a fingerprint of what its reading reads, or None before one.
+#[tauri::command]
+async fn installs_glance(game: String) -> Result<Option<String>, Failure> {
+    blocking(move || Ok(installs_page::glance(&game))).await
+}
+
+/// Whether the window reads the slow pages ahead (0.116.0; Settings, on by default).
+#[tauri::command]
+async fn reading_ahead(app: tauri::AppHandle) -> Result<bool, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || Ok(kept_answers::reading_ahead_on(&data))).await
+}
+
+/// Keeps the person's choice of reading ahead.
+#[tauri::command]
+async fn choose_reading_ahead(app: tauri::AppHandle, on: bool) -> Result<bool, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || kept_answers::choose_reading_ahead(&data, on)).await
 }
 
 /// Sends each progress line of a working tool to the window, through the channel the window gave with its request. A window that
@@ -114,7 +184,7 @@ async fn run_report(
     top: u32,
     on_progress: Channel<kit::Progress>,
 ) -> Result<reports::ReportResult, Failure> {
-    blocking(move || reports::run(&game, &command, report.as_deref(), top, Some(&hearing(on_progress)))).await
+    queued(None, move || reports::run(&game, &command, report.as_deref(), top, Some(&hearing(on_progress)))).await
 }
 
 /// What closing the program does first: a snapshot of the running game is never left held (owner's choice, 20 Nov 2026), and an
@@ -237,9 +307,13 @@ fn data_folder(app: &tauri::AppHandle) -> Result<std::path::PathBuf, Failure> {
 
 /// Every test list of a game, with what the game has seen working and the owner's verdicts so far.
 #[tauri::command]
-async fn test_lists(app: tauri::AppHandle, game: String) -> Result<Vec<tests_page::TestList>, Failure> {
+async fn test_lists(
+    app: tauri::AppHandle,
+    game: String,
+    ahead: Option<bool>,
+) -> Result<Vec<tests_page::TestList>, Failure> {
     let data = data_folder(&app)?;
-    blocking(move || tests_page::read(&game, &data)).await
+    reading(&app, "test_lists", vec![game.clone()], ahead, move || tests_page::read(&game, &data)).await
 }
 
 /// Records the owner's verdict on one test row, in this program's own folder.
@@ -273,10 +347,15 @@ async fn record_key_decision(
 /// Each repository's mods: installed, in the repository and in backups, with what moving between them gains or loses.
 #[tauri::command]
 async fn mod_installs(
+    app: tauri::AppHandle,
     game: String,
+    ahead: Option<bool>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<Vec<installs_page::RepositoryInstalls>, Failure> {
-    blocking(move || installs_page::read(&game, Some(&hearing(on_progress)))).await
+    reading(&app, "mod_installs", vec![game.clone()], ahead, move || {
+        installs_page::read(&game, Some(&hearing(on_progress)))
+    })
+    .await
 }
 
 /// Makes one move the owner asked for on the Mods page: build, install, back up, or go back to a backup.
@@ -298,10 +377,16 @@ async fn move_install(
 /// Whether any active mod's textures need encoding before the next launch; None for a game with no texture check.
 #[tauri::command]
 async fn texture_status(
+    app: tauri::AppHandle,
     game: String,
+    ahead: Option<bool>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<Option<serde_json::Value>, Failure> {
-    blocking(move || installs_page::read_textures(&game, Some(&hearing(on_progress)))).await
+    let key = vec![game.clone()];
+    reading(&app, "texture_status", key, ahead, move || {
+        installs_page::read_textures(&game, Some(&hearing(on_progress)))
+    })
+    .await
 }
 
 /// Encodes the named mods' textures, once the owner has confirmed.
@@ -418,7 +503,7 @@ async fn repository_commits(
 /// Every fact about a game's products over time: from git, and from this PC's history log.
 #[tauri::command]
 async fn timeline(game: String, on_progress: Channel<kit::Progress>) -> Result<history_page::Timeline, Failure> {
-    blocking(move || history_page::read(&game, Some(&hearing(on_progress)))).await
+    queued(None, move || history_page::read(&game, Some(&hearing(on_progress)))).await
 }
 
 /// A changelog as it stood at a commit, or at a moment when no commit is named.
@@ -472,7 +557,7 @@ async fn connections(
     commit: Option<String>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<connections_page::Answer, Failure> {
-    blocking(move || {
+    queued(None, move || {
         let question = connections_page::question(&kind, value, depth, commit)?;
         connections_page::ask(&game, &repository, &question, Some(&hearing(on_progress)))
     })
@@ -488,11 +573,15 @@ async fn read_log(game: String, on_progress: Channel<kit::Progress>) -> Result<l
 /// Where a repository's code notes each of its test rows, and in which method (cross-links L3).
 #[tauri::command]
 async fn test_code(
+    app: tauri::AppHandle,
     game: String,
     repository: String,
+    ahead: Option<bool>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<serde_json::Value, Failure> {
-    blocking(move || tests_page::code(&game, &repository, Some(&hearing(on_progress)))).await
+    let key = vec![game.clone(), repository.clone()];
+    reading(&app, "test_code", key, ahead, move || tests_page::code(&game, &repository, Some(&hearing(on_progress))))
+        .await
 }
 
 /// The methods a repository patches, the other mods on each and what the last update changed (cross-links L5).
@@ -500,9 +589,10 @@ async fn test_code(
 async fn patch_targets(
     game: String,
     repository: String,
+    ahead: Option<bool>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<patch_targets::PatchTargets, Failure> {
-    blocking(move || patch_targets::read(&game, &repository, Some(&hearing(on_progress)))).await
+    queued(ahead, move || patch_targets::read(&game, &repository, Some(&hearing(on_progress)))).await
 }
 
 /// Which tool kit version each of a game's repositories pins, and what a move would bring (cross-links S2).
@@ -520,7 +610,7 @@ async fn makeup(
     days: Option<u32>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<serde_json::Value, Failure> {
-    blocking(move || {
+    queued(None, move || {
         let question = makeup_page::question(&kind, days)?;
         makeup_page::ask(&game, &repository, &question, Some(&hearing(on_progress)))
     })
@@ -532,10 +622,13 @@ async fn makeup(
 async fn mod_settings(
     app: tauri::AppHandle,
     game: String,
+    ahead: Option<bool>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<Vec<settings_ledger::Ledger>, Failure> {
     let data = data_folder(&app)?;
-    blocking(move || settings_ledger::read(&game, &data, Some(&hearing(on_progress)))).await
+    let key = vec![game.clone()];
+    reading(&app, "mod_settings", key, ahead, move || settings_ledger::read(&game, &data, Some(&hearing(on_progress))))
+        .await
 }
 
 /// Marks settings as looked at, or not, for one repository; the time it was written.
@@ -1176,8 +1269,8 @@ async fn publish_choose_uploads(app: tauri::AppHandle, on: bool) -> Result<bool,
 
 /// What a game writes and what Steam records about it: what changed since the last launch, saves, screenshots and space.
 #[tauri::command]
-async fn game_files(game: String, since: Option<String>) -> Result<serde_json::Value, Failure> {
-    blocking(move || game_files_page::read(&game, since)).await
+async fn game_files(game: String, since: Option<String>, ahead: Option<bool>) -> Result<serde_json::Value, Failure> {
+    queued(ahead, move || game_files_page::read(&game, since)).await
 }
 
 /// Shows a save or a screenshot the Game files page listed, in the file manager.
@@ -1621,10 +1714,15 @@ async fn mod_list_check(
     app: tauri::AppHandle,
     game: String,
     online: bool,
+    ahead: Option<bool>,
     on_progress: Channel<kit::Progress>,
 ) -> Result<serde_json::Value, Failure> {
     let data = data_folder(&app)?;
-    blocking(move || mod_list_page::read(&data, &game, online, Some(&hearing(on_progress)))).await
+    let key = vec![game.clone(), (if online { "online" } else { "offline" }).to_owned()];
+    reading(&app, "mod_list_check", key, ahead, move || {
+        mod_list_page::read(&data, &game, online, Some(&hearing(on_progress)))
+    })
+    .await
 }
 
 /// One change the last check offered, after the owner's yes; the kit keeps a backup of the list first (0.45.0).
@@ -1664,7 +1762,12 @@ async fn mod_list_sort(
     apply: bool,
     on_progress: Channel<kit::Progress>,
 ) -> Result<mod_list_page::ChangeResult, Failure> {
-    blocking(move || mod_list_page::sort(&game, &list, full, apply, Some(&hearing(on_progress)))).await
+    // Only a sort that writes nothing waits its turn: a press that applies one runs at once, as every change does.
+    let lane = if apply { lanes::Lane::Free } else { lanes::Lane::Read };
+    blocking(move || {
+        lanes::within(lane, || mod_list_page::sort(&game, &list, full, apply, Some(&hearing(on_progress))))
+    })
+    .await
 }
 
 /// The owner's load-order rules and every rule set the sorter reads (0.47.0). Only reads.
@@ -1901,6 +2004,10 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             about,
+            kept_answer,
+            installs_glance,
+            reading_ahead,
+            choose_reading_ahead,
             activity,
             updates_status,
             updates_check,

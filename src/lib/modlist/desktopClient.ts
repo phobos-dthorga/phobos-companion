@@ -1,4 +1,4 @@
-import { ask, progressChannel } from "../shell/desktopClient";
+import { ask, progressChannel, readKept } from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
 import type {
@@ -25,10 +25,20 @@ export async function readModList(
   game: string,
   online: boolean,
   onProgress?: OnProgress,
+  ahead = false,
 ): Promise<Checked | Failed> {
   return ask<ModListCheck, Checked>(
     "mod_list_check",
-    { game, online, onProgress: progressChannel(onProgress) },
+    { game, online, ahead, onProgress: progressChannel(onProgress) },
+    (check) => ({ state: "ready", check }),
+  );
+}
+
+/** A game's check as last read, asking Steam or not, with when (0.116.0); null when none was kept. */
+export function keptModList(game: string, online: boolean) {
+  return readKept<ModListCheck, Checked>(
+    "mod_list_check",
+    [game, online ? "online" : "offline"],
     (check) => ({ state: "ready", check }),
   );
 }

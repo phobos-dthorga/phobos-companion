@@ -89,3 +89,24 @@ fn a_refusal_comes_back_in_words() {
 fn status_reads_the_repository_it_is_given() {
     assert_eq!(status_arguments(Path::new("repo")), ["installs", "status", "--root", "repo", "--no-redact", "--json"]);
 }
+
+#[test]
+fn the_quick_look_watches_the_install_folder_and_each_installed_mod() {
+    let data = serde_json::json!({"target": "Mods", "mods": [
+        {"installed": {"folder": "Mods/One"}}, {"installed": {"folder": null}}, {"installed": {"folder": "Mods/Two"}}]});
+    assert_eq!(installed_folders(&data), [PathBuf::from("Mods"), PathBuf::from("Mods/One"), PathBuf::from("Mods/Two")]);
+    assert_eq!(glance("a game this run never read"), None, "no look before a first read: the window reads");
+}
+
+#[test]
+fn a_folder_is_counted_all_the_way_down() {
+    let folder = std::env::temp_dir().join(format!("companion-glance-{}", std::process::id()));
+    fs::create_dir_all(folder.join("About")).unwrap();
+    fs::write(folder.join("About").join("About.xml"), "<x/>").unwrap();
+    fs::write(folder.join("one.dll"), "x").unwrap();
+    let (count, newest) = files_of(&folder);
+    assert_eq!(count, 2);
+    assert!(newest.is_some());
+    fs::remove_dir_all(&folder).unwrap();
+    assert_eq!(files_of(&folder), (0, None));
+}

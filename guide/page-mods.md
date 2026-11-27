@@ -4,9 +4,9 @@ kind: page
 page: mods
 go: mods
 words: install, update, backup, go back, restore, build, encode, textures, version
-see: task-before-playing, task-docs-only-changes, task-go-back, task-back-up-mod, term-backup, term-changelog-entry, term-build, term-textures
+see: task-before-playing, task-docs-only-changes, task-go-back, task-back-up-mod, term-backup, term-changelog-entry, term-build, term-textures, term-last-reading
 ---
-**Your installed mods, beside what installing from the repository would bring.** The page for updating, going back and backups, in three tabs. A tab says when something waits in it.
+**Your installed mods, beside what installing from the repository would bring.** The page for updating, going back and backups, in three tabs. A tab says when something waits in it. It opens with [its last reading](term-last-reading) while it reads again, and coming back to the window reads it again only when something changed.
 
 ### Before you play
 Whether anything needs building, installing or encoding, with a button for each: **Build now**, **Install everything that changed** and **Encode their textures**. A mod in the repository that was never installed is named on a line of its own, with **Install for the first time**: it is there for you to choose, so **Ready to play** still shows beside it. It also says what updated [since you last played](task-what-updated), with **Check what they mean for ours** to see whether those updates touch our mods, and [Settings to look at](task-new-settings) lists every mod setting added, removed or given a new default.

@@ -1605,6 +1605,53 @@ the owner's card: "Both, one key each".
 **Risk: none (agent's grade).** **Agent choices, owner to revise:** commits searched are each repository's newest 40; one
 matching rule everywhere (every word typed, anywhere in the thing's words); Ctrl + F with no list on the page opens /.
 
+## Speed: kept answers, a queue, reading ahead (built 28 Nov 2026, 0.116.0; kit 1.147.1 to 1.147.3)
+
+**The owner's request** (28 Nov 2026): "What can we do to improve the performance of Companion? It has become more and more sluggish
+with each newer version and now, it's quite rather awful … it's becoming quite a dire need."
+
+**What was measured first** (the window's own timings of each request, then each read alone and profiled): every press started
+a second Python process for the kit's manifest (696 KB, 0.4 s); the page-list scan started about a dozen slow readings at once, at
+start and on coming back to the window after five minutes, and beside each other they ran three to four times slower (the
+Mods page's 10.6 s alone took 40 s); the Mods page also read everything again on every return to the window; and the kit had slow
+loops: the test list's 1,077 parts each scanned all 97,000 notes, four saves were read afresh every time, the code map remade a
+table for each of 2,520 methods, the C# reader went a character at a time, and the update reports' decompiles were trimmed to 12
+and made again (patch targets: 281 s). phobos-rimworld's settings history stripped every C# file four times, a character at a time.
+
+**The owner's cards, each as put** (the chosen one first and marked):
+
+1. *Which fixes to build in this round?* (several allowed) **Chosen: all four.** Faster tools (the kit's and the settings script's
+   slow loops; same answers) (recommended) · Manifest kept in memory (read again only when the kit's files change) · Remember
+   answers (each page's last answer kept on disk and shown at once while a fresh one is read) · Queue heavy work (a few at once,
+   the page in front first).
+2. *If Companion remembers each page's last answer, what should a page show?* **Chosen: Old at once, then fresh** (recommended):
+   shown at once with when it was read, the fresh answer replacing it; buttons that change things locked until it lands. Others:
+   Old at once, refresh on press (shown with its age, read again only on Read again) · Always read fresh (as before).
+3. *The Mods page re-reads on every focus. What should it do?* **Chosen: Only if something changed** (recommended): a quick look
+   at the installed mods' folders and the repository's last commit and changed files. Others: Never on focus · Keep as now.
+4. *Warm up the slow pages in the background?* **Chosen: Yes, one at a time** (recommended): after start, behind anything asked,
+   with a setting to switch it off. Others: Only while the game is closed · No warm-up.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Open Tests, Mods and Mod list at once, and keep using the window while the slow readings run |
+| What does it stop them doing? | Pressing a change on an old answer: those buttons wait for the fresh one |
+| How does it change the way they work? | Pages are ready when opened; coming back from the game no longer starts a long read; a bar says when a reading waits its turn |
+| What outside it notices? | Nothing: it only reads, and the kept answers are never records |
+
+**Risk: none (agent's grade)**: reading ahead only reads, so its setting starts on. **Agent choices, owner to revise:** three slow
+readings at once, readings ahead one at a time; which readings keep their answers (Tests and its code places, Mods' installs,
+textures and settings, the Mod list's check); with reading ahead off, the page list's slow numbers come only from kept answers and
+the patch and sort numbers wait for their pages; the quick look cannot see the game start or close (the next read, or Read again,
+does); the waiting bar's words are the host's, in English, as the kit's own progress lines are.
+
+**Measured after, on the owner's repository** (the kit alone, not yet the window on screen): test list 44 s → 15 s, then 2 s once
+each save's answer is kept; test code 38 s → 11 s; patch targets 281 s → 21 s warm; settings history about 3 s; a press saves the
+0.4 s manifest read. **Not yet tested on screen.**
+
+**What a next game needs:** nothing new. The queue, the kept answers and the quick look are game-free; the quick look reads the
+folders its game's `installs status` names.
+
 Everything proposed and agreed but not yet built is in [later.md](later.md), with each item's status.
 
 ## Limits

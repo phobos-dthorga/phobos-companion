@@ -136,6 +136,11 @@ export async function mockHost(
     safe_copies_status: { result: [] },
     // The status bar's activity (0.86.0) is read every second on every page; a test that is not about it sees none yet.
     activity: { result: [] },
+    // Kept answers (0.116.0): a test that is not about them has none, so each page reads as before; reading ahead is on, as by
+    // default, so the page list's numbers are read as before too; and the Mods page's quick look has nothing to compare.
+    kept_answer: { result: null },
+    reading_ahead: { result: true },
+    installs_glance: { result: null },
     // The Memory page takes the key that marks from the game while a watch runs (0.98.0).
     memory_take_game_key: { result: null },
     memory_release_game_key: { result: null },
@@ -205,10 +210,16 @@ export async function mockHost(
               side?: string;
               value?: string | null;
               request?: { op?: string };
+              command?: string;
             }
           | undefined;
         // The code viewer's two sides of a changed file (0.50.0) are told apart by their side.
-        const kind = asked?.kind ?? asked?.request?.op ?? asked?.side;
+        // A kept answer (0.116.0) is told apart by the reading it is for: "kept_answer:test_lists".
+        const kind =
+          asked?.kind ??
+          asked?.request?.op ??
+          asked?.side ??
+          (command === "kept_answer" ? asked?.command : undefined);
         // One kind asked of several things (a file's names, 0.81.0) may have an answer for each: "command:kind:value".
         const answer =
           (kind && asked?.value

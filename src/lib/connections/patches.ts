@@ -74,12 +74,13 @@ export function forgetPatchTargets(game: string, repository: string): void {
 export function patchTargetsOf(
   game: string,
   repository: string,
+  ahead = false,
 ): Promise<PatchTargets> {
   const key = `${game}/${repository}`;
   if (!read.has(key))
     read.set(
       key,
-      readPatchTargets(game, repository).then((answer) =>
+      readPatchTargets(game, repository, ahead).then((answer) =>
         "available" in answer ? answer : { available: false, data: null },
       ),
     );

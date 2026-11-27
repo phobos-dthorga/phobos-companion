@@ -23,6 +23,7 @@ pub mod failure;
 pub mod games;
 pub mod git;
 pub mod kit;
+pub mod lanes;
 pub mod online;
 pub mod prefs;
 pub mod process;

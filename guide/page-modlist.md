@@ -4,9 +4,9 @@ kind: page
 page: modlist
 go: modlist
 words: missing mod, rimsort, mod manager, load order, dependencies, requirements, workshop, removed, unsubscribed, incompatible, enable, disable, reorder, sort, sorter, drag, saved list, preset, rml, subscribe, unsubscribe
-see: task-fix-mod-list, task-edit-mod-list, task-sort-mod-list, task-saved-lists, task-subscribe-mods, term-load-order-rule, task-add-game
+see: task-fix-mod-list, task-edit-mod-list, task-sort-mod-list, task-saved-lists, task-subscribe-mods, term-load-order-rule, task-add-game, term-last-reading
 ---
-**What is wrong with your game's list of active mods, and why; the list itself, to switch mods on and off and move them; a sorter that explains every move; and saved lists.** RimWorld and Project Zomboid so far; any other game says so.
+**What is wrong with your game's list of active mods, and why; the list itself, to switch mods on and off and move them; a sorter that explains every move; and saved lists.** RimWorld and Project Zomboid so far; any other game says so. **What's wrong** opens with [its last check](term-last-reading) while it checks again.
 
 Four views, chosen at the top: **What's wrong**, **Edit the list**, **Sort** and **Saved lists**.
 

@@ -3017,6 +3017,14 @@
     "ai-programs-copy-failed": "That could not be put on the clipboard. Select the lines and copy them instead.",
     "ai-programs-limits": "These lines hold this computer's own folders, so they work only on this computer. They have not yet been tried in each program: its own help says where its list of servers lives.",
     "publish-setting-on": "On",
-    "publish-setting-off": "Off"
+    "publish-setting-off": "Off",
+    "kept-note": "Shown from the last reading, { $when }. Reading again now: buttons that change something wait until it is done.",
+    "ahead-setting-title": "Read the slow pages ahead",
+    "ahead-setting-body": "While the Companion is open, it reads the slow pages of the game you are looking at by itself (Tests, Mods, the mod list and your mods' settings), one at a time and behind anything you ask, so they open at once. It only reads. Off: nothing slow runs by itself, and the number beside each page comes from that page's last reading.",
+    "ahead-setting-on": "On",
+    "ahead-setting-off": "Off",
+    "ahead-setting-kept-on": "Kept: the slow pages are read ahead.",
+    "ahead-setting-kept-off": "Kept: nothing slow runs by itself now.",
+    "ahead-setting-failed": "The setting could not be kept: { $reason }"
   }
 }

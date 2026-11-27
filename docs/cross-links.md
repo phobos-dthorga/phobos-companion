@@ -38,7 +38,7 @@ An address is written `dthorga://page/game?key=value`, with `dialog=code`, `dial
 | Code map | `repository`, `node` (a thing's id, `cs:...`, `def:...`, `lua:...`, `py:...`); `their` (another author's type or member, 0.26.0); `update` (a kept file, such as `Vehicles.dll`), `owner` (its mod's id) and `member` (one declaration's change), 0.26.0 |
 | Timeline | `day` (YYYY-MM-DD) |
 | Tests | `repository`, `row` |
-| Settings | `tab` (0.66.0): `look`, `games`, `folders`, `online`, `backups`, `agents`, `publishing` (0.69.0), `ai` (0.70.0); `key` opens that setting on `folders`; `show` (`all`, `every`, `needs` or a game's id) chooses which settings `folders` lists; `panel` still lands on the tab holding it and brings it into view: `records`, `cleanup`, `themes`, `games`, `agents`, `online` (0.37.0), `publishing` (0.69.0), `ai-programs` (0.70.0), `ai-services` (0.71.0) |
+| Settings | `tab` (0.66.0): `look`, `games`, `folders`, `online`, `backups`, `agents`, `publishing` (0.69.0), `ai` (0.70.0); `key` opens that setting on `folders`; `show` (`all`, `every`, `needs` or a game's id) chooses which settings `folders` lists; `panel` still lands on the tab holding it and brings it into view: `records`, `cleanup`, `themes`, `games`, `ahead` (0.116.0), `agents`, `online` (0.37.0), `publishing` (0.69.0), `ai-programs` (0.70.0), `ai-services` (0.71.0) |
 | Mods | `tab` (0.66.0): `before`, `installed`, `textures`; `repository`, and `mod` or `changelog` (on `installed`); `before` (a moment) marks the newest backup from before it; `panel=settings` lands on `before` and brings the settings to look at into view (0.21.0) |
 | Logs | `signature` |
 | Chat | `repository` (0.74.0) |

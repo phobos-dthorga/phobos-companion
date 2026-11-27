@@ -5,6 +5,7 @@
   import type { GameHome } from "../home/types";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import Placeholder from "../shell/Placeholder.svelte";
+  import KeptNote from "../shell/KeptNote.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { formatWhen } from "../shell/dates";
   import { heard, started } from "../shell/progress";
@@ -13,6 +14,7 @@
   import {
     changeModList,
     openInSteam,
+    keptModList,
     readModList,
     undoModList,
   } from "./desktopClient";
@@ -75,14 +77,26 @@
     };
   }
 
+  /** When the check on screen was read, while it is the last one kept and a fresh one is read (0.116.0); null once fresh. */
+  let keptAt = $state<string | null>(null);
+
   async function load() {
     busy = true;
+    if (reading.state === "reading") {
+      // The last check kept, at once (0.116.0); every button waits, as it does for any read, until the fresh one is in.
+      const kept = await keptModList(game.id, online);
+      if (kept?.reading.state === "ready" && reading.state === "reading") {
+        reading = { state: "ready", check: kept.reading.check };
+        keptAt = kept.at;
+      }
+    }
     // 0.112.0: the community lists over a week old, fetched once a run before the first check reads them.
     progress = started(t("modlist-lists-fetching"));
     await refreshStaleOnce(game.id, hearing());
     progress = started(t(online ? "modlist-reading-steam" : "modlist-reading"));
     const answer = await readModList(game.id, online, hearing());
     busy = false;
+    keptAt = null;
     if (answer.state === "ready") {
       reading = { state: "ready", check: answer.check };
       keep(game.id, answer.check);
@@ -230,7 +244,9 @@
         onclick={toggleSteam}>{t("modlist-ask-steam")}</button
       >
     </div>
-    {#if busy}
+    {#if busy && keptAt}
+      <KeptNote at={keptAt} {progress} fallback={t("modlist-reading")} />
+    {:else if busy}
       <ProgressBar {progress} fallback={t("modlist-reading")} />
     {/if}
 

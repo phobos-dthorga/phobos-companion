@@ -4,6 +4,28 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.116.0] - 2026-11-28
+
+### Added
+
+- **Slow pages open at once with their last reading** (the owner's speed round, 28 Nov 2026: "it's becoming quite a dire need";
+  their card "Old at once, then fresh"). Tests, Mods, the Mod list and Home's settings count show what they found last time, say
+  when, and read again behind it; buttons that change something wait for the fresh answer. Design and measurements:
+  [docs/design-record.md](docs/design-record.md), "Speed".
+- **Read the slow pages ahead** (Settings → Games, on by default; the owner's card "Yes, one at a time"). The page list's scan now
+  reads those pages by itself, one at a time behind anything you ask, so they are fresh when opened; off, nothing slow runs by itself.
+
+### Changed
+
+- **Slow readings take turns** (the owner's card "Queue heavy work"): at most three at once, so a dozen no longer slow each other
+  three to four times over; a bar says "Waiting for other readings to finish". Presses never wait.
+- **A press no longer asks the tool kit for its manifest first** (the owner's card "Manifest kept in memory"): kept until the kit's
+  files change, saving about half a second on most clicks.
+- **Coming back to the window reads the Mods page again only when something changed** (the owner's card "Only if something
+  changed"): the repository's last commit and changed files, or an installed mod's folder.
+- **Tool kit 1.147.3**: the test list, the code map and the update reports read many times faster with the same answers (patch
+  targets about 5 minutes to 21 s), and records leave the kept answers out. **Not tested on screen.**
+
 ## [0.115.0] - 2026-11-28
 
 ### Added

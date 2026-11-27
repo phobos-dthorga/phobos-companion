@@ -4,18 +4,32 @@ import { agents } from "../agents/state.svelte";
 import { readDecisions } from "../decisions/desktopClient";
 import { pageServes } from "../home/kinds";
 import type { GameHome } from "../home/types";
-import { readModList, sortModList } from "../modlist/desktopClient";
+import {
+  keptModList,
+  readModList,
+  sortModList,
+} from "../modlist/desktopClient";
 import { keep as keepModList } from "../modlist/latest.svelte";
 import { breakage, worthMentioning } from "../modlist/presentation";
-import { readInstalls, readLedger, readTextures } from "../mods/desktopClient";
+import {
+  keptInstalls,
+  keptLedger,
+  keptTextures,
+  readInstalls,
+  readLedger,
+  readTextures,
+} from "../mods/desktopClient";
+import type { InstallsReading, TexturesReading } from "../mods/types";
 import { split } from "../mods/ledger";
 import { preflight } from "../mods/presentation";
 import { readPatches, readSince } from "../mods/sinceReading";
 import type { PageName } from "../navigation/place";
 import { scanWatched } from "../reports/watched.svelte";
 import { readPicks } from "../picks/desktopClient";
-import { readTestLists } from "../tests/desktopClient";
+import { keptTestLists, readTestLists } from "../tests/desktopClient";
+import type { TestsReading } from "../tests/types";
 import { shelfCount } from "../tests/presentation";
+import { aheadOn } from "./ahead.svelte";
 import { counted, withPart, type Parts } from "./waiting";
 
 /**
@@ -82,26 +96,7 @@ export function readWaiting(game: GameHome) {
       ),
     );
   }
-  void readTestLists(game.id).then((answer) =>
-    keep(
-      "tests",
-      "seen",
-      answer.state === "ready" ? shelfCount(answer.lists, "seen") : null,
-    ),
-  );
-  if (pageServes(game.kind, "mods")) {
-    void readLedger(game.id).then((answer) =>
-      keep(
-        "mods",
-        "settings",
-        answer.state === "ready" && answer.ledgers.length > 0
-          ? split(answer.ledgers).toLook.length
-          : null,
-      ),
-    );
-    void scanMods(game, keep);
-  }
-  if (pageServes(game.kind, "modlist")) void scanModList(game.id, keep);
+  void scanSlow(game, keep);
   void scanWatched(game.id).then((total) => keep("reports", "waiting", total));
   void readAbout().then((answer) => {
     if (ask !== asked) return;
@@ -116,21 +111,92 @@ export function readWaiting(game: GameHome) {
 type Keep = (page: PageName, part: string, count: number | null) => void;
 
 /**
+ * The slow parts of the scan (0.116.0; the owner's choices of 28 Nov 2026: "Old at once, then fresh" and reading ahead, "Yes, one
+ * at a time"). Each number shows at once from the answer its page last kept. With reading ahead on, each slow reading then runs
+ * ahead, which the host queues one at a time behind anything the person asks, and keeps its answer, so the page opens at once
+ * too; a fresh answer that fails leaves the kept number standing. With it off, nothing slow runs by itself: the numbers are the
+ * kept ones, as fresh as each page's last reading.
+ */
+async function scanSlow(game: GameHome, keep: Keep) {
+  const ahead = await aheadOn();
+  const parts: Promise<void>[] = [scanTests(game.id, ahead, keep)];
+  if (pageServes(game.kind, "mods")) {
+    parts.push(scanSettings(game.id, ahead, keep));
+    parts.push(scanMods(game, ahead, keep));
+  }
+  if (pageServes(game.kind, "modlist"))
+    parts.push(scanModList(game.id, ahead, keep));
+  await Promise.all(parts);
+}
+
+/** A number from the kept answer at once, then from a fresh one read ahead; a failed fresh one never hides a kept number. */
+async function keptThenAhead<R>(
+  kept: Promise<{ reading: R } | null>,
+  fresh: (() => Promise<R>) | null,
+  count: (reading: R) => number | null,
+  put: (count: number | null) => void,
+): Promise<R | null> {
+  const before = await kept;
+  if (before) put(count(before.reading));
+  if (!fresh) {
+    if (!before) put(null);
+    return before?.reading ?? null;
+  }
+  const after = await fresh();
+  const counted = count(after);
+  if (counted !== null || !before) put(counted);
+  return counted !== null ? after : (before?.reading ?? after);
+}
+
+async function scanTests(game: string, ahead: boolean, keep: Keep) {
+  await keptThenAhead<TestsReading>(
+    keptTestLists(game),
+    ahead ? () => readTestLists(game, true) : null,
+    (answer) =>
+      answer.state === "ready" ? shelfCount(answer.lists, "seen") : null,
+    (count) => keep("tests", "seen", count),
+  );
+}
+
+async function scanSettings(game: string, ahead: boolean, keep: Keep) {
+  type Ledgers = Awaited<ReturnType<typeof readLedger>>;
+  await keptThenAhead<Ledgers>(
+    keptLedger(game),
+    ahead ? () => readLedger(game, undefined, true) : null,
+    (answer) =>
+      answer.state === "ready" && answer.ledgers.length > 0
+        ? split(answer.ledgers).toLook.length
+        : null,
+    (count) => keep("mods", "settings", count),
+  );
+}
+
+/**
  * The mod list: what the check found, and what a sort would move. The check is kept for Home's note and the Mod list page too.
  * The same check says what the first game run after the last change showed, which is the Logs page's number.
  */
-async function scanModList(game: string, keep: Keep) {
-  const answer = await readModList(game, false);
-  if (answer.state !== "ready" || !answer.check.supported) {
-    keep("modlist", "faults", null);
+async function scanModList(game: string, ahead: boolean, keep: Keep) {
+  type Checked = Awaited<ReturnType<typeof readModList>>;
+  const counts = (answer: Checked) =>
+    answer.state === "ready" && answer.check.supported
+      ? worthMentioning(answer.check)
+      : null;
+  const answer = await keptThenAhead<Checked>(
+    keptModList(game, false),
+    ahead ? () => readModList(game, false, undefined, true) : null,
+    counts,
+    (count) => keep("modlist", "faults", count),
+  );
+  if (!answer || answer.state !== "ready" || !answer.check.supported) {
     keep("logs", "new-errors", null);
+    keep("modlist", "moves", null);
     return;
   }
   keepModList(game, answer.check);
-  keep("modlist", "faults", worthMentioning(answer.check));
   keep("logs", "new-errors", breakage(answer.check));
   const list = answer.check.lists[0]?.key;
-  if (!list) return keep("modlist", "moves", null);
+  // A sort is only asked ahead: with reading ahead off, its number waits for the Mod list page.
+  if (!list || !ahead) return keep("modlist", "moves", null);
   const sorted = await sortModList(game, list, false, false);
   keep(
     "modlist",
@@ -145,30 +211,44 @@ async function scanModList(game: string, keep: Keep) {
  * The Mods page: what Before you play lists as to do (a build, changes not installed, textures to encode), and the updates since
  * you last played that changed a method our mods patch.
  */
-async function scanMods(game: GameHome, keep: Keep) {
-  const installs = await readInstalls(game.id);
-  if (installs.state !== "ready" || installs.repositories.length === 0) {
+async function scanMods(game: GameHome, ahead: boolean, keep: Keep) {
+  const installs = await keptThenAhead<InstallsReading>(
+    keptInstalls(game.id),
+    ahead ? () => readInstalls(game.id, undefined, true) : null,
+    (answer) =>
+      answer.state === "ready" && answer.repositories.length > 0 ? 0 : null,
+    () => {},
+  );
+  if (
+    !installs ||
+    installs.state !== "ready" ||
+    installs.repositories.length === 0
+  ) {
     keep("mods", "todo", null);
     keep("mods", "patched", null);
     return;
   }
   const repositories = installs.repositories;
   const running = repositories.some((r) => r.status.gameRunning.length > 0);
-  void readTextures(game.id).then((textures) =>
-    keep(
-      "mods",
-      "todo",
-      preflight(repositories, textures, game.name).filter(
-        (check) => check.kind === "todo",
-      ).length,
-    ),
+  const todo = (textures: TexturesReading) =>
+    preflight(repositories, textures, game.name).filter(
+      (check) => check.kind === "todo",
+    ).length;
+  void keptThenAhead<TexturesReading>(
+    keptTextures(game.id),
+    ahead ? () => readTextures(game.id, undefined, true) : null,
+    (textures) => (textures.state === "failed" ? null : todo(textures)),
+    (count) => keep("mods", "todo", count),
   );
-  const since = await readSince(game.id, running);
+  // What updated since you last played, and whether it touched a method ours patch: only ever read ahead.
+  if (!ahead) return keep("mods", "patched", null);
+  const since = await readSince(game.id, running, true);
   if (!since) return keep("mods", "patched", null);
   const patches = await readPatches(
     game.id,
     repositories.map((r) => r.repository),
     since,
+    true,
   );
   keep(
     "mods",

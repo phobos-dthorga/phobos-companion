@@ -8,7 +8,7 @@
   } from "./presentation";
   import type { GameHome, KitPins } from "./types";
   import { readKitPins } from "./desktopClient";
-  import { readLedger } from "../mods/desktopClient";
+  import { keptLedger, readLedger } from "../mods/desktopClient";
   import { split } from "../mods/ledger";
   import { go, openDialog } from "../navigation/navigation.svelte";
   import { commitRequest } from "../code/presentation";
@@ -55,7 +55,19 @@
   $effect(() => {
     const id = game.id;
     settingsToLook = null;
+    // The count from the last answer kept, at once (0.116.0), then from a fresh read.
+    let fresh = false;
+    void keptLedger(id).then((kept) => {
+      if (
+        !fresh &&
+        kept?.reading.state === "ready" &&
+        id === game.id &&
+        kept.reading.ledgers.length > 0
+      )
+        settingsToLook = split(kept.reading.ledgers).toLook.length;
+    });
     void readLedger(id).then((answer) => {
+      fresh = true;
       if (
         answer.state === "ready" &&
         id === game.id &&

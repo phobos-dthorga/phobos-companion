@@ -18,6 +18,8 @@ const PACKAGE: &str = "phobos_modkit";
 const MANIFEST: &str = "manifest";
 const PROGRESS_VARIABLE: &str = "PHOBOS_MODKIT_PROGRESS";
 const PROGRESS_OPENING: &str = "{\"progress\":";
+/// What a waiting reading's bar says, as the kit's own progress lines do (in the kit's words, not the window's).
+const WAITING_LABEL: &str = "Waiting for other readings to finish";
 
 /// One progress line from a working tool (phobos-modkit `docs/manifest.md`, Progress): what it is doing now, how far along when
 /// it can count, and a line of the work's own output.
@@ -161,6 +163,12 @@ pub fn run_with_input(
     listener: Option<Listener>,
     input: Option<&[u8]>,
 ) -> Result<Value, Failure> {
+    // A slow reading waits its turn (0.116.0, `lanes`); the page's bar says so meanwhile. Held until the run has answered.
+    let _turn = crate::lanes::turn(|| {
+        if let Some(hear) = listener {
+            hear(Progress { label: Some(WAITING_LABEL.to_owned()), ..Progress::default() });
+        }
+    });
     let mut command = kit_command(arguments, listener.is_some())?;
     if input.is_some() {
         command.stdin(Stdio::piped());
@@ -371,10 +379,59 @@ pub fn offered(manifest: &Value, game: &str, surface: &str, report: &str, effect
     Offered::Missing
 }
 
-/// The kit's description of every command.
+/// The kit's description of every command. Kept in memory (0.116.0) while the kit's files are as they were: asking the kit took
+/// about half a second, and almost every press asked it first. A changed, added or removed file of the kit asks it again, so
+/// every check still reads the manifest of the kit that will run.
 pub fn read_manifest() -> Result<Value, Failure> {
+    let runtime = runtime();
+    let key = kit_fingerprint(&runtime.kit.join(PACKAGE))
+        .map(|print| format!("{}|{}|{print}", runtime.kit.display(), runtime.python));
+    if let Some(key) = &key
+        && let Some((kept_key, manifest)) =
+            KEPT_MANIFEST.lock().unwrap_or_else(std::sync::PoisonError::into_inner).as_ref()
+        && kept_key == key
+    {
+        return Ok(manifest.clone());
+    }
     let arguments = [MANIFEST.to_owned(), "--json".to_owned()];
-    run(MANIFEST, &arguments)
+    let manifest = crate::lanes::within(crate::lanes::Lane::Free, || run(MANIFEST, &arguments))?;
+    if let Some(key) = key {
+        *KEPT_MANIFEST.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = Some((key, manifest.clone()));
+    }
+    Ok(manifest)
+}
+
+/// The manifest last read, with the fingerprint of the kit it came from.
+static KEPT_MANIFEST: std::sync::Mutex<Option<(String, Value)>> = std::sync::Mutex::new(None);
+
+/// A fingerprint of the kit's Python files: how many, and each one's path, size and time, folded together. None when the folder
+/// cannot be read, so the manifest is asked afresh.
+pub fn kit_fingerprint(package: &Path) -> Option<String> {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    let mut hasher = DefaultHasher::new();
+    let mut count = 0usize;
+    let mut folders = vec![package.to_path_buf()];
+    while let Some(folder) = folders.pop() {
+        let mut entries: Vec<_> = std::fs::read_dir(&folder).ok()?.filter_map(Result::ok).collect();
+        entries.sort_by_key(std::fs::DirEntry::file_name);
+        for entry in entries {
+            let path = entry.path();
+            let kind = entry.file_type().ok()?;
+            if kind.is_dir() {
+                if entry.file_name() != "__pycache__" {
+                    folders.push(path);
+                }
+            } else if path.extension().is_some_and(|e| e == "py" || e == "json") {
+                let info = entry.metadata().ok()?;
+                path.hash(&mut hasher);
+                info.len().hash(&mut hasher);
+                info.modified().ok()?.hash(&mut hasher);
+                count += 1;
+            }
+        }
+    }
+    Some(format!("{count}:{:016x}", hasher.finish()))
 }
 
 /// Reads the kit's manifest and says how many tools it holds.

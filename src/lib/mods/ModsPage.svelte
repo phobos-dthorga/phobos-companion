@@ -1,6 +1,7 @@
 <script lang="ts">
   import { showingOf } from "../media/decode";
   import ModFileCompare from "./ModFileCompare.svelte";
+  import KeptNote from "../shell/KeptNote.svelte";
   import Placeholder from "../shell/Placeholder.svelte";
   import SettingsToLook from "./SettingsToLook.svelte";
   import SinceLastPlayed from "./SinceLastPlayed.svelte";
@@ -26,6 +27,9 @@
   } from "../shell/progress";
   import {
     encodeTextures,
+    glanceInstalls,
+    keptInstalls,
+    keptTextures,
     makeMove,
     readInstalls,
     readTextures,
@@ -118,6 +122,10 @@
   let reading = $state<InstallsReading>({ state: "reading" });
   let textures = $state<TexturesReading>({ state: "reading" });
   let readAt = 0;
+  /** When the installs on screen were read, while they are the last answer kept (0.116.0); null once fresh. */
+  let keptAt = $state<string | null>(null);
+  /** The quick look taken after the last read (0.116.0), to tell on coming back whether anything changed. */
+  let glanced: string | null = null;
   let asking = $state<Asking | null>(null);
   let busy = $state<string | null>(null);
   let said = $state("");
@@ -198,6 +206,16 @@
       textures = { state: "reading" };
       readProgress = started();
       textureProgress = started();
+      // The last answers kept, shown at once while the fresh ones are read (0.116.0); every move waits for the fresh ones.
+      const [installs, kept] = await Promise.all([
+        keptInstalls(game.id),
+        keptTextures(game.id),
+      ]);
+      if (installs?.reading.state === "ready" && reading.state === "reading") {
+        reading = installs.reading;
+        keptAt = installs.at;
+      }
+      if (kept && textures.state === "reading") textures = kept.reading;
     }
     const [nextInstalls, nextTextures] = await Promise.all([
       readInstalls(game.id, (message) => {
@@ -212,20 +230,31 @@
     if (!quiet || nextTextures.state === "ready") textures = nextTextures;
     readAt = Date.now();
     refreshing = null;
+    keptAt = null;
+    glanced = await glanceInstalls(game.id);
   }
 
-  /** Coming back to the window reads again, so a change made elsewhere shows without a button. */
-  function onFocus() {
+  /**
+   * Coming back to the window reads again, so a change made elsewhere shows without a button, but only when something changed
+   * (0.116.0; the owner's choice of 28 Nov 2026, "Only if something changed"): a quick look at the repositories and the installed
+   * mods' folders first, taken without the tools.
+   */
+  async function onFocus() {
     if (
-      busy === null &&
-      asking === null &&
-      Date.now() - readAt > FOCUS_READ_AFTER_MS
-    ) {
-      void load(true);
-    }
+      busy !== null ||
+      asking !== null ||
+      refreshing !== null ||
+      keptAt !== null ||
+      Date.now() - readAt <= FOCUS_READ_AFTER_MS
+    )
+      return;
+    const now = await glanceInstalls(game.id);
+    if (now !== null && now === glanced) return;
+    void load(true);
   }
 
   function ask(next: Asking) {
+    if (keptAt !== null) return;
     asking = next;
     said = "";
     output = [];
@@ -250,6 +279,7 @@
 
   /** Builds every project. It writes only inside the repository, so it needs no question and no closed game. */
   async function build() {
+    if (keptAt !== null) return;
     busy = "build";
     said = "";
     working = started(t(MOVE_WORDS.build.working));
@@ -274,6 +304,7 @@
   }
 
   async function confirm() {
+    if (keptAt !== null) return;
     if (asking === null) return;
     const now = asking;
     busy = now.place;
@@ -652,7 +683,7 @@
         <button
           type="button"
           class="move-button"
-          disabled={busy !== null}
+          disabled={keptAt !== null || busy !== null}
           onclick={confirm}
         >
           {now.kind === "all"
@@ -670,7 +701,7 @@
         <button
           type="button"
           class="action"
-          disabled={busy !== null}
+          disabled={keptAt !== null || busy !== null}
           onclick={() => (asking = null)}
         >
           {t("mods-action-cancel")}
@@ -691,7 +722,7 @@
   <button
     type="button"
     class="move-button"
-    disabled={busy !== null || blocked !== null}
+    disabled={keptAt !== null || busy !== null || blocked !== null}
     aria-pressed={asking?.place === place}
     onclick={() => ask({ kind: "mod", place, repository, mod, move, backup })}
   >
@@ -902,6 +933,8 @@
   <ProgressBar progress={working} fallback={t("mods-working")} />
 {:else if refreshing !== null}
   <ProgressBar progress={refreshing} fallback={t("mods-reading-again")} />
+{:else if keptAt !== null}
+  <KeptNote at={keptAt} progress={readProgress} fallback={t("mods-reading")} />
 {:else}
   <p class="status" role="status" aria-live="polite">{said}</p>
 {/if}
@@ -965,7 +998,7 @@
             <button
               type="button"
               class="move-button"
-              disabled={busy !== null || blocked !== null}
+              disabled={keptAt !== null || busy !== null || blocked !== null}
               aria-pressed={asking?.place === STRIP &&
                 ((check.action === "install-all" &&
                   asking.kind === "all" &&
@@ -999,7 +1032,7 @@
       <button
         type="button"
         class="action"
-        disabled={busy !== null || refreshing !== null}
+        disabled={keptAt !== null || busy !== null || refreshing !== null}
         onclick={() => load(true)}
       >
         {refreshing !== null
@@ -1010,7 +1043,7 @@
         <button
           type="button"
           class="action"
-          disabled={busy !== null}
+          disabled={keptAt !== null || busy !== null}
           onclick={build}
         >
           {busy === "build" ? t("mods-building") : t("mods-action-build")}
@@ -1260,7 +1293,7 @@
         <button
           type="button"
           class="move-button"
-          disabled={busy !== null}
+          disabled={keptAt !== null || busy !== null}
           aria-pressed={asking?.place === place}
           onclick={() =>
             ask({
@@ -1324,7 +1357,7 @@
         <button
           type="button"
           class="move-button"
-          disabled={busy !== null || running.length > 0}
+          disabled={keptAt !== null || busy !== null || running.length > 0}
           aria-pressed={asking?.place === TEXTURES && asking.kind === "encode"}
           onclick={() =>
             ask({ kind: "encode", place: TEXTURES, mods: toEncode })}

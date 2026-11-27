@@ -116,10 +116,11 @@ export function askCalls(
 export async function readPatchTargets(
   game: string,
   repository: string,
+  ahead = false,
 ): Promise<PatchTargets | Failed> {
   return ask<PatchTargets, PatchTargets>(
     "patch_targets",
-    { game, repository, onProgress: progressChannel() },
+    { game, repository, ahead, onProgress: progressChannel() },
     (answer) => answer,
   );
 }

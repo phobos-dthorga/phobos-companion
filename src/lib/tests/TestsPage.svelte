@@ -12,9 +12,12 @@
   import GuideLink from "../guide/GuideLink.svelte";
   import FailurePanel from "../shell/FailurePanel.svelte";
   import Placeholder from "../shell/Placeholder.svelte";
+  import KeptNote from "../shell/KeptNote.svelte";
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { started } from "../shell/progress";
   import {
+    keptTestCode,
+    keptTestLists,
     readTestCode,
     readTestLists,
     recordKeyDecision,
@@ -61,24 +64,51 @@
   /** Where each repository's code notes its rows (kit 1.36.0), read after the lists; missing while read or when it fails. */
   let code = $state<Record<string, CodePlace[]>>({});
 
+  /**
+   * When the lists on screen were read, while they are the last answer kept and a fresh one is coming (0.116.0; the owner's choice
+   * of 28 Nov 2026, "Old at once, then fresh"); null once the fresh answer is in. Every verdict and decision waits for it.
+   */
+  let keptAt = $state<string | null>(null);
+
+  function firstShelf(lists: TestList[]): Shelf {
+    return (
+      SHELVES.find((s) => s !== "unrowed" && shelfCount(lists, s) > 0) ??
+      "waiting"
+    );
+  }
+
   async function load() {
+    keptAt = null;
     reading = { state: "reading" };
-    reading = await readTestLists(game.id);
-    if (reading.state === "ready") {
-      const lists = reading.lists;
-      shelf =
-        SHELVES.find((s) => s !== "unrowed" && shelfCount(lists, s) > 0) ??
-        "waiting";
-      for (const list of lists)
-        void readTestCode(game.id, list.repository).then((answer) => {
-          if (answer.state === "ready")
-            code = { ...code, [list.repository]: answer.code.places };
-        });
+    const kept = await keptTestLists(game.id);
+    if (kept && kept.reading.state === "ready" && reading.state === "reading") {
+      reading = kept.reading;
+      keptAt = kept.at;
+      shelf = firstShelf(kept.reading.lists);
     }
+    const fresh = await readTestLists(game.id);
+    // The shelf chosen from the kept answer stays, so the page never jumps under the person reading it.
+    if (fresh.state === "ready" && keptAt === null)
+      shelf = firstShelf(fresh.lists);
+    reading = fresh;
+    keptAt = null;
+    if (fresh.state === "ready")
+      for (const list of fresh.lists) void readCode(list.repository);
+  }
+
+  /** Where a repository's code notes its rows: as kept at once, then fresh. */
+  async function readCode(repository: string) {
+    const kept = await keptTestCode(game.id, repository);
+    if (kept && kept.reading.state === "ready" && !(repository in code))
+      code = { ...code, [repository]: kept.reading.code.places };
+    const answer = await readTestCode(game.id, repository);
+    if (answer.state === "ready")
+      code = { ...code, [repository]: answer.code.places };
   }
 
   /** Records a decision on a note no row names, then shows it at once; the host's answer decides whether it stands. */
   async function decide(list: TestList, item: Unrowed, decision: DecisionWord) {
+    if (keptAt !== null) return;
     const key = `${list.repository}/${item.key}`;
     busy = key;
     const answer = await recordKeyDecision(
@@ -100,6 +130,7 @@
 
   /** Records a verdict, then shows it at once; the host's answer decides whether it stands. */
   async function judge(list: TestList, row: TestRow, verdict: VerdictWord) {
+    if (keptAt !== null) return;
     const key = `${list.repository}/${row.id}`;
     busy = key;
     const note = verdict === "cleared" ? "" : (notes[key] ?? "").trim();
@@ -191,6 +222,9 @@
   <GuideLink entry="task-repository-ready" words={t("guide-ready-link")} />
 {:else}
   {@const lists = reading.lists}
+  {#if keptAt}
+    <KeptNote at={keptAt} fallback={t("tests-reading")} />
+  {/if}
   <div class="toggles" role="group" aria-label={t("tests-shelves-label")}>
     {#each SHELVES as which (which)}
       <button
@@ -250,7 +284,7 @@
                     <button
                       type="button"
                       class="action"
-                      disabled={busy !== null}
+                      disabled={busy !== null || keptAt !== null}
                       onclick={() => decide(list, item, "cleared")}
                     >
                       {t("tests-action-undo")}
@@ -259,7 +293,7 @@
                     <button
                       type="button"
                       class="verdict-button"
-                      disabled={busy !== null}
+                      disabled={busy !== null || keptAt !== null}
                       onclick={() => decide(list, item, "make-row")}
                     >
                       {t("tests-action-make-row")}
@@ -267,7 +301,7 @@
                     <button
                       type="button"
                       class="verdict-button"
-                      disabled={busy !== null}
+                      disabled={busy !== null || keptAt !== null}
                       onclick={() => decide(list, item, "no-row")}
                     >
                       {t("tests-action-no-row")}
@@ -405,7 +439,7 @@
                 <button
                   type="button"
                   class="verdict-button passed"
-                  disabled={busy !== null}
+                  disabled={busy !== null || keptAt !== null}
                   onclick={() => judge(list, row, "passed")}
                 >
                   <span aria-hidden="true">✓</span>
@@ -414,7 +448,7 @@
                 <button
                   type="button"
                   class="verdict-button failed"
-                  disabled={busy !== null}
+                  disabled={busy !== null || keptAt !== null}
                   onclick={() => judge(list, row, "failed")}
                 >
                   <span aria-hidden="true">✕</span>
@@ -433,7 +467,7 @@
                   <button
                     type="button"
                     class="action"
-                    disabled={busy !== null}
+                    disabled={busy !== null || keptAt !== null}
                     onclick={() => judge(list, row, "cleared")}
                   >
                     {t("tests-action-undo")}

@@ -6,10 +6,11 @@ import type { GameFiles } from "./types";
 export async function readGameFiles(
   game: string,
   since: string | null,
+  ahead = false,
 ): Promise<{ state: "ready"; files: GameFiles } | Failed> {
   return ask<GameFiles, { state: "ready"; files: GameFiles }>(
     "game_files",
-    { game, since },
+    { game, since, ahead },
     (files) => ({ state: "ready", files }),
   );
 }

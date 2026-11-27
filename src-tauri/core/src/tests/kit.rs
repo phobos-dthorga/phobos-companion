@@ -5,6 +5,26 @@ fn envelope(body: &str) -> Vec<u8> {
 }
 
 #[test]
+fn the_kits_fingerprint_moves_with_its_files_and_not_its_bytecode() {
+    let folder = env::temp_dir().join(format!("companion-kit-print-{}", std::process::id()));
+    let package = folder.join(PACKAGE);
+    std::fs::create_dir_all(package.join("games").join("__pycache__")).unwrap();
+    std::fs::write(package.join("__init__.py"), "x = 1\n").unwrap();
+    std::fs::write(package.join("games").join("one.py"), "y = 2\n").unwrap();
+    let first = kit_fingerprint(&package).unwrap();
+    assert!(first.starts_with("2:"));
+    std::fs::write(package.join("games").join("__pycache__").join("one.cpython-314.pyc"), "bytes").unwrap();
+    assert_eq!(kit_fingerprint(&package).unwrap(), first, "bytecode is not the kit");
+    std::fs::write(package.join("games").join("one.py"), "y = 22\n").unwrap();
+    let changed = kit_fingerprint(&package).unwrap();
+    assert_ne!(changed, first, "a changed file asks the manifest again");
+    std::fs::write(package.join("games").join("two.json"), "{}").unwrap();
+    assert!(kit_fingerprint(&package).unwrap().starts_with("3:"));
+    std::fs::remove_dir_all(&folder).unwrap();
+    assert_eq!(kit_fingerprint(&package), None, "a missing kit is never a kept manifest");
+}
+
+#[test]
 fn counts_the_commands_in_a_manifest() {
     let text = envelope(r#"{"envelope":1,"tool":"manifest","kit_version":"1.0.0","data":{"commands":[{},{}]}}"#);
     assert_eq!(

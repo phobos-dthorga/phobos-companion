@@ -30,6 +30,7 @@
   import ThemesPanel from "../theme/ThemesPanel.svelte";
   import AgentsPanel from "../agents/AgentsPanel.svelte";
   import PublishingPanel from "../publish/PublishingPanel.svelte";
+  import ReadingAheadPanel from "./ReadingAheadPanel.svelte";
   import OnlinePanel from "../online/OnlinePanel.svelte";
   import AiProgramsPanel from "../ai/AiProgramsPanel.svelte";
   import AiServicesPanel from "../ai/AiServicesPanel.svelte";
@@ -262,6 +263,7 @@
         >
       </section>
     {:else if tab === "games"}
+      <ReadingAheadPanel />
       <AddGamePanel
         taken={games.map((game) => game.id)}
         onchanged={() => {

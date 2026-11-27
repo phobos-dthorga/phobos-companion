@@ -27,7 +27,7 @@ export const MOST_TABS = 9;
 export const PAGE_TABS: Partial<Record<PageName, Tab[]>> = {
   settings: [
     { id: "look", words: "settings-tab-look", panels: ["themes"] },
-    { id: "games", words: "settings-tab-games", panels: ["games"] },
+    { id: "games", words: "settings-tab-games", panels: ["games", "ahead"] },
     {
       id: "setup",
       words: "settings-tab-setup",

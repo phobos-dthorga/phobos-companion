@@ -3,6 +3,7 @@ import {
   BROWSER,
   inBrowser,
   progressChannel,
+  readKept,
 } from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
@@ -21,13 +22,41 @@ import type {
 export async function readInstalls(
   game: string,
   onProgress?: OnProgress,
+  ahead = false,
 ): Promise<InstallsReading> {
   if (inBrowser()) return BROWSER;
   return ask<RepositoryInstalls[], InstallsReading>(
     "mod_installs",
-    { game, onProgress: progressChannel(onProgress) },
-    (repositories) => ({ state: "ready", repositories }),
+    { game, ahead, onProgress: progressChannel(onProgress) },
+    installsReady,
   );
+}
+
+const installsReady = (
+  repositories: RepositoryInstalls[],
+): InstallsReading => ({ state: "ready", repositories });
+
+/** The mods as last read, with when (0.116.0); null when none were kept. */
+export function keptInstalls(game: string) {
+  return readKept<RepositoryInstalls[], InstallsReading>(
+    "mod_installs",
+    [game],
+    installsReady,
+  );
+}
+
+/**
+ * A quick look at what the Mods page reads (0.116.0; the owner's choice of 28 Nov 2026, "Only if something changed"): a
+ * fingerprint of the repositories and the installed mods' folders, taken without the tools; null before a first read this run.
+ */
+export async function glanceInstalls(game: string): Promise<string | null> {
+  if (inBrowser()) return null;
+  const answer = await ask<string | null, string | null>(
+    "installs_glance",
+    { game },
+    (print) => print,
+  );
+  return typeof answer === "string" ? answer : null;
 }
 
 /** Asks the host to make one move. The host and the kit both check it first. */
@@ -57,12 +86,25 @@ export async function makeMove(
 export async function readTextures(
   game: string,
   onProgress?: OnProgress,
+  ahead = false,
 ): Promise<TexturesReading> {
   if (inBrowser()) return BROWSER;
   return ask<TexturesStatus | null, TexturesReading>(
     "texture_status",
-    { game, onProgress: progressChannel(onProgress) },
-    (status) => (status ? { state: "ready", status } : { state: "none" }),
+    { game, ahead, onProgress: progressChannel(onProgress) },
+    texturesReady,
+  );
+}
+
+const texturesReady = (status: TexturesStatus | null): TexturesReading =>
+  status ? { state: "ready", status } : { state: "none" };
+
+/** The textures as last read (0.116.0); null when none were kept. */
+export function keptTextures(game: string) {
+  return readKept<TexturesStatus | null, TexturesReading>(
+    "texture_status",
+    [game],
+    texturesReady,
   );
 }
 
@@ -83,10 +125,20 @@ export async function encodeTextures(
 export async function readLedger(
   game: string,
   onProgress?: OnProgress,
+  ahead = false,
 ): Promise<{ state: "ready"; ledgers: Ledger[] } | Failed> {
   return ask<Ledger[], { state: "ready"; ledgers: Ledger[] }>(
     "mod_settings",
-    { game, onProgress: progressChannel(onProgress) },
+    { game, ahead, onProgress: progressChannel(onProgress) },
+    (ledgers) => ({ state: "ready", ledgers }),
+  );
+}
+
+/** Every setting ever changed, as last read (0.116.0); null when it was not kept. */
+export function keptLedger(game: string) {
+  return readKept<Ledger[], { state: "ready"; ledgers: Ledger[] }>(
+    "mod_settings",
+    [game],
     (ledgers) => ({ state: "ready", ledgers }),
   );
 }

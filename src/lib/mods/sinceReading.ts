@@ -36,13 +36,14 @@ export type Patches =
 export async function readSince(
   game: string,
   running: boolean,
+  ahead = false,
 ): Promise<SinceSummary | null> {
-  const answer = await readGameFiles(game, running ? "previous" : null);
+  const answer = await readGameFiles(game, running ? "previous" : null, ahead);
   if (answer.state !== "ready") return null;
   const byLaunch = summarise(answer.files, running);
   const from = compareFrom(byLaunch.since, lastChecked(game), new Date());
   if (from.reach === "launch") return byLaunch;
-  const wider = await readGameFiles(game, from.since);
+  const wider = await readGameFiles(game, from.since, ahead);
   if (wider.state !== "ready") return byLaunch;
   return {
     ...summarise(wider.files, running),
@@ -57,6 +58,7 @@ export async function readPatches(
   game: string,
   repositories: string[],
   summary: SinceSummary,
+  ahead = false,
 ): Promise<Patches> {
   if (summary.updated.length === 0 && !summary.gameUpdated)
     return { state: "idle" };
@@ -69,7 +71,7 @@ export async function readPatches(
   if (tied.length === 0) return { state: "none" };
   const targets: PatchTarget[] = [];
   for (const repository of repositories) {
-    const found = await patchTargetsOf(game, repository);
+    const found = await patchTargetsOf(game, repository, ahead);
     targets.push(...(found.data?.targets ?? []));
   }
   return {

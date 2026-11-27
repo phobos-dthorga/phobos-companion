@@ -4,7 +4,7 @@ kind: page
 page: tests
 go: tests
 words: test, verdict, passed, failed, test list, row, seen in play
-see: task-pass-test, term-test-row, term-seen-working
+see: task-pass-test, term-test-row, term-seen-working, term-last-reading
 ---
 **The in-game tests waiting for you**, from each repository's test list, where it keeps one (see [make a repository ready](task-repository-ready)).
 
@@ -15,6 +15,8 @@ The rows are on shelves:
 - **Your verdicts:** what you pressed, waiting to be written into the test list (the tool kit's `test-pass apply` does it, run by you or an agent session).
 - **Done:** the test list already says passed or failed.
 - **To look into**, and **Notes with no row**, when the game noted something no row covers.
+
+The page opens with [its last reading](term-last-reading) while it reads again; the buttons wait for the fresh one.
 
 Each row says **What to do** and **What passes**. Press **Passed** or **Failed**, add a note if you like, or **Take it back**.
 

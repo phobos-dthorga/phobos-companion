@@ -61,3 +61,44 @@ export async function readKit(): Promise<KitReading> {
     status,
   }));
 }
+
+/** A slow reading's last answer and when it was read (0.116.0). */
+export type KeptAnswer<T> = { at: string; answer: T };
+
+/**
+ * The last answer the host kept for a slow reading (0.116.0; the owner's choice of 28 Nov 2026, "Old at once, then fresh"), shaped
+ * by `ready` as the reading's own answer is, with when it was read; null when there is none, or outside the program. Only a head
+ * start: a page shows it while it reads again, and locks every change until the fresh answer lands.
+ */
+export async function readKept<T, R>(
+  command: string,
+  key: string[],
+  ready: (answer: T) => R,
+): Promise<{ reading: R; at: string } | null> {
+  if (inBrowser()) return null;
+  const kept = await ask<KeptAnswer<T> | null, KeptAnswer<T> | null>(
+    "kept_answer",
+    { command, key },
+    (answer) => answer,
+  );
+  if (!kept || "state" in kept) return null;
+  return { reading: ready(kept.answer), at: kept.at };
+}
+
+/** Whether the window reads the slow pages ahead (0.116.0; on by default; outside the program, never). */
+export async function readReadingAhead(): Promise<boolean> {
+  if (inBrowser()) return false;
+  const answer = await ask<boolean, boolean>("reading_ahead", {}, (on) => on);
+  return answer === true;
+}
+
+/** Keeps the person's choice of reading ahead; the setting as it now stands, or the failure. */
+export async function chooseReadingAhead(
+  on: boolean,
+): Promise<{ state: "ready"; on: boolean } | Failed> {
+  return ask<boolean, { state: "ready"; on: boolean }>(
+    "choose_reading_ahead",
+    { on },
+    (kept) => ({ state: "ready", on: kept }),
+  );
+}

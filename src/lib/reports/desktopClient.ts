@@ -4,7 +4,10 @@ import {
   inBrowser,
   progressChannel,
 } from "../shell/desktopClient";
+import type { OtherAnswer } from "../othercode/types";
 import type { OnProgress } from "../shell/progress";
+import type { Failed } from "../shell/types";
+import type { LookKind } from "./lookup";
 import type {
   CatalogueReading,
   ReportEntry,
@@ -39,5 +42,22 @@ export async function runReport(
       onProgress: progressChannel(onProgress),
     },
     (result) => ({ state: "ready", result }),
+  );
+}
+
+/** One definition looked up by name (0.106.0): who defines and patches it, it as written, or it as patched. Only reads. */
+export async function lookUp(
+  game: string,
+  kind: LookKind,
+  name: string,
+  onProgress?: OnProgress,
+): Promise<{ state: "ready"; answer: OtherAnswer<unknown> } | Failed> {
+  return ask<
+    OtherAnswer<unknown>,
+    { state: "ready"; answer: OtherAnswer<unknown> }
+  >(
+    "look_up",
+    { game, kind, name, onProgress: progressChannel(onProgress) },
+    (answer) => ({ state: "ready", answer }),
   );
 }

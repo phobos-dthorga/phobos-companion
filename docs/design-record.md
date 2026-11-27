@@ -1440,6 +1440,23 @@ disk for two minutes each time); crashes from the last week show before any was 
 (its spare metrics file is zeros by design, and the first look reported it); **no Put back button**, since putting a file back
 writes into a repository, which this program never does: the question is on the Decisions page.
 
+## Look up one definition (built 27 Nov 2026, 0.106.0)
+
+**The owner's request** (27 Nov 2026), the third of four steps chosen together: "Look up a Def page". The question behind the
+C-17 warning that day was "who adds `modExtensions` to this Def?", which only an agent's command line could answer.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Type a definition's name and see who defines and patches it, it as written with its parents, and it as the game reads it |
+| What does it stop them doing? | Nothing |
+| How does it change the way they work? | No command line or agent to see a definition, or what patches did to it |
+| What outside it notices? | Nothing: it only reads |
+
+**Risk: none (agent's grade).** **Agent choices, owner to revise:** a tab on Reports rather than a page of its own, since a
+23rd page would push the page list past the 940 px window the owner sized its rows for; found by the kit's new `definitions`
+surface, so another game's look-up can serve the same tab. Building it found two faults in the kit's `rimworld-defs patched`
+(fixed in 1.140.0).
+
 Everything proposed and agreed but not yet built is in [later.md](later.md), with each item's status.
 
 ## Limits

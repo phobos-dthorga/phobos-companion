@@ -231,6 +231,36 @@ impl Outcome {
     }
 }
 
+/// What a page's tool answered, whole (0.26.0; in the core since 0.106.0): `available` is false when the game's tools offer no
+/// such report, so the page says so in words.
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub struct Answer {
+    pub available: bool,
+    pub ok: bool,
+    pub refusal: Option<String>,
+    pub report: Value,
+    pub data: Value,
+}
+
+impl Answer {
+    pub fn missing() -> Self {
+        Self { available: false, ok: false, refusal: None, report: Value::Null, data: Value::Null }
+    }
+
+    pub fn of(answer: &Value) -> Self {
+        let outcome = Outcome::of(answer);
+        let refused = answer["data"]["ok"].as_bool() == Some(false);
+        let refusal = outcome.refusal.or_else(|| answer["data"]["reason"].as_str().map(str::to_owned));
+        Self {
+            available: true,
+            ok: outcome.ok && !refused,
+            refusal,
+            report: answer["report"].clone(),
+            data: answer["data"].clone(),
+        }
+    }
+}
+
 const ALLOWED_EFFECTS: [&str; 2] = ["writes", "runs"];
 
 /// The kit's manifest still says this report writes or runs (never owner-only, never one it does not have): checked before every

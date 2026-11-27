@@ -389,6 +389,7 @@ Dates read from a repository are drawn in the `observed` colour; "how long ago",
 | Tables | Numbers sort as numbers, through the `values` the kit adds beside each table (kit 1.1.0); a column that isn't all numbers in one unit sorts as words. Columns take the width their words need and the table scrolls sideways. **Show more** asks the tool for five times as many rows, up to 5,000 |
 | Charts | A chart block in a kit report (kit 1.5.0, `docs/manifest.md`): bars or a line, series and reference lines, each with a role, never a colour. `chartOptions.ts` turns it into ECharts options as plain data, tested without a browser. SVG, loaded only when a report has a chart; a failed load shows the numbers instead. ECharts costs one file of 562 kB (192 kB compressed) |
 | Facts (0.24.0) | A report's `facts` (kit 1.48.0, label and value), drawn by `ReportView` as a strip of small cards above the opening lines |
+| Look up (0.106.0) | The page's second tab (`PAGE_TABS.reports`). `lookup.rs` finds the game's `definitions` reports by surface (kit 1.140.0: rimworld-defs' `who`, `show`, `patched`), checks the name (`definition_name`: letters, digits, `_ . -`, `*` and `?`) and passes it after `--`; `LookUp.svelte` keeps the name and the look in the place's focus. The answer is `companion_core::kit::Answer`, moved there from `other_code_page` once two pages used it |
 
 ### Atlas (0.6.0)
 

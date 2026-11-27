@@ -4,6 +4,16 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.106.0] - 2026-11-27
+
+### Added
+
+- **Look up one definition by name, on the Reports page** (the owner's choice of 27 Nov 2026, "Look up a Def page"). A new **Look
+  up** tab (**Alt + 2**) takes a name such as C17_Globemaster and shows **Who defines it** (every mod and patch), **As written**
+  (with its parents) or **As patched** (as the game reads it, and what the patches changed). It only reads. With tool kit 1.140.0,
+  which also fixes **As patched** finding nothing unless a setting named the file. Checked on RimWorld and Phobos Ostranauts
+  (its tools have no look-up, and the tab says so). **Not tested on screen.**
+
 ## [0.105.0] - 2026-11-27
 
 ### Added

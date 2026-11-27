@@ -376,3 +376,71 @@ for (const [name, viewport] of [
     });
   });
 }
+
+test.describe("Look up (0.106.0)", () => {
+  test("looks one definition up three ways, and says when a game's tools can't", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      report_catalogue: catalogue,
+      look_up: {
+        result: {
+          available: true,
+          ok: true,
+          refusal: null,
+          report: {
+            ...sampleReport(2),
+            title: "Def Sample_Thing, with every patch applied",
+          },
+          data: null,
+        },
+      },
+    });
+    await openReports(page);
+    await page.getByRole("tab", { name: "Look up" }).click();
+    const name = page.getByLabel("A definition's name");
+    await page.getByRole("button", { name: "As patched" }).click();
+    await expect(
+      page.getByText("Type a definition's name first"),
+    ).toBeVisible();
+    await name.fill("Sample_Thing");
+    await page.getByRole("button", { name: "As patched" }).click();
+    await expect(
+      page.getByRole("heading", {
+        name: "Def Sample_Thing, with every patch applied",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "As patched" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await audit(page);
+    await noSidewaysScroll(page);
+  });
+
+  test("a game whose tools have no look-up is told so in words", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      report_catalogue: catalogue,
+      look_up: {
+        result: {
+          available: false,
+          ok: false,
+          refusal: null,
+          report: null,
+          data: null,
+        },
+      },
+    });
+    await openReports(page);
+    await page.getByRole("tab", { name: "Look up" }).click();
+    await page.getByLabel("A definition's name").fill("Anything");
+    await page.getByRole("button", { name: "Who defines it" }).click();
+    await expect(page.getByText("can't look definitions up yet")).toBeVisible();
+    await audit(page);
+  });
+});

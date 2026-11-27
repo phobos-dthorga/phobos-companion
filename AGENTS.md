@@ -56,7 +56,8 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
 
 - **The host decides what may run, from the kit's manifest, and checks again when asked to run it**: the window can only request.
   The report viewer runs only reports marked `reads`, with a `question` and nothing required, a game's own or one the manifest
-  scopes to the whole PC (`scope: machine`, 0.105.0); `reads-online` and typed inputs come
+  scopes to the whole PC (`scope: machine`, 0.105.0); its **Look up** tab (0.106.0) runs only the game's `definitions` reports,
+  found by surface, while the manifest calls them `reads`, with a checked name after `--`; `reads-online` and typed inputs come
   next; anything else needs a design record and a confirmation step. **`owner-only` is never run**, and **the program holds no
   credentials but keys for AI services the person adds** (0.71.0; the owner, 23 Nov 2026, of the old rule: "willing to bend this
   rule now", and "keys for AI services only"): kept in the operating system's own key store, never in a file, never shown again

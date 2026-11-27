@@ -44,6 +44,6 @@ An address is written `dthorga://page/game?key=value`, with `dialog=code`, `dial
 | Chat | `repository` (0.74.0) |
 | Memory | `watch` (a kept watch's name, such as `20261119-205419-reload-test-2`; 0.23.0) |
 | Explorer | `view` (`kind`, `object` or `checks`, the live checks on the snapshot held, 0.91.0; none for the overview), `kind` (a type's full name, such as `Verse.Pawn`), with `match` (a word filter), `largest` (`yes`) and `page`; `object` (a token such as `o7`, never a memory address) with `snapshot` (the snapshot's number in this run of the program): a step back to an object from a snapshot let go says it is gone and offers the overview; `start` (`yes`: asks at once whether to take a snapshot, as Go to anything's **Look inside the running game** does) |
-| Reports | `command`, `report` |
+| Reports | `command`, `report`; `tab` (`questions`, `lookup`; 0.106.0); on Look up, `name` and `look` (`who`, `show`, `patched`) |
 | About | `tab` (0.66.0): `version`, `where`, `online`, `built` |
 | Guide | `entry` (an entry's id, such as `task-go-back`; 0.34.0). Each entry opened is a step |

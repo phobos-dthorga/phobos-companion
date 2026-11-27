@@ -15,8 +15,7 @@ use companion_core::args::Args;
 use companion_core::checks;
 use companion_core::failure::Failure;
 use companion_core::games;
-use companion_core::kit::{self, Offered, Outcome};
-use serde::Serialize;
+use companion_core::kit::{self, Offered};
 use serde_json::Value;
 use std::collections::BTreeSet;
 use std::sync::Mutex;
@@ -113,34 +112,8 @@ pub fn remembered_check(game: &str, repository: &str) -> Result<Value, Failure> 
         .ok_or_else(|| Failure::refused("that repository's update check is not one this run made: check again"))
 }
 
-/// What the tools answered: `available` is false when this game's tools offer no such report.
-#[derive(Debug, Clone, PartialEq, Serialize)]
-pub struct Answer {
-    pub available: bool,
-    pub ok: bool,
-    pub refusal: Option<String>,
-    pub report: Value,
-    pub data: Value,
-}
-
-impl Answer {
-    fn missing() -> Self {
-        Self { available: false, ok: false, refusal: None, report: Value::Null, data: Value::Null }
-    }
-
-    fn of(answer: &Value) -> Self {
-        let outcome = Outcome::of(answer);
-        let refused = answer["data"]["ok"].as_bool() == Some(false);
-        let refusal = outcome.refusal.or_else(|| answer["data"]["reason"].as_str().map(str::to_owned));
-        Self {
-            available: true,
-            ok: outcome.ok && !refused,
-            refusal,
-            report: answer["report"].clone(),
-            data: answer["data"].clone(),
-        }
-    }
-}
+/// What the tools answered (moved to the core in 0.106.0, when the Reports page's Look up came to use it too).
+pub use companion_core::kit::Answer;
 
 /// A type or member name as code, Harmony and our graph write them: letters, digits and `_ . : + `` < > ,`, not opening with a dash.
 pub fn type_name(text: &str) -> bool {

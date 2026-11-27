@@ -8,6 +8,9 @@
   import ProgressBar from "../shell/ProgressBar.svelte";
   import { heard, started } from "../shell/progress";
   import ReportView from "./ReportView.svelte";
+  import LookUp from "./LookUp.svelte";
+  import Tabs from "../shell/Tabs.svelte";
+  import { PAGE_TABS } from "../shell/tabs";
   import { readCatalogue, runReport } from "./desktopClient";
   import { DEFAULT_TOP, hasMoreRows, MAX_TOP, nextTop } from "./presentation";
   import { watched } from "./watched.svelte";
@@ -148,6 +151,23 @@
 {:else}
   <div class="eyebrow accent">{t("reports-kicker")}</div>
   <h1>{t("reports-title", { game: game.name })}</h1>
+  <!-- 0.106.0: Look up beside the questions, as a tab, so the page list keeps its height. -->
+  <Tabs
+    tabs={PAGE_TABS.reports ?? []}
+    id="reports"
+    label={t("reports-tabs-label")}
+  >
+    {#snippet children(tab)}
+      {#if tab === "lookup"}
+        <LookUp {game} />
+      {:else}
+        {@render questions()}
+      {/if}
+    {/snippet}
+  </Tabs>
+{/if}
+
+{#snippet questions()}
   {#if catalogue.state === "reading"}
     <p class="muted" role="status">{t("reports-loading")}</p>
   {:else if catalogue.state === "browser"}
@@ -177,7 +197,7 @@
       {/each}
     </ul>
   {/if}
-{/if}
+{/snippet}
 
 <style>
   h1:focus {

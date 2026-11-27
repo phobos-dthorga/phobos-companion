@@ -61,6 +61,11 @@ export const PAGE_TABS: Partial<Record<PageName, Tab[]>> = {
     },
     { id: "textures", words: "mods-tab-textures" },
   ],
+  // 0.106.0: Look up one definition by name, beside the questions.
+  reports: [
+    { id: "questions", words: "reports-tab-questions", keys: ["command"] },
+    { id: "lookup", words: "reports-tab-lookup", keys: ["name"] },
+  ],
   publish: [
     { id: "page", words: "publish-tab-page" },
     { id: "note", words: "publish-tab-note" },

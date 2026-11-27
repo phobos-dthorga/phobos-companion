@@ -25,6 +25,7 @@ mod home;
 mod installs_page;
 mod kit_pins;
 mod logs_page;
+mod lookup;
 mod makeup_page;
 mod memory_page;
 mod mod_list_lists;
@@ -1793,6 +1794,17 @@ async fn mod_list_open_in_steam(number: String) -> Result<(), Failure> {
     blocking(move || mod_list_page::open_in_steam(&number)).await
 }
 
+/// One definition looked up by name: who defines it, as written, or as patched (0.106.0). Only reads.
+#[tauri::command]
+async fn look_up(
+    game: String,
+    kind: String,
+    name: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<kit::Answer, Failure> {
+    blocking(move || lookup::look_up(&game, &kind, &name, Some(&hearing(on_progress)))).await
+}
+
 /// The crash dumps kept and whether a look for zero-filled files is due, for Home (0.105.0). Only reads.
 #[tauri::command]
 async fn crash_status() -> Result<crash_look::Status, Failure> {
@@ -1841,6 +1853,7 @@ pub fn run() {
             chat_try,
             cleanup_list,
             crash_status,
+            look_up,
             crash_look_now,
             cleanup_apply,
             mod_list_check,

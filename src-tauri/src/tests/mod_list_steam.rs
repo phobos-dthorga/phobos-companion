@@ -34,3 +34,20 @@ fn only_well_formed_numbers_and_known_mods_are_accepted() {
     assert!(subscribe("rimworld", &["not a number".to_owned()], false, None).is_err());
     assert!(unsubscribe("rimworld", "active", &["9999999999".to_owned()], None).is_err());
 }
+
+#[test]
+fn what_players_say_reads_only_a_named_item_and_only_while_workshop_pages_is_on() {
+    let data = std::env::temp_dir().join(format!("players-say-{}", std::process::id()));
+    std::fs::create_dir_all(&data).unwrap();
+    let arguments = players_arguments("3014915404");
+    assert_eq!(arguments[..2], ["steam-workshop", "report"]);
+    assert_eq!(arguments[arguments.len() - 2..], ["--", "3014915404"]);
+    // Not named by a listing in this run: refused before Steam is asked.
+    assert!(players_say(&data, "1234567890", None).is_err());
+    WORKSHOP.lock().unwrap().insert("2222222222".to_owned());
+    online::choose(&data, WORKSHOP_PAGES, false).unwrap();
+    let refused = players_say(&data, "2222222222", None).unwrap_err();
+    assert!(refused.detail.contains("Workshop pages is off"), "{refused:?}");
+    assert!(players_say(&data, "not-a-number", None).is_err());
+    std::fs::remove_dir_all(&data).unwrap();
+}

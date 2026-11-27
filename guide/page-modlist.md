@@ -27,6 +27,7 @@ Every mod on this PC, in one scroll: **Switched on**, in load order, and **Switc
 - **Put after…** or **Put before…**: type part of another mod's name, then press **Enter** on the match.
 - **Place** and **Move to**: a place number. **Switch off**, **Switch on**, **Switch on after…**.
 - **Dragging** rows with the mouse works too, as a shortcut.
+- **What players say**, beside the picture of a Workshop mod in focus: its last update, the newest comments that mention problems, and the author's latest replies, read from its public Workshop page in a window over the list. Useful before trusting a mod, or to see whether its author is still about. It only reads, and needs **Workshop pages** on in [Going online](task-going-online).
 - **Each change is saved once, when you make it**: several mods moved together are one change.
 
 ### Sort

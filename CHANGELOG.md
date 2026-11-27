@@ -4,6 +4,16 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.107.0] - 2026-11-27
+
+### Added
+
+- **What players say, on the Mod list** (the owner's choice of 27 Nov 2026, "Workshop research on Mod list"). In Edit the list,
+  a Workshop mod in focus has **What players say**: its last update, the newest comments that mention problems and the author's
+  latest replies, read from its public Workshop page in a window over the list. It only reads, keyless, under **Workshop pages**
+  in Going online, which now also names steamcommunity.com. Run on a RimWorld item (about a second); Project Zomboid's Workshop
+  mods get the same button, not yet run. **Not tested on screen.**
+
 ## [0.106.0] - 2026-11-27
 
 ### Added

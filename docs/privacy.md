@@ -15,7 +15,7 @@ Settings → Going online**, and About lists them too. **Off means off**: a kind
 | Nightly watch | `raw.githubusercontent.com` | What your repositories' nightly runs found, read from their public results | On |
 | Known problems | `raw.githubusercontent.com` | Public lists of mods known to go wrong together | On |
 | Their reports | `api.github.com` | Another author's existing issues for a fault, only when you press it | On |
-| Workshop pages | `api.steampowered.com` | How your Steam Workshop items stand, only when you press it | On |
+| Workshop pages | `api.steampowered.com`, `steamcommunity.com` | How your Steam Workshop items stand, and what players say on a mod's Workshop page, only when you press it | On |
 | Updates | `github.com` | Whether a newer Companion is published, and the installer when there is | On |
 | AI services | The AI service you chose | Help on a page, only text you were shown, only when you press Send, with your own key | **Off** |
 

@@ -1794,6 +1794,17 @@ async fn mod_list_open_in_steam(number: String) -> Result<(), Failure> {
     blocking(move || mod_list_page::open_in_steam(&number)).await
 }
 
+/// What players say about a mod on its Workshop page, read on the owner's press (0.107.0). Only reads, keyless.
+#[tauri::command]
+async fn players_say(
+    app: tauri::AppHandle,
+    number: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<kit::Answer, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || mod_list_steam::players_say(&data, &number, Some(&hearing(on_progress)))).await
+}
+
 /// One definition looked up by name: who defines it, as written, or as patched (0.106.0). Only reads.
 #[tauri::command]
 async fn look_up(
@@ -1854,6 +1865,7 @@ pub fn run() {
             cleanup_list,
             crash_status,
             look_up,
+            players_say,
             crash_look_now,
             cleanup_apply,
             mod_list_check,

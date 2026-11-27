@@ -93,6 +93,9 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
     library: no credentials held. Subscribe runs on a press for any well-formed Workshop number (it only adds); **Unsubscribe only
     after the owner's yes**, only for mods the last listing or check named, switching them off first. **Agents never press either
     on the owner's account**, in a test or otherwise (the Workshop rule): browser tests stand in a host.
+  - *What players say* (0.107.0; the owner's choice of 27 Nov 2026, "Workshop research on Mod list"): the kit's game-free
+    `steam-workshop report` for one Workshop number the last listing or check named, on a press, only while **Workshop pages** is on
+    and the manifest calls it `reads-online`; shown in a dialog so the list never moves. It only reads.
   - *Reading*: the check reads Steam's public Workshop API only when Ask Steam too is on (`reads-online`, no account); Home's note
     reads without it, at most every half hour. Saves and RimSort's files are only read. **Open in Steam** and **Find on the
     Workshop** hand the Steam client only a Workshop page a check named in this run, or a search for a missing mod's name in the

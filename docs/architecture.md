@@ -293,7 +293,7 @@ AI services, which starts off (`starts_on`):
 | Nightly watch | raw.githubusercontent.com | Severe | Home, `nightly.rs`: `feeds read --root`, each `companion-results` branch |
 | Known problems | raw.githubusercontent.com | Severe | Mod list, `mod_list_page.rs`: `feeds read --from published` |
 | Their reports | api.github.com | Small | Logs, `report_links.rs`: another author's issues, on a press |
-| Workshop pages | api.steampowered.com | Small | Publish, `publish_page.rs`: **Read Steam back** (`pull --write`) |
+| Workshop pages | api.steampowered.com, steamcommunity.com | Small | Publish, `publish_page.rs`: **Read Steam back** (`pull --write`); Mod list, `mod_list_steam.rs`: **What players say** (`steam-workshop report`, 0.107.0) |
 
 ### What each page's host checks
 

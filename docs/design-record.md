@@ -1457,6 +1457,22 @@ C-17 warning that day was "who adds `modExtensions` to this Def?", which only an
 surface, so another game's look-up can serve the same tab. Building it found two faults in the kit's `rimworld-defs patched`
 (fixed in 1.140.0).
 
+## What players say on the Mod list (built 27 Nov 2026, 0.107.0)
+
+**The owner's request** (27 Nov 2026), the last of four steps chosen together: "Workshop research on Mod list", so that "is this
+mod abandoned?" is a press instead of a script (phobos-rimworld's rule: read a mod's latest player comments before suggesting it).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See a Workshop mod's last update, the newest comments that mention problems, and the author's latest replies, from the mod in focus |
+| What does it stop them doing? | Nothing |
+| How does it change the way they work? | No browser trip or script before trusting a mod, or judging whether its author is still about |
+| What outside it notices? | Steam's public pages are asked, keyless; nothing is sent about the person |
+
+**Risk: none (agent's grade).** **Agent choices, owner to revise:** under the existing **Workshop pages** switch (now also
+steamcommunity.com) rather than a new kind; a dialog over the window, since the preview panel keeps one height so the list never
+moves under the pointer.
+
 Everything proposed and agreed but not yet built is in [later.md](later.md), with each item's status.
 
 ## Limits

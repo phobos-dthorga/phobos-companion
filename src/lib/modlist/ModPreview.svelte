@@ -3,6 +3,7 @@
   import { t } from "../i18n/runtime";
   import { pictureAddress } from "../media/addresses";
   import type { ModRow } from "./types";
+  import PlayersSay from "./PlayersSay.svelte";
 
   /**
    * The picture of the mod in focus on Edit the list (0.53.0; the owner's choice of 23 Nov 2026, "Mod list previews"): the one
@@ -51,6 +52,9 @@
         <p class="muted small">
           {t("modlist-preview-versions", { versions: mod.versions.join(", ") })}
         </p>
+      {/if}
+      {#if mod.source === "workshop" && mod.workshop_id}
+        <PlayersSay number={mod.workshop_id} name={mod.name} />
       {/if}
     {/if}
   </div>

@@ -822,6 +822,51 @@ for (const [name, viewport] of [
       await audit(page);
     });
 
+    test("What players say reads a Workshop mod's page into a dialog, and a local mod has none (0.107.0)", async ({
+      page,
+    }) => {
+      await open(page, {
+        players_say: {
+          result: {
+            available: true,
+            ok: true,
+            refusal: null,
+            report: {
+              format: 1,
+              title: "Workshop research",
+              lines: ["Steam: 1 items' details fetched now."],
+              blocks: [],
+              sections: [
+                {
+                  heading: "The uploader's latest replies",
+                  level: 2,
+                  blocks: [{ type: "text", text: "Fixed in the update." }],
+                },
+              ],
+            },
+            data: {},
+          },
+        },
+      });
+      await page
+        .getByRole("button", { name: "Edit the list", exact: true })
+        .click();
+      const panel = page.getByRole("region", { name: "The mod in focus" });
+      await page.getByRole("option", { name: /Delta Doors/ }).click();
+      await expect(
+        panel.getByRole("button", { name: "What players say" }),
+      ).toHaveCount(0);
+      await page.getByRole("option", { name: /Alpha Tools/ }).click();
+      await panel.getByRole("button", { name: "What players say" }).click();
+      const dialog = page.getByRole("dialog", {
+        name: "What players say about Alpha Tools",
+      });
+      await expect(dialog).toContainText("The uploader's latest replies");
+      await audit(page);
+      await dialog.getByRole("button", { name: "Close" }).click();
+      await expect(dialog).toHaveCount(0);
+    });
+
     test("new errors after a change are named, with Undo asked first and a way to a list that ran clean", async ({
       page,
     }) => {

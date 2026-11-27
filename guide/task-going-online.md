@@ -13,7 +13,7 @@ see: page-settings, page-home, page-about, page-logs, page-modlist, page-publish
 
 **AI services**: help on pages, such as **Explain this fault** on the [Logs](page-logs) page, from an online AI service you chose, with your own key ([set it up](task-ai-services)). It sends only what the page showed you, and only when you press **Send**. **Off until you turn it on.** A model on this computer, such as Ollama or LM Studio, is not going online and works either way.
 
-**Workshop pages**: on the [Publish](page-publish) page, **Read Steam back** asks Steam's public pages, without an account, how each of your Workshop items stands: whether it is public, and the day it went public, which it writes into the changelog. Only when you press it.
+**Workshop pages**: on the [Publish](page-publish) page, **Read Steam back** asks Steam's public pages, without an account, how each of your Workshop items stands: whether it is public, and the day it went public, which it writes into the changelog. On the [Mod list](page-modlist), **What players say** reads a Workshop mod's public page and comments. Each only when you press it.
 
 **Their reports**: on the [Logs](page-logs) page, lists another author's existing issues for a fault in their mod, only when you press it. Opening a new-issue form is your browser's own visit, so it has no switch.
 

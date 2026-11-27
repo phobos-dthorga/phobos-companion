@@ -2,6 +2,7 @@ import { ask, progressChannel } from "../shell/desktopClient";
 import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
 import type {
+  CommunityLists,
   CompareAnswer,
   SubscribeAnswer,
   UnsubscribeAnswer,
@@ -140,6 +141,30 @@ export async function addRule(
   return ask<ModListChange, Changed>(
     "mod_list_add_rule",
     { game, id, kind, other },
+    (result) => ({ state: "ready", result }),
+  );
+}
+
+/** The community lists the sorter and the check read (0.112.0); with `fetch`, fetched first (only those over a week old with
+ *  `stale`), only while Community lists is on in Going online. */
+export async function readCommunityLists(
+  game: string,
+  fetch: boolean,
+  stale: boolean,
+  onProgress?: OnProgress,
+): Promise<{ state: "ready"; lists: CommunityLists } | Failed> {
+  return ask<CommunityLists, { state: "ready"; lists: CommunityLists }>(
+    "mod_list_databases",
+    { game, fetch, stale, onProgress: progressChannel(onProgress) },
+    (lists) => ({ state: "ready", lists }),
+  );
+}
+
+/** Brings the owner's RimSort rules into their own (0.112.0), on a press. */
+export async function bringRulesOver(game: string): Promise<Changed | Failed> {
+  return ask<ModListChange, Changed>(
+    "mod_list_import_rules",
+    { game },
     (result) => ({ state: "ready", result }),
   );
 }

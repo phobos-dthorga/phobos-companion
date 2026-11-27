@@ -291,6 +291,7 @@ AI services, which starts off (`starts_on`):
 | AI services | The AI service the person chose | Small | Logs, `ai_help.rs`: **Explain this fault**, on **Send**; Settings, **Read the models** |
 | Gate lights | api.github.com | Severe | Home, `repo_status.rs`: the kit's `repos status` |
 | Nightly watch | raw.githubusercontent.com | Severe | Home, `nightly.rs`: `feeds read --root`, each `companion-results` branch |
+| Community lists | raw.githubusercontent.com | Small | Mod list, `mod_list_databases.rs`: `mod-list databases --fetch` (kit 1.144.0, 0.112.0), the stale ones once a run and all on **Fetch them now** |
 | Known problems | raw.githubusercontent.com | Severe | Mod list, `mod_list_page.rs`: `feeds read --from published` |
 | Their reports | api.github.com | Small | Logs, `report_links.rs`: another author's issues, on a press |
 | Workshop pages | api.steampowered.com, steamcommunity.com, store.steampowered.com | Small | Publish, `publish_page.rs`: **Read Steam back** (`pull --write`); Mod list, `mod_list_steam.rs`: **What players say** (`steam-workshop report`, 0.107.0; the game and its DLCs, `steam-reviews`, 0.111.0) |

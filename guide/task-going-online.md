@@ -13,9 +13,11 @@ see: page-settings, page-home, page-about, page-logs, page-modlist, page-publish
 
 **AI services**: help on pages, such as **Explain this fault** on the [Logs](page-logs) page, from an online AI service you chose, with your own key ([set it up](task-ai-services)). It sends only what the page showed you, and only when you press **Send**. **Off until you turn it on.** A model on this computer, such as Ollama or LM Studio, is not going online and works either way.
 
-**Workshop pages**: on the [Publish](page-publish) page, **Read Steam back** asks Steam's public pages, without an account, how each of your Workshop items stands: whether it is public, and the day it went public, which it writes into the changelog. On the [Mod list](page-modlist), **What players say** reads a Workshop mod's public page and comments. Each only when you press it.
+**Workshop pages**: on the [Publish](page-publish) page, **Read Steam back** asks Steam's public pages, without an account, how each of your Workshop items stands: whether it is public, and the day it went public, which it writes into the changelog. On the [Mod list](page-modlist), **What players say** reads a Workshop mod's public page and comments, or the game's and its DLCs' Steam reviews. Each only when you press it.
 
 **Their reports**: on the [Logs](page-logs) page, lists another author's existing issues for a fault in their mod, only when you press it. Opening a new-issue form is your browser's own visit, so it has no switch.
+
+**Community lists**: the Mod list's sorter and What's wrong read four lists the RimWorld community keeps on GitHub: load-order rules, each Workshop item's required mods, mods known to work on a version they don't name, and replacements for old mods. The Companion fetches any older than a week when the Mod list opens, and when you press **Fetch them now** on its Sort view, without using any of GitHub's hourly calls. Whichever copy is newer is read, the Companion's or RimSort's, so it works the same while you still have RimSort.
 
 **Known problems**: the Mod list's What's wrong warns when mods on your list are known to go wrong together, with what goes wrong and what to do. The problems come from the feeds your repositories publish (a `feeds` folder), each checked against the authors' own work before it was published. The Companion reads them at most every six hours, without using any of GitHub's hourly calls, and uses the last copy it has when GitHub can't be reached.
 

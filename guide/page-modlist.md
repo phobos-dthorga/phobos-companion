@@ -39,6 +39,8 @@ Two lists side by side, as RimSort lays them out: **Switched off** on the left, 
 - A move counts as **into its group** only when the mod passes a mod of another group; one that only changes places inside its group is put **in order of names**. A group move's reason follows the links back to the framework ("Combat Extended loads after it, and Vehicle Framework after Combat Extended").
 - **Nothing is written until you press Use this order.**
 - **Your rules**: make one by finding the mods by name; **Take away** removes it. Your RimSort rules are read too, never changed.
+- **Bring them over**, under your RimSort rules, copies them into your own, with their notes, so they stay when RimSort goes. RimSort's file isn't changed. Its copy is then no longer read, so no rule counts twice, unless you change it in RimSort again.
+- **Community lists**, at the bottom: the four lists the RimWorld community keeps on GitHub that the sorter and What's wrong read (load-order rules, each Workshop item's required mods, mods known to work on a version they don't name, and replacements for old mods). Each says whose copy is read, the Companion's or RimSort's (whichever is newer), and how old it is. The Companion fetches any older than a week when the Mod list opens; **Fetch them now** fetches them all. Both need **Community lists** on in [Going online](task-going-online).
 
 ### Saved lists
 - **Save the list** keeps it by name; **Save as a file…** writes it as the game's own list file (.rml), to share.

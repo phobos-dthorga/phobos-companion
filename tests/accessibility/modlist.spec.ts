@@ -210,6 +210,39 @@ const fullSorted = {
   },
 };
 
+/** The community lists (0.112.0), one the Companion's copy and one RimSort's, gone stale. */
+const communityLists = {
+  databases: [
+    {
+      name: "community-rules",
+      label: "The community's load-order rules",
+      repo: "Sample/Rules",
+      licence: "CC0-1.0",
+      ours: "2026-11-28T00:00:00+00:00",
+      theirs: "",
+      read: "ours",
+      age_days: 0,
+      stale: false,
+      fetched: "2026-11-28T00:00:00+00:00",
+    },
+    {
+      name: "use-this-instead",
+      label: "Use This Instead",
+      repo: "Sample/Instead",
+      licence: "MIT",
+      ours: "",
+      theirs: "2026-11-01T00:00:00+00:00",
+      read: "theirs",
+      age_days: 27,
+      stale: true,
+      fetched: "",
+    },
+  ],
+  fetched: [],
+  manager: "RimSort",
+  freshDays: 7,
+};
+
 const rules = {
   result: {
     rules: [
@@ -386,6 +419,15 @@ async function open(page: Page, replies: Record<string, unknown> = {}) {
     mod_list_write: changed(ON),
     mod_list_sort: sorted,
     mod_list_rules: rules,
+    mod_list_databases: { result: communityLists },
+    mod_list_import_rules: {
+      result: {
+        ok: true,
+        title: "kept",
+        refusal: null,
+        data: { imported: [{}] },
+      },
+    },
     mod_list_add_rule: {
       result: { ok: true, title: "kept", refusal: null, data: {} },
     },
@@ -927,6 +969,31 @@ for (const [name, viewport] of [
       await audit(page);
       await dialog.getByRole("button", { name: "Close" }).click();
       await expect(dialog).toHaveCount(0);
+    });
+
+    test("the community lists say whose copy is read and how old, fetch on a press, and RimSort's rules come over (0.112.0)", async ({
+      page,
+    }) => {
+      await open(page);
+      await page.getByRole("button", { name: "Sort", exact: true }).click();
+      const lists = page.getByRole("region", { name: "Community lists" });
+      await expect(lists).toContainText("RimSort's copy");
+      await expect(lists).toContainText("older than 7 days");
+      await audit(page);
+      await lists.getByRole("button", { name: "Fetch them now" }).click();
+      await expect(lists.getByRole("status")).toContainText("Fetched");
+      const fetches = (await asked(page, "mod_list_databases")) as unknown as {
+        fetch: boolean;
+        stale: boolean;
+      }[];
+      // Once by itself when the page opened (only the stale), once on the press (all of them).
+      expect(fetches.filter((f) => f.fetch && f.stale)).toHaveLength(1);
+      expect(fetches.filter((f) => f.fetch && !f.stale)).toHaveLength(1);
+      await page.getByRole("button", { name: "Bring them over" }).click();
+      await expect(
+        page.getByText("Brought over 1 of your rules"),
+      ).toBeVisible();
+      expect(await asked(page, "mod_list_import_rules")).toHaveLength(1);
     });
 
     test("new errors after a change are named, with Undo asked first and a way to a list that ran clean", async ({

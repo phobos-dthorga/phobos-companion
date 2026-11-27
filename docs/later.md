@@ -114,6 +114,21 @@ the order of work; each its own version, installable as it lands.
 | R4 | **Search**: Go to anything (`/`) grows into a global search (mods, Defs through Look up, changelog entries, test rows, settings, Guide text, commits, grouped by kind); **Ctrl + F** filters the long list on the page, from one shared filter part (Mod list, Reports, Changes, Tests, Timeline, Guide) | "Both, one key each" | **Built**, 0.110.0 (see `design-record.md`) |
 | R5 | **What players say for the game and its DLCs**: Steam's public reviews (how many recommend it, the newest negative ones), keyless, beside the game and each DLC on the Mod list | The owner's ask ("it'll just be reviews instead") | **Built**, 0.111.0 with kit 1.143.0 (see `design-record.md`) |
 
+## Retiring RimSort: the mod manager's step 6 (owner's card, 28 Nov 2026)
+
+With steps 1 to 5 and R1 to R5 built, the owner asked to "finish what has been planned for the Mod List". The step left was 6,
+retiring RimSort, agreed on 22 Nov 2026 but never designed. The agent listed what the Companion still leaned on RimSort for; the
+owner chose all four, each its own version:
+
+| # | Item | Status |
+| --- | --- | --- |
+| M6a | **Own data + your rules**: the four community lists RimSort clones fetched by the kit itself; your RimSort rules brought over once | **Built**, 0.112.0 with kit 1.144.0 (see `design-record.md`) |
+| M6b | **todds without RimSort**: texture encoding looks for todds installed by itself first (you install it) | To build |
+| M6c | **Save and start the game** from the Mod list, as RimSort's Run game | To build |
+| M6d | **Workshop updates waiting**: subscribed items Steam says need an update or are stuck, with a button to fetch them again | To build |
+
+RimSort itself goes when the owner says; nothing here removes it.
+
 ## Not on the build list yet
 
 | Item | Where it came from | What it needs or waits for |

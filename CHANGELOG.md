@@ -4,6 +4,22 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.112.0] - 2026-11-28
+
+### Added
+
+- **The community lists and your rules, without RimSort** (the owner's choice of 28 Nov 2026, "Own data + your rules", the first
+  piece of retiring RimSort). The Mod list's Sort view now ends with **Community lists**: the four lists the RimWorld community
+  keeps on GitHub that the sorter and What's wrong read, whose copy is read (the Companion's or RimSort's, whichever is newer) and
+  how old each is, with **Fetch them now**. Lists older than a week are fetched by themselves when the Mod list opens. Under your
+  RimSort rules, **Bring them over** copies them into your own, with their notes, so they stay when RimSort goes. A new Going
+  online switch, **Community lists** (raw.githubusercontent.com), on by default. From kit 1.144.0, now pinned. **Not tested on
+  screen.**
+
+### Changed
+
+- **Workshop pages' words in Going online** now name What players say too (since 0.107.0 and 0.111.0).
+
 ## [0.111.0] - 2026-11-28
 
 ### Added

@@ -218,6 +218,45 @@ export type RulesListing = {
   rules: OwnRule[];
   theirs: OwnRule[];
   sets: RuleSetInfo[];
+  /** The mod manager's own copy of the owner's rules (0.112.0, kit 1.144.0): how many, and whether they were brought over. */
+  manager?: {
+    name: string;
+    count: number;
+    where: string;
+    broughtOver: boolean;
+  };
+};
+
+/** One community list the sorter and the check read (0.112.0, kit 1.144.0): whose copy is read and how old it is. */
+export type CommunityList = {
+  name: string;
+  label: string;
+  repo: string;
+  licence: string;
+  ours: string;
+  theirs: string;
+  read: "" | "ours" | "theirs";
+  age_days: number | null;
+  stale: boolean;
+  fetched: string;
+};
+
+/** What one fetch of a community list did. */
+export type CommunityFetch = {
+  name: string;
+  label: string;
+  fetched: number;
+  unchanged: number;
+  missing: string[];
+  error: string;
+};
+
+/** The community lists, and what a fetch did (empty when nothing was fetched). */
+export type CommunityLists = {
+  databases: CommunityList[];
+  fetched: CommunityFetch[];
+  manager: string;
+  freshDays: number;
 };
 
 /** Where a saved list comes from (phobos-modkit 1.76.0): saved by name, kept at a game start, a save's own, RimSort's history. */

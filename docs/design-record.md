@@ -1489,6 +1489,29 @@ store.steampowered.com) rather than a new kind; the DLC found by every word of t
 matching none reading the game itself; 50 newest reviews read (about 4 seconds), 8 that do not recommend it shown and 3 that do.
 **For a next game:** nothing more than its Steam app ID in the games list.
 
+## The community lists and your rules, without RimSort (built 28 Nov 2026, 0.112.0, M6a)
+
+**The owner's choice** (card, 28 Nov 2026, "Own data + your rules"): the first piece of retiring RimSort. The sorter and What's wrong
+read four lists RimSort clones from GitHub (the community's load-order rules, the Steam Workshop database, No Version Warning, Use
+This Instead) and the owner's rules made in RimSort; with RimSort gone they would go stale, and the rules would be lost.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Keep their sort and checks current with no RimSort; see how old each list is and whose copy is read; keep their RimSort rules as their own |
+| What does it stop them doing? | Nothing: while RimSort is still there, whichever copy is newer is read |
+| How does it change the way they work? | Nothing to remember: stale lists are fetched when the Mod list opens; one press brings the rules over |
+| What outside it notices? | GitHub's raw file server is asked for public files, keyless, under the new **Community lists** switch |
+
+**Observed (28 Nov 2026):** the first fetch of all four took about 8 seconds (the Workshop database is about 50 MB); again, all
+unchanged by ETag, under 2. RimSort's copy of the Workshop database was 40 days old. With the newer lists the owner's list still
+sorted with nothing moved, and Use This Instead grew from 2,846 replacements to 2,883. 18 of the owner's RimSort rules would come over.
+
+**Risk: none (agent's grade).** **Agent choices, owner to revise:** a list counts as stale after 7 days; stale lists fetched once a
+run when the Mod list opens, before its first check; a new Going online kind, Community lists, on by default; Bring them over
+without a yes (it only adds to the owner's rules, each can be taken away, and RimSort's file is never changed); RimSort's copy of
+the rules stops being read once brought over, until it changes there. **For a next game:** its lists as `Database` rows in its
+kit adapter; nothing in the Companion.
+
 ## The Mod list's Edit the list, rebuilt (built 27 Nov 2026, 0.108.0)
 
 **The owner's request** (27 Nov 2026): "The mod list page needs a total redo in my opinion and we need to take lessons from

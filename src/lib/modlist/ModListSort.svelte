@@ -8,8 +8,10 @@
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
   import { register } from "../shortcuts/registry";
+  import CommunityLists from "./CommunityLists.svelte";
   import {
     addRule,
+    bringRulesOver,
     dropRule,
     readMods,
     readRules,
@@ -168,6 +170,20 @@
     if (answer.state === "failed") return refused(answer.failure.detail);
     if (!answer.result.ok) return refused(answer.result.refusal ?? "");
     said = { text: t("modlist-rule-dropped"), refused: false };
+    await reloadRules();
+  }
+
+  /** Copies the owner's RimSort rules into their own (0.112.0), so they stay when RimSort goes. */
+  async function bringOver() {
+    said = null;
+    const answer = await bringRulesOver(game.id);
+    if (answer.state === "failed") return refused(answer.failure.detail);
+    if (!answer.result.ok) return refused(answer.result.refusal ?? "");
+    const imported = (answer.result.data as { imported?: unknown[] }).imported;
+    said = {
+      text: t("modlist-rules-brought", { count: imported?.length ?? 0 }),
+      refused: false,
+    };
     await reloadRules();
   }
 
@@ -520,6 +536,14 @@
 
     {#if rules.theirs.length > 0}
       <h3>{t("modlist-rules-rimsort", { count: rules.theirs.length })}</h3>
+      <p class="muted">
+        {t("modlist-rules-bring-over-body", {
+          manager: rules.manager?.name || "RimSort",
+        })}
+      </p>
+      <button type="button" class="action strong" onclick={bringOver}
+        >{t("modlist-rules-bring-over")}</button
+      >
       <ul class="rules">
         {#each rules.theirs as rule, index (index)}
           <li class="yours">
@@ -535,6 +559,12 @@
       </ul>
     {/if}
 
+    {#if rules.theirs.length === 0 && rules.manager?.broughtOver}
+      <p class="muted">
+        {t("modlist-rules-brought-over", { manager: rules.manager.name })}
+      </p>
+    {/if}
+
     <h3>{t("modlist-rules-read-title")}</h3>
     <ul class="sets">
       {#each rules.sets as set (set.where)}
@@ -547,6 +577,8 @@
         </li>
       {/each}
     </ul>
+
+    <CommunityLists game={game.id} />
   </section>
 {/if}
 

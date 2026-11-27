@@ -78,6 +78,11 @@ const KIND_WORDS: Record<string, KindWords> = {
     body: "online-their-reports-body",
     loss: "online-their-reports-loss",
   },
+  "mod-databases": {
+    name: "online-mod-databases-name",
+    body: "online-mod-databases-body",
+    loss: "online-mod-databases-loss",
+  },
   "known-problems": {
     name: "online-known-problems-name",
     body: "online-known-problems-body",

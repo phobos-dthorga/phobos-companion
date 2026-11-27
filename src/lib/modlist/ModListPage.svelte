@@ -16,6 +16,7 @@
     readModList,
     undoModList,
   } from "./desktopClient";
+  import { refreshStaleOnce } from "./communityLists";
   import { keep } from "./latest.svelte";
   import ModListBoard from "./ModListBoard.svelte";
   import ModListSaved from "./ModListSaved.svelte";
@@ -75,6 +76,9 @@
 
   async function load() {
     busy = true;
+    // 0.112.0: the community lists over a week old, fetched once a run before the first check reads them.
+    progress = started(t("modlist-lists-fetching"));
+    await refreshStaleOnce(game.id, hearing());
     progress = started(t(online ? "modlist-reading-steam" : "modlist-reading"));
     const answer = await readModList(game.id, online, hearing());
     busy = false;

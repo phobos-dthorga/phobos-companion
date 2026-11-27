@@ -28,6 +28,7 @@ mod logs_page;
 mod lookup;
 mod makeup_page;
 mod memory_page;
+mod mod_list_databases;
 mod mod_list_lists;
 mod mod_list_page;
 mod mod_list_steam;
@@ -1672,6 +1673,25 @@ async fn mod_list_rules(game: String, on_progress: Channel<kit::Progress>) -> Re
     blocking(move || mod_list_page::rules(&game, Some(&hearing(on_progress)))).await
 }
 
+/// The community lists the sorter and the check read, and how old; with `fetch`, fetched first (0.112.0). The fetch goes online.
+#[tauri::command]
+async fn mod_list_databases(
+    app: tauri::AppHandle,
+    game: String,
+    fetch: bool,
+    stale: bool,
+    on_progress: Channel<kit::Progress>,
+) -> Result<serde_json::Value, Failure> {
+    let data = data_folder(&app)?;
+    blocking(move || mod_list_databases::databases(&data, &game, fetch, stale, Some(&hearing(on_progress)))).await
+}
+
+/// Brings the owner's RimSort rules into their own (0.112.0), on a press.
+#[tauri::command]
+async fn mod_list_import_rules(game: String) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_databases::import_rules(&game)).await
+}
+
 /// Keeps one of the owner's load-order rules (0.47.0).
 #[tauri::command]
 async fn mod_list_add_rule(
@@ -1889,6 +1909,8 @@ pub fn run() {
             mod_list_sort,
             mod_list_rules,
             mod_list_add_rule,
+            mod_list_databases,
+            mod_list_import_rules,
             mod_list_drop_rule,
             mod_list_lists,
             mod_list_compare,

@@ -13,6 +13,7 @@ Settings → Going online**, and About lists them too. **Off means off**: a kind
 | --- | --- | --- | --- |
 | Gate lights | `api.github.com` | Whether each of your repositories' last push passed its checks | On |
 | Nightly watch | `raw.githubusercontent.com` | What your repositories' nightly runs found, read from their public results | On |
+| Community lists | `raw.githubusercontent.com` | The public lists the Mod list's sorter and check read (load-order rules, Workshop requirements, version and replacement lists), once a run when over a week old, and on a press | On |
 | Known problems | `raw.githubusercontent.com` | Public lists of mods known to go wrong together | On |
 | Their reports | `api.github.com` | Another author's existing issues for a fault, only when you press it | On |
 | Workshop pages | `api.steampowered.com`, `steamcommunity.com`, `store.steampowered.com` | How your Steam Workshop items stand, what players say on a mod's Workshop page, and the game's and its DLCs' Steam reviews, only when you press it | On |

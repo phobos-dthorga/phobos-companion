@@ -4,7 +4,7 @@ kind: page
 page: home
 go: home
 words: where was I, start, overview, last time, summary
-see: task-first-steps, term-repository, task-repository-ready, task-agent-features, task-safe-copies, task-going-online
+see: task-first-steps, term-repository, task-repository-ready, task-agent-features, task-safe-copies, task-going-online, task-after-a-crash
 ---
 **Where was I?** The page to come back to after a break. For the game you are looking at (chosen at the top of the window), it shows:
 
@@ -18,6 +18,7 @@ see: task-first-steps, term-repository, task-repository-ready, task-agent-featur
 - **Checks on GitHub**, for each repository: commits not pushed, files changed, and whether its last push passed its checks on GitHub, with any nightly run that has stopped running. **Look now** asks GitHub at once; **Going online settings** switches it off (see [choose what the Companion asks the internet](task-going-online)).
 - **Their code changed**, when a repository's nightly watch found commits in other authors' public source that touch a method your code names: each commit, its date and words, the method, and your line that names it. It is an early warning: read the commit before acting, and the check after an update stays the real one.
 - **Which [tool kit](term-tool-kit) each repository uses**, how far behind the newest it is, and what moving its pin would bring.
+- **After a crash**, when a program crashed since you last looked, or your PC shut down unexpectedly: which programs, and a look by itself for files the shutdown left filled with zeros (see [find out what a crash or power cut did](task-after-a-crash)).
 - **Safe copies**, for a repository that lists what cannot be made again: each set, whether it is copied, changed since or never copied, with **Copy now** and **Check the copies** (see [safe copies](task-safe-copies)).
 
 **If you work with [AI agent sessions](task-agent-features)**, Home also shows who is working on what (their [claims](term-claim)), [screen notes](term-screen-note) still waiting for one, and [decisions](term-decision) waiting for you.

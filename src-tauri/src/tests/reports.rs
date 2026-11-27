@@ -149,3 +149,24 @@ fn runs_a_real_report_on_this_pc() {
     assert!(result.command_line.ends_with("rimworld-startup summary --top 100"));
     assert_eq!(run("rimworld", "steam-publish", Some("upload"), 100, None).unwrap_err().code, FailureCode::Refused);
 }
+
+#[test]
+fn a_report_that_reads_the_whole_pc_is_offered_for_every_game_and_no_other_game_free_one() {
+    // 0.105.0, kit 1.139.0: "Why did this program crash?" needs no repository; a game-free report that reads one would read the
+    // kit's own folder here, so it stays off.
+    let manifest = json!({"data": {"commands": [
+        {"name": "crash-dump", "game": null, "reports": [
+            {"name": null, "effect": "reads", "question": "Why did this program crash?", "scope": "machine", "options": []}]},
+        {"name": "art-audit", "game": null, "reports": [
+            {"name": "report", "effect": "reads", "question": "Which pictures?", "scope": null, "options": []}]},
+        {"name": "zeroed", "game": null, "reports": [
+            {"name": "restore", "effect": "writes", "question": null, "scope": "machine", "options": []}]},
+    ]}});
+    for game in ["g", "a-game-with-no-tools"] {
+        let names: Vec<_> = entries(&manifest, game).into_iter().map(|e| e.command).collect();
+        assert_eq!(names, ["crash-dump"], "{game}");
+        assert!(find_runnable(&manifest, game, "crash-dump", None).is_ok());
+        assert_eq!(code(find_runnable(&manifest, game, "art-audit", Some("report"))), FailureCode::Refused);
+        assert_eq!(code(find_runnable(&manifest, game, "zeroed", Some("restore"))), FailureCode::Refused);
+    }
+}

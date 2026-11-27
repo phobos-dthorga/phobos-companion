@@ -1422,6 +1422,24 @@ went unnoticed, and the program's own kit was behind the repository's.
 in the program's folder rather than the repository (as picks and decisions are, so the program never writes a repository); no
 second yes before marking, since Undo is beside it.
 
+## Home notices after a crash (built 27 Nov 2026, 0.105.0)
+
+**The owner's request** (27 Nov 2026), the second of four steps chosen together: "Home notices by itself". The owner has had
+sudden power cuts since 25 Oct 2026, and a zero-filled file is silent until a program trips over it.
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | See which programs crashed since they last looked, open why, and learn what a crash or power cut left filled with zeros without remembering to ask |
+| What does it stop them doing? | Nothing |
+| How does it change the way they work? | No command to remember after a power cut: Home looks once, by itself, and says what it found and what puts it right |
+| What outside it notices? | Windows' own records only; nothing is changed |
+
+**Risk: low (agent's grade).** It only reads; the look reads the disk for about two minutes, once per crash. **Agent choices,
+owner to revise:** the look runs by itself only after Windows recorded an unexpected shutdown (a half-hourly look would read the
+disk for two minutes each time); crashes from the last week show before any was seen; WebView2's cache is left out of the look
+(its spare metrics file is zeros by design, and the first look reported it); **no Put back button**, since putting a file back
+writes into a repository, which this program never does: the question is on the Decisions page.
+
 Everything proposed and agreed but not yet built is in [later.md](later.md), with each item's status.
 
 ## Limits

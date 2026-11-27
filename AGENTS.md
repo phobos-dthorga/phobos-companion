@@ -55,11 +55,18 @@ One bullet per page: what it may change, only when, and what guards it. **How ea
 program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)** ("Where state lives", "The security gates").
 
 - **The host decides what may run, from the kit's manifest, and checks again when asked to run it**: the window can only request.
-  The report viewer runs only reports marked `reads`, with a `question` and nothing required; `reads-online` and typed inputs come
+  The report viewer runs only reports marked `reads`, with a `question` and nothing required, a game's own or one the manifest
+  scopes to the whole PC (`scope: machine`, 0.105.0); `reads-online` and typed inputs come
   next; anything else needs a design record and a confirmation step. **`owner-only` is never run**, and **the program holds no
   credentials but keys for AI services the person adds** (0.71.0; the owner, 23 Nov 2026, of the old rule: "willing to bend this
   rule now", and "keys for AI services only"): kept in the operating system's own key store, never in a file, never shown again
   and never sent to the window (`companion_core::ai_keys`). **Steam passwords and every other credential stay never held.**
+- **Home's note after a crash only reads, and looks by itself once after each unexpected shutdown** (0.105.0; the owner's choice of
+  27 Nov 2026, "Home notices by itself"; `src-tauri/src/crash_look.rs`). It reads the kit's `crash-dump --list` (opens no dump) and
+  `zeroed status` at most every half hour, and runs the two-minute `zeroed check` **only when a fresh `status` says one is due**,
+  reaching back the days it names, so once per crash and never otherwise. Each only while the manifest calls it `reads`
+  (`kit::reads_only`). **It never puts a file back**: the kit's `zeroed restore --apply` is not run by this program. Got it is
+  remembered in the window's own storage.
 - **Mods page: the one place the program changes a game's files** (owner, 18 Nov 2026: a part "dedicated to the updating,
   reversing changes, making backups"). May: the kit's `installs build`, `install`, `backup` and `restore` for a repository with
   `config/installs.json`, and the game's texture `encode`, found by the manifest's `textures` surface, never by name, writing into

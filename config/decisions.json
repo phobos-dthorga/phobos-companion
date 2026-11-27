@@ -1,4 +1,26 @@
 {
   "schemaVersion": 1,
-  "decisions": []
+  "decisions": [
+    {
+      "id": "crash-put-back",
+      "question": "Should Home's note after a crash offer Put back for files git keeps?",
+      "context": "Home's After a crash note (0.105.0) lists files a crash left filled with zeros, with what puts each right. For a file git keeps, the kit's zeroed restore --apply writes the last commit's copy back. A button would be the program's first write into a repository other than starter files.",
+      "options": [
+        {
+          "id": "button-with-yes",
+          "label": "A Put back button, after a yes",
+          "detail": "Only files the look named that git keeps; refused while the game runs; any change since the last commit was lost to the crash already"
+        },
+        {
+          "id": "words-only",
+          "label": "Keep it to words",
+          "detail": "The note says what puts each right; an agent session or the command line puts it back"
+        }
+      ],
+      "lean": "button-with-yes",
+      "why": "After a power cut the fix is known and safe for a file git keeps, and remembering a command is what Home is meant to spare",
+      "from": "docs/design-record.md",
+      "asked": "2026-11-27"
+    }
+  ]
 }

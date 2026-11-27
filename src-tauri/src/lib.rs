@@ -14,6 +14,7 @@ mod claims_board;
 mod cleanup_page;
 mod code_colours_page;
 mod connections_page;
+mod crash_look;
 mod decisions_page;
 mod explorer_page;
 mod game_files_page;
@@ -1792,6 +1793,18 @@ async fn mod_list_open_in_steam(number: String) -> Result<(), Failure> {
     blocking(move || mod_list_page::open_in_steam(&number)).await
 }
 
+/// The crash dumps kept and whether a look for zero-filled files is due, for Home (0.105.0). Only reads.
+#[tauri::command]
+async fn crash_status() -> Result<crash_look::Status, Failure> {
+    blocking(crash_look::status).await
+}
+
+/// Looks for files a crash left filled with zeros, by itself, only when a look is due (0.105.0). Only reads.
+#[tauri::command]
+async fn crash_look_now(on_progress: Channel<kit::Progress>) -> Result<crash_look::Look, Failure> {
+    blocking(move || crash_look::look(Some(&hearing(on_progress)))).await
+}
+
 /// What the tools, builds and tests left behind, by group. Only reads.
 #[tauri::command]
 async fn cleanup_list(on_progress: Channel<kit::Progress>) -> Result<cleanup_page::Listing, Failure> {
@@ -1827,6 +1840,8 @@ pub fn run() {
             setup_preview_starter,
             chat_try,
             cleanup_list,
+            crash_status,
+            crash_look_now,
             cleanup_apply,
             mod_list_check,
             mod_list_change,

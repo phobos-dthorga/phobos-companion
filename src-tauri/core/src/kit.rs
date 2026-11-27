@@ -258,14 +258,7 @@ const OWNER_PRESS: &str = "owner-press";
 /// checked before the program runs it, only on the owner's press and their yes in the window (0.69.0, `docs/publishing.md`).
 /// `owner-only` is never run, and a report that came to mean anything else is refused.
 pub fn allowed_on_press(manifest: &Value, command: &str, report: &str) -> Result<(), String> {
-    let commands = manifest["data"]["commands"].as_array().map_or(&[][..], Vec::as_slice);
-    let effect = commands
-        .iter()
-        .find(|c| c["name"].as_str() == Some(command))
-        .and_then(|c| c["reports"].as_array())
-        .and_then(|reports| reports.iter().find(|r| r["name"].as_str() == Some(report)))
-        .map(|r| r["effect"].as_str().unwrap_or_default().to_owned())
-        .ok_or_else(|| format!("the tool kit has no {command} {report}"))?;
+    let effect = effect_of(manifest, command, report)?;
     if effect == OWNER_PRESS {
         Ok(())
     } else {
@@ -276,19 +269,37 @@ pub fn allowed_on_press(manifest: &Value, command: &str, report: &str) -> Result
 /// The kit's manifest still says this report goes online and only reads (`reads-online`): checked before the program passes a
 /// report the flag that takes it online (0.61.0, `docs/online.md`), so a report that came to write is never run as a reading.
 pub fn reads_online(manifest: &Value, command: &str, report: &str) -> Result<(), String> {
-    let commands = manifest["data"]["commands"].as_array().map_or(&[][..], Vec::as_slice);
-    let effect = commands
-        .iter()
-        .find(|c| c["name"].as_str() == Some(command))
-        .and_then(|c| c["reports"].as_array())
-        .and_then(|reports| reports.iter().find(|r| r["name"].as_str() == Some(report)))
-        .map(|r| r["effect"].as_str().unwrap_or_default().to_owned())
-        .ok_or_else(|| format!("the tool kit has no {command} {report}"))?;
+    let effect = effect_of(manifest, command, report)?;
     if effect == "reads-online" {
         Ok(())
     } else {
         Err(format!("the tool kit says {command} {report} is {effect:?}, not a reading that goes online"))
     }
+}
+
+/// The kit's manifest still says this report only reads (`reads`): checked before the program runs a report by itself, with no
+/// press (0.105.0, Home's look after a crash), so a report that came to write or go online is never run unasked.
+pub fn reads_only(manifest: &Value, command: &str, report: &str) -> Result<(), String> {
+    let effect = effect_of(manifest, command, report)?;
+    if effect == "reads" {
+        Ok(())
+    } else {
+        Err(format!("the tool kit says {command} {report} is {effect:?}, not a reading this program runs by itself"))
+    }
+}
+
+/// A report's effect as the manifest gives it: the one place the checks above look it up (0.105.0). An empty `report` names a
+/// command's one unnamed report.
+fn effect_of(manifest: &Value, command: &str, report: &str) -> Result<String, String> {
+    let commands = manifest["data"]["commands"].as_array().map_or(&[][..], Vec::as_slice);
+    let named = |r: &Value| if report.is_empty() { r["name"].is_null() } else { r["name"].as_str() == Some(report) };
+    commands
+        .iter()
+        .find(|c| c["name"].as_str() == Some(command))
+        .and_then(|c| c["reports"].as_array())
+        .and_then(|reports| reports.iter().find(|r| named(r)))
+        .map(|r| r["effect"].as_str().unwrap_or_default().to_owned())
+        .ok_or_else(|| format!("the tool kit has no {command} {report}"))
 }
 
 /// Where a game's tools offer a report a page needs, found by what it does (its surface), never by a tool's name (0.26.0).

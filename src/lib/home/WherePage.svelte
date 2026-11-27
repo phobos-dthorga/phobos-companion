@@ -19,6 +19,7 @@
   import { noteSaves } from "../notes/saves.svelte";
   import RecordsNote from "../records/RecordsNote.svelte";
   import CleanupNote from "../cleanup/CleanupNote.svelte";
+  import CrashNote from "../crash/CrashNote.svelte";
   import ModListNote from "../modlist/ModListNote.svelte";
   import WaitingNote from "../reports/WaitingNote.svelte";
   import { pageServes } from "./kinds";
@@ -243,6 +244,7 @@
 <WaitingNote game={game.id} />
 {#key game.id}<PublishNote game={game.id} />{/key}
 <CleanupNote game={game.id} />
+<CrashNote game={game.id} />
 
 {#if agents.shown && notes && (notes.open.length > 0 || notes.dealt_count > 0)}
   <section

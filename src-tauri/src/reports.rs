@@ -1,6 +1,10 @@
 //! Which of the kit's reports the window may offer for a game, and running them. The rule lives here, not in the window:
 //! a report runs only if the manifest says it only reads, has a plain question, and needs nothing typed.
 //!
+//! **Reports that read the whole PC** (0.105.0; kit 1.139.0's `scope: machine`, such as "Why did this program crash?") are offered
+//! beside every game's own: they need no repository, so running them with none reads the right thing. Other game-free reports stay
+//! off this page, since with no repository named they would read the kit's own folder.
+//!
 //! A report whose manifest names `waits` (0.101.0; kit 1.129.0) says which count in its data is what waits on the person, such
 //! as a save check's faults: the result carries that count, so the window's scans show it without reading the report's words.
 
@@ -10,6 +14,8 @@ use serde::Serialize;
 use serde_json::Value;
 
 const READS: &str = "reads";
+/// A report's `scope` when it reads this PC as a whole (phobos-modkit 1.139.0).
+const MACHINE: &str = "machine";
 const TOP_OPTION: &str = "--top";
 const JSON_OPTION: &str = "--json";
 const JSON_TO_STANDARD_OUTPUT: &str = "-";
@@ -64,10 +70,21 @@ pub fn run(
 pub(crate) fn waits_of(manifest: &Value, game: &str, command: &str, report: Option<&str>) -> Option<String> {
     commands_of(manifest)
         .iter()
-        .find(|c| c["name"].as_str() == Some(command) && c["game"].as_str() == Some(game))
+        .find(|c| c["name"].as_str() == Some(command) && for_game(c, game))
         .and_then(|c| reports_of(c).iter().find(|r| r["name"].as_str() == report))
         .and_then(|r| r["waits"].as_str())
         .map(str::to_owned)
+}
+
+/// Whether a command's reports may be offered for this game: its own, or a game-free command (whose reports are then held to
+/// `offered_here`).
+fn for_game(command: &Value, game: &str) -> bool {
+    command["game"].as_str() == Some(game) || command["game"].is_null()
+}
+
+/// A report of a command `for_game` passed may be offered here: a game's own always, a game-free one only when it reads the whole PC.
+fn offered_here(command: &Value, report: &Value) -> bool {
+    !command["game"].is_null() || report["scope"].as_str() == Some(MACHINE)
 }
 
 fn commands_of(manifest: &Value) -> &[Value] {
@@ -91,15 +108,17 @@ fn runnable(report: &Value) -> bool {
 pub(crate) fn entries(manifest: &Value, game: &str) -> Vec<ReportEntry> {
     commands_of(manifest)
         .iter()
-        .filter(|command| command["game"].as_str() == Some(game))
+        .filter(|command| for_game(command, game))
         .flat_map(|command| {
-            reports_of(command).iter().filter(|report| runnable(report)).map(|report| ReportEntry {
-                command: command["name"].as_str().unwrap_or_default().to_owned(),
-                report: report["name"].as_str().map(str::to_owned),
-                question: report["question"].as_str().unwrap_or_default().to_owned(),
-                surface: report["surface"].as_str().map(str::to_owned),
-                waits: report["waits"].as_str().map(str::to_owned),
-            })
+            reports_of(command).iter().filter(|report| runnable(report) && offered_here(command, report)).map(
+                |report| ReportEntry {
+                    command: command["name"].as_str().unwrap_or_default().to_owned(),
+                    report: report["name"].as_str().map(str::to_owned),
+                    question: report["question"].as_str().unwrap_or_default().to_owned(),
+                    surface: report["surface"].as_str().map(str::to_owned),
+                    waits: report["waits"].as_str().map(str::to_owned),
+                },
+            )
         })
         .collect()
 }
@@ -113,10 +132,10 @@ pub(crate) fn find_runnable<'a>(
     let refused = || Failure::refused(format!("{command} {}", report.unwrap_or_default()));
     let entry = commands_of(manifest)
         .iter()
-        .find(|c| c["name"].as_str() == Some(command) && c["game"].as_str() == Some(game))
+        .find(|c| c["name"].as_str() == Some(command) && for_game(c, game))
         .ok_or_else(refused)?;
     let found = reports_of(entry).iter().find(|r| r["name"].as_str() == report).ok_or_else(refused)?;
-    if runnable(found) { Ok(options_of(found)) } else { Err(refused()) }
+    if runnable(found) && offered_here(entry, found) { Ok(options_of(found)) } else { Err(refused()) }
 }
 
 pub(crate) fn option<'a>(options: &'a [Value], name: &str) -> Option<&'a Value> {

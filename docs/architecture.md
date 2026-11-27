@@ -115,7 +115,7 @@ A reading is a small union the view switches on: `{ state: "reading" }` (`Pendin
 desktop program), `"failed"` with the host's `Failure`, or `"ready"`/`"done"` with the answer (`src/lib/shell/types.ts:23`).
 
 Not every page has a `_page.rs`. Home draws on `home.rs`, `pending.rs`, `open_work.rs`, `repo_status.rs`, `nightly.rs`,
-`kit_pins.rs`, `safe_copies.rs` and `records_backup.rs`. The Atlas and the report viewer share `reports.rs`. The Guide has no
+`kit_pins.rs`, `safe_copies.rs`, `records_backup.rs` and `crash_look.rs`. The Atlas and the report viewer share `reports.rs`. The Guide has no
 host part: `entries.ts` bundles `guide/*.md` into the window when it is built (`import.meta.glob`).
 
 ### Worked example: pressing Pick on the Picks page
@@ -251,7 +251,10 @@ Each change passes every gate below that applies to it, in the host, at the mome
 - **The manifest's effect, read at the press.** `kit::allowed_by_manifest`, `allowed_on_press`, `reads_online` and `offered`
   (`src-tauri/core/src/kit.rs:238` to `331`) refuse a report that has come to do more than the page expects.
 - **`owner-only` is never run.** `allowed_by_manifest` passes only `writes` and `runs`; `allowed_on_press` only `owner-press`.
-- **The report viewer only reads.** `runnable` (`src-tauri/src/reports.rs:63`) offers only `reads` reports.
+- **The report viewer only reads.** `runnable` (`src-tauri/src/reports.rs:63`) offers only `reads` reports: a game's own, and
+  since 0.105.0 game-free ones whose manifest `scope` is `machine` (they need no repository; others would read the kit's folder).
+- **A reading the program starts by itself** (0.105.0, Home's note after a crash) passes `kit::reads_only` first, so a report that
+  came to write or go online is never run unasked.
 - **Names are checked before the kit sees them**: `companion_core::checks`, `games::named_repository` and each page's own
   shapes stop paths outside a repository, odd names and long text.
 - **Typed text is one argument** (`Args::given`, `src-tauri/core/src/args.rs:51`), never an option.
@@ -558,6 +561,15 @@ the repository, `create_new`, the folder checked to be the repository's after it
 | Not kept yet | A tied update whose newest kept build is older than that moment; Keep the new builds runs `rimworld-archive snapshot`, then checks again |
 | The check (0.35.0) | Kit 1.61.1's `rimworld-update-check`, found by its `update-check` surface; `other_code_page::update_check`, with `--since` the moment Since you last played compares with. What is ours: the repository's `config/update-check.json` and `config/temporary-patches.json`. `summariseCheck` decides what is shown; five updates before "and N smaller ones" |
 | Shared reading (0.67.0) | `src/lib/mods/sinceReading.ts`, asked by the Mods page and the page list's scan alike |
+
+### After a crash (0.105.0)
+
+| Part | How |
+| --- | --- |
+| The tools | Kit 1.138.0: `crash-dump --list` (every dump kept, newest first, none opened, about 0.1 s) and `zeroed status` (Windows' last Kernel-Power 41 or EventLog 6008, and the kit's record of the last look, about 0.1 s); `zeroed check --days N` (about two minutes on the owner's PC) |
+| The host | `crash_look.rs`: `status` runs both quick readings; `look` asks `status` afresh and refuses unless it says `due`, then runs the check with its `days` held to 3 to 30. Both pass `kit::reads_only` |
+| The window | `src/lib/crash/`: `latest.svelte.ts` reads the status at most every half hour and starts the look once per run when due, outside the page; `CrashNote.svelte` on Home; `newDumps` shows dumps after the newest seen, or the last week's before any was (`seenMemory.ts`, the window's own storage) |
+| Reports | Kit 1.139.0's `scope: machine` puts crash-dump, windows-dumps and zeroed's questions on every game's Reports page; **Why did it crash?** opens it at `crash-dump` |
 
 ### Memory (0.23.0)
 

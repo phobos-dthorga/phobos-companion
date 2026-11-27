@@ -178,3 +178,19 @@ fn only_a_report_the_owner_presses_is_run_on_a_press() {
     // A report the owner presses is never one the program runs as a plain change.
     assert!(allowed_by_manifest(&manifest, "steam-publish", "upload").is_err());
 }
+
+#[test]
+fn only_a_report_that_reads_is_run_by_the_program_itself() {
+    let manifest = serde_json::json!({"data": {"commands": [
+        {"name": "zeroed", "reports": [
+            {"name": "status", "effect": "reads"},
+            {"name": "restore", "effect": "writes"}]},
+        {"name": "crash-dump", "reports": [{"name": null, "effect": "reads"}]},
+        {"name": "feeds", "reports": [{"name": "read", "effect": "reads-online"}]}]}});
+    assert!(reads_only(&manifest, "zeroed", "status").is_ok());
+    assert!(reads_only(&manifest, "crash-dump", "").is_ok(), "a command's one unnamed report");
+    assert!(reads_only(&manifest, "zeroed", "restore").is_err());
+    assert!(reads_only(&manifest, "feeds", "read").is_err(), "going online is not reading here");
+    assert!(reads_only(&manifest, "zeroed", "nothing").is_err());
+    assert!(reads_online(&manifest, "feeds", "read").is_ok());
+}

@@ -4,6 +4,20 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.105.0] - 2026-11-27
+
+### Added
+
+- **Home notices after a crash, by itself** (the owner's choice of 27 Nov 2026, "Home notices by itself"). A note called **After
+  a crash** names each program that crashed since you last looked, with **Why did it crash?** and **Got it**; and after Windows
+  recorded an unexpected shutdown, it looks once, by itself, for files the shutdown left filled with zeros, and says what puts
+  each right. It only reads. With tool kit 1.139.0. Checked on RimWorld and Phobos Ostranauts (the note is the same for every
+  game). **Not tested on screen.**
+- **Questions about this PC as a whole are on every game's Reports page** (the same day): **Why did this program crash?**, **Did
+  a crash leave any files filled with zeros?** and **Did my PC shut down unexpectedly since the last look?**, from the kit's new
+  `scope: machine`; Phobos Ostranauts, which had no reports here, now has these three. Other game-free reports stay
+  off, since with no repository named they would read the wrong folder.
+
 ## [0.104.0] - 2026-11-27
 
 ### Added

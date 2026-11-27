@@ -4,6 +4,17 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.110.0] - 2026-11-28
+
+### Added
+
+- **Search everything with /, filter the page's list with Ctrl + F** (the owner's choice of 27 Nov 2026, "Both, one key each").
+  Go to anything now also finds your mods (opening the Mod list's Edit the list with the mod chosen), each repository's recent
+  commits (opening their code) and words anywhere in the Guide, and offers to **look up** anything typed like a definition's name.
+  **Ctrl + F** puts the keyboard in the filter box of the page's long list: the Mod list, Reports, Changes, Tests, the Timeline,
+  the Code map and the Guide, with new boxes on Reports, Changes, Tests and the Timeline that say how many are shown. One rule
+  everywhere: every word typed appears. **Not tested on screen.**
+
 ## [0.109.0] - 2026-11-27
 
 ### Changed

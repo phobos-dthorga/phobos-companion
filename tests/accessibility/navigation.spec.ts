@@ -236,6 +236,110 @@ test.describe("The way back, the search and addresses", () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
+  test("Go to anything finds a mod, a commit and offers to look a definition up (0.110.0)", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      read_shortcuts: { result: null },
+      mod_list_mods: {
+        result: {
+          game: "first",
+          name: "First Sample",
+          supported: true,
+          version: "1.7",
+          mods: [
+            {
+              key: "sample.boats",
+              id: "Sample.Boats",
+              name: "Sample Boats",
+              source: "workshop",
+              workshop_id: "1000000001",
+              authors: "Sample Author",
+              versions: ["1.7"],
+              needs: [],
+            },
+          ],
+          lists: [],
+          running: [],
+          notes: [],
+          changes: {},
+        },
+      },
+      repository_commits: {
+        result: {
+          repository: "first-mods",
+          total: 1,
+          skip: 0,
+          commits: [
+            {
+              hash: "a1b2c3d4e5f6",
+              time: "2026-11-27T09:00:00Z",
+              author: "Sample",
+              subject: "Boats float on rivers",
+              files: 2,
+              binary: 0,
+            },
+          ],
+        },
+      },
+    });
+    await page.goto("/");
+    await page.keyboard.press("/");
+    const search = page.getByRole("dialog", { name: "Where to?" });
+    const box = search.getByLabel("Search for anything, or paste an address");
+    await box.fill("boats");
+    await expect(search.getByRole("region", { name: "Mods" })).toContainText(
+      "Sample Boats",
+    );
+    await expect(search.getByRole("region", { name: "Commits" })).toContainText(
+      "Boats float on rivers",
+    );
+    await box.fill("C17_Globemaster");
+    await expect(search.getByRole("region", { name: "Look up" })).toContainText(
+      "Look up C17_Globemaster among the definitions",
+    );
+    await audit(page);
+  });
+
+  test("Ctrl + F filters the list on the page shown (0.110.0)", async ({
+    page,
+  }) => {
+    await mockHost(page, {
+      home_status: { result: sampleHome() },
+      kit_status: healthyKit,
+      read_shortcuts: { result: null },
+      report_catalogue: {
+        result: [
+          {
+            command: "sample-save",
+            report: "summary",
+            question: "What's in my save?",
+          },
+          {
+            command: "sample-log",
+            report: null,
+            question: "Why did it log errors?",
+          },
+        ],
+      },
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Reports", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Why did it log errors?" }),
+    ).toBeVisible();
+    await page.keyboard.press("Control+f");
+    await expect(page.getByLabel("Filter the questions")).toBeFocused();
+    await page.keyboard.type("save");
+    await expect(
+      page.getByRole("button", { name: "Why did it log errors?" }),
+    ).toHaveCount(0);
+    await expect(page.getByText("1 of 2 shown")).toBeVisible();
+    await audit(page);
+  });
+
   test("an address is copied, and pasted back in it opens the same place", async ({
     page,
   }) => {

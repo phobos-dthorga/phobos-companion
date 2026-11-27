@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { matchesFilter } from "../shell/filter";
+  import FilterBox from "../shell/FilterBox.svelte";
   import Placeholder from "../shell/Placeholder.svelte";
   import { COMMIT_ONLY_CHANGELOG } from "../code/presentation";
   import Pager from "../shell/Pager.svelte";
@@ -79,10 +81,28 @@
     reading.state === "ready" && reading.timeline.repositories.length > 1,
   );
   const months = $derived(monthStarts(overviewDays));
+  /** Ctrl + F's filter (0.110.0): facts whose words hold every word typed; screenshots step aside while it is used. */
+  let filterText = $state("");
   const days = $derived(
     withShotDays(
-      byDay(only ? facts.filter((fact) => laneOf(fact) === only) : facts),
-      only ? [] : shotDays,
+      byDay(
+        facts.filter(
+          (fact) =>
+            (!only || laneOf(fact) === only) &&
+            matchesFilter(
+              [
+                fact.subject,
+                fact.product,
+                fact.mod,
+                fact.version,
+                fact.summary,
+                fact.repository,
+              ],
+              filterText,
+            ),
+        ),
+      ),
+      only || filterText.trim() ? [] : shotDays,
     ),
   );
   const pagedDays = $derived(pageOf(days, dayPage, DAYS_AT_ONCE));
@@ -464,6 +484,7 @@
         {/each}
       {/if}
     </div>
+    <FilterBox bind:value={filterText} label={t("timeline-filter")} />
     {@render dayPager()}
     {#each pagedDays.items as group (group.day)}
       <section

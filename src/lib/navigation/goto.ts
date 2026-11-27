@@ -3,6 +3,8 @@ import type { Thing } from "../connections/types";
 import type { ReportEntry } from "../reports/types";
 import type { Setting } from "../settings/types";
 import { plainText } from "../shell/inline";
+import { commitRequest } from "../code/presentation";
+import { definitionName } from "../reports/lookup";
 import type { TestList } from "../tests/types";
 import type { Fact } from "../timeline/types";
 import { dayOf } from "../shell/dates";
@@ -17,7 +19,13 @@ export type Kind =
   | "address"
   | "page"
   | "action"
+  /** Look a definition up by the name typed (0.110.0). */
+  | "lookup"
   | "guide"
+  /** A mod on this PC, opening the Mod list's editor on it (0.110.0). */
+  | "mod"
+  /** A recent commit, opening its code (0.110.0). */
+  | "commit"
   | "version"
   | "entry"
   | "code"
@@ -32,8 +40,11 @@ export const KINDS: Kind[] = [
   "address",
   "page",
   "action",
+  "lookup",
   "guide",
+  "mod",
   "code",
+  "commit",
   "version",
   "entry",
   "test",
@@ -48,6 +59,8 @@ export type Candidate = {
   label: string;
   detail: string;
   place: Place;
+  /** More words it is found by, never shown (0.110.0: a Guide entry's whole text). */
+  match?: string;
 };
 
 export const PER_KIND = 8;
@@ -109,7 +122,13 @@ export function fromActions(
  */
 export function fromGuide(
   game: string | null,
-  entries: { id: string; title: string; words: string[]; kind: string }[],
+  entries: {
+    id: string;
+    title: string;
+    words: string[];
+    kind: string;
+    text?: string;
+  }[],
   kindWords: (kind: string) => string,
 ): Candidate[] {
   return entries.map((e) => ({
@@ -117,6 +136,64 @@ export function fromGuide(
     label: e.title,
     detail: `${kindWords(e.kind)} · ${e.words.join(", ")}`,
     place: place("guide", game, { entry: e.id }),
+    match: e.text ?? "",
+  }));
+}
+
+/** The mods on this PC (0.110.0), each opening the Mod list's editor with it in focus. */
+export function fromMods(
+  game: string,
+  mods: { key: string; id: string; name: string; authors: string }[],
+  detail: (mod: { id: string; authors: string }) => string,
+): Candidate[] {
+  return mods.map((m) => ({
+    kind: "mod" as const,
+    label: m.name,
+    detail: detail(m),
+    place: place("modlist", game, { view: "edit", mod: m.key }),
+    match: m.id,
+  }));
+}
+
+/** A search shaped like a definition's name (0.110.0) offers to look it up, on the Reports page's Look up tab. */
+export function fromLookUp(
+  game: string | null,
+  query: string,
+  words: (name: string) => string,
+): Candidate[] {
+  const name = query.trim();
+  if (!game || !definitionName(name) || !/[A-Za-z]/.test(name)) return [];
+  return [
+    {
+      kind: "lookup",
+      label: words(name),
+      detail: "",
+      place: place("reports", game, { tab: "lookup", name, look: "who" }),
+      match: name,
+    },
+  ];
+}
+
+/** A repository's recent commits (0.110.0), each opening its code over the Changes page. */
+export function fromCommits(
+  game: string,
+  repository: string,
+  commits: { hash: string; time: string | null; subject: string }[],
+): Candidate[] {
+  return commits.map((c) => ({
+    kind: "commit" as const,
+    label: c.subject,
+    detail: `${repository}${c.time ? ` · ${dayOf(c.time)}` : ""}`,
+    place: {
+      page: "changes",
+      game,
+      focus: { repository },
+      dialog: {
+        kind: "code",
+        request: commitRequest(repository, c.hash, c.subject),
+      },
+    },
+    match: c.hash,
   }));
 }
 
@@ -273,8 +350,12 @@ export function rank(
   const scored = candidates
     .map((c) => {
       const label = c.label.toLowerCase();
-      const all = `${label} ${c.detail.toLowerCase()}`;
-      if (c.kind !== "address" && !words.every((w) => all.includes(w)))
+      const all = `${label} ${c.detail.toLowerCase()} ${(c.match ?? "").toLowerCase()}`;
+      if (
+        c.kind !== "address" &&
+        c.kind !== "lookup" &&
+        !words.every((w) => all.includes(w))
+      )
         return null;
       const score = label.startsWith(text)
         ? 0

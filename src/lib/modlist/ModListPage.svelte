@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { here } from "../navigation/navigation.svelte";
   import { onMount } from "svelte";
   import { t } from "../i18n/runtime";
   import type { GameHome } from "../home/types";
@@ -51,7 +52,14 @@
 
   let reading = $state<Reading>({ state: "reading" });
   /** What's wrong, Edit the list (0.46.0) or Sort (0.47.0): coming back to What's wrong checks again, so it follows the edits. */
-  let view = $state<"wrong" | "edit" | "sort" | "saved">("wrong");
+  let view = $state<"wrong" | "edit" | "sort" | "saved">(
+    here().focus.view === "edit" ? "edit" : "wrong",
+  );
+  /** A mod a place names (0.110.0: Go to anything's mods), chosen on Edit the list when it opens. */
+  const focusMod = $derived(here().focus.mod ?? "");
+  $effect(() => {
+    if (here().focus.view === "edit" && view !== "edit") view = "edit";
+  });
   let online = $state(true);
   let busy = $state(false);
   let progress = $state(started());
@@ -187,7 +195,7 @@
 </div>
 
 {#if view === "edit"}
-  <ModListBoard {game} />
+  <ModListBoard {game} {focusMod} />
 {:else if view === "sort"}
   <ModListSort {game} />
 {:else if view === "saved"}

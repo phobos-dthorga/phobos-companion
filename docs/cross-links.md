@@ -12,7 +12,7 @@ Code comments name these ids (`docs/cross-links.md, N1`).
 | Id | What | Built |
 | --- | --- | --- |
 | N1 | Back and Forward: one trail of pages, games, choices and dialogs (the , and . keys) | 0.19.0 |
-| N2 | Go to anything (the / key) | 0.19.0 |
+| N2 | Go to anything (the / key); from 0.110.0 also mods, recent commits, the Guide's whole text and Look up; Ctrl + F filters the page's own list | 0.19.0 |
 | N3 | An address for every place, below | 0.19.0 |
 | L1 | The log chain: a log error to its code, the change that touched it, and the backup from before it | 0.19.0 |
 | L2 | A thing's own history on the Code map | 0.19.0 |
@@ -45,6 +45,7 @@ An address is written `dthorga://page/game?key=value`, with `dialog=code`, `dial
 | Memory | `watch` (a kept watch's name, such as `20261119-205419-reload-test-2`; 0.23.0) |
 | Explorer | `view` (`kind`, `object` or `checks`, the live checks on the snapshot held, 0.91.0; none for the overview), `kind` (a type's full name, such as `Verse.Pawn`), with `match` (a word filter), `largest` (`yes`) and `page`; `object` (a token such as `o7`, never a memory address) with `snapshot` (the snapshot's number in this run of the program): a step back to an object from a snapshot let go says it is gone and offers the overview; `start` (`yes`: asks at once whether to take a snapshot, as Go to anything's **Look inside the running game** does) |
 | Home | `tab` (0.109.0): `needs`, `recent`, `repositories`; `panel=pins` lands on `repositories` |
+| Mod list | `view=edit` opens Edit the list, with `mod` (a mod's key) chosen and scrolled to (0.110.0: Go to anything's mods) |
 | Reports | `command`, `report`; `tab` (`questions`, `lookup`; 0.106.0); on Look up, `name` and `look` (`who`, `show`, `patched`) |
 | About | `tab` (0.66.0): `version`, `where`, `online`, `built` |
 | Guide | `entry` (an entry's id, such as `task-go-back`; 0.34.0). Each entry opened is a step |

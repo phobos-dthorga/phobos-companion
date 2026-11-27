@@ -68,6 +68,7 @@
     <input
       id="guide-search"
       type="search"
+      data-page-filter
       bind:value={query}
       autocomplete="off"
       spellcheck="false"

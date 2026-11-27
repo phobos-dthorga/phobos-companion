@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { readChanges } from "../code/desktopClient";
+  import { readChanges, readCommits } from "../code/desktopClient";
+  import { readMods } from "../modlist/desktopClient";
   import { askConnections } from "../connections/desktopClient";
   import type { Found } from "../connections/types";
   import type { GameHome } from "../home/types";
@@ -20,6 +21,9 @@
     fromAddress,
     fromChanges,
     fromCode,
+    fromCommits,
+    fromLookUp,
+    fromMods,
     fromGuide,
     fromPages,
     fromReports,
@@ -52,7 +56,15 @@
     onchoose: (where: Place) => void;
   } = $props();
 
-  type Source = "version" | "test" | "fact" | "setting" | "report" | "watch";
+  type Source =
+    | "version"
+    | "test"
+    | "fact"
+    | "setting"
+    | "report"
+    | "watch"
+    | "mod"
+    | "commit";
   const CODE_WAIT_MS = 350;
 
   let query = $state("");
@@ -63,6 +75,8 @@
     setting: "reading",
     report: "reading",
     watch: "reading",
+    mod: "reading",
+    commit: "reading",
   });
   let code = $state<Candidate[]>([]);
   let searchingCode = $state(false);
@@ -72,7 +86,10 @@
     address: "goto-kind-address",
     page: "goto-kind-page",
     action: "goto-kind-action",
+    lookup: "goto-kind-lookup",
     guide: "goto-kind-guide",
+    mod: "goto-kind-mod",
+    commit: "goto-kind-commit",
     code: "goto-kind-code",
     version: "goto-kind-version",
     entry: "goto-kind-entry",
@@ -91,6 +108,9 @@
   );
   const candidates = $derived([
     ...fromAddress(query, t("goto-open-address")),
+    ...fromLookUp(game?.id ?? null, query, (name) =>
+      t("goto-look-up", { name }),
+    ),
     ...fromPages(game?.id ?? null, (page) => t(`page-${page}`), hiddenPages()),
     ...fromTabs(game?.id ?? null, (page) => t(`page-${page}`), t),
     ...fromActions(
@@ -149,6 +169,8 @@
         "fact",
         "report",
         "watch",
+        "mod",
+        "commit",
       ] as Source[])
         loaded[source] = [];
       return;
@@ -177,6 +199,31 @@
     settle<{ status: StatusData | null }>("watch", readStatus(id, null), (v) =>
       fromWatches(id, v.status?.kept ?? [], formatStarted),
     );
+    // 0.110.0: the mods on this PC, where the game's list can be read, and each repository's newest commits.
+    if (pageServes(game.kind, "modlist"))
+      settle<{ listing: { mods: Parameters<typeof fromMods>[1] } }>(
+        "mod",
+        readMods(id),
+        (v) =>
+          fromMods(id, v.listing.mods, (m) =>
+            m.authors ? `${m.id} · ${m.authors}` : m.id,
+          ),
+      );
+    else loaded.mod = [];
+    const repositories = game.repositories ?? [];
+    void Promise.all(
+      repositories.map((repository) => readCommits(id, repository, 0)),
+    ).then((answers) => {
+      loaded.commit = answers.every((a) => a.state === "failed")
+        ? repositories.length
+          ? "failed"
+          : []
+        : answers.flatMap((a) =>
+            a.state === "ready"
+              ? fromCommits(id, a.found.repository, a.found.commits)
+              : [],
+          );
+    });
   });
 
   // Code is searched as you type, a moment after the last key, in every repository of the game.

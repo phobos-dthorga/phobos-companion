@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { focusPageFilter } from "./lib/shell/filter";
   import ActivityMeters from "./lib/activity/ActivityMeters.svelte";
   import { onMount, untrack } from "svelte";
   import CodeViewer from "./lib/code/CodeViewer.svelte";
@@ -189,6 +190,9 @@
         "game.next": () => stepGame(1),
         "look-again": () => void refresh(),
         search: () => (goToOpen = true),
+        filter: () => {
+          if (!focusPageFilter()) goToOpen = true;
+        },
         help: () => (helpOpen = true),
         // F1 (0.34.0): the Guide, at the entry for the page shown; on the Guide itself it stays where it is.
         "guide.here": () => {

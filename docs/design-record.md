@@ -1507,6 +1507,22 @@ quite long", and "Is there anything you can suggest that can be merged ... to ti
 of the window still switches games); safe copies are a card on Repositories, not a row; a clean look after a crash adds no row;
 the count on the tab is the last one seen while Needs you was open.
 
+## Search: one key for everything, one for the page (built 28 Nov 2026, 0.110.0)
+
+**The owner's request** (27 Nov 2026): "Many parts of Companion could dearly do with a Search tool and at that, we could also make
+the case for a global Search. What do you recommend?" The agent recommended growing Go to anything and adding one shared filter;
+the owner's card: "Both, one key each".
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Find a mod, a commit, a definition or anything the Guide says from one box (/); narrow any long list on the page they are on (Ctrl + F) |
+| What does it stop them doing? | Nothing |
+| How does it change the way they work? | No scrolling through 400 mods or 700 test rows; two keys to remember, the same on every page |
+| What outside it notices? | Nothing: it only reads |
+
+**Risk: none (agent's grade).** **Agent choices, owner to revise:** commits searched are each repository's newest 40; one
+matching rule everywhere (every word typed, anywhere in the thing's words); Ctrl + F with no list on the page opens /.
+
 Everything proposed and agreed but not yet built is in [later.md](later.md), with each item's status.
 
 ## Limits

@@ -45,7 +45,7 @@
    * or the buttons, or drag. Each row says what its own files warn of as the draft stands. Nothing is written until Save, which
    * writes the whole list at once after a backup; Undo walks back one step, Throw away returns to the list as read.
    */
-  let { game }: { game: GameHome } = $props();
+  let { game, focusMod = "" }: { game: GameHome; focusMod?: string } = $props();
 
   type Side = "off" | "on";
   type Reading =
@@ -163,6 +163,20 @@
       said = { text: t("modlist-board-set-aside"), refused: true };
     keep(same ? kept : fresh);
     chosen = { off: [], on: [] };
+    if (focusMod) void bringIntoView(focusMod);
+  }
+
+  /** The mod a place names, chosen in whichever list holds it and scrolled to (0.110.0). */
+  async function bringIntoView(key: string) {
+    if (!draft || !mods.has(key)) return;
+    const side: Side = draft.order.includes(key) ? "on" : "off";
+    filter[side] = "";
+    chosen = { off: [], on: [] };
+    chosen[side] = [key];
+    anchor[side] = key;
+    focus[side] = key;
+    inFocus = key;
+    await showRow(side, key);
   }
 
   // ------------------------------------------------------------ choosing
@@ -676,6 +690,7 @@
         type="search"
         class="filter"
         aria-label={t("modlist-board-filter-on")}
+        data-page-filter
         placeholder={t("modlist-board-filter")}
         bind:value={filter.on}
       />

@@ -4,6 +4,10 @@ import {
   fromAddress,
   fromChanges,
   fromCode,
+  fromCommits,
+  fromGuide,
+  fromLookUp,
+  fromMods,
   fromPages,
   fromTabs,
   fromTests,
@@ -168,5 +172,81 @@ describe("go to anything", () => {
       place("explorer", "sample", { start: "yes" }),
     ]);
     expect(rank(found, "")).toEqual([]);
+  });
+});
+
+describe("the search across everything (0.110.0)", () => {
+  it("finds a mod by its name or id, opening the Mod list's editor on it", () => {
+    const found = rank(
+      fromMods(
+        "first",
+        [
+          {
+            key: "smashphil.vehicleframework",
+            id: "SmashPhil.VehicleFramework",
+            name: "Vehicle Framework",
+            authors: "Smash Phil",
+          },
+        ],
+        (m) => m.id,
+      ),
+      "smashphil",
+    );
+    expect(found).toHaveLength(1);
+    expect(found[0]?.place.page).toBe("modlist");
+    expect(found[0]?.place.focus).toEqual({
+      view: "edit",
+      mod: "smashphil.vehicleframework",
+    });
+  });
+
+  it("offers to look up anything shaped like a definition's name, and nothing else", () => {
+    const words = (name: string) => `Look up ${name}`;
+    const found = rank(
+      fromLookUp("first", "C17_Globemaster", words),
+      "C17_Globemaster",
+    );
+    expect(found[0]?.place.focus).toEqual({
+      tab: "lookup",
+      name: "C17_Globemaster",
+      look: "who",
+    });
+    expect(fromLookUp("first", "two words", words)).toEqual([]);
+    expect(fromLookUp(null, "Steel", words)).toEqual([]);
+  });
+
+  it("finds a commit by its words or hash, opening its code", () => {
+    const found = rank(
+      fromCommits("first", "first-mods", [
+        {
+          hash: "a1b2c3d4e5f6",
+          time: "2026-11-27T09:00:00Z",
+          subject: "Save writes the whole list",
+        },
+      ]),
+      "a1b2c3",
+    );
+    expect(found[0]?.kind).toBe("commit");
+    expect(found[0]?.place.dialog?.kind).toBe("code");
+  });
+
+  it("finds a Guide entry by words in its text, not only its title", () => {
+    const found = rank(
+      fromGuide(
+        null,
+        [
+          {
+            id: "task-x",
+            title: "Edit the list",
+            words: [],
+            kind: "task",
+            text: "Press Ctrl + S to save the whole list.",
+          },
+        ],
+        () => "How do I",
+      ),
+      "whole list",
+    );
+    expect(found.map((c) => c.label)).toEqual(["Edit the list"]);
   });
 });

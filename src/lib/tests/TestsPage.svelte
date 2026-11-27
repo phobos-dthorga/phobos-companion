@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { matchesFilter } from "../shell/filter";
+  import FilterBox from "../shell/FilterBox.svelte";
   import Pager from "../shell/Pager.svelte";
   import { pageHolding, pageOf, type Paged } from "../shell/paging";
   import { go, here, setFocus } from "../navigation/navigation.svelte";
@@ -44,6 +46,8 @@
   } from "./types";
 
   let { game }: { game: GameHome } = $props();
+  /** Ctrl + F's filter over every shelf's rows (0.110.0). */
+  let filterText = $state("");
 
   let reading = $state<TestsReading>({ state: "reading" });
   let shelf = $state<Shelf>("seen");
@@ -203,9 +207,15 @@
     {/each}
   </div>
   <p class="muted shelf-note">{t(SHELF_WORDS[shelf].note)}</p>
+  <FilterBox bind:value={filterText} label={t("tests-filter")} />
 
   {#each lists as list (list.repository)}
-    {@const rows = onShelf(list.rows, shelf)}
+    {@const rows = onShelf(list.rows, shelf).filter((row) =>
+      matchesFilter(
+        [row.id, row.title, row.section, ...Object.values(row.cells)],
+        filterText,
+      ),
+    )}
     {@const pagedRows = pageOf(
       rows,
       rowPages[list.repository] ?? 1,

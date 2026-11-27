@@ -160,6 +160,7 @@
             id="codemap-search"
             data-shortcut-search
             type="search"
+            data-page-filter
             bind:value={search}
             spellcheck="false"
             autocomplete="off"

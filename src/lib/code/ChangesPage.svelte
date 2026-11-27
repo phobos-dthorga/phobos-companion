@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { matchesFilter } from "../shell/filter";
+  import FilterBox from "../shell/FilterBox.svelte";
   import Placeholder from "../shell/Placeholder.svelte";
   import { go, here, setFocus } from "../navigation/navigation.svelte";
   import { readTestLists } from "../tests/desktopClient";
@@ -90,12 +92,18 @@
 
   /** Versions a page: the newest six first; the page is part of the place, so Back returns to it. */
   const VERSIONS_PER_PAGE = 6;
-  const paged = $derived(
-    pageOf(
-      chosen?.log.versions ?? [],
-      pageFrom(here().focus.page),
-      VERSIONS_PER_PAGE,
+  /** Ctrl + F's filter (0.110.0): versions whose number, heading or any entry holds every word. */
+  let filterText = $state("");
+  const fitting = $derived(
+    (chosen?.log.versions ?? []).filter((v) =>
+      matchesFilter(
+        [v.version, v.heading, v.summary, ...v.entries.map((e) => e.text)],
+        filterText,
+      ),
     ),
+  );
+  const paged = $derived(
+    pageOf(fitting, pageFrom(here().focus.page), VERSIONS_PER_PAGE),
   );
 
   /** A page turn is a step, so Back turns back. */
@@ -194,6 +202,12 @@
     </button>
   </p>
 
+  <FilterBox
+    bind:value={filterText}
+    label={t("changes-filter")}
+    shown={fitting.length}
+    total={chosen.log.versions.length}
+  />
   {@render pager()}
   {#each paged.items as version (version.version)}
     {@const runs = commitRuns(version.entries)}

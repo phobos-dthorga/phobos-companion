@@ -188,6 +188,13 @@ export const ACTIONS: Action[] = [
     defaultKey: "/",
     words: "shortcut-search",
   },
+  // 0.110.0: the page's own list filtered, beside / for everything.
+  {
+    id: "filter",
+    scope: "everywhere",
+    defaultKey: "Ctrl+f",
+    words: "shortcut-filter",
+  },
   {
     id: "picture",
     scope: "everywhere",

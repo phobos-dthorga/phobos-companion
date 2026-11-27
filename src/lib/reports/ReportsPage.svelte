@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { matchesFilter } from "../shell/filter";
+  import FilterBox from "../shell/FilterBox.svelte";
   import { here, setFocus } from "../navigation/navigation.svelte";
   import { onMount, tick, untrack } from "svelte";
   import type { GameHome } from "../home/types";
@@ -26,6 +28,7 @@
   let progress = $state(started());
   let top = $state(DEFAULT_TOP);
   let copied = $state<"idle" | "done" | "failed">("idle");
+  let filterText = $state("");
   let heading = $state<HTMLElement | undefined>();
   let request = 0;
 
@@ -177,8 +180,17 @@
   {:else if catalogue.entries.length === 0}
     <p class="lead">{t("reports-empty", { game: game.name })}</p>
   {:else}
+    {@const fitting = catalogue.entries.filter((e) =>
+      matchesFilter([e.question, e.command, e.report], filterText),
+    )}
+    <FilterBox
+      bind:value={filterText}
+      label={t("reports-filter")}
+      shown={fitting.length}
+      total={catalogue.entries.length}
+    />
     <ul>
-      {#each catalogue.entries as entry (`${entry.command}-${entry.report}`)}
+      {#each fitting as entry (`${entry.command}-${entry.report}`)}
         {@const waiting = waitingFor(watched.found[game.id], entry)}
         <li>
           <button

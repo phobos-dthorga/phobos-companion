@@ -4,6 +4,16 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.116.1] - 2026-11-28
+
+### Changed
+
+- **Records copies keep each file once, compressed** (tool kit 1.149.1; the owner's choices by card, 28 Nov 2026: "Store-once",
+  "Convert, checked first", "Compress them too"). A copy is now a small list beside one shared store, so 24 copies take about
+  10 MB instead of 155 MB; the tool kit's `records restore` writes one out to look inside. The kit also keeps game recordings and
+  heap dumps packed (539 MB to 125 MB) and copies only pictures and sounds out of zipped mod backups (195 MB to 4 MB). It needs
+  Python 3.14, which the installer already ships. **Not tested on screen.**
+
 ## [0.116.0] - 2026-11-28
 
 ### Added

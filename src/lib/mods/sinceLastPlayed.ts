@@ -147,7 +147,13 @@ export type TemporaryRow = {
   patch: string;
   mod: string;
   file: string;
-  status: "changed" | "removed" | "unchanged" | "no-update" | "one-build";
+  status:
+    | "changed"
+    | "removed"
+    | "reviewed"
+    | "unchanged"
+    | "no-update"
+    | "one-build";
   detail: string;
 };
 export type UpdateRow = {

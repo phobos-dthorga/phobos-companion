@@ -4,6 +4,14 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.103.1] - 2026-11-27
+
+### Changed
+
+- **A temporary patch whose update was read stops asking to be read** (the owner, 27 Nov 2026: "mark the jet rows as
+  reviewed"). The update check's temporary patches can now say their newest build was read (kit pin to 1.136.0): such a row is
+  reviewed, so Since you last played no longer lists it among the patches an update touched.
+
 ## [0.103.0] - 2026-11-27
 
 ### Added

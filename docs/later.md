@@ -101,6 +101,19 @@ screenshots as a list, and where the space goes; places and the Steam app ID in 
 | **The launch before last** | **Built**, 0.28.0 (phobos-modkit 1.51.0) |
 | **RimWorld extras**: the start-up chart over launches, crashes on the Timeline, the creations shelf | The kit's `startup-impact` and `crash-dump` readings as Timeline facts; the creations folders listed |
 
+## Round two of the toolkit's reach (owner's choices by card, 27 Nov 2026)
+
+After the four integration steps (0.104.0 to 0.107.0), the owner asked for more and answered four question cards the same day. In
+the order of work; each its own version, installable as it lands.
+
+| # | Item | The owner's choice | Status |
+| --- | --- | --- | --- |
+| R1 | **The Mod list's sort made safe** (the owner: the sort "leads to faults" such as a game unable to make a map) | "Sort first, then screen" | **Built**, 0.107.2 (kit 1.141.0): a full re-sort keeps your order wherever no rule decides; the owner's RimSort-sorted list re-sorts with none moved |
+| R2 | **The Mod list's screen rebuilt, with lessons from RimSort**: inactive mods left, active right, each with its own filter; problem icons on each row; an info panel for the mod in focus; drag, Shift and Ctrl to choose several, double-click to switch on or off, every move with keys | "Hold until Save": moves are kept until **Save** (with a backup and Undo), replacing the 22 Nov choice of saving each change at once | To build |
+| R3 | **Home: one "Needs you" list, and tabs**: every note merged into one list, one line each with its button and "Everything else is fine"; tabs **Needs you**, **Recent work** (last thing done, latest work, left unfinished, not released, open work) and **Repositories** (checks on GitHub, their code changed, tool kit pins, safe copies, claims). One shared note-row part for every page | "Inbox + 2 tabs" | To build |
+| R4 | **Search**: Go to anything (`/`) grows into a global search (mods, Defs through Look up, changelog entries, test rows, settings, Guide text, commits, grouped by kind); **Ctrl + F** filters the long list on the page, from one shared filter part (Mod list, Reports, Changes, Tests, Timeline, Guide) | "Both, one key each" | To build |
+| R5 | **What players say for the game and its DLCs**: Steam's public reviews (how many recommend it, the newest negative ones), keyless, beside the game and each DLC on the Mod list | The owner's ask ("it'll just be reviews instead") | To build |
+
 ## Not on the build list yet
 
 | Item | Where it came from | What it needs or waits for |

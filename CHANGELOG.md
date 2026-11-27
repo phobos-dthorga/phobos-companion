@@ -4,6 +4,18 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.117.0] - 2026-11-28
+
+### Added
+
+- **Start the game from Home and from every view of the Mod list** (the owner, 28 Nov 2026: "There should be a way to launch games
+  via the Companion, to lessen user confusion, especially if they are moving away from tools like RimSort"). It was only on Edit
+  the list's bar. **Shift+S** starts it wherever the button shows (the owner's card "Yes, a key").
+- **Arguments for the game** (the owner's cards: "Always the game's program", one line per game, both in Settings and on the Mod
+  list): Start now runs the game's own program, as RimSort's Run game did, with a line such as -harmony-detours, kept per game and
+  changed on the Mod list or in Settings → Games, Starting each game. It says when Steam is not running. Tool kit 1.150.0.
+  **Not tested on screen.**
+
 ## [0.116.1] - 2026-11-28
 
 ### Changed

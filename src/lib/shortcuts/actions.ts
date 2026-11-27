@@ -176,6 +176,13 @@ export const ACTIONS: Action[] = [
     defaultKey: "]",
     words: "shortcut-game-next",
   },
+  // 0.117.0: wherever a Start button shows (Home, the Mod list); the owner's card of 28 Nov 2026, "Yes, a key".
+  {
+    id: "game.start",
+    scope: "everywhere",
+    defaultKey: "Shift+s",
+    words: "shortcut-game-start",
+  },
   {
     id: "look-again",
     scope: "everywhere",

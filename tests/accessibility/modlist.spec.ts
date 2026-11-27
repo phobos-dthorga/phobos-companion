@@ -446,7 +446,28 @@ async function open(page: Page, replies: Record<string, unknown> = {}) {
       result: { ok: true, title: "asked", refusal: null, data: {} },
     },
     mod_list_start: {
-      result: { ok: true, title: "started", refusal: null, data: {} },
+      result: {
+        ok: true,
+        title: "started",
+        refusal: null,
+        data: { started: true, steamRunning: true },
+      },
+    },
+    mod_list_launch: {
+      result: {
+        ok: true,
+        title: "starts with no arguments",
+        refusal: null,
+        data: { arguments: "", program: "C:\\Games\\RimWorld\\RimWorld.exe" },
+      },
+    },
+    mod_list_launch_keep: {
+      result: {
+        ok: true,
+        title: "kept",
+        refusal: null,
+        data: { arguments: "-harmony-detours", program: null },
+      },
     },
     mod_list_import_rules: {
       result: {
@@ -1024,7 +1045,7 @@ for (const [name, viewport] of [
       expect(await asked(page, "mod_list_import_rules")).toHaveLength(1);
     });
 
-    test("Start the game asks Steam on a press, and offers to save first when changes wait (0.113.0)", async ({
+    test("Start the game starts it on a press, and offers to save first when changes wait (0.113.0)", async ({
       page,
     }) => {
       await open(page);
@@ -1035,9 +1056,31 @@ for (const [name, viewport] of [
         has: page.getByRole("button", { name: "Save", exact: true }),
       });
       await bar.getByRole("button", { name: /^Start / }).click();
-      await expect(page.getByText(/Steam was asked to start/)).toBeVisible();
+      await expect(page.getByText(/is starting/)).toBeVisible();
       expect(await asked(page, "mod_list_start")).toHaveLength(1);
       expect(await asked(page, "mod_list_write")).toHaveLength(0);
+      await audit(page);
+    });
+
+    test("Start shows above What's wrong, keeps the arguments typed beside it, and Shift+S starts it (0.117.0)", async ({
+      page,
+    }) => {
+      await open(page);
+      const box = page.getByRole("textbox", {
+        name: "Arguments the game starts with",
+      });
+      await box.fill("-harmony-detours");
+      await page.getByRole("button", { name: "Keep", exact: true }).click();
+      await expect(
+        page.getByText("Kept: the game starts with -harmony-detours"),
+      ).toBeVisible();
+      const kept = await asked(page, "mod_list_launch_keep");
+      expect(kept).toHaveLength(1);
+      expect(kept[0].arguments).toBe("-harmony-detours");
+      await page.locator("h1").click();
+      await page.keyboard.press("Shift+S");
+      await expect(page.getByText(/is starting/)).toBeVisible();
+      expect(await asked(page, "mod_list_start")).toHaveLength(1);
       await audit(page);
     });
 

@@ -89,6 +89,16 @@ export type Since = {
   run?: string;
 };
 
+/** The game's arguments line and its program (0.117.0, the kit's `mod-list launch`), or a start's answer (`mod-list start`). */
+export type LaunchAnswer = ModListChange & {
+  data: {
+    arguments?: string;
+    program?: string | null;
+    steamRunning?: boolean;
+    started?: boolean;
+  };
+};
+
 /** What a change or an undo did, or why the kit refused it. */
 export type ModListChange = {
   ok: boolean;

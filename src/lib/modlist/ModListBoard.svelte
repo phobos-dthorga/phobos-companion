@@ -8,11 +8,11 @@
   import { heard, started } from "../shell/progress";
   import type { Failure } from "../shell/types";
   import { register } from "../shortcuts/registry";
+  import GameStart from "./GameStart.svelte";
   import ModPreview from "./ModPreview.svelte";
   import SteamSubscribe from "./SteamSubscribe.svelte";
   import {
     readMods,
-    startTheGame,
     undoEdit,
     unsubscribeFrom,
     writeModList,
@@ -361,37 +361,6 @@
     return true;
   }
 
-  /** Start the game through Steam (0.113.0; the owner's "Save and start the game", as RimSort's Run game): saves first when changes
-   *  wait, and starts nothing when the save is refused. */
-  async function startGame() {
-    if (busy) return;
-    const saving = pending;
-    if (saving && !(await save())) return;
-    busy = true;
-    progress = started(t("modlist-board-starting"));
-    const answer = await startTheGame(game.id);
-    busy = false;
-    const refusal =
-      answer.state === "failed"
-        ? answer.failure.detail
-        : !answer.result.ok
-          ? (answer.result.refusal ?? "")
-          : null;
-    said =
-      refusal !== null
-        ? {
-            text: t("modlist-board-start-failed", { reason: refusal }),
-            refused: true,
-          }
-        : {
-            text: t(
-              saving ? "modlist-board-saved-started" : "modlist-board-started",
-              { game: game.name },
-            ),
-            refused: false,
-          };
-  }
-
   async function goBack() {
     said = null;
     busy = true;
@@ -619,15 +588,6 @@
       <button
         type="button"
         class="action"
-        disabled={busy || (pending && running.length > 0)}
-        onclick={startGame}
-        >{t(pending ? "modlist-board-save-start" : "modlist-board-start", {
-          game: game.name,
-        })}</button
-      >
-      <button
-        type="button"
-        class="action"
         disabled={!draft.history.length || busy}
         onclick={undoStep}>{t("modlist-board-undo")}</button
       >
@@ -651,6 +611,13 @@
         {t("modlist-board-running", { names: running.join(", ") })}
       </p>
     {/if}
+    <GameStart
+      {game}
+      withLine
+      before={pending ? save : undefined}
+      label={pending ? t("modlist-board-save-start", { game: game.name }) : ""}
+      disabled={busy || (pending && running.length > 0)}
+    />
   </div>
   {#if busy}
     <ProgressBar {progress} fallback={t("modlist-changing")} />

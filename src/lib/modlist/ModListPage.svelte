@@ -20,6 +20,7 @@
   } from "./desktopClient";
   import { refreshStaleOnce } from "./communityLists";
   import { keep } from "./latest.svelte";
+  import GameStart from "./GameStart.svelte";
   import ModListBoard from "./ModListBoard.svelte";
   import ModListSaved from "./ModListSaved.svelte";
   import ModListSort from "./ModListSort.svelte";
@@ -212,6 +213,11 @@
     onclick={() => showView("saved")}>{t("modlist-view-saved")}</button
   >
 </div>
+
+{#if view !== "edit"}
+  <!-- Edit the list has its own, which saves first (0.117.0). -->
+  <GameStart {game} withLine />
+{/if}
 
 {#if view === "edit"}
   <ModListBoard {game} {focusMod} />

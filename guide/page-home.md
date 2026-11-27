@@ -6,7 +6,7 @@ go: home
 words: where was I, start, overview, last time, summary
 see: task-first-steps, term-repository, task-repository-ready, task-agent-features, task-safe-copies, task-going-online, task-after-a-crash
 ---
-**Where was I?** The page to come back to after a break, for the game you are looking at (chosen at the top of the window). Under its opening sentence (how long since you were here, and the last thing you did) are three tabs; **Alt + 1, 2, 3** jump between them.
+**Where was I?** The page to come back to after a break, for the game you are looking at (chosen at the top of the window). Under its opening sentence (how long since you were here, and the last thing you did) is **Start the game** (or **Shift+S**), with the arguments it starts with beside it when there are any; change them on the Mod list or in Settings → Games. Then come three tabs; **Alt + 1, 2, 3** jump between them.
 
 ### Needs you
 **Everything waiting on you, one line each, with its button.** Nothing else is on this tab, and when nothing waits it says so. The tab's name says how many wait. A line marked down its edge needs you first. Any of these may show:

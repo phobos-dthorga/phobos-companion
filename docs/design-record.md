@@ -1652,6 +1652,37 @@ each save's answer is kept; test code 38 s → 11 s; patch targets 281 s → 21 
 **What a next game needs:** nothing new. The queue, the kept answers and the quick look are game-free; the quick look reads the
 folders its game's `installs status` names.
 
+## Starting the game, with arguments (built 28 Nov 2026, 0.117.0; kit 1.150.0)
+
+**The owner's request** (28 Nov 2026): "How do you start the game from the Mod List page though? There should also be a way to
+parse arguments to the executable, like, `-harmony-detours`", and, while it was being asked: "There should be a way to launch games
+via the Companion, to lessen user confusion, especially if they are moving away from tools like RimSort which allow exactly that."
+Start had been only on Edit the list's bar, through Steam's Play, which takes no arguments of ours.
+
+**The owner's cards, each as put** (the chosen one first and marked):
+
+1. *How should it start the game when you've chosen arguments?* **Chosen: Always the game's program** (run its own program directly,
+   with or without arguments, as RimSort did) · Steam, or direct with arguments (recommended) · Always through Steam (Steam likely
+   asks to confirm each launch with arguments; untested).
+2. *Where should launch arguments be chosen and kept?* **Chosen, in the owner's words: "Both a single line in Settings and a field
+   on the Mod List bar."** · Named sets beside Start (recommended) · One line in Settings · A field on the Mod list bar.
+3. *A key for Start?* **Chosen: Yes, a key** (recommended) · No shortcut.
+
+**What was built:** the kit's `mod-list start` runs the game's own program (RimWorld 1.7's `RimWorld.exe`, found on the owner's
+install; `RimWorldWin64.exe` before 1.7) detached, with the line `mod-list launch --set` keeps per game beside the mod list's memory;
+it says when Steam is not running. In the window, one Start (GameStart) on Home and above every Mod list view; Edit the list's bar
+keeps its own, which saves first. One line per game (launch.svelte.ts, shared), changed beside Start on the Mod list or in Settings →
+Games, Starting each game. **Shift+S** wherever a Start shows (agent's choice of key: the only Shift letter free in every scope).
+Agent's choices: Home shows the button without the line (it says the line when one is kept), to keep Home short; a game the kit
+cannot start shows no Start at all. **Not yet tested on screen.**
+
+**What it lets the player do, stops, and changes:** start the game, with arguments, from wherever they look first; it stops nothing;
+RimSort's Run game is no longer needed. **What outside notices:** the game itself, given the arguments; Steam sees the game start
+as any directly started game.
+
+**What a next game needs:** its mod-list adapter's `program()` (Project Zomboid's names are there but unconfirmed); nothing in the
+window.
+
 Everything proposed and agreed but not yet built is in [later.md](later.md), with each item's status.
 
 ## Limits

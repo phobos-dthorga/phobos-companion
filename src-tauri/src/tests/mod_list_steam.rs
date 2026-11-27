@@ -67,6 +67,23 @@ fn the_games_reviews_name_its_app_and_the_mod_to_match_and_wait_for_workshop_pag
 }
 
 #[test]
+fn the_arguments_line_is_read_cleared_or_kept_as_one_argument() {
+    let read = launch_arguments(&zed(), None);
+    assert_eq!(read[..2], ["mod-list", "launch"]);
+    assert!(!read.contains(&"--apply".to_owned()));
+    let kept = launch_arguments(&zed(), Some("  -harmony-detours -logfile x  "));
+    assert!(kept.contains(&"--set=-harmony-detours -logfile x".to_owned()));
+    assert!(kept.contains(&"--apply".to_owned()));
+    let cleared = launch_arguments(&zed(), Some("   "));
+    assert!(cleared.contains(&"--clear".to_owned()) && cleared.contains(&"--apply".to_owned()));
+    assert!(sane_arguments("-harmony-detours \"two words\""));
+    assert!(sane_arguments(""));
+    assert!(!sane_arguments("-one\n-two"));
+    assert!(!sane_arguments(&"x".repeat(MAX_ARGUMENTS + 1)));
+    assert!(keep_launch_line("not a game", "-x").is_err());
+}
+
+#[test]
 fn starting_the_game_names_it_and_always_applies() {
     let arguments = start_arguments(&zed());
     assert_eq!(arguments[..2], ["mod-list", "start"]);

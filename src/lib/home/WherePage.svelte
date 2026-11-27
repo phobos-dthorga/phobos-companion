@@ -21,6 +21,7 @@
   import CleanupNote from "../cleanup/CleanupNote.svelte";
   import CrashNote from "../crash/CrashNote.svelte";
   import ModListNote from "../modlist/ModListNote.svelte";
+  import GameStart from "../modlist/GameStart.svelte";
   import WaitingNote from "../reports/WaitingNote.svelte";
   import { pageServes } from "./kinds";
   import SafeCopiesNote from "../safecopies/SafeCopiesNote.svelte";
@@ -166,6 +167,10 @@
     {t("home-never-body")}
   {/if}
 </p>
+
+{#if pageServes(game.kind, "modlist")}
+  {#key game.id}<GameStart {game} />{/key}
+{/if}
 
 {#snippet needsYou()}
   <ul class="inbox" bind:this={inbox} aria-label={t("home-needs-label")}>

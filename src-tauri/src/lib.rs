@@ -1792,10 +1792,22 @@ async fn mod_list_fetch_again(
     blocking(move || mod_list_steam::fetch_again(&game, &numbers, Some(&hearing(on_progress)))).await
 }
 
-/// Starts the game through the Steam client, on the owner's press (0.113.0).
+/// Starts the game, on the owner's press (0.113.0): its own program with its arguments line from 0.117.0.
 #[tauri::command]
 async fn mod_list_start(game: String) -> Result<mod_list_page::ChangeResult, Failure> {
     blocking(move || mod_list_steam::start_game(&game)).await
+}
+
+/// The arguments line the game is started with (0.117.0). Only reads.
+#[tauri::command]
+async fn mod_list_launch(game: String) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_steam::launch_line(&game)).await
+}
+
+/// Keeps a new arguments line for the game, on the owner's press (0.117.0); an empty one keeps none.
+#[tauri::command]
+async fn mod_list_launch_keep(game: String, arguments: String) -> Result<mod_list_page::ChangeResult, Failure> {
+    blocking(move || mod_list_steam::keep_launch_line(&game, &arguments)).await
 }
 
 /// The community lists the sorter and the check read, and how old; with `fetch`, fetched first (0.112.0). The fetch goes online.
@@ -2041,6 +2053,8 @@ pub fn run() {
             mod_list_databases,
             mod_list_import_rules,
             mod_list_start,
+            mod_list_launch,
+            mod_list_launch_keep,
             mod_list_updates,
             mod_list_fetch_again,
             mod_list_drop_rule,

@@ -8,6 +8,7 @@ import type {
   SubscribeAnswer,
   UnsubscribeAnswer,
   EditAnswer,
+  LaunchAnswer,
   ListsListing,
   ModListChange,
   ModListCheck,
@@ -196,12 +197,34 @@ export async function fetchAgain(
   );
 }
 
-/** Starts the game through the Steam client (0.113.0), on a press; refused while it runs. */
-export async function startTheGame(game: string): Promise<Changed | Failed> {
-  return ask<ModListChange, Changed>("mod_list_start", { game }, (result) => ({
+type Launched = { state: "ready"; result: LaunchAnswer };
+
+/** Starts the game (0.113.0), on a press; refused while it runs. From 0.117.0 its own program, with its arguments line. */
+export async function startTheGame(game: string): Promise<Launched | Failed> {
+  return ask<LaunchAnswer, Launched>("mod_list_start", { game }, (result) => ({
     state: "ready",
     result,
   }));
+}
+
+/** The game's arguments line and program (0.117.0). Only reads; refused for a game the tools cannot start. */
+export async function readLaunchLine(game: string): Promise<Launched | Failed> {
+  return ask<LaunchAnswer, Launched>("mod_list_launch", { game }, (result) => ({
+    state: "ready",
+    result,
+  }));
+}
+
+/** Keeps a new arguments line for the game (0.117.0), on a press; an empty one keeps none. */
+export async function keepLaunchLine(
+  game: string,
+  line: string,
+): Promise<Launched | Failed> {
+  return ask<LaunchAnswer, Launched>(
+    "mod_list_launch_keep",
+    { game, arguments: line },
+    (result) => ({ state: "ready", result }),
+  );
 }
 
 /** Brings the owner's RimSort rules into their own (0.112.0), on a press. */

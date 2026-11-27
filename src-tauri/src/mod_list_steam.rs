@@ -39,8 +39,12 @@ const WORKSHOP_PAGES: &str = "workshop-pages";
 const UNSUBSCRIBE: &str = "unsubscribe";
 /// The kit's reading of Workshop items Steam has not brought up to date, and fetching them again (phobos-modkit 1.147.0).
 const UPDATES: &str = "updates";
-/// The kit's start of the game through Steam (phobos-modkit 1.146.0).
+/// The kit's start of the game: its own program with the arguments line kept for it (phobos-modkit 1.150.0; Steam's Play from 1.146.0).
 const START: &str = "start";
+/// The kit's arguments line for starting the game, read or kept (phobos-modkit 1.150.0).
+const LAUNCH: &str = "launch";
+/// The longest arguments line kept (the kit's own limit).
+pub const MAX_ARGUMENTS: usize = 1000;
 /// The kit's game-free reading of a game's or a DLC's Steam reviews (phobos-modkit `steam-reviews`, 1.143.0).
 const REVIEWS_TOOL: &str = "steam-reviews";
 /// The most items one press subscribes to (the kit's own limit).
@@ -158,12 +162,48 @@ pub fn start_arguments(game: &GamePlaces) -> Vec<String> {
     named(Args::new(TOOL, START), game).flag("--apply").flag("--no-redact").json()
 }
 
-/// Starts the game through the Steam client (0.113.0; the owner's choice of 28 Nov 2026, "Save and start the game", as RimSort's Run
-/// game): on the owner's press, while the manifest calls `mod-list start` `runs`; the kit refuses while the game runs.
+/// Starts the game (0.113.0; the owner's choice of 28 Nov 2026, "Save and start the game", as RimSort's Run game): on the owner's
+/// press, while the manifest calls `mod-list start` `runs`; the kit refuses while the game runs. From 0.117.0 the kit runs the game's
+/// own program with the arguments line kept for it (the owner's card "Always the game's program").
 pub fn start_game(game: &str) -> Result<ChangeResult, Failure> {
     let found = places(game)?;
     allowed_by_manifest(&kit::read_manifest()?, TOOL, START).map_err(Failure::refused)?;
     Ok(result_of(&kit::run_hearing(TOOL, &start_arguments(&found), None)?))
+}
+
+/// An arguments line from the window (0.117.0): one line, no control characters, not too long. An empty one keeps none.
+pub fn sane_arguments(text: &str) -> bool {
+    text.trim().chars().count() <= MAX_ARGUMENTS && !text.chars().any(char::is_control)
+}
+
+/// The arguments for reading the line (`keep` None), or keeping a new one: `--set=TEXT`, always one argument so a line opening with
+/// a dash stays a value, or `--clear` for an empty one.
+pub fn launch_arguments(game: &GamePlaces, keep: Option<&str>) -> Vec<String> {
+    let arguments = named(Args::new(TOOL, LAUNCH), game);
+    let arguments = match keep.map(str::trim) {
+        None => arguments,
+        Some("") => arguments.flag("--clear").flag("--apply"),
+        Some(text) => arguments.given("--set", text).flag("--apply"),
+    };
+    arguments.flag("--no-redact").json()
+}
+
+/// The arguments line a game is started with, and its program (0.117.0). Only reads; refused for a game the kit cannot start.
+pub fn launch_line(game: &str) -> Result<ChangeResult, Failure> {
+    let found = places(game)?;
+    allowed_by_manifest(&kit::read_manifest()?, TOOL, LAUNCH).map_err(Failure::refused)?;
+    Ok(result_of(&kit::run_hearing(TOOL, &launch_arguments(&found, None), None)?))
+}
+
+/// Keeps a new arguments line for a game, on the owner's press (0.117.0; the owner's card: one line per game, kept from Settings or
+/// the Mod list): while the manifest calls `mod-list launch` `writes`.
+pub fn keep_launch_line(game: &str, text: &str) -> Result<ChangeResult, Failure> {
+    let found = places(game)?;
+    if !sane_arguments(text) {
+        return Err(Failure::refused("keep the arguments to one line of at most 1,000 characters"));
+    }
+    allowed_by_manifest(&kit::read_manifest()?, TOOL, LAUNCH).map_err(Failure::refused)?;
+    Ok(result_of(&kit::run_hearing(TOOL, &launch_arguments(&found, Some(text)), None)?))
 }
 
 /// The arguments for What players say: one Workshop number, after `--`.

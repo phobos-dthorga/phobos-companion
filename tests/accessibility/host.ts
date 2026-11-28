@@ -144,6 +144,9 @@ export async function mockHost(
     // The Memory page takes the key that marks from the game while a watch runs (0.98.0).
     memory_take_game_key: { result: null },
     memory_release_game_key: { result: null },
+    // The window holds the key that records from the game while it runs (0.118.0).
+    performance_take_game_key: { result: null },
+    performance_release_game_key: { result: null },
     // Home's setup line (0.87.0) reads once; a test that is not about it sees everything here.
     setup_status: {
       result: {

@@ -54,7 +54,7 @@ fn each_row_carries_the_pages_that_use_it_from_the_companion_s_own_file() {
     assert!(pages.contains_key("dotnet-sdk") && !pages.contains_key("git"));
     let rows = rows(&data(), &["rimworld".to_owned()], &[]);
     let row = |key: &str| rows.iter().find(|r| r.key == key).expect("the row").clone();
-    assert_eq!(row("dotnet-sdk").pages, vec!["memory".to_owned()]);
+    assert_eq!(row("dotnet-sdk").pages, vec!["memory".to_owned(), "performance".to_owned()]);
     assert_eq!(row("todds").pages, vec!["mods".to_owned()]);
     // git says so on every page already.
     assert!(row("git").pages.is_empty());

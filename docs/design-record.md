@@ -516,6 +516,24 @@ Decisions page: marking from inside the game, starting a watch by itself when th
 **Not built:** marking without switching from the game (a global key), carrying a watch across a game restart or starting one when
 the game starts, editing or removing a mark, and the heap snapshot's comparison.
 
+## Performance (built 28 Nov 2026, 0.118.0)
+
+**The owner asked (28 Nov 2026)** for "relevant, compiled, condensed information and how it relates to everything else" from
+rimworld-perf's new reports. The design, every card as put and what slice one left are in [performance.md](performance.md).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Record the running game from the page or with a key inside it, read what slowed it first (at most five findings) and the game's own figures, then follow any mod, method or type to the page that answers what to do |
+| What does it stop them doing? | Reading fifteen tables to find the line that matters; recording without a yes; two recordings at once |
+| How does it change the way they work? | Performance is read in the Companion, as memory has been since 19 Nov 2026; no agent session or console is needed |
+| What outside it notices? | The Mod list, the Code map, the Explorer, the Timeline and the Memory page, by its links; the Memory watch's chart, by the game's pace |
+
+**Owner's choices (28 Nov 2026, by card):** a page of its own; slice one first (the page, its findings and links out); a key in the
+game while the program runs; the memory watch always reading the game's counter. **Agent choices, owner to revise:** the page
+under Play after Memory; Shift+F (every single letter was taken) and T; 15, 30 and 60 seconds, 30 first; Ctrl+Alt+P and 30 seconds
+for the key; a method opening as "their code" with the game's first repository; the findings' marks and ranking (phobos-modkit
+`docs/rimworld-perf.md`). **Not tested on screen or in game.**
+
 ## Tools beside the games, loading pages, the atlas's top (built 19 Nov 2026, 0.24.0)
 
 **The owner asked (19 Nov 2026) for the Companion "as its own game"**, knowing it would need exceptions, and chose one entry

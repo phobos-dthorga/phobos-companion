@@ -1,7 +1,8 @@
 # Performance: where the running game spends its time, joined to everything else (design, 28 Nov 2026)
 
-**Status (28 Nov 2026):** designed, nothing built. Slice one (below) has the owner's go: the kit's part first, then the page. When a
-slice is built, its design moves into `design-record.md` and this record keeps what differs.
+**Status (28 Nov 2026):** **slice one built**: the kit's part in phobos-modkit 1.152.0 (K1 to K3, K6, K7) and the page in
+Companion 0.118.0 (P1 to P6, and the links X1, X4, X7, X8); not tested on screen or in game. Not built yet: links X2, X3, X5 and X6
+([What slice one left](#what-slice-one-left)), slice two (B1 to B9) and K4, K5. Its build is in `design-record.md`, "Performance".
 
 **The owner's request** (28 Nov 2026, after phobos-modkit 1.151.0 gave rimworld-perf callers, hot spots, lock waits, allocations,
 timelines and stalls, thread names, a trend across recordings and the game's own tick counter): "what can we do with Companion to
@@ -126,6 +127,20 @@ The page reads surfaces and the kit's generic report blocks, so nothing in it is
 runtime that fills the same index (frames, threads, samples, owners): .NET games through the same Microsoft tools; Unity's Mono
 games need another sampler; **Project Zomboid runs on Java, where Java Flight Recorder could fill it** (an idea, not checked). The
 game meter is a mod's part: each game's library would publish its own ticks and frames.
+
+## What slice one left
+
+Slice one built the page and the links that needed nothing new. What differs from the design above:
+
+- **X1** opens the Mod list's editor at the mod, by the package ID a recording keeps from kit 1.152.0; a mod in an older recording
+  is plain text. The Mod list's own info panel is where its Workshop page is.
+- **X2** (the author's activity) and **X3** (our mod's changelog) are not linked yet: the first needs `workshop-research` read on a
+  press, the second the mod's changelog by name; both are small.
+- **X4** opens every method as "their code" on the Code map, ours included, with the game's first repository; a method of our own
+  could open as a node of the map instead once the kit says which mods are ours.
+- **X5** (patch badges) shows wherever the Code map shows them; the page links no further.
+- **X6** names the holding thread's method in words; it is not a link yet (the kit gives it no ref).
+- **The page's key is Shift+F**, not F: every single letter was taken (the shortcuts' own check).
 
 ## Agent choices, owner to revise
 

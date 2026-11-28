@@ -6,8 +6,8 @@
     "names-reader": ["codemap"],
     "ilspycmd": ["codemap"],
     "heap-reader": ["explorer"],
-    "dotnet-sdk": ["memory"],
-    "dotnet-diagnostics": ["memory"],
+    "dotnet-sdk": ["memory", "performance"],
+    "dotnet-diagnostics": ["memory", "performance"],
     "steam": ["gamefiles", "modlist"],
     "todds": ["mods"]
   }

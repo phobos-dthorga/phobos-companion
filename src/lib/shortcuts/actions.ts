@@ -8,6 +8,8 @@ export type Scope =
   | "code"
   | "connections"
   | "memory"
+  /** The Performance page (0.118.0). */
+  | "performance"
   | "explorer"
   /** A picture or a sound being compared (0.55.0): in the code viewer, on the Mods page, a screenshot, the Picks page. */
   | "media"
@@ -156,6 +158,13 @@ export const ACTIONS: Action[] = [
     scope: "everywhere",
     defaultKey: "u",
     words: "shortcut-page-memory",
+  },
+  /** The Performance page (0.118.0; agent's choice of Shift+F, for frames, every single letter being taken: changeable like every page key). */
+  {
+    id: "page.performance",
+    scope: "everywhere",
+    defaultKey: "Shift+f",
+    words: "shortcut-page-performance",
   },
   /** The Explorer (agent's choice of V, an open decision: changeable like every page key). */
   {
@@ -524,6 +533,22 @@ export const ACTIONS: Action[] = [
     defaultKey: "x",
     words: "shortcut-memory-stop",
   },
+  /** The Performance page's record (asks first), as the Memory page's start. */
+  {
+    id: "performance.record",
+    scope: "performance",
+    defaultKey: "t",
+    words: "shortcut-performance-record",
+  },
+  // 0.118.0: records the game from inside it (the owner's choice by card, 28 Nov 2026: "while the Companion runs"), so held with
+  // Ctrl and Alt. The system holds it for the game chosen while the program runs; no page runs it itself.
+  {
+    id: "performance.record-in-game",
+    scope: "performance",
+    defaultKey: "Ctrl+Alt+p",
+    words: "shortcut-performance-record-in-game",
+    system: true,
+  },
   /** The Explorer's moves (agent's choices, all changeable): take a snapshot (asks first), let it go, back to the overview. */
   {
     id: "explorer.look",
@@ -584,6 +609,7 @@ export const SCOPES: { scope: Scope; words: string }[] = [
   { scope: "code", words: "shortcut-scope-code" },
   { scope: "connections", words: "shortcut-scope-connections" },
   { scope: "memory", words: "shortcut-scope-memory" },
+  { scope: "performance", words: "shortcut-scope-performance" },
   { scope: "explorer", words: "shortcut-scope-explorer" },
   { scope: "media", words: "shortcut-scope-media" },
   { scope: "picks", words: "shortcut-scope-picks" },
@@ -602,6 +628,7 @@ const TOGETHER: Record<Scope, Scope[]> = {
     "code",
     "connections",
     "memory",
+    "performance",
     "explorer",
     "media",
     "picks",
@@ -611,6 +638,7 @@ const TOGETHER: Record<Scope, Scope[]> = {
   code: ["everywhere", "code", "connections", "media"],
   connections: ["everywhere", "code", "connections"],
   memory: ["everywhere", "memory"],
+  performance: ["everywhere", "performance"],
   explorer: ["everywhere", "explorer"],
   media: ["everywhere", "code", "media", "picks"],
   picks: ["everywhere", "media", "picks"],

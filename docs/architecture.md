@@ -318,6 +318,10 @@ The mechanism behind each page's rule in `AGENTS.md`. Every change also passes t
   keep `config/workshop-publishing.json`; a mod or item must be one the last reading named (`KNOWN_MODS`, `KNOWN_ITEMS`).
 - **Memory** (`memory_page.rs`): the tool by the `memory-watch` surface. The length is one offered, a label passes
   `checks::label`, a watch's name has the kit's shape, and a mark is one line under 200 characters, sent after `--`.
+- **Performance** (`performance_page.rs`, 0.118.0): the tool by the `performance` surface; `record` passes `allowed_by_manifest`
+  and holds `RECORDING` while it runs. A length is one offered, a label passes `checks::label`, a recording's name
+  `checks::stamped_name`, a method `checks::method_pattern`, a mod's name is one plain line; names are sent after `--`. The
+  window links a report's refs through `src/lib/reports/refs.ts`, never by reading words.
 - **Explorer** (`explorer_page.rs`): `look-serve` by the `look-inside` surface. A request's kind is from a fixed list; a type name
   passes `checks::type_name`, an address `checks::memory_address`, a filter is one line under 80 characters, and every number is
   held to its range (`MAX_SKIP`, `MAX_TAKE`, `MAX_HOLDERS`, `MAX_SAMPLE`). **The checks with the game frozen** (0.102.0):

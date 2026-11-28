@@ -27,7 +27,6 @@ const RUNS: &str = "runs";
 /// The lengths the page offers, in minutes (agent's choice from the owner's word: 60 was "a bit generous", 15 to 20 workable).
 pub const MINUTES: [u32; 6] = [5, 10, 15, 20, 30, 60];
 const MAX_MARK: usize = 200;
-const MAX_ID: usize = 60;
 /// Rows per table in a kept watch's report, as the kit's own default.
 const TOP: &str = "15";
 
@@ -88,18 +87,7 @@ pub fn checked(manifest: &Value, game: &str, report: &str, effect: &str) -> Resu
 
 /// A kept watch's name as the kit makes it: its start (`20261119-205419`) and, after a dash, its label in plain letters.
 pub fn watch_id(text: &str) -> bool {
-    if !text.is_ascii() || !(15..=MAX_ID).contains(&text.len()) {
-        return false;
-    }
-    let bytes = text.as_bytes();
-    let stamp =
-        bytes[..8].iter().all(u8::is_ascii_digit) && bytes[8] == b'-' && bytes[9..15].iter().all(u8::is_ascii_digit);
-    let rest = &text[15..];
-    stamp
-        && (rest.is_empty()
-            || (rest.starts_with('-')
-                && rest.len() > 1
-                && rest[1..].bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')))
+    checks::stamped_name(text)
 }
 
 fn checked_id(watch: Option<&str>) -> Result<Option<&str>, Failure> {

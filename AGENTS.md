@@ -121,6 +121,12 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
 - **Memory page: a key that marks from the game** (0.98.0; the owner's answer on the Decisions page): while a watch runs, the
   host takes one system key, held with Ctrl or Alt (`game_key::plugin_key` refuses one the game uses alone), and a press runs the
   page's own mark through the manifest. It is let go when the watch ends, the page goes or the program closes.
+- **Performance page: a recording of the running game, only on the owner's press** (0.118.0; the owner, 28 Nov 2026,
+  `docs/performance.md`). The game's tool by the `performance` surface: `record` only while the manifest calls it `runs`, after
+  the owner's yes on the page, or on their key in the game (`game_key::take_record`, held with Ctrl or Alt for the chosen game
+  while the program runs: the owner's choice by card that the press is the go-ahead). **Never record by itself.** One recording
+  runs at a time (`performance_page::RECORDING`). Every other report it runs only reads; every length, label, recording name,
+  method and mod name is checked first and names go after `--`.
 - **Explorer: a snapshot of the running game, only on the owner's press and confirmation** (owner, 20 Nov 2026: debugging tools
   that look at "variables in memory"; `docs/debugging.md`). The game's `look-inside` tool, only while the manifest calls it
   `runs`; it pauses the game for about half a second and writes nothing to the game. **Never take one by itself.** One is held at

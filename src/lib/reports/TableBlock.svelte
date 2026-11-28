@@ -1,14 +1,27 @@
 <script lang="ts">
   import { t } from "../i18n/runtime";
+  import { go } from "../navigation/navigation.svelte";
   import {
     cellText,
     isNumericColumn,
     nextSort,
     sortedIndexes,
   } from "./presentation";
-  import type { Sort, TableBlockData } from "./types";
+  import { refAt, refWords } from "./refs";
+  import type { RefLink, Sort, TableBlockData } from "./types";
 
-  let { table }: { table: TableBlockData } = $props();
+  /**
+   * `link` (0.118.0) says where a cell's ref opens, for a page whose reports say what each row is about (phobos-modkit 1.152.0):
+   * such a cell is a link, and the rest stay plain text.
+   */
+  let { table, link }: { table: TableBlockData; link?: RefLink } = $props();
+
+  function linked(row: number, column: number) {
+    if (!link) return null;
+    const ref = refAt(table.refs, row, column);
+    const where = ref ? link(ref) : null;
+    return ref && where ? { ref, where } : null;
+  }
 
   let sort = $state<Sort | null>(null);
   const order = $derived(sortedIndexes(table, sort));
@@ -44,8 +57,14 @@
       {#each order as row (row)}
         <tr>
           {#each table.rows[row] as cell, column (column)}
+            {@const to = linked(row, column)}
             <td class:numeric={isNumericColumn(table, column)}
-              >{cellText(cell)}</td
+              >{#if to}<button
+                  type="button"
+                  class="ref"
+                  title={t(refWords(to.ref), { name: to.ref.id })}
+                  onclick={() => go(to.where)}>{cellText(cell)}</button
+                >{:else}{cellText(cell)}{/if}</td
             >
           {/each}
         </tr>
@@ -116,6 +135,21 @@
     text-align: end;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+  }
+
+  /* A cell that opens what it names (0.118.0): looks like a link, and is a button for the keyboard. */
+  .ref {
+    min-height: var(--control-min);
+    padding: 0;
+    font: inherit;
+    text-align: start;
+    color: var(--colour-accent);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    overflow-wrap: anywhere;
   }
 
   .showing {

@@ -26,7 +26,11 @@
   import ShortcutsDialog from "./lib/shortcuts/ShortcutsDialog.svelte";
   import GoTo from "./lib/navigation/GoTo.svelte";
   import { register, dispatch } from "./lib/shortcuts/registry";
-  import { loadShortcuts, shortcuts } from "./lib/shortcuts/state.svelte";
+  import {
+    keyFor,
+    loadShortcuts,
+    shortcuts,
+  } from "./lib/shortcuts/state.svelte";
   import GamePicker from "./lib/home/GamePicker.svelte";
   import PageRail from "./lib/shell/PageRail.svelte";
   import { readWaiting, waiting } from "./lib/shell/waiting.svelte";
@@ -64,6 +68,12 @@
   import GameFilesPage from "./lib/gamefiles/GameFilesPage.svelte";
   import ModListPage from "./lib/modlist/ModListPage.svelte";
   import MemoryPage from "./lib/memory/MemoryPage.svelte";
+  import PerformancePage from "./lib/performance/PerformancePage.svelte";
+  import {
+    releaseRecordKey,
+    takeRecordKey,
+  } from "./lib/performance/desktopClient";
+  import { heardFromGame } from "./lib/performance/recording.svelte";
   import SafeCopiesPage from "./lib/safecopies/SafeCopiesPage.svelte";
   import ExplorerPage from "./lib/explorer/ExplorerPage.svelte";
   import GuidePage from "./lib/guide/GuidePage.svelte";
@@ -121,6 +131,27 @@
     // The scan writes what it finds as it goes: untracked, so its own writes never start it again.
     if (game) untrack(() => readWaiting(game));
   });
+  /**
+   * The key that records the chosen game from inside it (0.118.0; the owner's choice by card, 28 Nov 2026, `docs/performance.md`
+   * P6): held for the system while the program runs, for the game chosen, and let go for a tools entry or when the key is cleared.
+   * A press records at once; the Performance page shows it, wherever the owner is.
+   */
+  const recordKey = $derived(keyFor("performance.record-in-game"));
+  let recordKeyTaken: string | null = null;
+  $effect(() => {
+    const game = selected && selected.kind !== "tools" ? selected.id : null;
+    const want = game && recordKey ? `${game} ${recordKey}` : null;
+    if (want === recordKeyTaken) return;
+    recordKeyTaken = want;
+    untrack(() => {
+      if (game && recordKey)
+        void takeRecordKey(game, recordKey, (press) =>
+          heardFromGame(game, t("performance-bar-recording"), press),
+        );
+      else void releaseRecordKey();
+    });
+  });
+
   const counts = $derived(
     selected && waiting.game === selected.id ? waiting.counts : {},
   );
@@ -155,6 +186,7 @@
     ["page.about", "about"],
     ["page.gamefiles", "gamefiles"],
     ["page.memory", "memory"],
+    ["page.performance", "performance"],
     ["page.safecopies", "safecopies"],
     ["page.explorer", "explorer"],
     ["page.guide", "guide"],
@@ -390,6 +422,10 @@
         {#key selected.id}
           <MemoryPage game={selected} />
         {/key}
+      {:else if selected && page === "performance"}
+        {#key selected.id}
+          <PerformancePage game={selected} />
+        {/key}
       {:else if selected && page === "explorer"}
         {#key selected.id}
           <ExplorerPage game={selected} />
@@ -465,11 +501,13 @@
                                     ? t("source-body-publish")
                                     : page === "memory"
                                       ? t("source-body-memory")
-                                      : page === "safecopies"
-                                        ? t("source-body-safecopies")
-                                        : page === "explorer"
-                                          ? t("source-body-explorer")
-                                          : t("source-body")}
+                                      : page === "performance"
+                                        ? t("source-body-performance")
+                                        : page === "safecopies"
+                                          ? t("source-body-safecopies")
+                                          : page === "explorer"
+                                            ? t("source-body-explorer")
+                                            : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

@@ -16,6 +16,7 @@
     atlas: "tools-page-atlas",
     logs: "tools-page-logs",
     memory: "tools-page-memory",
+    performance: "tools-page-performance",
     gamefiles: "tools-page-gamefiles",
     explorer: "tools-page-explorer",
   };

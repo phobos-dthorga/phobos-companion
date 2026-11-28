@@ -4,6 +4,31 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.118.0] - 2026-11-28
+
+### Added
+
+- **The Performance page: where the running game spends its time, and whose code it is** (the owner, 28 Nov 2026: "I only wish
+  to provide users with relevant, compiled, condensed, information and how it relates to everything else"; their cards: a page of
+  its own, the page with its findings and links first, a key in the game, and the watch reading the game's counter). Record for
+  15, 30 or 60 seconds, asking first every time; each recording opens on at most five ranked findings (a lock the game waits on,
+  the longest stall and who caused it, the busiest mod, a busy thread, garbage collection) and the game's own figures, then every
+  table. **Every mod, method and type in a finding or a table is a link**: a mod to the Mod list, a method to the Code map, a type
+  to the Explorer. Look closer at who calls a method, one mod, a comparison or our own mods' trend; Around this recording opens
+  that day's Timeline and the Memory page. **Shift+F** opens it; **T** asks to record. Tool kit 1.152.0. **Not tested on screen.**
+- **Ctrl+Alt+P records the running game from inside it**, at once and for 30 seconds, while the program runs (the owner's card
+  "Yes, while Companion runs"): the press is the go-ahead, so no card asks first. One recording runs at a time; when it ends, the
+  Performance page opens the recording it made. Changeable in Settings. **Not tested in game.**
+- **Every report can link its rows** (phobos-modkit 1.152.0's refs): a page that knows where a mod, a method or a type opens shows
+  them as links, and a report's findings show first, each with its links.
+
+### Changed
+
+- **The Memory page's watch also reads the game's own pace** (tool kit 1.152.0; the owner's card "Yes, always"): with D'thorga
+  Framework running, its report, and the running watch on the page, show ticks and frames a second and the longest frame beside
+  the memory. Tool kit pin moved from 1.150.0 to 1.152.0 (1.151.0's recordings, heap snapshots by default, and 1.152.0's
+  findings).
+
 ## [0.117.1] - 2026-11-28
 
 ### Fixed

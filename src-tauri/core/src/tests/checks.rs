@@ -146,3 +146,27 @@ fn a_repository_file_stays_inside_its_repository() {
     assert!(!repository_file("--output=a.png"));
     assert!(!repository_file(&"x".repeat(MAX_PATH + 1)));
 }
+
+#[test]
+fn a_stamped_name_is_as_the_kit_names_what_it_keeps() {
+    assert!(stamped_name("20261119-205419"));
+    assert!(stamped_name("20261119-205419-reload-test-2"));
+    assert!(!stamped_name("20261119-205419-"));
+    assert!(!stamped_name("--json"));
+    assert!(!stamped_name("20261119-205419-Reload"));
+    assert!(!stamped_name("20261119-205419-ü"));
+    assert!(!stamped_name("20261119-205419/../x"));
+    assert!(!stamped_name(&format!("20261119-205419-{}", "a".repeat(60))));
+}
+
+#[test]
+fn a_method_pattern_is_one_line_of_a_names_marks() {
+    assert!(method_pattern("Verse.GenTypes.IsSealedWithCache"));
+    assert!(method_pattern("GenTypes.IsSealed*"));
+    assert!(method_pattern("System.Collections.Generic.List`1[System.__Canon].Add"));
+    assert!(!method_pattern(""));
+    assert!(!method_pattern("-x"));
+    assert!(!method_pattern("A;B"));
+    assert!(!method_pattern("A\nB"));
+    assert!(!method_pattern(&"x".repeat(MAX_METHOD + 1)));
+}

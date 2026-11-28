@@ -173,6 +173,13 @@ fn block_text(block: &Value, lines: &mut Vec<String>) {
     match block["type"].as_str().unwrap_or_default() {
         "text" => lines.push(cell(&block["text"])),
         "bullets" => lines.extend(cells(&block["items"]).into_iter().map(|item| format!("- {item}"))),
+        "findings" => lines.extend(
+            block["items"]
+                .as_array()
+                .map_or(&[][..], Vec::as_slice)
+                .iter()
+                .map(|item| format!("- {}", cell(&item["text"]))),
+        ),
         "code" => lines.extend(cells(&block["lines"])),
         "table" => {
             lines.push(cells(&block["headers"]).join(" | "));

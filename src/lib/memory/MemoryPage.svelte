@@ -125,12 +125,14 @@
     const pick = chosen && kept.has(chosen) ? chosen : data.watch;
     return liveData && pick === liveData.watch ? null : pick;
   });
-  const liveChart = $derived.by<ChartBlockData | null>(() => {
-    if (status.state !== "ready" || !status.reading.report) return null;
-    for (const section of status.reading.report.sections)
-      for (const block of section.blocks)
-        if (block.type === "chart") return block;
-    return null;
+  /** The running watch's pictures: its memory, and (0.118.0, tool kit 1.152.0) the game's own pace when D'thorga Framework runs. */
+  const liveCharts = $derived.by<ChartBlockData[]>(() => {
+    if (status.state !== "ready" || !status.reading.report) return [];
+    return status.reading.report.sections.flatMap((section) =>
+      section.blocks.filter(
+        (block): block is ChartBlockData => block.type === "chart",
+      ),
+    );
   });
   const bar = $derived(
     mine && mine.ended === null
@@ -400,9 +402,9 @@
         </ul>
       {/if}
 
-      {#if liveChart}
-        <ChartBlock chart={liveChart} />
-      {/if}
+      {#each liveCharts as chart, index (index)}
+        <ChartBlock {chart} />
+      {/each}
 
       <div class="buttons">
         <button

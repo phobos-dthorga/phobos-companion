@@ -69,6 +69,38 @@ pub fn one_line(text: &str) -> String {
     text.split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
+/// The longest name the kit gives a kept recording or watch: its start, a dash and a label of up to 40 plain letters.
+pub const MAX_STAMPED: usize = 60;
+/// The longest method name or pattern a page passes to the kit.
+pub const MAX_METHOD: usize = 400;
+
+/// A name the kit gives what it keeps by when it began (a memory watch, a performance recording): `20261119-205419` and, after a
+/// dash, its label in lower-case letters, digits and dashes. Moved here from the Memory page once the Performance page used it too.
+pub fn stamped_name(text: &str) -> bool {
+    if !text.is_ascii() || !(15..=MAX_STAMPED).contains(&text.len()) {
+        return false;
+    }
+    let bytes = text.as_bytes();
+    let stamp =
+        bytes[..8].iter().all(u8::is_ascii_digit) && bytes[8] == b'-' && bytes[9..15].iter().all(u8::is_ascii_digit);
+    let rest = &text[15..];
+    stamp
+        && (rest.is_empty()
+            || (rest.starts_with('-')
+                && rest.len() > 1
+                && rest[1..].bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')))
+}
+
+/// A method's full name, or the end of one with `*` and `?` as wildcards, as a recording names it
+/// (`Verse.GenTypes.IsSealedWithCache`, ``System.Collections.Generic.List`1[System.__Canon].Add``): one line of letters, digits and
+/// the marks such a name holds, never opening with a dash.
+pub fn method_pattern(text: &str) -> bool {
+    !text.is_empty()
+        && text.chars().count() <= MAX_METHOD
+        && !text.starts_with([' ', '-'])
+        && text.chars().all(|c| c.is_alphanumeric() || "._+<>,[]`*?$ ".contains(c))
+}
+
 #[cfg(test)]
 #[path = "tests/checks.rs"]
 mod tests;

@@ -38,6 +38,7 @@ mod open_work;
 mod other_code_page;
 mod patch_targets;
 mod pending;
+mod performance_page;
 mod pick;
 mod picks_page;
 mod pictures;
@@ -1567,6 +1568,74 @@ fn memory_release_game_key(app: tauri::AppHandle) {
     game_key::release(&app);
 }
 
+/// Every performance recording kept for the game, each with its summary; says when the game's tools have none (0.118.0).
+#[tauri::command]
+async fn performance_list(
+    game: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<performance_page::PerformanceReading, Failure> {
+    blocking(move || performance_page::list(&game, Some(&hearing(on_progress)))).await
+}
+
+/// One recording's whole report: its findings, its figures and every table, each row saying what it is about.
+#[tauri::command]
+async fn performance_report(
+    game: String,
+    recording: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<performance_page::PerformanceReading, Failure> {
+    blocking(move || performance_page::report(&game, &recording, Some(&hearing(on_progress)))).await
+}
+
+/// A closer look at a recording: `callers` of a method, one `mod`, `compare` with another recording, or our own mods' `trend`.
+#[tauri::command]
+async fn performance_look(
+    game: String,
+    recording: String,
+    kind: String,
+    text: Option<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<performance_page::PerformanceReading, Failure> {
+    let text = text.unwrap_or_default();
+    let look = match kind.as_str() {
+        "callers" => performance_page::Look::Callers { method: text },
+        "mod" => performance_page::Look::Mod { name: text },
+        "compare" => performance_page::Look::Compare { other: text },
+        "trend" => performance_page::Look::Trend,
+        _ => return Err(Failure::refused("that is not a look the page offers")),
+    };
+    blocking(move || performance_page::look(&game, &recording, &look, Some(&hearing(on_progress)))).await
+}
+
+/// Records the running game on the owner's press and yes; answers with its report when it ends.
+#[tauri::command]
+async fn performance_record(
+    game: String,
+    seconds: u32,
+    allocations: bool,
+    label: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<performance_page::PerformanceReading, Failure> {
+    blocking(move || performance_page::record(&game, seconds, allocations, &label, Some(&hearing(on_progress)))).await
+}
+
+/// Takes the key that records the chosen game from inside it (0.118.0); each press is told through the channel.
+#[tauri::command]
+fn performance_take_game_key(
+    app: tauri::AppHandle,
+    game: String,
+    key: String,
+    on_recorded: Channel<game_key::Recorded>,
+) -> Result<(), Failure> {
+    game_key::take_record(&app, &game, &key, on_recorded)
+}
+
+/// Lets go of that key (0.118.0).
+#[tauri::command]
+fn performance_release_game_key(app: tauri::AppHandle) {
+    game_key::release_record(&app);
+}
+
 /// Puts the owner's words beside a memory watch's figures.
 #[tauri::command]
 async fn memory_mark(
@@ -2175,6 +2244,12 @@ pub fn run() {
             report_preview,
             report_open,
             memory_release_game_key,
+            performance_list,
+            performance_report,
+            performance_look,
+            performance_record,
+            performance_take_game_key,
+            performance_release_game_key,
             explorer_offer,
             explorer_start,
             explorer_ask,

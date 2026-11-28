@@ -10,6 +10,7 @@ export const PAGE_NAMES = [
   "tests",
   "logs",
   "memory",
+  "performance",
   "gamefiles",
   "explorer",
   "atlas",

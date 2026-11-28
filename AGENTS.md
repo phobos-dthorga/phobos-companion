@@ -127,6 +127,10 @@ program or the kit writes, is in [`docs/architecture.md`](docs/architecture.md)*
   while the program runs: the owner's choice by card that the press is the go-ahead). **Never record by itself.** One recording
   runs at a time (`performance_page::RECORDING`). Every other report it runs only reads; every length, label, recording name,
   method and mod name is checked first and names go after `--`.
+- **Save explorer: reads only, and the first page that sends typed words to a tool** (0.122.0; the owner's card of 28 Nov
+  2026, `docs/save-explorer.md`). The game's tool by the `save` surface, only while the manifest calls each report `reads`. A
+  save's name is one line and never a path, a part is an element path of plain names, a thing's ID is letters, digits, `_` and
+  `-`, and a search is one line; the search and the ID go after `--`, the rest as `--option=value`. **The save is never written.**
 - **Explorer: a snapshot of the running game, only on the owner's press and confirmation** (owner, 20 Nov 2026: debugging tools
   that look at "variables in memory"; `docs/debugging.md`). The game's `look-inside` tool, only while the manifest calls it
   `runs`; it pauses the game for about half a second and writes nothing to the game. **Never take one by itself.** One is held at

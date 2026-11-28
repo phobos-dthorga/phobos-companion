@@ -4,6 +4,22 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.122.0] - 2026-11-28
+
+### Added
+
+- **The Save explorer: what your saves hold, a part at a time** (the owner's question of 20 Nov 2026 and their card of 28 Nov
+  2026, "Save explorer, first slice"; `docs/save-explorer.md`): open any save (the newest, or **Explore** beside one on Game
+  files), find anything by name, kind or ID, and open one thing in full: its kind as your mods label it and the mod that defines
+  it (or **not in your mods now**, what a removed mod left behind), what holds it out to the map or the world, what it holds,
+  and every value it saved, each a press from the next. It only reads. **Shift+V** opens it (V stays with the Explorer for now:
+  a question for you on the Decisions page). Tool kit 1.156.0. **Not tested on screen.**
+
+### Changed
+
+- Tool kit pin moved from 1.153.0 to 1.156.0 (1.154.0's test-pass rules, 1.155.0's save reports and 1.156.0's fixes from the
+  review of rimworld-perf).
+
 ## [0.121.0] - 2026-11-28
 
 ### Added

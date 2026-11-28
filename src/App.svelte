@@ -69,6 +69,7 @@
   import ModListPage from "./lib/modlist/ModListPage.svelte";
   import MemoryPage from "./lib/memory/MemoryPage.svelte";
   import PerformancePage from "./lib/performance/PerformancePage.svelte";
+  import SaveExplorerPage from "./lib/saves/SaveExplorerPage.svelte";
   import {
     releaseRecordKey,
     takeRecordKey,
@@ -187,6 +188,7 @@
     ["page.gamefiles", "gamefiles"],
     ["page.memory", "memory"],
     ["page.performance", "performance"],
+    ["page.saves", "saves"],
     ["page.safecopies", "safecopies"],
     ["page.explorer", "explorer"],
     ["page.guide", "guide"],
@@ -426,6 +428,10 @@
         {#key selected.id}
           <PerformancePage game={selected} />
         {/key}
+      {:else if selected && page === "saves"}
+        {#key selected.id}
+          <SaveExplorerPage game={selected} />
+        {/key}
       {:else if selected && page === "explorer"}
         {#key selected.id}
           <ExplorerPage game={selected} />
@@ -503,11 +509,13 @@
                                       ? t("source-body-memory")
                                       : page === "performance"
                                         ? t("source-body-performance")
-                                        : page === "safecopies"
-                                          ? t("source-body-safecopies")
-                                          : page === "explorer"
-                                            ? t("source-body-explorer")
-                                            : t("source-body")}
+                                        : page === "saves"
+                                          ? t("source-body-saves")
+                                          : page === "safecopies"
+                                            ? t("source-body-safecopies")
+                                            : page === "explorer"
+                                              ? t("source-body-explorer")
+                                              : t("source-body")}
       </p>
 
       <h2>{t("legend-title")}</h2>

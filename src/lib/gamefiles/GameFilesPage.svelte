@@ -12,6 +12,8 @@
   import type { GameFiles, Since } from "./types";
   import { readGameFiles, showGameFile } from "./desktopClient";
   import ShotStrip from "./ShotStrip.svelte";
+  import { go } from "../navigation/navigation.svelte";
+  import { place as placeAt } from "../navigation/place";
 
   /**
    * Game files (0.22.0; docs/later.md, item 5), for any Steam game: what changed since you last played, the saves, the
@@ -170,6 +172,15 @@
                   aria-label={t("gamefiles-show-named", { name: save.name })}
                   onclick={() => show(savePath(files, save.file, save.name))}
                   >{t("gamefiles-show")}</button
+                >
+                <!-- 0.121.0: the Save explorer, at this save. -->
+                <button
+                  type="button"
+                  class="action"
+                  aria-label={t("gamefiles-explore-named", { name: save.name })}
+                  onclick={() =>
+                    go(placeAt("saves", game.id, { save: save.name }))}
+                  >{t("gamefiles-explore")}</button
                 >
               </td>
             </tr>

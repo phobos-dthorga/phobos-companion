@@ -17,6 +17,7 @@ export const GAME_ONLY_PAGES: readonly string[] = [
   "memory",
   "performance",
   "gamefiles",
+  "saves",
   "explorer",
 ];
 

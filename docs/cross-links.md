@@ -43,6 +43,7 @@ An address is written `dthorga://page/game?key=value`, with `dialog=code`, `dial
 | Logs | `signature` |
 | Chat | `repository` (0.74.0) |
 | Memory | `watch` (a kept watch's name, such as `20261119-205419-reload-test-2`; 0.23.0) |
+| Save explorer | `save` (a save's name; the newest when none), `place` (a part of the save by its element path), `thing` (one thing's ID) and `search` (the words searched for); 0.122.0 |
 | Performance | `recording` (a kept recording's name, such as `20261118-081449-after-engine-loads`; the newest when none), `look` (`callers`, `mod`, `compare` or `trend`) and `text` (the method, the mod, or the other recording, for the first three; 0.118.0) |
 | Explorer | `view` (`kind`, `object` or `checks`, the live checks on the snapshot held, 0.91.0; none for the overview), `kind` (a type's full name, such as `Verse.Pawn`), with `match` (a word filter), `largest` (`yes`) and `page`; `object` (a token such as `o7`, never a memory address) with `snapshot` (the snapshot's number in this run of the program): a step back to an object from a snapshot let go says it is gone and offers the overview; `start` (`yes`: asks at once whether to take a snapshot, as Go to anything's **Look inside the running game** does) |
 | Home | `tab` (0.109.0): `needs`, `recent`, `repositories`; `panel=pins` lands on `repositories` |

@@ -166,6 +166,16 @@ export const ACTIONS: Action[] = [
     defaultKey: "Shift+f",
     words: "shortcut-page-performance",
   },
+  /**
+   * The Save explorer (0.121.0). The owner chose V on the Decisions page before the Explorer took it; Shift+V is the agent's
+   * stand-in until the owner says which page keeps V (`config/decisions.json`, "save-explorer-key").
+   */
+  {
+    id: "page.saves",
+    scope: "everywhere",
+    defaultKey: "Shift+v",
+    words: "shortcut-page-saves",
+  },
   /** The Explorer (agent's choice of V, an open decision: changeable like every page key). */
   {
     id: "page.explorer",

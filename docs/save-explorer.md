@@ -1,8 +1,8 @@
 # Save explorer: design (20 Nov 2026)
 
-**Status (checked 24 Nov 2026):** designed, nothing built. The first slice (the explorer and one thing in full) waits for the owner's word
-to build; the slices after it are listed at the end. When it is built, its design moves into `design-record.md` and `later.md`
-keeps one line pointing there.
+**Status (28 Nov 2026):** **the first slice is built** (Companion 0.122.0, phobos-modkit 1.155.0; the owner's card "Save explorer,
+first slice", 28 Nov 2026), not tested on screen: the explorer, search and one thing in full, for RimWorld. What differs from the
+design below is in [What the first slice left](#what-the-first-slice-left); the slices after it are listed at the end.
 
 **The owner asked whether the Companion should let players "delve deep into their save-files and like the Coding tools ... see
 relationships visually"** (20 Nov 2026). The agent's answer was yes, starting from what the tools already read. **Owner's choices
@@ -104,6 +104,18 @@ exactly what the person sees.
 
 The key V; the page under Play; one Go to anything entry rather than a live search; the friendly group names and the words table
 above. The key and the search are on the Decisions page.
+
+## What the first slice left
+
+- **The key is Shift+V, not V**: the Explorer had taken V (0.41.0) since the owner chose it here; which page keeps V is on the
+  Decisions page (`save-explorer-key`).
+- **One thing's values show as a table** (path and value), not yet the nested list that opens and closes.
+- **Friendly group names** (Maps, Things by kind, People and animals) are not over the tree: it shows the save's own parts, a list
+  item as "item". Search groups its answers by people and animals, things, kinds, places on the world map and parts.
+- **Go to anything** has no "Search this save for ..." entry yet; the page's own search does it.
+- **Only RimWorld**: Farming Simulator 25's saves need a reader of their own giving the same refs (`thing`, `place`) through the
+  `save` surface; every other game is told in words that its saves cannot be read yet.
+- **Copy as command** is the command line under one thing in full.
 
 ## The slices after this one (not on the build list yet)
 

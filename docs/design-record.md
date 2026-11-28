@@ -516,6 +516,22 @@ Decisions page: marking from inside the game, starting a watch by itself when th
 **Not built:** marking without switching from the game (a global key), carrying a watch across a game restart or starting one when
 the game starts, editing or removing a mark, and the heap snapshot's comparison.
 
+## Save explorer (built 28 Nov 2026, 0.122.0)
+
+**The owner asked (20 Nov 2026)** whether the Companion should let players "delve deep into their save-files", and chose the first
+slice to build on 28 Nov 2026 by card ("Save explorer, first slice"), with the slices after it to follow on their word. The design,
+its four questions and what this slice left: [save-explorer.md](save-explorer.md).
+
+| Question | Answer |
+| --- | --- |
+| What does it let the person do? | Open any save a part at a time, find anything by name, kind or ID, and open one thing in full with what holds it and what it holds |
+| What does it stop them doing? | Opening a 300 MB file in a text editor, or guessing where a thing went or what a removed mod left behind |
+| How does it change the way they work? | A question about their colony that needed a console or an agent session is a few presses from Game files |
+| What outside it notices? | Nothing, by choice: it only reads |
+
+**Agent choices, owner to revise:** Shift+V while the Explorer keeps V (on the Decisions page); the page after Game files;
+300 parts a level, 60 rows of each kind a search lists; values as a table in this slice. **Not tested on screen.**
+
 ## Performance (built 28 Nov 2026, 0.118.0)
 
 **The owner asked (28 Nov 2026)** for "relevant, compiled, condensed information and how it relates to everything else" from

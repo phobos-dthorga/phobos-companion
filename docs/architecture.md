@@ -324,6 +324,9 @@ The mechanism behind each page's rule in `AGENTS.md`. Every change also passes t
   window links a report's refs through `src/lib/reports/refs.ts`, never by reading words.
   **Costs** (0.119.0): `costs` by the same surface, read once a game and kept for the run by
   `src/lib/performance/costs.svelte.ts`, which every page's cost tag reads.
+- **Save explorer** (`save_explorer.rs`, 0.122.0): `schema`, `search` and `thing` by the `save` surface, each `reads`. A save's
+  name passes `save_name`, a part `place`, an ID `thing_id`, a search `checks::search_pattern`; typed words go after `--` or as
+  one `--option=value` argument. The window links the kit's `thing` and `place` refs to the page's own focus keys.
 - **Explorer** (`explorer_page.rs`): `look-serve` by the `look-inside` surface. A request's kind is from a fixed list; a type name
   passes `checks::type_name`, an address `checks::memory_address`, a filter is one line under 80 characters, and every number is
   held to its range (`MAX_SKIP`, `MAX_TAKE`, `MAX_HOLDERS`, `MAX_SAMPLE`). **The checks with the game frozen** (0.102.0):

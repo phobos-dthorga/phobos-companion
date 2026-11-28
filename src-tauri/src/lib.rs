@@ -49,6 +49,7 @@ mod report_links;
 mod report_page;
 mod reports;
 mod safe_copies;
+mod save_explorer;
 mod screen_notes;
 mod settings_ledger;
 mod settings_page;
@@ -1645,6 +1646,24 @@ fn performance_release_game_key(app: tauri::AppHandle) {
     game_key::release_record(&app);
 }
 
+/// The Save explorer (0.121.0): one level of a save's parts, a search, or one thing in full; says when the game has none.
+#[tauri::command]
+async fn save_explorer_read(
+    game: String,
+    save: Option<String>,
+    kind: String,
+    text: Option<String>,
+    on_progress: Channel<kit::Progress>,
+) -> Result<save_explorer::SaveReading, Failure> {
+    let ask = match kind.as_str() {
+        "parts" => save_explorer::Ask::Parts { under: text.filter(|t| !t.is_empty()) },
+        "search" => save_explorer::Ask::Search { text: text.unwrap_or_default() },
+        "thing" => save_explorer::Ask::Thing { id: text.unwrap_or_default() },
+        _ => return Err(Failure::refused("that is not something the Save explorer reads")),
+    };
+    blocking(move || save_explorer::read(&game, save.as_deref(), &ask, Some(&hearing(on_progress)))).await
+}
+
 /// Puts the owner's words beside a memory watch's figures.
 #[tauri::command]
 async fn memory_mark(
@@ -2255,6 +2274,7 @@ pub fn run() {
             memory_release_game_key,
             performance_list,
             performance_costs,
+            save_explorer_read,
             performance_report,
             performance_look,
             performance_record,

@@ -147,6 +147,14 @@ export async function mockHost(
     // The window holds the key that records from the game while it runs (0.118.0).
     performance_take_game_key: { result: null },
     performance_release_game_key: { result: null },
+    // Other pages tag mods and methods with what they cost, and Go to anything and Tests list recordings (0.119.0): a test that
+    // is not about them sees a game whose tools have none.
+    performance_costs: {
+      result: { available: false, report: null, data: null, command_line: "" },
+    },
+    performance_list: {
+      result: { available: false, report: null, data: null, command_line: "" },
+    },
     // Home's setup line (0.87.0) reads once; a test that is not about it sees everything here.
     setup_status: {
       result: {

@@ -22,7 +22,10 @@ export type FactKind =
   | "duplicates-removed"
   | "backups-packed"
   | "safe-copies"
-  | "mod-list-change";
+  | "mod-list-change"
+  /** The running game recorded, and a memory watch ended (0.119.0; kit 1.153.0). */
+  | "perf-recorded"
+  | "memory-watched";
 
 /** An entry a fact names: its opening words and section; a reworded one with its words before and after. */
 export type FactEntry = {
@@ -72,6 +75,10 @@ export type Fact = {
   files?: number;
   bytes?: number;
   destinations?: string[];
+  /** For a recording (0.119.0): its name and what it found first; for a memory watch, its name. Its words are in `label`. */
+  recording?: string;
+  finding?: string;
+  watch?: string;
   /** For a mod list change: which list, and the change in the kit's words. */
   list?: string;
   change?: string;

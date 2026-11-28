@@ -14,6 +14,8 @@
   import { readTestLists } from "../tests/desktopClient";
   import { readTimeline } from "../timeline/desktopClient";
   import { readStatus } from "../memory/desktopClient";
+  import { readList } from "../performance/desktopClient";
+  import type { Summary } from "../performance/types";
   import { formatStarted } from "../memory/presentation";
   import type { StatusData } from "../memory/types";
   import {
@@ -29,6 +31,7 @@
     fromReports,
     fromTabs,
     fromWatches,
+    fromRecordings,
     fromSettings,
     fromTests,
     fromTimeline,
@@ -63,6 +66,7 @@
     | "setting"
     | "report"
     | "watch"
+    | "recording"
     | "mod"
     | "commit";
   const CODE_WAIT_MS = 350;
@@ -75,6 +79,7 @@
     setting: "reading",
     report: "reading",
     watch: "reading",
+    recording: "reading",
     mod: "reading",
     commit: "reading",
   });
@@ -98,6 +103,7 @@
     setting: "goto-kind-setting",
     report: "goto-kind-report",
     watch: "goto-kind-watch",
+    recording: "goto-kind-recording",
   };
 
   const reading = $derived(Object.values(loaded).some((v) => v === "reading"));
@@ -169,6 +175,7 @@
         "fact",
         "report",
         "watch",
+        "recording",
         "mod",
         "commit",
       ] as Source[])
@@ -199,6 +206,12 @@
     settle<{ status: StatusData | null }>("watch", readStatus(id, null), (v) =>
       fromWatches(id, v.status?.kept ?? [], formatStarted),
     );
+    // 0.119.0: performance recordings, where the game's tools keep them.
+    if (pageServes(game.kind, "performance"))
+      settle<{ recordings: Summary[] }>("recording", readList(id), (v) =>
+        fromRecordings(id, v.recordings),
+      );
+    else loaded.recording = [];
     // 0.110.0: the mods on this PC, where the game's list can be read, and each repository's newest commits.
     if (pageServes(game.kind, "modlist"))
       settle<{ listing: { mods: Parameters<typeof fromMods>[1] } }>(

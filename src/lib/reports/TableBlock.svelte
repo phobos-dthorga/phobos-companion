@@ -62,7 +62,9 @@
               >{#if to}<button
                   type="button"
                   class="ref"
-                  title={t(refWords(to.ref), { name: to.ref.id })}
+                  title={t(refWords(to.ref, to.where.page === "changes"), {
+                    name: to.ref.id,
+                  })}
                   onclick={() => go(to.where)}>{cellText(cell)}</button
                 >{:else}{cellText(cell)}{/if}</td
             >

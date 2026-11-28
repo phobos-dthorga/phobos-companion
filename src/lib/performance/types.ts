@@ -59,3 +59,41 @@ export type GameRecorded = {
   refusal: string | null;
   recording: string | null;
 };
+
+/** One mod's cost by the newest recording (phobos-modkit 1.153.0's `costs`): its share of ticking, in %, against the earlier ones. */
+export type ModCost = {
+  name: string;
+  package: string;
+  share: number;
+  earlier_middle: number | null;
+  change: number | null;
+  ours: boolean;
+  flagged: boolean;
+  version: string;
+};
+
+/** One busy method in the newest recording: its share of ticking (0 to 1) and who owns it. */
+export type MethodCost = {
+  name: string;
+  share: number;
+  of: string;
+  of_kind: string;
+};
+
+/** What `costs` gives: the newest recording, our own mods' share and every mod's and busy method's cost. */
+export type CostsData = {
+  newest: string;
+  recorded_at: string;
+  label: string;
+  first_finding: { text?: string; role?: string };
+  recordings: number;
+  own: {
+    pattern: string;
+    share: number;
+    earlier_middle: number | null;
+    note: string;
+  };
+  mods: ModCost[];
+  methods: MethodCost[];
+  game: GameFigures;
+};

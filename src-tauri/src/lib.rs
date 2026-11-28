@@ -1577,6 +1577,15 @@ async fn performance_list(
     blocking(move || performance_page::list(&game, Some(&hearing(on_progress)))).await
 }
 
+/// What each mod costs by the newest recording, and the busiest methods (0.119.0), for other pages' tags and badges.
+#[tauri::command]
+async fn performance_costs(
+    game: String,
+    on_progress: Channel<kit::Progress>,
+) -> Result<performance_page::PerformanceReading, Failure> {
+    blocking(move || performance_page::costs(&game, Some(&hearing(on_progress)))).await
+}
+
 /// One recording's whole report: its findings, its figures and every table, each row saying what it is about.
 #[tauri::command]
 async fn performance_report(
@@ -2245,6 +2254,7 @@ pub fn run() {
             report_open,
             memory_release_game_key,
             performance_list,
+            performance_costs,
             performance_report,
             performance_look,
             performance_record,

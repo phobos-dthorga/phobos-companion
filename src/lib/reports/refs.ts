@@ -3,19 +3,27 @@ import type { Ref } from "./types";
 
 /**
  * Where what a report's row or finding is about opens (0.118.0; phobos-modkit 1.152.0's refs; `docs/performance.md`, X1 to X8):
- * a mod in the Mod list's editor, a method on the Code map (another author's code, read or decompiled), a type in the Explorer,
- * a recording on the Performance page, a day on the Timeline. Null where the Companion has nowhere for it yet: a thread, or a mod
- * whose package ID the recording did not keep.
+ * a mod in the Mod list's editor, or one of ours at its changelog (0.119.0, X3), a method on the Code map (another author's code,
+ * read or decompiled), a type in the Explorer, a recording on the Performance page, a day on the Timeline, and a log message on
+ * the Logs page (0.119.0, B8). Null where the Companion has nowhere for it yet: a thread, or another author's mod whose package ID
+ * the recording did not keep. `ours` says whether a mod's name is one of ours.
  */
 export function refPlace(
   ref: Ref,
   game: string,
   repository: string | null,
+  ours: (name: string) => boolean = () => false,
 ): Place | null {
   switch (ref.kind) {
     case "mod":
+      if (repository && ours(ref.id))
+        return place("changes", game, { repository, product: ref.id });
       return ref.package
         ? place("modlist", game, { view: "edit", mod: ref.package })
+        : null;
+    case "signature":
+      return /^[0-9a-f]{8}$/.test(ref.id)
+        ? place("logs", game, { signature: ref.id })
         : null;
     case "method":
       return repository
@@ -35,10 +43,12 @@ export function refPlace(
 }
 
 /** The message key saying where a ref opens, for a link's accessible name. */
-export function refWords(ref: Ref): string {
+export function refWords(ref: Ref, ours = false): string {
   switch (ref.kind) {
     case "mod":
-      return "ref-open-mod";
+      return ours ? "ref-open-our-mod" : "ref-open-mod";
+    case "signature":
+      return "ref-open-signature";
     case "method":
       return "ref-open-method";
     case "type":

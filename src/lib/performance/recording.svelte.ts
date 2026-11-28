@@ -1,4 +1,5 @@
 import { heard, started, type ProgressState } from "../shell/progress";
+import { forgetCosts } from "./costs.svelte";
 import { recordGame } from "./desktopClient";
 import type { GameRecorded, RecordChoice, ReportReading } from "./types";
 
@@ -47,6 +48,7 @@ export async function beginRecording(
     if (recording.running?.game === game && !recording.running.ended)
       recording.running.progress = heard(recording.running.progress, message);
   });
+  forgetCosts(game);
   if (recording.running?.game === game) {
     const data = answer.state === "ready" ? answer.reading.data : null;
     recording.running.ended = true;
@@ -80,6 +82,7 @@ export function heardFromGame(
     };
     return;
   }
+  forgetCosts(game);
   const running = recording.running;
   if (running && running.from === "game" && running.at === press.at) {
     running.ended = true;

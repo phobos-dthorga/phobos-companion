@@ -25,6 +25,7 @@ const CALLERS: &str = "callers";
 const MOD: &str = "mod";
 const COMPARE: &str = "compare";
 const TREND: &str = "trend";
+const COSTS: &str = "costs";
 const READS: &str = "reads";
 const RUNS: &str = "runs";
 /// The lengths the page offers, in seconds (agent's choice, owner to revise: 30 first, as the kit's own default).
@@ -196,6 +197,17 @@ pub fn list(game: &str, listener: Option<kit::Listener>) -> Result<PerformanceRe
     }
     let tool = checked(&manifest, game, LIST, READS)?;
     reading(Args::new(&tool, LIST).json(), listener)
+}
+
+/// What each mod costs by the newest recording against the earlier ones, and the busiest methods (0.119.0, phobos-modkit 1.153.0's
+/// `costs`), for the tags and badges other pages show; says when the game's tools have none.
+pub fn costs(game: &str, listener: Option<kit::Listener>) -> Result<PerformanceReading, Failure> {
+    let manifest = kit::read_manifest()?;
+    if tool_of(&manifest, game).is_none() {
+        return Ok(unavailable());
+    }
+    let tool = checked(&manifest, game, COSTS, READS)?;
+    reading(Args::new(&tool, COSTS).pair("--top", TOP).json(), listener)
 }
 
 /// One recording's whole report: its findings, its figures and every table, each row saying what it is about.

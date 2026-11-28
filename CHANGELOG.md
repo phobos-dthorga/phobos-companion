@@ -4,6 +4,25 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.119.0] - 2026-11-28
+
+### Added
+
+- **What each mod costs, wherever the mod is shown** (the owner's card of 28 Nov 2026, "Build slice two now"): the Mods page
+  tags each of our mods, and Edit the list each mod's row and its info panel, with its share of ticking in the newest recording
+  and how it moved against the earlier ones; the tag opens that recording. The Code map shows a method's share beside its patch
+  badges, and on another author's code. Tool kit 1.153.0's `costs`. **Not tested on screen.**
+- **Home says when the newest recording found a risk, or our own mods' share rose**, with Open it to the Performance page.
+- **Recordings and memory watches on the Timeline**, recordings in Go to anything, and on Tests each row's recordings (those
+  labelled "row 785"), each opening on the Performance page.
+- **More links from a recording**: a message the game logged while recording opens on the Logs page; one of our mods opens at its
+  changelog; the thread holding a lock links to the method it was running. Comparisons say when mods' settings or our versions
+  changed. The Guide explains a finding, a stall, a lock wait and milliseconds a tick.
+
+### Changed
+
+- Tool kit pin moved from 1.152.0 to 1.153.0.
+
 ## [0.118.0] - 2026-11-28
 
 ### Added

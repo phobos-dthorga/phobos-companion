@@ -14,6 +14,7 @@ fn manifest(record_effect: &str, report_surface: &str) -> Value {
             {"name": "mod", "effect": "reads", "surface": "performance"},
             {"name": "compare", "effect": "reads", "surface": "performance"},
             {"name": "trend", "effect": "reads", "surface": "performance"},
+            {"name": "costs", "effect": "reads", "surface": "performance"},
             {"name": "watch", "effect": "runs", "surface": "memory-watch"},
         ]},
         {"name": "other-perf", "game": "other", "reports": [
@@ -34,6 +35,7 @@ fn each_report_runs_only_while_the_manifest_gives_it_the_surface_and_effect() {
     let good = manifest("runs", "performance");
     assert_eq!(checked(&good, "g", "record", "runs").unwrap(), "game-perf");
     assert_eq!(checked(&good, "g", "callers", "reads").unwrap(), "game-perf");
+    assert_eq!(checked(&good, "g", "costs", "reads").unwrap(), "game-perf");
     assert!(checked(&manifest("owner-only", "performance"), "g", "record", "runs").is_err());
     assert!(checked(&good, "g", "watch", "runs").is_err());
     assert!(checked(&good, "other", "report", "reads").is_err());

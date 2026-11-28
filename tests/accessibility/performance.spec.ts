@@ -191,6 +191,44 @@ for (const [name, viewport] of [
       await expect(card).toHaveCount(0);
     });
 
+    test("Home says when the newest recording found a risk, and opens it", async ({
+      page,
+    }) => {
+      await mockHost(page, {
+        home_status: { result: sampleHome() },
+        kit_status: healthyKit,
+        performance_costs: reading({
+          newest: summary.recording,
+          recorded_at: summary.recorded_at,
+          label: summary.label,
+          first_finding: finding,
+          recordings: 2,
+          own: {
+            pattern: "D'thorga*",
+            share: 2.6,
+            earlier_middle: 0.1,
+            note: "**up 2.5 points** on the earlier middle (0.1%)",
+          },
+          mods: [],
+          methods: [],
+          game: {},
+        }),
+        performance_list: reading({ recordings: [summary, older] }),
+        performance_report: reading({ recording: summary.recording }, report),
+      });
+      await page.goto("/");
+      const note = page.getByRole("listitem", {
+        name: "The newest performance recording",
+      });
+      await expect(note).toContainText("stalled for 2,445 ms");
+      await expect(note).toContainText("Our own mods took 2.6% of ticking");
+      await audit(page);
+      await note.getByRole("button", { name: "Open it" }).click();
+      await expect(page.getByRole("heading", { level: 1 })).toContainText(
+        "Where First Sample spends its time",
+      );
+    });
+
     test("says so when the game's tools have no recordings", async ({
       page,
     }) => {

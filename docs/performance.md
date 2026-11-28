@@ -1,8 +1,8 @@
 # Performance: where the running game spends its time, joined to everything else (design, 28 Nov 2026)
 
-**Status (28 Nov 2026):** **slice one built**: the kit's part in phobos-modkit 1.152.0 (K1 to K3, K6, K7) and the page in
-Companion 0.118.0 (P1 to P6, and the links X1, X4, X7, X8); not tested on screen or in game. Not built yet: links X2, X3, X5 and X6
-([What slice one left](#what-slice-one-left)), slice two (B1 to B9) and K4, K5. Its build is in `design-record.md`, "Performance".
+**Status (28 Nov 2026):** **slices one and two built**, not tested on screen or in game: the kit's part in phobos-modkit 1.152.0
+and 1.153.0 (K1 to K7), the page in Companion 0.118.0 (P1 to P6) and the links both ways in 0.119.0 (X1, X3 to X8, B1 to B9). Not
+built: X2, the author's activity ([What slice two left](#what-slice-two-left)). Its build is in `design-record.md`, "Performance".
 
 **The owner's request** (28 Nov 2026, after phobos-modkit 1.151.0 gave rimworld-perf callers, hot spots, lock waits, allocations,
 timelines and stalls, thread names, a trend across recordings and the game's own tick counter): "what can we do with Companion to
@@ -141,6 +141,29 @@ Slice one built the page and the links that needed nothing new. What differs fro
 - **X5** (patch badges) shows wherever the Code map shows them; the page links no further.
 - **X6** names the holding thread's method in words; it is not a link yet (the kit gives it no ref).
 - **The page's key is Shift+F**, not F: every single letter was taken (the shortcuts' own check).
+
+## Slice two (the owner's card, 28 Nov 2026)
+
+**What next for the Performance page?**, asked once slice one was built:
+
+- **Chosen: build slice two now.** Links back from other pages (cost tags on Mods and the Mod list, time badges on the Code map,
+  a Home note, recordings on the Timeline and in Go to anything) plus the links slice one left.
+- Try it first (the agent's lean): the owner installs 0.118.0 and looks at the three old recordings and one new one first.
+- Finish the four links only: the author's activity, our changelog, patch badges and the lock holder's method.
+
+## What slice two left
+
+- **X2** (whether a mod's author is still active) is not built: it needs `workshop-research` read online, on a press, through the
+  Companion's Workshop pages kind. The Mod list's info panel already shows what players say on the Workshop.
+- **B2** shows each mod's cost in Edit the list's rows as plain text (a row is one choice in a list box, so a button cannot sit in
+  it) and as a tag in the info panel; sorting the list by cost is not built.
+- **B3** shows a method's share wherever the Code map shows its patch badges, and on another author's code; it reads the newest
+  recording's busiest 100 methods only.
+- **B4** shows on Home only when the newest recording's first finding is a risk, or our own mods' share rose 2 points or more on
+  the earlier recordings' middle (the kit's trend mark); a calm recording adds nothing there.
+- **X3** opens one of our mods at its changelog, in the game's first repository, and another author's in the Mod list; "ours" is
+  the kit's `D'thorga*`.
+- **B9** finds a test row's recordings by their label ("row 785"), as the test list's steps write it.
 
 ## Agent choices, owner to revise
 

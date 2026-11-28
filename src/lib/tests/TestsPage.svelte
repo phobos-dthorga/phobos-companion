@@ -7,6 +7,11 @@
   import { reveal } from "../shell/reveal";
   import { untrack } from "svelte";
   import { onMount } from "svelte";
+  import { readList } from "../performance/desktopClient";
+  import { recordingsForRow } from "../performance/presentation";
+  import type { Summary } from "../performance/types";
+  import { pageServes } from "../home/kinds";
+  import { place as placeOn } from "../navigation/place";
   import type { GameHome } from "../home/types";
   import { t } from "../i18n/runtime";
   import GuideLink from "../guide/GuideLink.svelte";
@@ -159,6 +164,15 @@
   }
 
   onMount(load);
+
+  /** Performance recordings kept for the game (0.119.0, B9), so a row names those made for it. */
+  let recordings = $state<Summary[]>([]);
+  onMount(() => {
+    if (!pageServes(game.kind, "performance")) return;
+    void readList(game.id).then((answer) => {
+      if (answer.state === "ready") recordings = answer.recordings;
+    });
+  });
 
   /** A row the place names is scrolled to and outlined once the lists are read. */
   const focusRow = $derived(
@@ -381,6 +395,23 @@
                         file: where.file,
                         line: where.line,
                       })}</button
+                    >
+                  {/each}
+                </div>
+              {/if}
+              {#if recordingsForRow(recordings, row.id).length > 0}
+                <div class="noted">
+                  <span class="muted">{t("tests-recordings")}</span>
+                  {#each recordingsForRow(recordings, row.id) as made (made.recording)}
+                    <button
+                      type="button"
+                      class="action"
+                      onclick={() =>
+                        go(
+                          placeOn("performance", game.id, {
+                            recording: made.recording,
+                          }),
+                        )}>{made.label} · {made.recorded_at}</button
                     >
                   {/each}
                 </div>

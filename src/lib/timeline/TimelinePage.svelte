@@ -157,6 +157,15 @@
         }),
       "mod-list-change": () =>
         t("timeline-kind-mod-list-change", { change: fact.change ?? "" }),
+      "perf-recorded": () =>
+        t("timeline-kind-perf-recorded", {
+          label: fact.label || fact.recording || "",
+          finding: fact.finding ?? "",
+        }),
+      "memory-watched": () =>
+        t("timeline-kind-memory-watched", {
+          label: fact.label || fact.watch || "",
+        }),
     };
     // 0.117.1: a kind from a newer tool kit is named as the kit names it, never thrown on.
     return isKnownKind(fact.kind)
@@ -192,6 +201,8 @@
     "backups-packed": "timeline-mark-backups-packed",
     "safe-copies": "timeline-mark-safe-copies",
     "mod-list-change": "timeline-mark-mod-list-change",
+    "perf-recorded": "timeline-mark-perf-recorded",
+    "memory-watched": "timeline-mark-memory-watched",
   };
 
   /** One setting's words: its label, or its key where the settings window's label is not known, and what happened to it. */

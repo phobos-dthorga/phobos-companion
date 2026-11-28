@@ -534,6 +534,13 @@ under Play after Memory; Shift+F (every single letter was taken) and T; 15, 30 a
 for the key; a method opening as "their code" with the game's first repository; the findings' marks and ranking (phobos-modkit
 `docs/rimworld-perf.md`). **Not tested on screen or in game.**
 
+**Slice two (0.119.0; the owner's card "Build slice two now", 28 Nov 2026):** what each mod costs on the Mods page, Edit the list
+and its info panel, a method's share on the Code map, a Home note when the newest recording found a risk or our mods' share rose,
+recordings on the Timeline, in Go to anything and on Tests, and links to the Logs page and our changelogs. One read of the kit's
+`costs` a game, kept for the run and forgotten when a recording ends (`src/lib/performance/costs.svelte.ts`). **Agent choices,
+owner to revise:** plain text in the list's rows; the Home note's two triggers; a row's recordings found by "row N" in a label;
+our mods opening at their changelog rather than in the Mod list. What it left: [performance.md](performance.md).
+
 ## Tools beside the games, loading pages, the atlas's top (built 19 Nov 2026, 0.24.0)
 
 **The owner asked (19 Nov 2026) for the Companion "as its own game"**, knowing it would need exceptions, and chose one entry

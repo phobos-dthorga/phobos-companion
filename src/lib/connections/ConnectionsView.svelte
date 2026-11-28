@@ -30,6 +30,7 @@
   import ThingHistory from "./ThingHistory.svelte";
   import WatchingRows from "./WatchingRows.svelte";
   import PatchBadges from "./PatchBadges.svelte";
+  import CostTag from "../performance/CostTag.svelte";
   import { openTheirCode } from "../othercode/navigation";
   import { theirName } from "../othercode/presentation";
   import { patchTargetsOf, riskyNodes, type PatchTargets } from "./patches";
@@ -555,6 +556,8 @@
     </aside>
   </div>
   {#if centre && !centre.external && centre.file}
+    <!-- Its share of ticking in the newest recording (0.119.0, docs/performance.md B3), when one caught it. -->
+    <CostTag {game} method={centre.id} />
     <PatchBadges
       targets={patchTargets}
       node={centre.id}

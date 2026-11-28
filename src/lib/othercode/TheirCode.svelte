@@ -1,4 +1,5 @@
 <script lang="ts">
+  import CostTag from "../performance/CostTag.svelte";
   import { untrack } from "svelte";
   import CodeLines from "../code/CodeLines.svelte";
   import { t } from "../i18n/runtime";
@@ -104,6 +105,7 @@
     <div>
       <div class="eyebrow accent">{t("their-kicker")}</div>
       <h2 id="their-title">{name}</h2>
+      <CostTag {game} method={name} />
     </div>
     <button type="button" class="action" onclick={onclose}
       >{t("their-close")}</button

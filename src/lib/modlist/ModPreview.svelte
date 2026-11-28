@@ -4,6 +4,7 @@
   import { pictureAddress } from "../media/addresses";
   import type { ModRow } from "./types";
   import PlayersSay from "./PlayersSay.svelte";
+  import CostTag from "../performance/CostTag.svelte";
 
   /**
    * The picture of the mod in focus on Edit the list (0.53.0; the owner's choice of 23 Nov 2026, "Mod list previews"): the one
@@ -47,6 +48,10 @@
   <div class="about">
     {#if mod}
       <h3>{mod.name}</h3>
+      {#if game}
+        <!-- What it cost in the newest recording (0.119.0, docs/performance.md B2). -->
+        <CostTag {game} name={mod.name} pkg={mod.key} />
+      {/if}
       {#if mod.authors}<p class="muted small">{mod.authors}</p>{/if}
       {#if mod.versions.length > 0}
         <p class="muted small">

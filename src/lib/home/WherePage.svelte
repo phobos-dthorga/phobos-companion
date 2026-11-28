@@ -20,6 +20,7 @@
   import RecordsNote from "../records/RecordsNote.svelte";
   import CleanupNote from "../cleanup/CleanupNote.svelte";
   import CrashNote from "../crash/CrashNote.svelte";
+  import PerformanceNote from "../performance/PerformanceNote.svelte";
   import ModListNote from "../modlist/ModListNote.svelte";
   import GameStart from "../modlist/GameStart.svelte";
   import WaitingNote from "../reports/WaitingNote.svelte";
@@ -191,6 +192,9 @@
     {/if}
     <WaitingNote game={game.id} />
     <CrashNote game={game.id} />
+    {#if pageServes(game.kind, "performance")}
+      {#key game.id}<PerformanceNote game={game.id} />{/key}
+    {/if}
     {#if agents.shown}
       <DecisionsNote game={game.id} />
       <PicksNote game={game.id} />

@@ -36,6 +36,7 @@
     texturePairsOffered,
   } from "./desktopClient";
   import TexturePairs from "./TexturePairs.svelte";
+  import CostTag from "../performance/CostTag.svelte";
   import {
     DOCS_CHOICES,
     DOCS_CHOICE_WORDS,
@@ -1093,6 +1094,8 @@
           <article class="mod" aria-label={mod.name} id={`mod-${key}`}>
             <div class="mod-head">
               <h3>{mod.name}</h3>
+              <!-- What it cost in the newest recording (0.119.0, docs/performance.md B1). -->
+              <CostTag game={game.id} name={mod.name} />
               <p class="state state-{quietDocs ? 'docs-only' : mod.state}">
                 <span aria-hidden="true">{words.mark}</span>
                 {t(words.label)}

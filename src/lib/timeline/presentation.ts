@@ -31,6 +31,8 @@ export const KIND_LOOKS: Record<FactKind, KindLook> = {
   "mod-list-change": { mark: "⇅", tone: "observed", weight: 45 },
   "safe-copies": { mark: "⧉", tone: "comparison", weight: 28 },
   "backups-packed": { mark: "▤", tone: "comparison", weight: 22 },
+  "perf-recorded": { mark: "◷", tone: "observed", weight: 32 },
+  "memory-watched": { mark: "◔", tone: "observed", weight: 31 },
   encoded: { mark: "▦", tone: "comparison", weight: 10 },
 };
 

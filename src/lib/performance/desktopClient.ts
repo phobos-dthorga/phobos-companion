@@ -8,6 +8,7 @@ import {
 import type { OnProgress } from "../shell/progress";
 import type { Failed } from "../shell/types";
 import type {
+  CostsData,
   GameRecorded,
   ListReading,
   LookKind,
@@ -30,6 +31,24 @@ export async function readList(
       state: "ready",
       reading,
       recordings: (reading.data?.recordings as Summary[] | undefined) ?? [],
+    }),
+  );
+}
+
+/** What each mod costs by the newest recording, and the busiest methods (0.119.0); null when the game's tools have none. */
+export async function readCosts(
+  game: string,
+): Promise<{ state: "ready"; costs: CostsData | null } | Failed> {
+  if (inBrowser()) return { state: "ready", costs: null };
+  return ask<
+    PerformanceReading,
+    { state: "ready"; costs: CostsData | null } | Failed
+  >(
+    "performance_costs",
+    { game, onProgress: progressChannel(undefined) },
+    (reading) => ({
+      state: "ready",
+      costs: reading.available ? (reading.data as CostsData | null) : null,
     }),
   );
 }

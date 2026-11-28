@@ -65,3 +65,32 @@ export function chosenRecording(
 export function others(recordings: Summary[], shown: string): Summary[] {
   return recordings.filter((r) => r.recording !== shown);
 }
+
+/** A share of ticking, in %, as a tag shows it: one decimal under 10, none above. */
+export function shareWords(share: number): string {
+  return `${figure(share, share < 10 ? 1 : 0)}%`;
+}
+
+/** A change in points against the earlier recordings, signed ("+0.5", "−1.2"), or "±0" when it did not move. */
+export function changeWords(change: number): string {
+  if (Math.abs(change) < 0.05) return "±0";
+  return `${change > 0 ? "+" : "−"}${figure(Math.abs(change), 1)}`;
+}
+
+/** Whether the kit marked our own mods' share as up on the earlier recordings' middle (its trend note opens "**up"). */
+export function ownRose(note: string): boolean {
+  return note.startsWith("**up");
+}
+
+/**
+ * The recordings made for a test row (0.119.0, `docs/performance.md` B9): those whose label names it ("row 785"), as the test
+ * list's steps ask (`perf.py record --label "row 785"`), newest first as kept.
+ */
+export function recordingsForRow(
+  recordings: Summary[],
+  row: string,
+): Summary[] {
+  const id = row.replace(/[^0-9A-Za-z]/g, "");
+  const named = new RegExp(`(^|[^0-9A-Za-z])row ${id}(?![0-9A-Za-z])`, "i");
+  return id ? recordings.filter((r) => named.test(r.label)) : [];
+}

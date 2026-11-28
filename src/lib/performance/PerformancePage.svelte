@@ -28,6 +28,7 @@
     others,
     SECONDS,
   } from "./presentation";
+  import { costsOf, isOurs, loadCosts } from "./costs.svelte";
   import { beginRecording, busy, recording } from "./recording.svelte";
   import type { ListReading, LookKind, ReportReading } from "./types";
 
@@ -71,9 +72,12 @@
   const gameKey = $derived(keyFor("performance.record-in-game"));
   const repository = $derived(game.repositories[0] ?? null);
 
-  /** Where what a row or a finding is about opens. */
+  $effect(() => loadCosts(game.id));
+  const costs = $derived(costsOf(game.id));
+
+  /** Where what a row or a finding is about opens: one of our mods at its changelog, another's in the Mod list. */
   function link(ref: Ref) {
-    return refPlace(ref, game.id, repository);
+    return refPlace(ref, game.id, repository, (name) => isOurs(costs, name));
   }
 
   async function read(quiet = false) {

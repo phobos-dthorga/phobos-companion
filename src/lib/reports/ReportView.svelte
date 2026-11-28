@@ -58,7 +58,9 @@
             <button
               type="button"
               class="ref-chip"
-              aria-label={t(refWords(to.ref), { name: to.ref.id })}
+              aria-label={t(refWords(to.ref, to.where.page === "changes"), {
+                name: to.ref.id,
+              })}
               onclick={() => go(to.where)}>{refName(to.ref)}</button
             >
           {/each}

@@ -38,6 +38,8 @@
   import { draftKey, drafts } from "./drafts.svelte";
   import { workshopNumberIn } from "./editor";
   import type { ModRow, ModsListing, Subscribed } from "./types";
+  import { costsOf, loadCosts, modCost } from "../performance/costs.svelte";
+  import { shareWords } from "../performance/presentation";
 
   /**
    * Edit the list, rebuilt (0.108.0; the owner, 27 Nov 2026: "the mod list page needs a total redo ... take lessons from RimSort",
@@ -474,7 +476,20 @@
       },
     });
   });
+
+  // What each mod cost in the newest recording (0.119.0, docs/performance.md B2), read once for the run.
+  $effect(() => loadCosts(game.id));
 </script>
+
+{#snippet costOf(key: string)}
+  {@const cost = modCost(costsOf(game.id), mods.get(key)?.name ?? null, key)}
+  {#if cost && cost.share > 0}<span
+      class="cost small"
+      class:flagged={cost.flagged}
+      title={t("modlist-cost-title", { share: shareWords(cost.share) })}
+      >{shareWords(cost.share)}</span
+    >{/if}
+{/snippet}
 
 {#snippet rowsOf(side: Side)}
   {@const rows = shown[side]}
@@ -525,6 +540,7 @@
         <span class="name">{nameOf(key)}</span>
         {#if mod}<span class="source small">{t(SOURCE[mod.source] ?? "")}</span
           >{/if}
+        {@render costOf(key)}
         {#if side === "on" && said.length}
           <span class="marks small">
             {#each said as mark (mark.kind + mark.other)}
@@ -988,5 +1004,15 @@
     gap: 8px;
     align-items: center;
     margin-bottom: 10px;
+  }
+
+  /* A mod's share of ticking in the newest recording (0.119.0): plain text, as a row is one choice. */
+  .cost {
+    font-variant-numeric: tabular-nums;
+    color: var(--colour-text-muted);
+  }
+
+  .cost.flagged {
+    color: var(--colour-risk);
   }
 </style>

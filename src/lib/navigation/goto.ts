@@ -33,7 +33,8 @@ export type Kind =
   | "fact"
   | "setting"
   | "report"
-  | "watch";
+  | "watch"
+  | "recording";
 
 /** The order kinds are listed in. */
 export const KINDS: Kind[] = [
@@ -52,6 +53,7 @@ export const KINDS: Kind[] = [
   "setting",
   "report",
   "watch",
+  "recording",
 ];
 
 export type Candidate = {
@@ -310,6 +312,25 @@ export function fromWatches(
     label: [when(k.started), k.label].filter(Boolean).join(" · "),
     detail: k.watch,
     place: place("memory", game, { watch: k.watch }),
+  }));
+}
+
+/** Performance recordings kept for the game (0.119.0, `docs/performance.md` B6), by their label and what they found first. */
+export function fromRecordings(
+  game: string,
+  kept: {
+    recording: string;
+    label: string;
+    recorded_at: string;
+    findings?: { text: string }[];
+  }[],
+): Candidate[] {
+  return kept.map((k) => ({
+    kind: "recording" as const,
+    label: [k.recorded_at, k.label].filter(Boolean).join(" · ") || k.recording,
+    detail: k.findings?.[0]?.text ?? k.recording,
+    place: place("performance", game, { recording: k.recording }),
+    match: k.recording,
   }));
 }
 

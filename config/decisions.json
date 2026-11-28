@@ -21,27 +21,6 @@
       "why": "After a power cut the fix is known and safe for a file git keeps, and remembering a command is what Home is meant to spare",
       "from": "docs/design-record.md",
       "asked": "2026-11-27"
-    },
-    {
-      "id": "save-explorer-key",
-      "question": "Which page keeps the V key: the Save explorer or the Explorer?",
-      "context": "You chose V for the Save explorer on the Decisions page (save-explorer.md), before the Explorer (0.41.0) took V as an agent's choice. The Save explorer was built tonight (0.121.0) on Shift+V so nothing clashed.",
-      "options": [
-        {
-          "id": "explorer-v",
-          "label": "Explorer keeps V; Save explorer on Shift+V",
-          "detail": "As built tonight; nothing you already press changes"
-        },
-        {
-          "id": "saves-v",
-          "label": "Save explorer takes V; Explorer moves to Shift+V",
-          "detail": "Your earlier choice; the Explorer's key changes"
-        }
-      ],
-      "lean": "explorer-v",
-      "why": "V already opens the Explorer in your hands; either key can be changed in Settings at any time",
-      "from": "docs/save-explorer.md",
-      "asked": "2026-11-28"
     }
   ]
 }

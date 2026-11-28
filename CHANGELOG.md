@@ -25,8 +25,8 @@ Maintained from 9 November 2026.
   2026, "Save explorer, first slice"; `docs/save-explorer.md`): open any save (the newest, or **Explore** beside one on Game
   files), find anything by name, kind or ID, and open one thing in full: its kind as your mods label it and the mod that defines
   it (or **not in your mods now**, what a removed mod left behind), what holds it out to the map or the world, what it holds,
-  and every value it saved, each a press from the next. It only reads. **Shift+V** opens it (V stays with the Explorer for now:
-  a question for you on the Decisions page). Tool kit 1.156.0. **Not tested on screen.**
+  and every value it saved, each a press from the next. It only reads. **Shift+V** opens it (your choice: "Keep V on the
+  Explorer"). Tool kit 1.156.0. **Not tested on screen.**
 
 ### Changed
 

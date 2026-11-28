@@ -529,7 +529,8 @@ its four questions and what this slice left: [save-explorer.md](save-explorer.md
 | How does it change the way they work? | A question about their colony that needed a console or an agent session is a few presses from Game files |
 | What outside it notices? | Nothing, by choice: it only reads |
 
-**Agent choices, owner to revise:** Shift+V while the Explorer keeps V (on the Decisions page); the page after Game files;
+**Owner's choice (28 Nov 2026):** "Keep V on the Explorer", so the Save explorer is Shift+V. **Agent choices, owner to revise:**
+the page after Game files;
 300 parts a level, 60 rows of each kind a search lists; values as a table in this slice. **Not tested on screen.**
 
 ## Performance (built 28 Nov 2026, 0.118.0)

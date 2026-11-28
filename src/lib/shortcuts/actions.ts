@@ -167,8 +167,8 @@ export const ACTIONS: Action[] = [
     words: "shortcut-page-performance",
   },
   /**
-   * The Save explorer (0.121.0). The owner chose V on the Decisions page before the Explorer took it; Shift+V is the agent's
-   * stand-in until the owner says which page keeps V (`config/decisions.json`, "save-explorer-key").
+   * The Save explorer (0.122.0): Shift+V, the owner's choice of 28 Nov 2026 ("Keep V on the Explorer"), changeable like every
+   * page key.
    */
   {
     id: "page.saves",

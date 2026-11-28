@@ -107,8 +107,8 @@ above. The key and the search are on the Decisions page.
 
 ## What the first slice left
 
-- **The key is Shift+V, not V**: the Explorer had taken V (0.41.0) since the owner chose it here; which page keeps V is on the
-  Decisions page (`save-explorer-key`).
+- **The key is Shift+V, not V**: the Explorer had taken V (0.41.0) since the owner chose it here. **Owner's choice (28 Nov
+  2026): "Keep V on the Explorer"**, over giving V to the Save explorer and moving the Explorer to Shift+V.
 - **One thing's values show as a table** (path and value), not yet the nested list that opens and closes.
 - **Friendly group names** (Maps, Things by kind, People and animals) are not over the tree: it shows the save's own parts, a list
   item as "item". Search groups its answers by people and animals, things, kinds, places on the world map and parts.

@@ -30,6 +30,8 @@
   } from "./presentation";
   import { costsOf, isOurs, loadCosts } from "./costs.svelte";
   import { beginRecording, busy, recording } from "./recording.svelte";
+  import WhoseCode from "./WhoseCode.svelte";
+  import { pageServes } from "../home/kinds";
   import type { ListReading, LookKind, ReportReading } from "./types";
 
   /**
@@ -390,6 +392,16 @@
       </div>
       <p class="small muted">{t("performance-around-how")}</p>
     </section>
+
+    {#if pageServes(game.kind, "modlist") && shownReading?.state === "ready"}
+      {#key shown}
+        <WhoseCode
+          game={game.id}
+          {repository}
+          report={shownReading.reading.report}
+        />
+      {/key}
+    {/if}
 
     <section class="panel" aria-labelledby="performance-look">
       <h2 id="performance-look">{t("performance-look-title")}</h2>

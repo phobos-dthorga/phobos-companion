@@ -174,3 +174,107 @@ describe("recordings made for a test row", () => {
     expect(recordingsForRow(kept, "")).toEqual([]);
   });
 });
+
+describe("the mods a recording's findings name", () => {
+  it("lists each mod once, and finds it on this PC by package, a Workshop copy first", async () => {
+    const { findingMods, rowOf } = await import("./presentation");
+    const mod = (id: string, pkg = "") => ({ kind: "mod", id, package: pkg });
+    const report = {
+      format: 1,
+      title: "t",
+      lines: [],
+      sections: [],
+      blocks: [
+        {
+          type: "findings" as const,
+          items: [
+            {
+              text: "a",
+              role: "risk" as const,
+              value: null,
+              unit: "",
+              refs: [
+                mod("Sample Boats", "sample.boats"),
+                { kind: "method", id: "A.B" },
+              ],
+            },
+            {
+              text: "b",
+              role: "observed" as const,
+              value: null,
+              unit: "",
+              refs: [mod("Sample Boats", "sample.boats"), mod("Other")],
+            },
+          ],
+        },
+      ],
+    };
+    expect(findingMods(report).map((r) => r.id)).toEqual([
+      "Sample Boats",
+      "Other",
+    ]);
+    expect(findingMods(null)).toEqual([]);
+    const rows = [
+      { key: "sample.boats", name: "Sample Boats", source: "local" },
+      { key: "sample.boats_steam", name: "Sample Boats", source: "workshop" },
+      { key: "other.mod", name: "Other", source: "workshop" },
+    ];
+    expect(rowOf(rows, mod("Sample Boats", "sample.boats"))?.source).toBe(
+      "workshop",
+    );
+    expect(rowOf(rows, mod("Other"))?.key).toBe("other.mod");
+    expect(rowOf(rows, mod("Nobody", "no.body"))).toBeNull();
+  });
+});
+
+describe("the active mods, costliest first", () => {
+  it("ranks only active mods a recording named, by package then name, and never reorders the list itself", async () => {
+    const { costliest } = await import("./presentation");
+    const cost = (name: string, pkg: string, share: number) => ({
+      name,
+      package: pkg,
+      share,
+      earlier_middle: null,
+      change: null,
+      ours: false,
+      flagged: false,
+      version: "",
+    });
+    const data = {
+      newest: "n",
+      recorded_at: "",
+      label: "",
+      first_finding: {},
+      recordings: 1,
+      own: { pattern: "", share: 0, earlier_middle: null, note: "" },
+      mods: [
+        cost("Boats", "sample.boats", 12),
+        cost("Doors", "", 30),
+        cost("Off", "off.mod", 50),
+        cost("Idle", "idle.mod", 0),
+      ],
+      methods: [],
+      game: {},
+    };
+    const names: Record<string, string> = {
+      "sample.boats_steam": "Boats",
+      "doors.mod": "Doors",
+      "idle.mod": "Idle",
+      "plain.mod": "Plain",
+    };
+    const active = ["sample.boats_steam", "doors.mod", "idle.mod", "plain.mod"];
+    expect(
+      costliest(data, active, (k) => names[k]).map((r) => [r.key, r.share]),
+    ).toEqual([
+      ["doors.mod", 30],
+      ["sample.boats_steam", 12],
+    ]);
+    expect(active).toEqual([
+      "sample.boats_steam",
+      "doors.mod",
+      "idle.mod",
+      "plain.mod",
+    ]);
+    expect(costliest(null, active, (k) => k)).toEqual([]);
+  });
+});

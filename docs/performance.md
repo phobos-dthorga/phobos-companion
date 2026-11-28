@@ -1,8 +1,9 @@
 # Performance: where the running game spends its time, joined to everything else (design, 28 Nov 2026)
 
-**Status (28 Nov 2026):** **slices one and two built**, not tested on screen or in game: the kit's part in phobos-modkit 1.152.0
-and 1.153.0 (K1 to K7), the page in Companion 0.118.0 (P1 to P6) and the links both ways in 0.119.0 (X1, X3 to X8, B1 to B9). Not
-built: X2, the author's activity ([What slice two left](#what-slice-two-left)). Its build is in `design-record.md`, "Performance".
+**Status (28 Nov 2026):** **every part built**, not tested on screen or in game: the kit's part in phobos-modkit 1.152.0 and
+1.153.0 (K1 to K7), the page in Companion 0.118.0 (P1 to P6), the links both ways in 0.119.0 (X1, X3 to X8, B1 to B9) and the
+author's activity in 0.120.0 (X2). What differs from the design: [What slice two left](#what-slice-two-left). Its build is in
+`design-record.md`, "Performance".
 
 **The owner's request** (28 Nov 2026, after phobos-modkit 1.151.0 gave rimworld-perf callers, hot spots, lock waits, allocations,
 timelines and stalls, thread names, a trend across recordings and the game's own tick counter): "what can we do with Companion to
@@ -153,8 +154,10 @@ Slice one built the page and the links that needed nothing new. What differs fro
 
 ## What slice two left
 
-- **X2** (whether a mod's author is still active) is not built: it needs `workshop-research` read online, on a press, through the
-  Companion's Workshop pages kind. The Mod list's info panel already shows what players say on the Workshop.
+- **X2** (whether a mod's author is still active) is built in 0.120.0 (the owner: "Build the author activity link too") as the
+  page's **Whose code it is**: each mod the findings name, with the Mod list's own What players say for another author's Workshop
+  mod (its update date and the uploader's latest replies, read on a press under Workshop pages), found on this PC by the
+  recording's package ID; a mod not from the Workshop says it has no page to read.
 - **B2** shows each mod's cost in Edit the list's rows as plain text (a row is one choice in a list box, so a button cannot sit in
   it) and as a tag in the info panel; sorting the list by cost is not built.
 - **B3** shows a method's share wherever the Code map shows its patch badges, and on another author's code; it reads the newest

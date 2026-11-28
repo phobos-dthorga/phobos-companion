@@ -4,6 +4,15 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.120.0] - 2026-11-28
+
+### Added
+
+- **Whose code it is, on the Performance page** (the owner, 28 Nov 2026: "Build the author activity link too"): each mod a
+  recording's findings name, with **What players say** for another author's Workshop mod (when it was last updated and the
+  uploader's latest replies, from Steam's public pages on your press: is it theirs to fix, and will they?), its place in the Mod
+  list, or our own mod's changelog. Workshop pages in Going online switches the reading off. **Not tested on screen.**
+
 ## [0.119.0] - 2026-11-28
 
 ### Added

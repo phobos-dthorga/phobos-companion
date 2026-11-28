@@ -176,6 +176,74 @@ for (const [name, viewport] of [
       expect(await overflow(page)).toBeLessThanOrEqual(0);
     });
 
+    test("whose code it is: what players and the uploader say, for a Workshop mod the findings name", async ({
+      page,
+    }) => {
+      await mockHost(page, {
+        home_status: { result: sampleHome() },
+        kit_status: healthyKit,
+        performance_list: reading({ recordings: [summary, older] }),
+        performance_report: reading({ recording: summary.recording }, report),
+        mod_list_mods: {
+          result: {
+            game: "first",
+            name: "First Sample",
+            supported: true,
+            version: "1.7",
+            mods: [
+              {
+                key: "sample.boats_steam",
+                id: "sample.boats",
+                name: "Sample Boats",
+                source: "workshop",
+                workshop_id: "123456",
+                authors: "A. Sample",
+                versions: ["1.7"],
+                needs: [],
+              },
+            ],
+            lists: [],
+            running: [],
+            notes: [],
+          },
+        },
+        players_say: {
+          result: {
+            available: true,
+            ok: true,
+            refusal: null,
+            report: {
+              format: 1,
+              title: "Workshop research",
+              lines: ["Updated 3 days ago."],
+              blocks: [],
+              sections: [
+                {
+                  heading: "The uploader's latest replies",
+                  level: 2,
+                  blocks: [{ type: "text", text: "Looking into it." }],
+                },
+              ],
+            },
+            data: {},
+          },
+        },
+      });
+      await page.goto("/");
+      await page.keyboard.press("Shift+F");
+      const panel = page.getByRole("region", { name: "Whose code it is" });
+      await expect(panel).toContainText("Sample Boats");
+      await audit(page);
+      await panel.getByRole("button", { name: "What players say" }).click();
+      const dialog = page.getByRole("dialog", {
+        name: "What players say about Sample Boats",
+      });
+      await expect(dialog).toContainText("The uploader's latest replies");
+      await audit(page);
+      await dialog.getByRole("button", { name: "Close" }).click();
+      expect(await smallControls(page)).toBe(0);
+    });
+
     test("asks first before recording, every time", async ({ page }) => {
       await open(page);
       await page

@@ -1,5 +1,6 @@
 import { LOCALE } from "../i18n/runtime";
-import type { LookKind, Summary } from "./types";
+import type { Ref, Report } from "../reports/types";
+import type { CostsData, LookKind, Summary } from "./types";
 
 /** The lengths offered, in seconds; the host refuses any other (agent's choice, owner to revise: 30 first, as the kit's own). */
 export const SECONDS = [15, 30, 60] as const;
@@ -93,4 +94,75 @@ export function recordingsForRow(
   const id = row.replace(/[^0-9A-Za-z]/g, "");
   const named = new RegExp(`(^|[^0-9A-Za-z])row ${id}(?![0-9A-Za-z])`, "i");
   return id ? recordings.filter((r) => named.test(r.label)) : [];
+}
+
+/** The mods a report's findings name (0.120.0, `docs/performance.md` X2), each once, in the findings' order. */
+export function findingMods(report: Report | null): Ref[] {
+  if (!report) return [];
+  const seen = new Set<string>();
+  const found: Ref[] = [];
+  for (const block of report.blocks)
+    if (block.type === "findings")
+      for (const item of block.items)
+        for (const ref of item.refs)
+          if (ref.kind === "mod" && !seen.has(ref.id)) {
+            seen.add(ref.id);
+            found.push(ref);
+          }
+  return found;
+}
+
+/** A mod on this PC, by a recording's package ID first and its name second; a Workshop copy before any other. */
+export function rowOf<T extends { key: string; name: string; source: string }>(
+  rows: T[],
+  ref: Ref,
+): T | null {
+  const bare = (key: string) => key.toLowerCase().replace(/_steam$/, "");
+  const matches = rows.filter((r) =>
+    ref.package ? bare(r.key) === ref.package : r.name === ref.id,
+  );
+  return matches.find((r) => r.source === "workshop") ?? matches[0] ?? null;
+}
+
+/** One active mod in the costliest-first list. */
+export type Ranked = {
+  key: string;
+  name: string;
+  share: number;
+  change: number | null;
+  flagged: boolean;
+};
+
+/**
+ * The active mods a recording named, costliest first (0.121.0, B2), by their key (the package ID the game compares, a Workshop
+ * copy's `_steam` dropped) and their name second. Load order is never changed by it.
+ */
+export function costliest(
+  data: CostsData | null,
+  active: string[],
+  nameOf: (key: string) => string,
+): Ranked[] {
+  if (!data) return [];
+  const byPackage = new Map(
+    data.mods.filter((m) => m.package).map((m) => [m.package, m]),
+  );
+  const byName = new Map(data.mods.map((m) => [m.name, m]));
+  const found: Ranked[] = [];
+  for (const key of active) {
+    const name = nameOf(key);
+    const mod =
+      byPackage.get(key.toLowerCase().replace(/_steam$/, "")) ??
+      byName.get(name);
+    if (mod && mod.share > 0)
+      found.push({
+        key,
+        name,
+        share: mod.share,
+        change: mod.change,
+        flagged: mod.flagged,
+      });
+  }
+  return found.sort(
+    (a, b) => b.share - a.share || a.name.localeCompare(b.name),
+  );
 }

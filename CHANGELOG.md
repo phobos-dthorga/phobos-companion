@@ -4,6 +4,14 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.121.0] - 2026-11-28
+
+### Added
+
+- **The active mods, costliest first, beside Edit the list** (the owner's card of 28 Nov 2026, "Sort the Mod list by cost"): a
+  list that opens under the board, each mod with its share of ticking in the newest recording; choosing one shows it in the list.
+  The load order itself is never changed by it. **Not tested on screen.**
+
 ## [0.120.0] - 2026-11-28
 
 ### Added

@@ -159,7 +159,8 @@ Slice one built the page and the links that needed nothing new. What differs fro
   mod (its update date and the uploader's latest replies, read on a press under Workshop pages), found on this PC by the
   recording's package ID; a mod not from the Workshop says it has no page to read.
 - **B2** shows each mod's cost in Edit the list's rows as plain text (a row is one choice in a list box, so a button cannot sit in
-  it) and as a tag in the info panel; sorting the list by cost is not built.
+  it) and as a tag in the info panel; from 0.121.0 (the owner's card "Sort the Mod list by cost") the active mods also show
+  costliest first in a list beside the board, which opens each in it and never changes the load order.
 - **B3** shows a method's share wherever the Code map shows its patch badges, and on another author's code; it reads the newest
   recording's busiest 100 methods only.
 - **B4** shows on Home only when the newest recording's first finding is a risk, or our own mods' share rose 2 points or more on

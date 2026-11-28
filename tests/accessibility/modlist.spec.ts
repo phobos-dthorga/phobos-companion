@@ -921,6 +921,63 @@ for (const [name, viewport] of [
       await audit(page);
     });
 
+    test("the active mods, costliest first, open in the list without changing its order (0.121.0)", async ({
+      page,
+    }) => {
+      const cost = (name: string, pkg: string, share: number) => ({
+        name,
+        package: pkg,
+        share,
+        earlier_middle: share - 1,
+        change: 1,
+        ours: false,
+        flagged: false,
+        version: "",
+      });
+      await open(page, {
+        performance_costs: {
+          result: {
+            available: true,
+            report: null,
+            command_line: "",
+            data: {
+              newest: "20261118-081449-a-sample-raid",
+              recorded_at: "2026-11-18 08:14:49",
+              label: "a sample raid",
+              first_finding: {},
+              recordings: 2,
+              own: { pattern: "", share: 0, earlier_middle: null, note: "" },
+              mods: [
+                cost("Bravo Beds", "bravo", 4.2),
+                cost("Delta Doors", "delta", 21),
+                cost("Echo Engines", "echo", 9),
+              ],
+              methods: [],
+              game: {},
+            },
+          },
+        },
+      });
+      await page
+        .getByRole("button", { name: "Edit the list", exact: true })
+        .click();
+      const on = page.getByRole("listbox", { name: /on|active/i }).last();
+      const before = await on.getByRole("option").allInnerTexts();
+      await page
+        .getByText("Costliest first, in the recording a sample raid")
+        .click();
+      const ranked = page.locator("details.ranking li");
+      await expect(ranked).toHaveCount(2);
+      await expect(ranked.first()).toContainText("Delta Doors");
+      await expect(ranked.first()).toContainText("21%");
+      await audit(page);
+      await ranked.nth(1).getByRole("button").click();
+      await expect(
+        page.getByRole("option", { name: /Bravo Beds/ }),
+      ).toHaveAttribute("aria-selected", "true");
+      expect(await on.getByRole("option").allInnerTexts()).toEqual(before);
+    });
+
     test("What players say reads a Workshop mod's page into a dialog, and a local mod has none (0.107.0)", async ({
       page,
     }) => {

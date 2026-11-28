@@ -40,6 +40,7 @@
   import type { ModRow, ModsListing, Subscribed } from "./types";
   import { costsOf, loadCosts, modCost } from "../performance/costs.svelte";
   import { shareWords } from "../performance/presentation";
+  import CostRanking from "../performance/CostRanking.svelte";
 
   /**
    * Edit the list, rebuilt (0.108.0; the owner, 27 Nov 2026: "the mod list page needs a total redo ... take lessons from RimSort",
@@ -724,6 +725,13 @@
     </section>
   </div>
   <p class="small muted how">{t("modlist-board-how")}</p>
+  <!-- The active mods, costliest first (0.121.0): beside the list, never an order of it. -->
+  <CostRanking
+    game={game.id}
+    active={draft.order}
+    {nameOf}
+    onchoose={(key) => void bringIntoView(key)}
+  />
 
   <section class="info" aria-label={t("modlist-board-info-label")}>
     <ModPreview mod={focused} game={game.id} />

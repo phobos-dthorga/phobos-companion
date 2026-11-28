@@ -12,7 +12,7 @@
 use companion_core::args::Args;
 use companion_core::checks;
 use companion_core::failure::Failure;
-use companion_core::kit;
+use companion_core::kit::{self, Outcome};
 use serde::Serialize;
 use serde_json::Value;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -181,6 +181,8 @@ fn unavailable() -> PerformanceReading {
 
 fn reading(arguments: Vec<String>, listener: Option<kit::Listener>) -> Result<PerformanceReading, Failure> {
     let answer = kit::run_hearing(&arguments[0], &arguments, listener)?;
+    // A refusal ("No recordings in ...") comes back as an envelope too; it is a failure, never data (0.122.1).
+    Outcome::required(&answer)?;
     Ok(PerformanceReading {
         available: true,
         report: answer["report"].clone(),
@@ -229,6 +231,12 @@ pub fn look(
     let tool = checked(&manifest, game, report_of(look), READS)?;
     let recording = checked_recording(recording)?;
     reading(look_arguments(&tool, &recording, look).map_err(Failure::refused)?, listener)
+}
+
+/// Whether this game's tools can record it now, by the manifest, before a key in the game says a recording began (0.122.1).
+pub fn check_record(game: &str) -> Result<(), Failure> {
+    let manifest = kit::read_manifest()?;
+    checked(&manifest, game, RECORD, RUNS).map(|_| ())
 }
 
 /// Clears the running mark when a recording ends, however it ends.

@@ -50,6 +50,9 @@ export function refusal(
     const otherScope = action(other)?.scope;
     if (other === id || bound !== key || !scope || !otherScope) continue;
     if (together(scope, otherScope)) return { reason: "taken", by: other };
+    // Two keys the system holds (0.122.1) work together wherever their pages are, so they never share a key.
+    if (action(id)?.system && action(other)?.system)
+      return { reason: "taken", by: other };
   }
   return null;
 }

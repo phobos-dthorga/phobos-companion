@@ -74,7 +74,7 @@
     releaseRecordKey,
     takeRecordKey,
   } from "./lib/performance/desktopClient";
-  import { heardFromGame } from "./lib/performance/recording.svelte";
+  import { heardFromGame, recording } from "./lib/performance/recording.svelte";
   import SafeCopiesPage from "./lib/safecopies/SafeCopiesPage.svelte";
   import ExplorerPage from "./lib/explorer/ExplorerPage.svelte";
   import GuidePage from "./lib/guide/GuidePage.svelte";
@@ -148,8 +148,17 @@
       if (game && recordKey)
         void takeRecordKey(game, recordKey, (press) =>
           heardFromGame(game, t("performance-bar-recording"), press),
-        );
-      else void releaseRecordKey();
+        ).then((answer) => {
+          // 0.122.1: a key another program holds is said on the Performance page, never silently lost.
+          recording.keyRefused =
+            answer.state === "failed"
+              ? { game, why: answer.failure.detail }
+              : null;
+        });
+      else {
+        recording.keyRefused = null;
+        void releaseRecordKey();
+      }
     });
   });
 

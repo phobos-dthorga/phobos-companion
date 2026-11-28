@@ -225,7 +225,16 @@
     <ul>
       <li><RichText text={t("performance-gotcha-save")} /></li>
       <li><RichText text={t("performance-gotcha-speed")} /></li>
-      {#if gameKey}
+      {#if gameKey && recording.keyRefused?.game === game.id}
+        <li class="wrong">
+          <RichText
+            text={t("performance-gotcha-key-refused", {
+              key: gameKey,
+              why: recording.keyRefused.why,
+            })}
+          />
+        </li>
+      {:else if gameKey}
         <li>
           <RichText text={t("performance-gotcha-key", { key: gameKey })} />
         </li>

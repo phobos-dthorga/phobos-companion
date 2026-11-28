@@ -297,6 +297,36 @@ for (const [name, viewport] of [
       );
     });
 
+    test("before the first recording, Home and the Mod list stand and show no costs (0.122.1)", async ({
+      page,
+    }) => {
+      const refused = {
+        failure: {
+          code: "tool_failed",
+          detail:
+            "No recordings in K:/cache/rimworld-perf. Make one with: rimworld-perf record",
+        },
+      };
+      await mockHost(page, {
+        home_status: { result: sampleHome() },
+        kit_status: healthyKit,
+        performance_costs: refused,
+        performance_list: reading({ recordings: [] }),
+      });
+      await page.goto("/");
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await expect(
+        page.getByRole("listitem", {
+          name: "The newest performance recording",
+        }),
+      ).toHaveCount(0);
+      await page.keyboard.press("Shift+F");
+      await expect(page.locator("main")).toContainText(
+        "No recordings are kept yet.",
+      );
+      await audit(page);
+    });
+
     test("says so when the game's tools have no recordings", async ({
       page,
     }) => {

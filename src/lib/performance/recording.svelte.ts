@@ -20,8 +20,13 @@ export type Running = {
   refusal: string | null;
 };
 
-export const recording = $state<{ running: Running | null }>({
+export const recording = $state<{
+  running: Running | null;
+  /** Why the key in the game could not be taken, for the game it was for (0.122.1); null when it was. */
+  keyRefused: { game: string; why: string } | null;
+}>({
   running: null,
+  keyRefused: null,
 });
 
 /** Whether a recording from this window is running now, for any game. */
@@ -35,21 +40,27 @@ export async function beginRecording(
   choice: RecordChoice,
   label: string,
 ): Promise<ReportReading> {
+  const at = Date.now() / 1000;
   recording.running = {
     game,
     from: "page",
-    at: Date.now() / 1000,
+    at,
     progress: started(label),
     ended: false,
     made: null,
     refusal: null,
   };
+  // Only this recording's own entry is written: a key pressed in the game meanwhile has its own (0.122.1).
+  const mine = () =>
+    recording.running?.from === "page" &&
+    recording.running.game === game &&
+    recording.running.at === at;
   const answer = await recordGame(game, choice, (message) => {
-    if (recording.running?.game === game && !recording.running.ended)
+    if (mine() && recording.running && !recording.running.ended)
       recording.running.progress = heard(recording.running.progress, message);
   });
   forgetCosts(game);
-  if (recording.running?.game === game) {
+  if (mine() && recording.running) {
     const data = answer.state === "ready" ? answer.reading.data : null;
     recording.running.ended = true;
     recording.running.made =

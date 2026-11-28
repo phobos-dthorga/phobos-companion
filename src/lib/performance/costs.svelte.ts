@@ -7,7 +7,26 @@ import type { CostsData, MethodCost, ModCost } from "./types";
  * kept for the run, so the Mods page, the Mod list, the Code map and Home can tag what they show without asking each time. A new
  * recording forgets it, and the next page that asks reads it again.
  */
-type Kept = { state: "reading" | "ready"; costs: CostsData | null };
+type Kept = {
+  gen: number;
+  state: "reading" | "ready";
+  costs: CostsData | null;
+};
+
+/** Each read's number: an answer for an older read than the one kept is dropped (0.122.1). */
+let generation = 0;
+
+/** Whether an answer has the shape costs gives; a refusal or anything else is no costs. */
+export function validCosts(data: unknown): data is CostsData {
+  const found = data as Partial<CostsData> | null;
+  return (
+    !!found &&
+    typeof found.newest === "string" &&
+    Array.isArray(found.mods) &&
+    Array.isArray(found.methods) &&
+    !!found.own
+  );
+}
 
 export const costs = $state<{ byGame: Record<string, Kept> }>({ byGame: {} });
 
@@ -18,18 +37,24 @@ export const costs = $state<{ byGame: Record<string, Kept> }>({ byGame: {} });
 export function loadCosts(game: string) {
   untrack(() => {
     if (costs.byGame[game]) return;
-    costs.byGame[game] = { state: "reading", costs: null };
+    const gen = ++generation;
+    costs.byGame[game] = { gen, state: "reading", costs: null };
     void readCosts(game).then((answer) => {
-      if (answer.state === "ready")
-        costs.byGame[game] = { state: "ready", costs: answer.costs };
-      else delete costs.byGame[game];
+      if (costs.byGame[game]?.gen !== gen) return;
+      // A refusal (no recordings yet) or a failed read is no costs for the run, until a recording ends; never a crash.
+      const found =
+        answer.state === "ready" && validCosts(answer.costs)
+          ? answer.costs
+          : null;
+      costs.byGame[game] = { gen, state: "ready", costs: found };
     });
   });
 }
 
-/** Forgets a game's costs, after a recording made a newer one. */
+/** Forgets a game's costs after a recording made a newer one, and reads them again at once, so every tag shown updates. */
 export function forgetCosts(game: string) {
   delete costs.byGame[game];
+  loadCosts(game);
 }
 
 /** A game's costs, once read; null while reading, or when its tools have no recordings. */

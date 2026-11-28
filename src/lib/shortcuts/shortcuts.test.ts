@@ -111,6 +111,15 @@ describe("the owner's keys", () => {
     expect(refusal("page.timeline", "`", NOTHING_SAVED)).toBeNull();
   });
 
+  it("never lets two keys the system holds share a key, whatever their pages (0.122.1)", () => {
+    expect(
+      refusal("performance.record-in-game", "Ctrl+Alt+m", NOTHING_SAVED),
+    ).toEqual({ reason: "taken", by: "memory.mark-in-game" });
+    expect(
+      refusal("performance.record-in-game", "Ctrl+Alt+r", NOTHING_SAVED),
+    ).toBeNull();
+  });
+
   it("stores only what differs from the defaults", () => {
     let saved = withKey(NOTHING_SAVED, "page.timeline", "`");
     expect(saved.keys).toEqual({ "page.timeline": "`" });

@@ -4,6 +4,19 @@ Maintained from 9 November 2026.
 
 ## [Unreleased]
 
+## [0.122.1] - 2026-11-28
+
+### Fixed
+
+- **Home, the Mods page, Edit the list and the Code map no longer break before the first recording** (a review of 0.118.0 to
+  0.120.0 the owner asked for, 28 Nov 2026): the tool kit's "no recordings yet" answer was read as costs, and every cost tag
+  threw. A refusal is now a failure the page says in words, and no costs show until a recording names some.
+- **Cost tags update when a recording ends**, everywhere they show, and an older reading can no longer bring back the costs from
+  before it.
+- **The key that records from inside the game says when it cannot be taken** (another program may hold it), on the Performance
+  page; Settings no longer lets it share a key with the Memory page's mark from the game; a game whose tools cannot record it is
+  told so at once, never "recording" first; and a key pressed while the page records never ends the page's recording early.
+
 ## [0.122.0] - 2026-11-28
 
 ### Added

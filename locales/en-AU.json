@@ -2025,6 +2025,7 @@
     "saves-steps-top": "The whole save",
     "saves-parts-none": "Nothing below this part: it holds values only.",
     "saves-parts-count": "{ $count ->\n    [one] one\n   *[other] { $count }\n  }",
+    "performance-gotcha-key-refused": "**{ $key } could not be taken for recording from inside the game**: { $why }. Choose another key in Settings → Keys, or close the program that holds it.",
     "performance-kicker": "Performance",
     "performance-title": "Where { $game } spends its time",
     "performance-lead": "A recording follows the running game for a few seconds and says what slowed it and whose code it was: the few things that matter first, then every table. Each mod, method and type opens where you can do something about it.",

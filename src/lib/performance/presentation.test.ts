@@ -278,3 +278,16 @@ describe("the active mods, costliest first", () => {
     expect(costliest(null, active, (k) => k)).toEqual([]);
   });
 });
+
+describe("costs as the kit gives them", () => {
+  it("are no costs when the kit refused (no recordings yet) or answered anything else", async () => {
+    const { validCosts } = await import("./costs.svelte");
+    expect(
+      validCosts({ ok: false, refusal: "No recordings in K:/cache." }),
+    ).toBe(false);
+    expect(validCosts(null)).toBe(false);
+    expect(validCosts({ newest: "n", mods: [], methods: [], own: {} })).toBe(
+      true,
+    );
+  });
+});

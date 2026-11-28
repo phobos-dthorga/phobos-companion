@@ -132,6 +132,17 @@ pub fn take_record(app: &AppHandle, game: &str, key: &str, channel: Channel<Reco
                     let _ = channel.send(Recorded { at, ended: true, ok: false, refusal, recording: None });
                     return;
                 }
+                // 0.122.1: a game whose tools cannot record it is told so at once, never "recording" first.
+                if let Err(failure) = performance_page::check_record(&game) {
+                    let _ = channel.send(Recorded {
+                        at,
+                        ended: true,
+                        ok: false,
+                        refusal: Some(failure.detail),
+                        recording: None,
+                    });
+                    return;
+                }
                 let _ = channel.send(Recorded { at, ended: false, ok: true, refusal: None, recording: None });
                 let ended =
                     match performance_page::record(&game, performance_page::KEY_SECONDS, false, FROM_THE_GAME, None) {
